@@ -1,0 +1,16 @@
+CREATE INDEX idx_weight_user_date ON weight_logs(user_id, logged_at DESC);
+CREATE INDEX idx_nutrition_user_date ON nutrition_logs(user_id, logged_at DESC);
+CREATE INDEX idx_workout_user_date ON workout_sessions(user_id, started_at DESC);
+CREATE INDEX idx_habit_comp_user_date ON habit_completions(user_id, completed_at DESC);
+CREATE INDEX idx_sleep_user_date ON sleep_logs(user_id, bedtime DESC);
+CREATE INDEX idx_mood_user_date ON mood_logs(user_id, logged_at DESC);
+CREATE INDEX idx_revenue_biz_date ON revenue_logs(business_id, transaction_date DESC);
+CREATE INDEX idx_checkins_user_date ON daily_checkins(user_id, date DESC);
+CREATE INDEX idx_focus_user_date ON focus_sessions(user_id, started_at DESC);
+CREATE INDEX idx_finance_tx_user_date ON finance_transactions(user_id, transaction_date DESC);
+CREATE INDEX idx_pain_user_date ON pain_logs(user_id, logged_at DESC);
+CREATE INDEX idx_journal_user_date ON journal_entries(user_id, date DESC);
+CREATE INDEX idx_foods_barcode ON foods(barcode) WHERE barcode IS NOT NULL;
+CREATE INDEX idx_foods_name ON foods USING gin(to_tsvector('english', name));
+CREATE INDEX idx_exercises_name ON exercises USING gin(to_tsvector('english', name));
+CREATE INDEX idx_live_sync_session ON live_workout_sync(session_id, synced_at DESC);

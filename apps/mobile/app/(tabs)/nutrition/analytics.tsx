@@ -1,0 +1,714 @@
+// =============================================================================
+// TRANSFORMR -- Nutrition Analytics
+// =============================================================================
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+} from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@theme/index';
+import { Card } from '@components/ui/Card';
+import { Badge } from '@components/ui/Badge';
+import { ProgressRing } from '@components/ui/ProgressRing';
+import { useNutritionStore } from '@stores/nutritionStore';
+import { useProfileStore } from '@stores/profileStore';
+import { formatCalories, formatMacro, formatPercentage } from '@utils/formatters';
+import { MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
+import { hapticLight } from '@utils/haptics';
+
+type TimeRange = '7d' | '14d' | '30d' | '90d';
+
+interface DailySnapshot {
+  date: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  water_oz: number;
+}
+
+interface TopFood {
+  name: string;
+  timesLogged: number;
+  avgCalories: number;
+}
+
+interface MealDistribution {
+  mealType: string;
+  percentage: number;
+  avgCalories: number;
+}
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+function MiniBarChart({
+  data,
+  maxValue,
+  color,
+  targetValue,
+  height = 80,
+}: {
+  data: number[];
+  maxValue: number;
+  color: string;
+  targetValue?: number;
+  height?: number;
+}) {
+  const { colors, borderRadius } = useTheme();
+  const barWidth = Math.max(2, (SCREEN_WIDTH - 80) / data.length - 2);
+
+  return (
+    <View style={[miniBarStyles.container, { height }]}>
+      {targetValue !== undefined && (
+        <View
+          style={[
+            miniBarStyles.targetLine,
+            {
+              bottom: (targetValue / maxValue) * height,
+              borderColor: colors.text.muted,
+            },
+          ]}
+        />
+      )}
+      <View style={miniBarStyles.barsRow}>
+        {data.map((value, i) => {
+          const barHeight = Math.max(2, (value / maxValue) * height);
+          return (
+            <View
+              key={i}
+              style={{
+                width: barWidth,
+                height: barHeight,
+                backgroundColor: color,
+                borderRadius: borderRadius.sm,
+                opacity: 0.8,
+              }}
+            />
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const miniBarStyles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    justifyContent: 'flex-end',
+  },
+  targetLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    borderStyle: 'dashed',
+  },
+  barsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: '100%',
+  },
+});
+
+export default function NutritionAnalyticsScreen() {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { profile } = useProfileStore();
+
+  const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [isLoading, setIsLoading] = useState(true);
+  const [dailyData, setDailyData] = useState<DailySnapshot[]>([]);
+
+  const targets = useMemo(() => ({
+    calories: profile?.daily_calorie_target ?? 2200,
+    protein: profile?.daily_protein_target ?? 180,
+    carbs: profile?.daily_carb_target ?? 250,
+    fat: profile?.daily_fat_target ?? 70,
+    water: profile?.daily_water_target_oz ?? DEFAULT_WATER_TARGET_OZ,
+  }), [profile]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const days = timeRange === '7d' ? 7 : timeRange === '14d' ? 14 : timeRange === '30d' ? 30 : 90;
+    const data: DailySnapshot[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      data.push({
+        date: date.toISOString().split('T')[0] ?? '',
+        calories: 1800 + Math.floor(Math.random() * 800),
+        protein: 140 + Math.floor(Math.random() * 80),
+        carbs: 180 + Math.floor(Math.random() * 120),
+        fat: 50 + Math.floor(Math.random() * 50),
+        water_oz: 60 + Math.floor(Math.random() * 50),
+      });
+    }
+    setDailyData(data);
+    setIsLoading(false);
+  }, [timeRange]);
+
+  const averages = useMemo(() => {
+    if (dailyData.length === 0) return { calories: 0, protein: 0, carbs: 0, fat: 0, water_oz: 0 };
+    const sum = dailyData.reduce(
+      (acc, d) => ({
+        calories: acc.calories + d.calories,
+        protein: acc.protein + d.protein,
+        carbs: acc.carbs + d.carbs,
+        fat: acc.fat + d.fat,
+        water_oz: acc.water_oz + d.water_oz,
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0, water_oz: 0 },
+    );
+    const len = dailyData.length;
+    return {
+      calories: Math.round(sum.calories / len),
+      protein: Math.round(sum.protein / len),
+      carbs: Math.round(sum.carbs / len),
+      fat: Math.round(sum.fat / len),
+      water_oz: Math.round(sum.water_oz / len),
+    };
+  }, [dailyData]);
+
+  const adherencePercent = useMemo(() => {
+    if (dailyData.length === 0) return 0;
+    const onTarget = dailyData.filter(
+      (d) =>
+        d.calories >= targets.calories * 0.85 &&
+        d.calories <= targets.calories * 1.15,
+    ).length;
+    return onTarget / dailyData.length;
+  }, [dailyData, targets.calories]);
+
+  const proteinConsistency = useMemo(() => {
+    if (dailyData.length === 0) return 0;
+    const daysHitProtein = dailyData.filter(
+      (d) => d.protein >= targets.protein * 0.9,
+    ).length;
+    return daysHitProtein / dailyData.length;
+  }, [dailyData, targets.protein]);
+
+  const calorieTrend = useMemo(() => dailyData.map((d) => d.calories), [dailyData]);
+  const proteinTrend = useMemo(() => dailyData.map((d) => d.protein), [dailyData]);
+  const maxCalories = useMemo(() => Math.max(...calorieTrend, targets.calories), [calorieTrend, targets.calories]);
+  const maxProtein = useMemo(() => Math.max(...proteinTrend, targets.protein), [proteinTrend, targets.protein]);
+
+  // Mock top foods
+  const topFoods: TopFood[] = useMemo(() => [
+    { name: 'Chicken Breast', timesLogged: 28, avgCalories: 284 },
+    { name: 'Brown Rice', timesLogged: 22, avgCalories: 216 },
+    { name: 'Protein Shake', timesLogged: 20, avgCalories: 200 },
+    { name: 'Greek Yogurt', timesLogged: 18, avgCalories: 150 },
+    { name: 'Eggs', timesLogged: 16, avgCalories: 155 },
+  ], []);
+
+  // Mock meal distribution
+  const mealDistribution: MealDistribution[] = useMemo(() => [
+    { mealType: 'Breakfast', percentage: 22, avgCalories: 484 },
+    { mealType: 'Lunch', percentage: 32, avgCalories: 704 },
+    { mealType: 'Dinner', percentage: 30, avgCalories: 660 },
+    { mealType: 'Snacks', percentage: 16, avgCalories: 352 },
+  ], []);
+
+  // Weekly comparison
+  const weeklyComparison = useMemo(() => {
+    if (dailyData.length < 14) return null;
+    const thisWeek = dailyData.slice(-7);
+    const lastWeek = dailyData.slice(-14, -7);
+
+    const avg = (arr: DailySnapshot[], key: keyof Omit<DailySnapshot, 'date'>) =>
+      Math.round(arr.reduce((sum, d) => sum + d[key], 0) / arr.length);
+
+    return {
+      thisWeek: { calories: avg(thisWeek, 'calories'), protein: avg(thisWeek, 'protein') },
+      lastWeek: { calories: avg(lastWeek, 'calories'), protein: avg(lastWeek, 'protein') },
+      calorieDiff: avg(thisWeek, 'calories') - avg(lastWeek, 'calories'),
+      proteinDiff: avg(thisWeek, 'protein') - avg(lastWeek, 'protein'),
+    };
+  }, [dailyData]);
+
+  const TIME_RANGES: Array<{ value: TimeRange; label: string }> = [
+    { value: '7d', label: '7D' },
+    { value: '14d', label: '14D' },
+    { value: '30d', label: '30D' },
+    { value: '90d', label: '90D' },
+  ];
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {isLoading ? (
+          <View style={styles.loadingState}>
+            <ActivityIndicator size="large" color={colors.accent.primary} />
+          </View>
+        ) : (
+          <>
+            {/* Time Range */}
+            <View style={[styles.rangeRow, { marginBottom: spacing.lg, gap: spacing.sm }]}>
+              {TIME_RANGES.map((range) => (
+                <Pressable
+                  key={range.value}
+                  onPress={() => { hapticLight(); setTimeRange(range.value); }}
+                  style={[
+                    styles.rangeChip,
+                    {
+                      backgroundColor: timeRange === range.value ? colors.accent.primary : colors.background.secondary,
+                      borderRadius: borderRadius.md,
+                      paddingHorizontal: spacing.lg,
+                      paddingVertical: spacing.sm,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      typography.captionBold,
+                      { color: timeRange === range.value ? '#FFFFFF' : colors.text.secondary },
+                    ]}
+                  >
+                    {range.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Average vs Target */}
+            <Animated.View entering={FadeInDown.duration(300)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+                  Average vs Target
+                </Text>
+                <View style={styles.avgGrid}>
+                  <View style={styles.avgItem}>
+                    <ProgressRing
+                      progress={Math.min(1, averages.calories / targets.calories)}
+                      size={72}
+                      strokeWidth={6}
+                      color={
+                        Math.abs(averages.calories - targets.calories) < targets.calories * 0.1
+                          ? colors.accent.success
+                          : colors.accent.warning
+                      }
+                    >
+                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                        {Math.round(averages.calories)}
+                      </Text>
+                    </ProgressRing>
+                    <Text style={[typography.tiny, { color: colors.text.muted, marginTop: 4 }]}>
+                      Calories
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      / {targets.calories}
+                    </Text>
+                  </View>
+                  <View style={styles.avgItem}>
+                    <ProgressRing
+                      progress={Math.min(1, averages.protein / targets.protein)}
+                      size={72}
+                      strokeWidth={6}
+                      color={MACRO_COLORS.protein}
+                    >
+                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                        {averages.protein}g
+                      </Text>
+                    </ProgressRing>
+                    <Text style={[typography.tiny, { color: MACRO_COLORS.protein, marginTop: 4 }]}>
+                      Protein
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      / {targets.protein}g
+                    </Text>
+                  </View>
+                  <View style={styles.avgItem}>
+                    <ProgressRing
+                      progress={Math.min(1, averages.carbs / targets.carbs)}
+                      size={72}
+                      strokeWidth={6}
+                      color={MACRO_COLORS.carbs}
+                    >
+                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                        {averages.carbs}g
+                      </Text>
+                    </ProgressRing>
+                    <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, marginTop: 4 }]}>
+                      Carbs
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      / {targets.carbs}g
+                    </Text>
+                  </View>
+                  <View style={styles.avgItem}>
+                    <ProgressRing
+                      progress={Math.min(1, averages.fat / targets.fat)}
+                      size={72}
+                      strokeWidth={6}
+                      color={MACRO_COLORS.fat}
+                    >
+                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                        {averages.fat}g
+                      </Text>
+                    </ProgressRing>
+                    <Text style={[typography.tiny, { color: MACRO_COLORS.fat, marginTop: 4 }]}>
+                      Fat
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      / {targets.fat}g
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            </Animated.View>
+
+            {/* Calorie Trend Chart */}
+            <Animated.View entering={FadeInDown.duration(300).delay(80)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+                  Calorie Trend
+                </Text>
+                <MiniBarChart
+                  data={calorieTrend}
+                  maxValue={maxCalories}
+                  color={colors.accent.primary}
+                  targetValue={targets.calories}
+                  height={100}
+                />
+                <View style={[styles.legendRow, { marginTop: spacing.sm }]}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: colors.accent.primary }]} />
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>Daily</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDash, { borderColor: colors.text.muted }]} />
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>Target ({targets.calories})</Text>
+                  </View>
+                </View>
+              </Card>
+            </Animated.View>
+
+            {/* Protein Consistency Score */}
+            <Animated.View entering={FadeInDown.duration(300).delay(160)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <View style={styles.consistencyRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[typography.h3, { color: colors.text.primary }]}>
+                      Protein Consistency
+                    </Text>
+                    <Text style={[typography.caption, { color: colors.text.muted, marginTop: 4 }]}>
+                      Days hitting 90%+ of protein target
+                    </Text>
+                  </View>
+                  <ProgressRing
+                    progress={proteinConsistency}
+                    size={80}
+                    strokeWidth={7}
+                    color={proteinConsistency >= 0.8 ? colors.accent.success : proteinConsistency >= 0.5 ? colors.accent.warning : colors.accent.danger}
+                  >
+                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                      {formatPercentage(proteinConsistency * 100)}
+                    </Text>
+                  </ProgressRing>
+                </View>
+                <MiniBarChart
+                  data={proteinTrend}
+                  maxValue={maxProtein}
+                  color={MACRO_COLORS.protein}
+                  targetValue={targets.protein}
+                  height={60}
+                />
+              </Card>
+            </Animated.View>
+
+            {/* Calorie Adherence */}
+            <Animated.View entering={FadeInDown.duration(300).delay(240)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <View style={styles.adherenceRow}>
+                  <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                    Calorie Adherence
+                  </Text>
+                  <Badge
+                    label={formatPercentage(adherencePercent * 100)}
+                    variant={adherencePercent >= 0.7 ? 'success' : adherencePercent >= 0.5 ? 'warning' : 'danger'}
+                  />
+                </View>
+                <View style={[styles.adherenceBar, { marginTop: spacing.sm }]}>
+                  <View
+                    style={[
+                      styles.adherenceTrack,
+                      { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.full },
+                    ]}
+                  >
+                    <View
+                      style={{
+                        height: 8,
+                        width: `${Math.min(100, adherencePercent * 100)}%`,
+                        backgroundColor: adherencePercent >= 0.7 ? colors.accent.success : colors.accent.warning,
+                        borderRadius: borderRadius.full,
+                      }}
+                    />
+                  </View>
+                </View>
+                <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
+                  Days within +/-15% of calorie target
+                </Text>
+              </Card>
+            </Animated.View>
+
+            {/* Calorie Distribution by Meal */}
+            <Animated.View entering={FadeInDown.duration(300).delay(320)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+                  Calories by Meal Type
+                </Text>
+                {mealDistribution.map((meal) => {
+                  const barColors = [colors.accent.primary, colors.accent.info, colors.accent.success, colors.accent.warning];
+                  const colorIndex = mealDistribution.indexOf(meal);
+
+                  return (
+                    <View key={meal.mealType} style={[styles.distRow, { marginBottom: spacing.md }]}>
+                      <View style={styles.distLabel}>
+                        <Text style={[typography.caption, { color: colors.text.primary, width: 80 }]}>
+                          {meal.mealType}
+                        </Text>
+                        <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                          {meal.avgCalories} cal
+                        </Text>
+                      </View>
+                      <View style={[styles.distBarTrack, { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.full, flex: 1, marginLeft: spacing.md }]}>
+                        <View
+                          style={{
+                            height: 12,
+                            width: `${meal.percentage}%`,
+                            backgroundColor: barColors[colorIndex] ?? colors.accent.primary,
+                            borderRadius: borderRadius.full,
+                          }}
+                        />
+                      </View>
+                      <Text style={[typography.captionBold, { color: colors.text.secondary, width: 40, textAlign: 'right' }]}>
+                        {meal.percentage}%
+                      </Text>
+                    </View>
+                  );
+                })}
+              </Card>
+            </Animated.View>
+
+            {/* Most Logged Foods */}
+            <Animated.View entering={FadeInDown.duration(300).delay(400)}>
+              <Card style={{ marginBottom: spacing.lg }}>
+                <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+                  Most Logged Foods
+                </Text>
+                {topFoods.map((food, index) => (
+                  <View
+                    key={food.name}
+                    style={[
+                      styles.topFoodRow,
+                      {
+                        paddingVertical: spacing.sm,
+                        borderBottomWidth: index < topFoods.length - 1 ? 1 : 0,
+                        borderBottomColor: colors.border.subtle,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.rankBadge,
+                        {
+                          backgroundColor: index < 3 ? `${colors.accent.primary}20` : colors.background.tertiary,
+                          borderRadius: borderRadius.full,
+                        },
+                      ]}
+                    >
+                      <Text style={[typography.captionBold, { color: index < 3 ? colors.accent.primary : colors.text.muted }]}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1, marginLeft: spacing.md }}>
+                      <Text style={[typography.body, { color: colors.text.primary }]}>
+                        {food.name}
+                      </Text>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                        ~{food.avgCalories} cal avg
+                      </Text>
+                    </View>
+                    <Badge label={`${food.timesLogged}x`} size="sm" variant="info" />
+                  </View>
+                ))}
+              </Card>
+            </Animated.View>
+
+            {/* Weekly/Monthly Comparison */}
+            {weeklyComparison && (
+              <Animated.View entering={FadeInDown.duration(300).delay(480)}>
+                <Card style={{ marginBottom: spacing.lg }}>
+                  <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+                    This Week vs Last Week
+                  </Text>
+                  <View style={styles.comparisonGrid}>
+                    <View style={styles.comparisonCol}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>Metric</Text>
+                      <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.sm }]}>Avg Calories</Text>
+                      <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.sm }]}>Avg Protein</Text>
+                    </View>
+                    <View style={styles.comparisonCol}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>Last Week</Text>
+                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                        {weeklyComparison.lastWeek.calories}
+                      </Text>
+                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                        {weeklyComparison.lastWeek.protein}g
+                      </Text>
+                    </View>
+                    <View style={styles.comparisonCol}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>This Week</Text>
+                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                        {weeklyComparison.thisWeek.calories}
+                      </Text>
+                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                        {weeklyComparison.thisWeek.protein}g
+                      </Text>
+                    </View>
+                    <View style={styles.comparisonCol}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>Change</Text>
+                      <Text
+                        style={[
+                          typography.captionBold,
+                          {
+                            color: weeklyComparison.calorieDiff > 0 ? colors.accent.warning : colors.accent.success,
+                            marginTop: spacing.sm,
+                          },
+                        ]}
+                      >
+                        {weeklyComparison.calorieDiff > 0 ? '+' : ''}{weeklyComparison.calorieDiff}
+                      </Text>
+                      <Text
+                        style={[
+                          typography.captionBold,
+                          {
+                            color: weeklyComparison.proteinDiff >= 0 ? colors.accent.success : colors.accent.danger,
+                            marginTop: spacing.sm,
+                          },
+                        ]}
+                      >
+                        {weeklyComparison.proteinDiff > 0 ? '+' : ''}{weeklyComparison.proteinDiff}g
+                      </Text>
+                    </View>
+                  </View>
+                </Card>
+              </Animated.View>
+            )}
+
+            {/* Water Average */}
+            <Animated.View entering={FadeInDown.duration(300).delay(560)}>
+              <Card>
+                <View style={styles.waterRow}>
+                  <Ionicons name="water" size={24} color={colors.accent.info} />
+                  <View style={{ flex: 1, marginLeft: spacing.md }}>
+                    <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                      Avg Water: {averages.water_oz} oz/day
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      Target: {targets.water} oz/day
+                    </Text>
+                  </View>
+                  <ProgressRing
+                    progress={Math.min(1, averages.water_oz / targets.water)}
+                    size={48}
+                    strokeWidth={4}
+                    color={colors.accent.info}
+                  >
+                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      {formatPercentage((averages.water_oz / targets.water) * 100)}
+                    </Text>
+                  </ProgressRing>
+                </View>
+              </Card>
+            </Animated.View>
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  scroll: { flex: 1 },
+  loadingState: { alignItems: 'center', paddingVertical: 60 },
+  rangeRow: { flexDirection: 'row', justifyContent: 'center' },
+  rangeChip: {},
+  avgGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  avgItem: { alignItems: 'center' },
+  consistencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  adherenceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  adherenceBar: {},
+  adherenceTrack: { height: 8, overflow: 'hidden' },
+  distRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  distLabel: {},
+  distBarTrack: { height: 12, overflow: 'hidden' },
+  legendRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendDash: {
+    width: 12,
+    height: 0,
+    borderTopWidth: 1,
+    borderStyle: 'dashed',
+  },
+  topFoodRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rankBadge: {
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  comparisonGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  comparisonCol: {
+    alignItems: 'center',
+  },
+  waterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+});

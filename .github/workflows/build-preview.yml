@@ -1,0 +1,28 @@
+name: Preview Build
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  build:
+    name: EAS Preview Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'npm'
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci && cd apps/mobile && npm ci
+
+      - name: Build preview
+        run: cd apps/mobile && eas build --profile preview --platform all --non-interactive

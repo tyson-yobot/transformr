@@ -1,0 +1,774 @@
+// =============================================================================
+// TRANSFORMR -- Nutrition Home / Daily View
+// =============================================================================
+
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  FadeIn,
+  FadeInDown,
+} from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@theme/index';
+import { Card } from '@components/ui/Card';
+import { Button } from '@components/ui/Button';
+import { Badge } from '@components/ui/Badge';
+import { ProgressRing } from '@components/ui/ProgressRing';
+import { BottomSheet } from '@components/ui/BottomSheet';
+import { MealCard } from '@components/nutrition/MealCard';
+import { useNutrition } from '@hooks/useNutrition';
+import { useNutritionStore } from '@stores/nutritionStore';
+import { useProfileStore } from '@stores/profileStore';
+import { formatCalories, formatMacro, formatOz, formatDateShort } from '@utils/formatters';
+import { MEAL_TYPES, MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
+import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import type { NutritionLog } from '../../../types/database';
+
+type MealType = typeof MEAL_TYPES[number];
+
+interface MealSection {
+  type: MealType;
+  label: string;
+  emoji: string;
+}
+
+const MEAL_SECTIONS: MealSection[] = [
+  { type: 'breakfast', label: 'Breakfast', emoji: '\u{1F373}' },
+  { type: 'lunch', label: 'Lunch', emoji: '\u{1F96A}' },
+  { type: 'dinner', label: 'Dinner', emoji: '\u{1F35D}' },
+  { type: 'snack', label: 'Snacks', emoji: '\u{1F34E}' },
+  { type: 'shake', label: 'Shakes', emoji: '\u{1F964}' },
+  { type: 'pre_workout', label: 'Pre-Workout', emoji: '\u{26A1}' },
+  { type: 'post_workout', label: 'Post-Workout', emoji: '\u{1F4AA}' },
+];
+
+function getDateString(offset: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  return date.toISOString().split('T')[0] ?? '';
+}
+
+function getDateLabel(offset: number): string {
+  if (offset === 0) return 'Today';
+  if (offset === -1) return 'Yesterday';
+  if (offset === 1) return 'Tomorrow';
+  return formatDateShort(new Date(Date.now() + offset * 86400000).toISOString());
+}
+
+export default function NutritionHomeScreen() {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  const { todayMacros, macroProgress, isLoading } = useNutrition();
+  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition } =
+    useNutritionStore();
+  const { profile } = useProfileStore();
+
+  const [dayOffset, setDayOffset] = useState(0);
+  const [fabOpen, setFabOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const targets = useMemo(() => ({
+    calories: profile?.daily_calorie_target ?? 2200,
+    protein: profile?.daily_protein_target ?? 180,
+    carbs: profile?.daily_carb_target ?? 250,
+    fat: profile?.daily_fat_target ?? 70,
+    water: profile?.daily_water_target_oz ?? DEFAULT_WATER_TARGET_OZ,
+  }), [profile]);
+
+  const remaining = useMemo(() => ({
+    calories: Math.max(0, targets.calories - todayMacros.calories),
+    protein: Math.max(0, targets.protein - todayMacros.protein),
+    carbs: Math.max(0, targets.carbs - todayMacros.carbs),
+    fat: Math.max(0, targets.fat - todayMacros.fat),
+  }), [targets, todayMacros]);
+
+  const totalWater = useMemo(
+    () => waterLogs.reduce((sum, log) => sum + log.amount_oz, 0),
+    [waterLogs],
+  );
+
+  const supplementsTaken = useMemo(() => {
+    const takenIds = new Set(supplementLogs.map((l) => l.supplement_id));
+    return supplements.map((s) => ({
+      ...s,
+      taken: takenIds.has(s.id),
+    }));
+  }, [supplements, supplementLogs]);
+
+  const logsByMeal = useMemo(() => {
+    const grouped: Record<string, NutritionLog[]> = {};
+    for (const log of todayLogs) {
+      const key = log.meal_type ?? 'snack';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(log);
+    }
+    return grouped;
+  }, [todayLogs]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchTodayNutrition();
+    setRefreshing(false);
+  }, [fetchTodayNutrition]);
+
+  const handlePrevDay = useCallback(() => {
+    hapticLight();
+    setDayOffset((prev) => prev - 1);
+  }, []);
+
+  const handleNextDay = useCallback(() => {
+    hapticLight();
+    setDayOffset((prev) => prev + 1);
+  }, []);
+
+  const handleQuickAdd = useCallback((mealType: MealType) => {
+    hapticLight();
+    router.push({ pathname: '/(tabs)/nutrition/add-food', params: { meal: mealType } });
+  }, [router]);
+
+  const handleEditLog = useCallback((logId: string) => {
+    router.push({ pathname: '/(tabs)/nutrition/add-food', params: { editId: logId } });
+  }, [router]);
+
+  const handleDeleteLog = useCallback((_logId: string) => {
+    hapticMedium();
+    // Delete handled by store
+  }, []);
+
+  const handleAddWater = useCallback(async (oz: number) => {
+    hapticSuccess();
+    await logWater(oz);
+  }, [logWater]);
+
+  const handleFabToggle = useCallback(() => {
+    hapticLight();
+    setFabOpen((prev) => !prev);
+  }, []);
+
+  const handleFabAction = useCallback((action: 'camera' | 'barcode' | 'manual' | 'menu') => {
+    setFabOpen(false);
+    hapticMedium();
+    switch (action) {
+      case 'camera':
+        router.push('/(tabs)/nutrition/meal-camera');
+        break;
+      case 'barcode':
+        router.push('/(tabs)/nutrition/barcode-scanner');
+        break;
+      case 'menu':
+        router.push('/(tabs)/nutrition/menu-scanner');
+        break;
+      case 'manual':
+        router.push('/(tabs)/nutrition/add-food');
+        break;
+    }
+  }, [router]);
+
+  const fabScale = useSharedValue(1);
+  const fabAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: fabScale.value }],
+  }));
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      {/* Header */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top + spacing.sm,
+            paddingHorizontal: spacing.lg,
+            paddingBottom: spacing.md,
+            backgroundColor: colors.background.primary,
+          },
+        ]}
+      >
+        <Text style={[typography.h1, { color: colors.text.primary }]}>Nutrition</Text>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => router.push('/(tabs)/nutrition/saved-meals')}
+            style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md }]}
+          >
+            <Ionicons name="bookmark-outline" size={20} color={colors.text.secondary} />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(tabs)/nutrition/analytics')}
+            style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, marginLeft: spacing.sm }]}
+          >
+            <Ionicons name="analytics-outline" size={20} color={colors.text.secondary} />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Date Selector */}
+      <View style={[styles.dateSelector, { paddingHorizontal: spacing.lg, marginBottom: spacing.md }]}>
+        <Pressable onPress={handlePrevDay} hitSlop={12}>
+          <Ionicons name="chevron-back" size={24} color={colors.text.secondary} />
+        </Pressable>
+        <Pressable onPress={() => setDayOffset(0)}>
+          <Text style={[typography.h3, { color: colors.text.primary }]}>
+            {getDateLabel(dayOffset)}
+          </Text>
+          {dayOffset !== 0 && (
+            <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: 2 }]}>
+              {getDateString(dayOffset)}
+            </Text>
+          )}
+        </Pressable>
+        <Pressable onPress={handleNextDay} hitSlop={12}>
+          <Ionicons name="chevron-forward" size={24} color={colors.text.secondary} />
+        </Pressable>
+      </View>
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
+      >
+        {/* Macro Rings */}
+        <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+          <Card style={{ marginBottom: spacing.lg }}>
+            <View style={styles.macroRingsRow}>
+              <ProgressRing
+                progress={Math.min(1, todayMacros.calories / targets.calories)}
+                size={100}
+                strokeWidth={8}
+                color={colors.accent.primary}
+              >
+                <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                  {Math.round(todayMacros.calories)}
+                </Text>
+                <Text style={[typography.tiny, { color: colors.text.muted }]}>cal</Text>
+              </ProgressRing>
+
+              <View style={styles.macroMiniRings}>
+                <View style={styles.miniRingItem}>
+                  <ProgressRing
+                    progress={Math.min(1, todayMacros.protein / targets.protein)}
+                    size={56}
+                    strokeWidth={5}
+                    color={MACRO_COLORS.protein}
+                  >
+                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      {Math.round(todayMacros.protein)}g
+                    </Text>
+                  </ProgressRing>
+                  <Text style={[typography.tiny, { color: MACRO_COLORS.protein, marginTop: 4 }]}>
+                    Protein
+                  </Text>
+                </View>
+
+                <View style={styles.miniRingItem}>
+                  <ProgressRing
+                    progress={Math.min(1, todayMacros.carbs / targets.carbs)}
+                    size={56}
+                    strokeWidth={5}
+                    color={MACRO_COLORS.carbs}
+                  >
+                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      {Math.round(todayMacros.carbs)}g
+                    </Text>
+                  </ProgressRing>
+                  <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, marginTop: 4 }]}>
+                    Carbs
+                  </Text>
+                </View>
+
+                <View style={styles.miniRingItem}>
+                  <ProgressRing
+                    progress={Math.min(1, todayMacros.fat / targets.fat)}
+                    size={56}
+                    strokeWidth={5}
+                    color={MACRO_COLORS.fat}
+                  >
+                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      {Math.round(todayMacros.fat)}g
+                    </Text>
+                  </ProgressRing>
+                  <Text style={[typography.tiny, { color: MACRO_COLORS.fat, marginTop: 4 }]}>
+                    Fat
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Remaining Macros */}
+            <View style={[styles.remainingRow, { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border.subtle }]}>
+              <View style={styles.remainingItem}>
+                <Text style={[typography.tiny, { color: colors.text.muted }]}>Remaining</Text>
+                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                  {formatCalories(remaining.calories)}
+                </Text>
+              </View>
+              <View style={styles.remainingItem}>
+                <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>P</Text>
+                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                  {formatMacro(remaining.protein)}
+                </Text>
+              </View>
+              <View style={styles.remainingItem}>
+                <Text style={[typography.tiny, { color: MACRO_COLORS.carbs }]}>C</Text>
+                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                  {formatMacro(remaining.carbs)}
+                </Text>
+              </View>
+              <View style={styles.remainingItem}>
+                <Text style={[typography.tiny, { color: MACRO_COLORS.fat }]}>F</Text>
+                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                  {formatMacro(remaining.fat)}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </Animated.View>
+
+        {/* Quick Links */}
+        <Animated.View entering={FadeInDown.duration(400).delay(200)}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: spacing.lg }}
+            contentContainerStyle={{ gap: spacing.sm }}
+          >
+            <Pressable
+              onPress={() => router.push('/(tabs)/nutrition/meal-plans')}
+              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
+            >
+              <Ionicons name="calendar-outline" size={16} color={colors.accent.primary} />
+              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Plans</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(tabs)/nutrition/meal-prep')}
+              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
+            >
+              <Ionicons name="restaurant-outline" size={16} color={colors.accent.success} />
+              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Prep</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(tabs)/nutrition/grocery-list')}
+              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
+            >
+              <Ionicons name="cart-outline" size={16} color={colors.accent.warning} />
+              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Groceries</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/(tabs)/nutrition/supplements')}
+              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
+            >
+              <Ionicons name="medical-outline" size={16} color={colors.accent.info} />
+              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Supplements</Text>
+            </Pressable>
+          </ScrollView>
+        </Animated.View>
+
+        {/* Meal Sections */}
+        {MEAL_SECTIONS.map((section, index) => {
+          const logs = logsByMeal[section.type] ?? [];
+          const sectionCalories = logs.reduce((sum, l) => sum + l.calories, 0);
+
+          return (
+            <Animated.View
+              key={section.type}
+              entering={FadeInDown.duration(400).delay(300 + index * 50)}
+              style={{ marginBottom: spacing.lg }}
+            >
+              <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
+                <View style={styles.sectionTitleRow}>
+                  <Text style={[typography.h3, { color: colors.text.primary }]}>
+                    {section.emoji} {section.label}
+                  </Text>
+                  {sectionCalories > 0 && (
+                    <Badge label={formatCalories(sectionCalories)} variant="info" size="sm" />
+                  )}
+                </View>
+                <Pressable
+                  onPress={() => handleQuickAdd(section.type)}
+                  hitSlop={8}
+                  style={[styles.addBtn, { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.full }]}
+                >
+                  <Ionicons name="add" size={18} color={colors.accent.primary} />
+                  <Text style={[typography.caption, { color: colors.accent.primary, marginLeft: 2 }]}>Add</Text>
+                </Pressable>
+              </View>
+
+              {logs.length > 0 ? (
+                <View style={{ gap: spacing.sm }}>
+                  {logs.map((log) => (
+                    <MealCard
+                      key={log.id}
+                      log={log}
+                      foodName={log.food_id ?? 'Custom Food'}
+                      onEdit={handleEditLog}
+                      onDelete={handleDeleteLog}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => handleQuickAdd(section.type)}
+                  style={[
+                    styles.emptyMeal,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderRadius: borderRadius.lg,
+                      borderColor: colors.border.subtle,
+                      borderWidth: 1,
+                      borderStyle: 'dashed',
+                      padding: spacing.lg,
+                    },
+                  ]}
+                >
+                  <Ionicons name="add-circle-outline" size={24} color={colors.text.muted} />
+                  <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.xs }]}>
+                    Tap to log {section.label.toLowerCase()}
+                  </Text>
+                </Pressable>
+              )}
+            </Animated.View>
+          );
+        })}
+
+        {/* Water Tracker */}
+        <Animated.View entering={FadeInDown.duration(400).delay(600)}>
+          <Card style={{ marginBottom: spacing.lg }}>
+            <View style={styles.sectionHeader}>
+              <Text style={[typography.h3, { color: colors.text.primary }]}>
+                {'\u{1F4A7}'} Water
+              </Text>
+              <Text style={[typography.caption, { color: colors.text.muted }]}>
+                {formatOz(totalWater)} / {formatOz(targets.water)}
+              </Text>
+            </View>
+
+            <View style={[styles.waterBarContainer, { marginTop: spacing.md }]}>
+              <View
+                style={[
+                  styles.waterBarTrack,
+                  {
+                    backgroundColor: colors.background.tertiary,
+                    borderRadius: borderRadius.full,
+                    height: 12,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.waterBarFill,
+                    {
+                      backgroundColor: colors.accent.info,
+                      borderRadius: borderRadius.full,
+                      width: `${Math.min(100, (totalWater / targets.water) * 100)}%`,
+                      height: 12,
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+
+            <View style={[styles.waterButtonRow, { marginTop: spacing.md, gap: spacing.sm }]}>
+              {[4, 8, 12, 16].map((oz) => (
+                <Pressable
+                  key={oz}
+                  onPress={() => handleAddWater(oz)}
+                  style={[
+                    styles.waterBtn,
+                    {
+                      backgroundColor: colors.background.tertiary,
+                      borderRadius: borderRadius.md,
+                      paddingVertical: spacing.sm,
+                      paddingHorizontal: spacing.md,
+                    },
+                  ]}
+                >
+                  <Text style={[typography.captionBold, { color: colors.accent.info }]}>
+                    +{oz}oz
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </Card>
+        </Animated.View>
+
+        {/* Supplement Checklist */}
+        <Animated.View entering={FadeInDown.duration(400).delay(700)}>
+          <Card style={{ marginBottom: spacing.lg }}>
+            <View style={styles.sectionHeader}>
+              <Text style={[typography.h3, { color: colors.text.primary }]}>
+                {'\u{1F48A}'} Supplements
+              </Text>
+              <Pressable onPress={() => router.push('/(tabs)/nutrition/supplements')}>
+                <Text style={[typography.caption, { color: colors.accent.primary }]}>Manage</Text>
+              </Pressable>
+            </View>
+
+            {supplementsTaken.length > 0 ? (
+              <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+                {supplementsTaken.map((supp) => (
+                  <Pressable
+                    key={supp.id}
+                    style={[styles.supplementRow, { paddingVertical: spacing.sm }]}
+                    onPress={() => {
+                      if (!supp.taken) {
+                        hapticSuccess();
+                        useNutritionStore.getState().logSupplement(supp.id);
+                      }
+                    }}
+                  >
+                    <Ionicons
+                      name={supp.taken ? 'checkbox' : 'square-outline'}
+                      size={22}
+                      color={supp.taken ? colors.accent.success : colors.text.muted}
+                    />
+                    <View style={{ flex: 1, marginLeft: spacing.md }}>
+                      <Text
+                        style={[
+                          typography.body,
+                          {
+                            color: supp.taken ? colors.text.muted : colors.text.primary,
+                            textDecorationLine: supp.taken ? 'line-through' : 'none',
+                          },
+                        ]}
+                      >
+                        {supp.name}
+                      </Text>
+                      {supp.dosage && (
+                        <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                          {supp.dosage}
+                        </Text>
+                      )}
+                    </View>
+                    {supp.category && (
+                      <Badge label={supp.category} size="sm" />
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => router.push('/(tabs)/nutrition/supplements')}
+                style={{ marginTop: spacing.md, alignItems: 'center', paddingVertical: spacing.lg }}
+              >
+                <Text style={[typography.caption, { color: colors.text.muted }]}>
+                  No supplements tracked. Tap to add.
+                </Text>
+              </Pressable>
+            )}
+          </Card>
+        </Animated.View>
+      </ScrollView>
+
+      {/* FAB */}
+      <Animated.View
+        style={[
+          styles.fab,
+          {
+            bottom: insets.bottom + 20,
+            right: spacing.lg,
+            backgroundColor: colors.accent.primary,
+            borderRadius: borderRadius.full,
+          },
+          fabAnimatedStyle,
+        ]}
+      >
+        <Pressable
+          onPress={handleFabToggle}
+          onPressIn={() => { fabScale.value = withSpring(0.9); }}
+          onPressOut={() => { fabScale.value = withSpring(1); }}
+          style={styles.fabInner}
+        >
+          <Ionicons name={fabOpen ? 'close' : 'add'} size={28} color="#FFFFFF" />
+        </Pressable>
+      </Animated.View>
+
+      {/* FAB Bottom Sheet */}
+      <BottomSheet
+        visible={fabOpen}
+        onDismiss={() => setFabOpen(false)}
+        snapPoints={[0.35]}
+      >
+        <View style={{ padding: spacing.lg, gap: spacing.md }}>
+          <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.sm }]}>
+            Log Food
+          </Text>
+          <Pressable
+            onPress={() => handleFabAction('camera')}
+            style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
+          >
+            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.md }]}>
+              <Ionicons name="camera" size={24} color={colors.accent.primary} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>AI Camera</Text>
+              <Text style={[typography.caption, { color: colors.text.muted }]}>Snap a photo of your meal</Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleFabAction('barcode')}
+            style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
+          >
+            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.success}20`, borderRadius: borderRadius.md }]}>
+              <Ionicons name="barcode" size={24} color={colors.accent.success} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Barcode</Text>
+              <Text style={[typography.caption, { color: colors.text.muted }]}>Scan a product barcode</Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleFabAction('menu')}
+            style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
+          >
+            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.warning}20`, borderRadius: borderRadius.md }]}>
+              <Ionicons name="reader" size={24} color={colors.accent.warning} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Menu Scanner</Text>
+              <Text style={[typography.caption, { color: colors.text.muted }]}>Scan a restaurant menu</Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleFabAction('manual')}
+            style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
+          >
+            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.info}20`, borderRadius: borderRadius.md }]}>
+              <Ionicons name="create" size={24} color={colors.accent.info} />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Manual Entry</Text>
+              <Text style={[typography.caption, { color: colors.text.muted }]}>Search or type macros</Text>
+            </View>
+          </Pressable>
+        </View>
+      </BottomSheet>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerActions: { flexDirection: 'row', alignItems: 'center' },
+  headerBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scroll: { flex: 1 },
+  macroRingsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  macroMiniRings: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  miniRingItem: {
+    alignItems: 'center',
+  },
+  remainingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  remainingItem: {
+    alignItems: 'center',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  emptyMeal: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waterBarContainer: {},
+  waterBarTrack: { overflow: 'hidden' },
+  waterBarFill: {},
+  waterButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  waterBtn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  supplementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  quickLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  fabInner: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fabOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fabOptionIcon: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

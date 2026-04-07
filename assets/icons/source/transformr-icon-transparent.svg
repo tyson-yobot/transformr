@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer hexagonal prism -->
+  <path d="M512 88L860 256V622L512 936L164 622V256L512 88Z" fill="#7E22CE"/>
+  <!-- Right face -->
+  <path d="M512 88L860 256V622L512 351V88Z" fill="#A855F7"/>
+  <!-- Right-bottom face -->
+  <path d="M512 351L860 256V622L512 936V351Z" fill="#9333EA"/>
+  <!-- Left face -->
+  <path d="M164 256L512 351V936L164 622V256Z" fill="#6B21A8"/>
+  <!-- Top face -->
+  <path d="M512 88L164 256L512 351L860 256L512 88Z" fill="#C084FC"/>
+  <!-- Inner hexagonal ring -->
+  <path d="M512 278L716 380V598L512 774L308 598V380L512 278Z" fill="none" stroke="#E9D5FF" stroke-width="5" opacity="0.5"/>
+  <!-- Inner diamond - partner pink -->
+  <path d="M512 380L614 438V554L512 658L410 554V438L512 380Z" fill="#EC4899" opacity="0.25"/>
+  <path d="M512 380L614 438V554L512 658L410 554V438L512 380Z" fill="none" stroke="#F9A8D4" stroke-width="4" opacity="0.55"/>
+  <!-- AI core outer ring -->
+  <circle cx="512" cy="512" r="42" fill="#0C0A15"/>
+  <!-- AI core -->
+  <circle cx="512" cy="512" r="30" fill="#22D3EE" opacity="0.9"/>
+  <!-- AI core inner glow -->
+  <circle cx="512" cy="512" r="14" fill="#FFFFFF" opacity="0.35"/>
+  <!-- AI crosshair -->
+  <path d="M512 484V540M484 512H540" stroke="#0C0A15" stroke-width="8" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,38 @@
+name: Production Build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-submit:
+    name: EAS Production Build & Submit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.4'
+          cache: 'npm'
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci && cd apps/mobile && npm ci
+
+      - name: Build production
+        run: cd apps/mobile && eas build --profile production --platform all --non-interactive
+
+      - name: Submit to App Store
+        if: success()
+        run: cd apps/mobile && eas submit --platform ios --non-interactive
+        continue-on-error: true
+
+      - name: Submit to Play Store
+        if: success()
+        run: cd apps/mobile && eas submit --platform android --non-interactive
+        continue-on-error: true

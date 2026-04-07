@@ -1,0 +1,478 @@
+// =============================================================================
+// TRANSFORMR -- Goals Dashboard
+// =============================================================================
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useTheme } from '@theme/index';
+import { Card } from '@components/ui/Card';
+import { Button } from '@components/ui/Button';
+import { Badge } from '@components/ui/Badge';
+import { ProgressBar } from '@components/ui/ProgressBar';
+import { ProgressRing } from '@components/ui/ProgressRing';
+import { Modal } from '@components/ui/Modal';
+import { Input } from '@components/ui/Input';
+import { Chip } from '@components/ui/Chip';
+import { useGoalStore } from '@stores/goalStore';
+import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
+import { hapticSuccess } from '@utils/haptics';
+import type { Goal } from '@app-types/database';
+
+type GoalCategory = NonNullable<Goal['category']>;
+
+const CATEGORIES: { key: GoalCategory; label: string; icon: string }[] = [
+  { key: 'fitness', label: 'Fitness', icon: '\uD83D\uDCAA' },
+  { key: 'business', label: 'Business', icon: '\uD83D\uDCBC' },
+  { key: 'personal', label: 'Personal', icon: '\u2728' },
+  { key: 'financial', label: 'Financial', icon: '\uD83D\uDCB0' },
+  { key: 'health', label: 'Health', icon: '\u2764\uFE0F' },
+  { key: 'education', label: 'Education', icon: '\uD83D\uDCDA' },
+  { key: 'mindset', label: 'Mindset', icon: '\uD83E\uDDE0' },
+  { key: 'relationship', label: 'Relationship', icon: '\uD83D\uDC9C' },
+  { key: 'nutrition', label: 'Nutrition', icon: '\uD83C\uDF4E' },
+];
+
+const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
+  { route: '/(tabs)/goals/habits', label: 'Habits', icon: '\u2705' },
+  { route: '/(tabs)/goals/sleep', label: 'Sleep', icon: '\uD83D\uDE34' },
+  { route: '/(tabs)/goals/mood', label: 'Mood', icon: '\uD83D\uDE0A' },
+  { route: '/(tabs)/goals/journal', label: 'Journal', icon: '\uD83D\uDCD3' },
+  { route: '/(tabs)/goals/focus-mode', label: 'Focus', icon: '\uD83C\uDFAF' },
+  { route: '/(tabs)/goals/vision-board', label: 'Vision', icon: '\uD83C\uDF1F' },
+  { route: '/(tabs)/goals/skills', label: 'Skills', icon: '\uD83D\uDCA1' },
+  { route: '/(tabs)/goals/challenges', label: 'Challenges', icon: '\uD83C\uDFC6' },
+  { route: '/(tabs)/goals/stake-goals', label: 'Stakes', icon: '\uD83D\uDD25' },
+  { route: '/(tabs)/goals/business', label: 'Business', icon: '\uD83D\uDCC8' },
+  { route: '/(tabs)/goals/finance', label: 'Finance', icon: '\uD83D\uDCB3' },
+];
+
+export default function GoalsDashboard() {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const router = useRouter();
+  const { goals, milestones, isLoading, fetchGoals, createGoal } = useGoalStore();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<GoalCategory | null>(null);
+  const [newGoalTitle, setNewGoalTitle] = useState('');
+  const [newGoalCategory, setNewGoalCategory] = useState<GoalCategory>('personal');
+  const [newGoalTargetDate, setNewGoalTargetDate] = useState('');
+
+  useEffect(() => {
+    fetchGoals();
+  }, [fetchGoals]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchGoals();
+    setRefreshing(false);
+  }, [fetchGoals]);
+
+  const overallCompletion = useMemo(() => {
+    const goalsWithTarget = goals.filter((g) => g.target_value && g.target_value > 0);
+    if (goalsWithTarget.length === 0) return 0;
+    const total = goalsWithTarget.reduce((sum, g) => {
+      return sum + Math.min((g.current_value ?? 0) / g.target_value!, 1);
+    }, 0);
+    return total / goalsWithTarget.length;
+  }, [goals]);
+
+  const filteredGoals = useMemo(
+    () =>
+      selectedCategory
+        ? goals.filter((g) => g.category === selectedCategory)
+        : goals,
+    [goals, selectedCategory],
+  );
+
+  const upcomingDeadlines = useMemo(
+    () =>
+      goals
+        .filter((g) => g.target_date && g.status === 'active')
+        .sort(
+          (a, b) =>
+            new Date(a.target_date!).getTime() - new Date(b.target_date!).getTime(),
+        )
+        .slice(0, 5),
+    [goals],
+  );
+
+  const goalsByCategory = useMemo(() => {
+    const map = new Map<string, Goal[]>();
+    for (const g of goals) {
+      const cat = g.category ?? 'personal';
+      const existing = map.get(cat) ?? [];
+      existing.push(g);
+      map.set(cat, existing);
+    }
+    return map;
+  }, [goals]);
+
+  const handleAddGoal = useCallback(async () => {
+    if (!newGoalTitle.trim()) return;
+    await createGoal({
+      title: newGoalTitle.trim(),
+      category: newGoalCategory,
+      target_date: newGoalTargetDate || undefined,
+    });
+    await hapticSuccess();
+    setShowAddModal(false);
+    setNewGoalTitle('');
+    setNewGoalTargetDate('');
+  }, [newGoalTitle, newGoalCategory, newGoalTargetDate, createGoal]);
+
+  const getGoalProgress = (goal: Goal): number => {
+    if (!goal.target_value || goal.target_value === 0) return 0;
+    return Math.min((goal.current_value ?? 0) / goal.target_value, 1);
+  };
+
+  return (
+    <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
+      >
+        {/* Overall Completion Ring */}
+        <Animated.View entering={FadeInDown.delay(100)} style={styles.ringSection}>
+          <ProgressRing progress={overallCompletion} size={140} strokeWidth={12}>
+            <Text style={[typography.stat, { color: colors.text.primary }]}>
+              {formatPercentage(overallCompletion * 100)}
+            </Text>
+            <Text style={[typography.caption, { color: colors.text.secondary }]}>
+              Complete
+            </Text>
+          </ProgressRing>
+          <Text
+            style={[
+              typography.caption,
+              { color: colors.text.secondary, marginTop: spacing.sm },
+            ]}
+          >
+            {goals.length} active goal{goals.length !== 1 ? 's' : ''}
+          </Text>
+        </Animated.View>
+
+        {/* Quick Nav */}
+        <Animated.View entering={FadeInDown.delay(200)}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[styles.navRow, { gap: spacing.sm }]}
+          >
+            {NAV_ITEMS.map((item) => (
+              <Pressable
+                key={item.route}
+                onPress={() => router.push(item.route as `/${string}`)}
+                style={[
+                  styles.navItem,
+                  {
+                    backgroundColor: colors.background.secondary,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.md,
+                  },
+                ]}
+              >
+                <Text style={styles.navIcon}>{item.icon}</Text>
+                <Text
+                  style={[
+                    typography.tiny,
+                    { color: colors.text.secondary, marginTop: spacing.xs },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </Animated.View>
+
+        {/* Category Filter */}
+        <Animated.View entering={FadeInDown.delay(300)}>
+          <Text
+            style={[
+              typography.h3,
+              { color: colors.text.primary, marginTop: spacing.xl, marginBottom: spacing.md },
+            ]}
+          >
+            Goals by Category
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: spacing.sm }}
+          >
+            <Chip
+              label="All"
+              selected={selectedCategory === null}
+              onPress={() => setSelectedCategory(null)}
+            />
+            {CATEGORIES.map((cat) => {
+              const count = goalsByCategory.get(cat.key)?.length ?? 0;
+              return (
+                <Chip
+                  key={cat.key}
+                  label={`${cat.icon} ${cat.label} (${count})`}
+                  selected={selectedCategory === cat.key}
+                  onPress={() =>
+                    setSelectedCategory(
+                      selectedCategory === cat.key ? null : cat.key,
+                    )
+                  }
+                />
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
+
+        {/* Active Goals List */}
+        <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
+          {filteredGoals.map((goal, index) => {
+            const progress = getGoalProgress(goal);
+            const categoryInfo = CATEGORIES.find((c) => c.key === goal.category);
+            return (
+              <Animated.View key={goal.id} entering={FadeInDown.delay(400 + index * 50)}>
+                <Card
+                  onPress={() => router.push(`/(tabs)/goals/${goal.id}` as `/${string}`)}
+                >
+                  <View style={styles.goalHeader}>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={[typography.bodyBold, { color: colors.text.primary }]}
+                        numberOfLines={1}
+                      >
+                        {goal.title}
+                      </Text>
+                      {goal.description && (
+                        <Text
+                          style={[
+                            typography.caption,
+                            { color: colors.text.secondary, marginTop: spacing.xs },
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {goal.description}
+                        </Text>
+                      )}
+                    </View>
+                    {categoryInfo && (
+                      <Badge label={categoryInfo.label} variant="info" size="sm" />
+                    )}
+                  </View>
+
+                  <ProgressBar
+                    progress={progress}
+                    showPercentage
+                    color={goal.color ?? undefined}
+                    style={{ marginTop: spacing.md }}
+                  />
+
+                  {goal.target_value != null && (
+                    <Text
+                      style={[
+                        typography.tiny,
+                        { color: colors.text.muted, marginTop: spacing.xs },
+                      ]}
+                    >
+                      {goal.current_value ?? 0} / {goal.target_value}
+                      {goal.unit ? ` ${goal.unit}` : ''}
+                    </Text>
+                  )}
+
+                  {goal.target_date && (
+                    <View style={[styles.deadlineRow, { marginTop: spacing.sm }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                        {formatCountdown(goal.target_date).days}{' '}
+                        {formatCountdown(goal.target_date).label}
+                      </Text>
+                    </View>
+                  )}
+                </Card>
+              </Animated.View>
+            );
+          })}
+
+          {filteredGoals.length === 0 && (
+            <Card>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.text.secondary, textAlign: 'center' },
+                ]}
+              >
+                No goals in this category yet. Add one!
+              </Text>
+            </Card>
+          )}
+        </View>
+
+        {/* Upcoming Deadlines */}
+        {upcomingDeadlines.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(600)}>
+            <Text
+              style={[
+                typography.h3,
+                {
+                  color: colors.text.primary,
+                  marginTop: spacing.xl,
+                  marginBottom: spacing.md,
+                },
+              ]}
+            >
+              Upcoming Deadlines
+            </Text>
+            {upcomingDeadlines.map((goal) => (
+              <View
+                key={goal.id}
+                style={[
+                  styles.deadlineItem,
+                  {
+                    backgroundColor: colors.background.secondary,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.md,
+                    marginBottom: spacing.sm,
+                  },
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[typography.bodyBold, { color: colors.text.primary }]}
+                    numberOfLines={1}
+                  >
+                    {goal.title}
+                  </Text>
+                  <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                    {formatDate(goal.target_date!)}
+                  </Text>
+                </View>
+                <Badge
+                  label={`${formatCountdown(goal.target_date!).days}d`}
+                  variant={
+                    formatCountdown(goal.target_date!).days <= 7 ? 'danger' : 'warning'
+                  }
+                  size="sm"
+                />
+              </View>
+            ))}
+          </Animated.View>
+        )}
+
+        <View style={{ height: 80 }} />
+      </ScrollView>
+
+      {/* FAB */}
+      <Pressable
+        onPress={() => setShowAddModal(true)}
+        style={[
+          styles.fab,
+          { backgroundColor: colors.accent.primary, borderRadius: 28 },
+        ]}
+      >
+        <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
+      </Pressable>
+
+      {/* Add Goal Modal */}
+      <Modal
+        visible={showAddModal}
+        onDismiss={() => setShowAddModal(false)}
+        title="Add Goal"
+      >
+        <Input
+          label="Goal Title"
+          value={newGoalTitle}
+          onChangeText={setNewGoalTitle}
+          placeholder="What do you want to achieve?"
+        />
+
+        <Text
+          style={[
+            typography.captionBold,
+            {
+              color: colors.text.secondary,
+              marginTop: spacing.lg,
+              marginBottom: spacing.sm,
+            },
+          ]}
+        >
+          Category
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.sm }}
+        >
+          {CATEGORIES.map((cat) => (
+            <Chip
+              key={cat.key}
+              label={`${cat.icon} ${cat.label}`}
+              selected={newGoalCategory === cat.key}
+              onPress={() => setNewGoalCategory(cat.key)}
+            />
+          ))}
+        </ScrollView>
+
+        <Input
+          label="Target Date (optional)"
+          value={newGoalTargetDate}
+          onChangeText={setNewGoalTargetDate}
+          placeholder="YYYY-MM-DD"
+          containerStyle={{ marginTop: spacing.lg }}
+        />
+
+        <Button
+          title="Create Goal"
+          onPress={handleAddGoal}
+          fullWidth
+          loading={isLoading}
+          disabled={!newGoalTitle.trim()}
+          style={{ marginTop: spacing.xl }}
+        />
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  content: { paddingBottom: 24 },
+  ringSection: { alignItems: 'center', marginBottom: 16 },
+  navRow: { paddingVertical: 8 },
+  navItem: { alignItems: 'center', width: 72 },
+  navIcon: { fontSize: 24 },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  deadlineRow: { flexDirection: 'row', alignItems: 'center' },
+  deadlineItem: { flexDirection: 'row', alignItems: 'center' },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+});

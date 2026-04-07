@@ -1,0 +1,759 @@
+// =============================================================================
+// TRANSFORMR -- Active Workout Player Screen
+// =============================================================================
+
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@theme/index';
+import { Card } from '@components/ui/Card';
+import { Button } from '@components/ui/Button';
+import { Badge } from '@components/ui/Badge';
+import { Modal } from '@components/ui/Modal';
+import { Slider } from '@components/ui/Slider';
+import { useWorkout } from '@hooks/useWorkout';
+import { useWorkoutStore } from '@stores/workoutStore';
+import {
+  formatTimerDisplay,
+  formatRestTimer,
+  formatVolume,
+  formatSetDisplay,
+} from '@utils/formatters';
+import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { supabase } from '@services/supabase';
+import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
+
+interface GhostSet {
+  exercise_id: string;
+  set_number: number;
+  weight: number | undefined;
+  reps: number | undefined;
+  session_date: string;
+}
+
+interface LoggedSet {
+  exerciseId: string;
+  setNumber: number;
+  weight: number;
+  reps: number;
+  rpe: number;
+  isPR: boolean;
+}
+
+interface ExerciseWithSets {
+  exercise: Exercise;
+  templateExercise: WorkoutTemplateExercise | null;
+  loggedSets: LoggedSet[];
+  ghostSets: GhostSet[];
+}
+
+export default function WorkoutPlayerScreen() {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const router = useRouter();
+  const { activeSession, logSetWithPRDetection, completeWorkout, getGhostData, isLoading } =
+    useWorkout();
+
+  const [exercisesWithSets, setExercisesWithSets] = useState<ExerciseWithSets[]>([]);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [restSeconds, setRestSeconds] = useState(0);
+  const [isResting, setIsResting] = useState(false);
+  const [restTarget, setRestTarget] = useState(90);
+  const [totalVolume, setTotalVolume] = useState(0);
+  const [totalSets, setTotalSets] = useState(0);
+  const [moodBefore, setMoodBefore] = useState(5);
+  const [moodAfter, setMoodAfter] = useState(5);
+  const [showMoodModal, setShowMoodModal] = useState(false);
+  const [showPRCelebration, setShowPRCelebration] = useState(false);
+  const [prMessage, setPrMessage] = useState('');
+  const [showGhostOverlay, setShowGhostOverlay] = useState(true);
+  const [loadingExercises, setLoadingExercises] = useState(true);
+
+  // Set logger state per exercise
+  const [currentWeight, setCurrentWeight] = useState('');
+  const [currentReps, setCurrentReps] = useState('');
+  const [currentRpe, setCurrentRpe] = useState(7);
+  const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Workout duration timer
+  useEffect(() => {
+    if (activeSession) {
+      const startTime = new Date(activeSession.started_at).getTime();
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [activeSession]);
+
+  // Rest timer
+  useEffect(() => {
+    if (isResting && restSeconds > 0) {
+      restTimerRef.current = setInterval(() => {
+        setRestSeconds((prev) => {
+          if (prev <= 1) {
+            setIsResting(false);
+            hapticMedium();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (restTimerRef.current) clearInterval(restTimerRef.current);
+    };
+  }, [isResting, restSeconds]);
+
+  // Load exercises for the template
+  useEffect(() => {
+    const loadExercises = async () => {
+      if (!activeSession) return;
+      setLoadingExercises(true);
+
+      try {
+        let exercises: Exercise[] = [];
+
+        if (activeSession.template_id) {
+          const { data: templateExercises } = await supabase
+            .from('workout_template_exercises')
+            .select('*, exercises(*)')
+            .eq('template_id', activeSession.template_id)
+            .order('sort_order');
+
+          if (templateExercises) {
+            const exerciseItems: ExerciseWithSets[] = [];
+            for (const te of templateExercises) {
+              const exerciseData = (te as Record<string, unknown>).exercises as Exercise | null;
+              if (exerciseData) {
+                const ghostData = await getGhostData(exerciseData.id);
+                exerciseItems.push({
+                  exercise: exerciseData,
+                  templateExercise: {
+                    id: te.id,
+                    template_id: te.template_id,
+                    exercise_id: te.exercise_id,
+                    sort_order: te.sort_order,
+                    target_sets: te.target_sets,
+                    target_reps: te.target_reps,
+                    target_weight: te.target_weight,
+                    target_rpe: te.target_rpe,
+                    rest_seconds: te.rest_seconds,
+                    superset_group: te.superset_group,
+                    notes: te.notes,
+                  },
+                  loggedSets: [],
+                  ghostSets: ghostData,
+                });
+              }
+            }
+            setExercisesWithSets(exerciseItems);
+          }
+        }
+      } catch {
+        // Exercises will be empty; user can add exercises manually
+      } finally {
+        setLoadingExercises(false);
+      }
+    };
+
+    loadExercises();
+  }, [activeSession, getGhostData]);
+
+  const handleLogSet = useCallback(async () => {
+    const weight = parseFloat(currentWeight);
+    const reps = parseInt(currentReps, 10);
+
+    if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+      Alert.alert('Invalid Input', 'Please enter valid weight and reps.');
+      return;
+    }
+
+    const currentExercise = exercisesWithSets[activeExerciseIndex];
+    if (!currentExercise) return;
+
+    await hapticLight();
+
+    const result = await logSetWithPRDetection(currentExercise.exercise.id, {
+      weight,
+      reps,
+    });
+
+    const newSet: LoggedSet = {
+      exerciseId: currentExercise.exercise.id,
+      setNumber: currentExercise.loggedSets.length + 1,
+      weight,
+      reps,
+      rpe: currentRpe,
+      isPR: result.isPR,
+    };
+
+    setExercisesWithSets((prev) =>
+      prev.map((item, idx) =>
+        idx === activeExerciseIndex
+          ? { ...item, loggedSets: [...item.loggedSets, newSet] }
+          : item,
+      ),
+    );
+
+    setTotalVolume((prev) => prev + weight * reps);
+    setTotalSets((prev) => prev + 1);
+
+    if (result.isPR) {
+      setShowPRCelebration(true);
+      setPrMessage(`New PR! ${weight} x ${reps}`);
+      setTimeout(() => setShowPRCelebration(false), 3000);
+    }
+
+    // Start rest timer
+    const restDuration = currentExercise.templateExercise?.rest_seconds ?? restTarget;
+    setRestSeconds(restDuration);
+    setIsResting(true);
+
+    // Clear inputs
+    setCurrentWeight('');
+    setCurrentReps('');
+    setCurrentRpe(7);
+
+    await hapticSuccess();
+  }, [
+    currentWeight,
+    currentReps,
+    currentRpe,
+    activeExerciseIndex,
+    exercisesWithSets,
+    logSetWithPRDetection,
+    restTarget,
+  ]);
+
+  const handleSkipRest = useCallback(() => {
+    setIsResting(false);
+    setRestSeconds(0);
+    hapticLight();
+  }, []);
+
+  const handleCompleteWorkout = useCallback(async () => {
+    if (totalSets === 0) {
+      Alert.alert('No Sets Logged', 'Log at least one set before completing.');
+      return;
+    }
+    setShowMoodModal(true);
+  }, [totalSets]);
+
+  const handleFinishWithMood = useCallback(async () => {
+    setShowMoodModal(false);
+
+    if (activeSession) {
+      await supabase
+        .from('workout_sessions')
+        .update({
+          mood_before: moodBefore,
+          mood_after: moodAfter,
+          total_volume: totalVolume,
+          total_sets: totalSets,
+        })
+        .eq('id', activeSession.id);
+    }
+
+    await completeWorkout();
+    router.replace(
+      `/(tabs)/fitness/workout-summary?sessionId=${activeSession?.id ?? ''}` as never,
+    );
+  }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router]);
+
+  const currentExercise = exercisesWithSets[activeExerciseIndex] ?? null;
+
+  if (!activeSession) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
+        <ActivityIndicator size="large" color={colors.accent.primary} />
+        <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
+          Starting workout...
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      {/* Top Bar: Timer + Volume */}
+      <View
+        style={[
+          styles.topBar,
+          { backgroundColor: colors.background.secondary, padding: spacing.md },
+        ]}
+      >
+        <View style={styles.topBarItem}>
+          <Ionicons name="time-outline" size={18} color={colors.accent.primary} />
+          <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.xs }]}>
+            {formatTimerDisplay(elapsedSeconds)}
+          </Text>
+        </View>
+        <View style={styles.topBarItem}>
+          <Ionicons name="barbell-outline" size={18} color={colors.accent.success} />
+          <Text style={[typography.bodyBold, { color: colors.text.primary, marginLeft: spacing.xs }]}>
+            {formatVolume(totalVolume)}
+          </Text>
+        </View>
+        <View style={styles.topBarItem}>
+          <Text style={[typography.caption, { color: colors.text.muted }]}>
+            {totalSets} sets
+          </Text>
+        </View>
+      </View>
+
+      {/* Rest Timer Overlay */}
+      {isResting && (
+        <View
+          style={[
+            styles.restOverlay,
+            { backgroundColor: `${colors.background.primary}E6`, padding: spacing.xl },
+          ]}
+        >
+          <Ionicons name="timer-outline" size={48} color={colors.accent.info} />
+          <Text style={[typography.hero, { color: colors.text.primary, marginTop: spacing.md }]}>
+            {formatRestTimer(restSeconds)}
+          </Text>
+          <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
+            Rest Time
+          </Text>
+          <Button
+            title="Skip Rest"
+            variant="outline"
+            onPress={handleSkipRest}
+            style={{ marginTop: spacing.xl }}
+          />
+        </View>
+      )}
+
+      {/* PR Celebration */}
+      {showPRCelebration && (
+        <View style={[styles.prOverlay, { backgroundColor: `${colors.accent.gold}15` }]}>
+          <Ionicons name="trophy" size={64} color={colors.accent.gold} />
+          <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
+            NEW PR!
+          </Text>
+          <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.sm }]}>
+            {prMessage}
+          </Text>
+        </View>
+      )}
+
+      <ScrollView
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {loadingExercises ? (
+          <ActivityIndicator size="small" color={colors.accent.primary} />
+        ) : exercisesWithSets.length === 0 ? (
+          <Card style={{ marginBottom: spacing.lg }}>
+            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
+              No exercises loaded. This is an empty workout session.
+            </Text>
+            <Button
+              title="Browse Exercises"
+              variant="outline"
+              onPress={() => router.push('/(tabs)/fitness/exercises' as never)}
+              fullWidth
+              style={{ marginTop: spacing.md }}
+            />
+          </Card>
+        ) : (
+          <>
+            {/* Exercise Tabs */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginBottom: spacing.lg }}
+            >
+              {exercisesWithSets.map((item, idx) => (
+                <Pressable
+                  key={item.exercise.id}
+                  onPress={() => {
+                    setActiveExerciseIndex(idx);
+                    hapticLight();
+                  }}
+                  style={[
+                    styles.exerciseTab,
+                    {
+                      backgroundColor:
+                        idx === activeExerciseIndex
+                          ? colors.accent.primary
+                          : colors.background.secondary,
+                      borderRadius: borderRadius.md,
+                      paddingHorizontal: spacing.lg,
+                      paddingVertical: spacing.sm,
+                      marginRight: spacing.sm,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      typography.captionBold,
+                      {
+                        color:
+                          idx === activeExerciseIndex ? '#FFFFFF' : colors.text.secondary,
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.exercise.name}
+                  </Text>
+                  {item.loggedSets.length > 0 && (
+                    <Badge
+                      label={`${item.loggedSets.length}`}
+                      variant="success"
+                      size="sm"
+                      style={{ marginLeft: spacing.xs }}
+                    />
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            {/* Active Exercise Card */}
+            {currentExercise && (
+              <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+                <View style={styles.exerciseHeader}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[typography.h2, { color: colors.text.primary }]}>
+                      {currentExercise.exercise.name}
+                    </Text>
+                    {currentExercise.exercise.category && (
+                      <Badge
+                        label={currentExercise.exercise.category}
+                        variant="info"
+                        size="sm"
+                        style={{ marginTop: spacing.xs }}
+                      />
+                    )}
+                  </View>
+                  {currentExercise.templateExercise?.target_sets && (
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={[typography.caption, { color: colors.text.muted }]}>
+                        Target
+                      </Text>
+                      <Text style={[typography.bodyBold, { color: colors.text.secondary }]}>
+                        {currentExercise.templateExercise.target_sets} x{' '}
+                        {currentExercise.templateExercise.target_reps ?? '?'}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Logged Sets Table */}
+                {currentExercise.loggedSets.length > 0 && (
+                  <View style={{ marginTop: spacing.md }}>
+                    <View style={[styles.setRow, { marginBottom: spacing.xs }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted, width: 30 }]}>
+                        SET
+                      </Text>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                        WEIGHT
+                      </Text>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                        REPS
+                      </Text>
+                      {showGhostOverlay && (
+                        <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                          PREV
+                        </Text>
+                      )}
+                      <Text style={[typography.tiny, { color: colors.text.muted, width: 30 }]}>
+                        RPE
+                      </Text>
+                    </View>
+                    {currentExercise.loggedSets.map((set) => {
+                      const ghost = currentExercise.ghostSets.find(
+                        (g) => g.set_number === set.setNumber,
+                      );
+                      const beatGhost =
+                        ghost &&
+                        ghost.weight !== undefined &&
+                        ghost.reps !== undefined &&
+                        set.weight * set.reps > ghost.weight * ghost.reps;
+
+                      return (
+                        <View
+                          key={set.setNumber}
+                          style={[
+                            styles.setRow,
+                            {
+                              paddingVertical: spacing.xs,
+                              borderBottomWidth: 1,
+                              borderBottomColor: colors.border.subtle,
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              typography.captionBold,
+                              { color: set.isPR ? colors.accent.gold : colors.text.primary, width: 30 },
+                            ]}
+                          >
+                            {set.isPR ? '\u2B50' : `${set.setNumber}`}
+                          </Text>
+                          <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                            {set.weight} lbs
+                          </Text>
+                          <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                            {set.reps}
+                          </Text>
+                          {showGhostOverlay && (
+                            <Text
+                              style={[
+                                typography.caption,
+                                {
+                                  color: beatGhost
+                                    ? colors.accent.success
+                                    : colors.text.muted,
+                                  flex: 1,
+                                },
+                              ]}
+                            >
+                              {ghost && ghost.weight !== undefined && ghost.reps !== undefined
+                                ? formatSetDisplay(ghost.weight, ghost.reps)
+                                : '-'}
+                              {beatGhost ? ' \u2191' : ''}
+                            </Text>
+                          )}
+                          <Text style={[typography.caption, { color: colors.text.muted, width: 30 }]}>
+                            {set.rpe}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* Set Logger Inputs */}
+                <View style={[styles.setLogger, { marginTop: spacing.lg, gap: spacing.sm }]}>
+                  <View style={styles.inputGroup}>
+                    <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
+                      WEIGHT (lbs)
+                    </Text>
+                    <TextInput
+                      value={currentWeight}
+                      onChangeText={setCurrentWeight}
+                      keyboardType="numeric"
+                      placeholder={
+                        currentExercise.templateExercise?.target_weight?.toString() ?? '0'
+                      }
+                      placeholderTextColor={colors.text.muted}
+                      style={[
+                        styles.numericInput,
+                        {
+                          backgroundColor: colors.background.input,
+                          color: colors.text.primary,
+                          borderRadius: borderRadius.sm,
+                          borderWidth: 1,
+                          borderColor: colors.border.default,
+                          ...typography.h3,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
+                      REPS
+                    </Text>
+                    <TextInput
+                      value={currentReps}
+                      onChangeText={setCurrentReps}
+                      keyboardType="numeric"
+                      placeholder={
+                        currentExercise.templateExercise?.target_reps ?? '0'
+                      }
+                      placeholderTextColor={colors.text.muted}
+                      style={[
+                        styles.numericInput,
+                        {
+                          backgroundColor: colors.background.input,
+                          color: colors.text.primary,
+                          borderRadius: borderRadius.sm,
+                          borderWidth: 1,
+                          borderColor: colors.border.default,
+                          ...typography.h3,
+                        },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
+                      RPE
+                    </Text>
+                    <TextInput
+                      value={currentRpe.toString()}
+                      onChangeText={(v) => {
+                        const num = parseInt(v, 10);
+                        if (!isNaN(num) && num >= 1 && num <= 10) setCurrentRpe(num);
+                      }}
+                      keyboardType="numeric"
+                      placeholderTextColor={colors.text.muted}
+                      style={[
+                        styles.numericInput,
+                        {
+                          backgroundColor: colors.background.input,
+                          color: colors.text.primary,
+                          borderRadius: borderRadius.sm,
+                          borderWidth: 1,
+                          borderColor: colors.border.default,
+                          ...typography.h3,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+
+                <Button
+                  title={`Log Set ${currentExercise.loggedSets.length + 1}`}
+                  onPress={handleLogSet}
+                  loading={isLoading}
+                  fullWidth
+                  style={{ marginTop: spacing.md }}
+                  leftIcon={<Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />}
+                />
+
+                {/* Ghost overlay toggle */}
+                <Pressable
+                  onPress={() => setShowGhostOverlay((prev) => !prev)}
+                  style={[styles.ghostToggle, { marginTop: spacing.md }]}
+                >
+                  <Ionicons
+                    name={showGhostOverlay ? 'eye' : 'eye-off'}
+                    size={16}
+                    color={colors.text.muted}
+                  />
+                  <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.xs }]}>
+                    {showGhostOverlay ? 'Hide' : 'Show'} previous session
+                  </Text>
+                </Pressable>
+              </Card>
+            )}
+          </>
+        )}
+      </ScrollView>
+
+      {/* Bottom Action Bar */}
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            backgroundColor: colors.background.secondary,
+            padding: spacing.lg,
+            borderTopWidth: 1,
+            borderTopColor: colors.border.subtle,
+          },
+        ]}
+      >
+        <Button
+          title="Complete Workout"
+          onPress={handleCompleteWorkout}
+          loading={isLoading}
+          fullWidth
+          size="lg"
+          leftIcon={<Ionicons name="checkmark-done" size={22} color="#FFFFFF" />}
+        />
+      </View>
+
+      {/* Mood Modal */}
+      <Modal visible={showMoodModal} onDismiss={() => setShowMoodModal(false)} title="How are you feeling?">
+        <View style={{ gap: spacing.lg }}>
+          <Slider
+            value={moodBefore}
+            onValueChange={setMoodBefore}
+            min={1}
+            max={10}
+            step={1}
+            label="Mood Before Workout"
+          />
+          <Slider
+            value={moodAfter}
+            onValueChange={setMoodAfter}
+            min={1}
+            max={10}
+            step={1}
+            label="Mood After Workout"
+          />
+          <Button title="Finish Workout" onPress={handleFinishWithMood} fullWidth size="lg" />
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topBarItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  restOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  prOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  exerciseTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  exerciseHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  setRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  setLogger: {
+    flexDirection: 'row',
+  },
+  inputGroup: {
+    flex: 1,
+  },
+  numericInput: {
+    height: 48,
+    textAlign: 'center',
+    paddingHorizontal: 8,
+  },
+  ghostToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bottomBar: {},
+});
