@@ -1,0 +1,25 @@
+# Treat all files as text by default
+* text=auto
+
+# Force binary for image assets — prevents CRLF line ending corruption
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg text
+
+# Force binary for fonts
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# Force binary for archives/APKs
+*.zip binary
+*.gz binary
+*.tar binary
+*.apk binary
+*.aar binary
+*.jar binary
