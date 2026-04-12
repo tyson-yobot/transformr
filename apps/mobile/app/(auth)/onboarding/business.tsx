@@ -9,6 +9,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { useBusinessStore } from '@stores/businessStore';
+import { hapticLight } from '@utils/haptics';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';
 
@@ -111,7 +112,10 @@ export default function BusinessScreen() {
           return (
             <Pressable
               key={type.value}
-              onPress={() => setBusinessType(type.value)}
+              onPress={() => { hapticLight(); setBusinessType(type.value); }}
+              accessibilityLabel={`Business type: ${type.label}`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
               style={[
                 styles.typeCard,
                 {

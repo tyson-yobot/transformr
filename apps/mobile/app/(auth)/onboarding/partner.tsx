@@ -9,6 +9,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Card } from '@components/ui/Card';
+import { hapticLight } from '@utils/haptics';
 
 interface PrivacyToggle {
   key: string;
@@ -36,6 +37,7 @@ export default function PartnerScreen() {
   const [privacy, setPrivacy] = useState<PrivacyToggle[]>(DEFAULT_PRIVACY);
 
   const togglePrivacy = useCallback((key: string) => {
+    hapticLight();
     setPrivacy((prev) =>
       prev.map((p) => (p.key === key ? { ...p, enabled: !p.enabled } : p)),
     );
@@ -171,6 +173,8 @@ export default function PartnerScreen() {
             onValueChange={() => togglePrivacy(item.key)}
             trackColor={{ false: colors.background.tertiary, true: colors.accent.primary + '60' }}
             thumbColor={item.enabled ? colors.accent.primary : colors.text.muted}
+            accessibilityLabel={`Share ${item.label}`}
+            accessibilityRole="switch"
           />
         </View>
       ))}

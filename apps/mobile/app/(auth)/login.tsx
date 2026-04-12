@@ -12,12 +12,14 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { hapticLight } from '@utils/haptics';
 import { isValidEmail } from '@utils/validators';
 
 export default function LoginScreen() {
@@ -64,14 +66,14 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Logo / Brand */}
-          <View style={[styles.logoSection, { marginBottom: spacing.xxxl }]}>
+          <Animated.View entering={FadeInDown.delay(100)} style={[styles.logoSection, { marginBottom: spacing.xxxl }]}>
             <Text style={[typography.hero, { color: colors.accent.primary, letterSpacing: 4 }]}>
               TRANSFORMR
             </Text>
             <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
               Every rep. Every meal. Every dollar. Every day.
             </Text>
-          </View>
+          </Animated.View>
 
           {/* Error Banner */}
           {error && (
@@ -95,6 +97,7 @@ export default function LoginScreen() {
           )}
 
           {/* Email Input */}
+          <Animated.View entering={FadeInDown.delay(200)}>
           <Input
             label="Email"
             placeholder="you@example.com"
@@ -109,8 +112,10 @@ export default function LoginScreen() {
             autoComplete="email"
             containerStyle={{ marginBottom: spacing.lg }}
           />
+          </Animated.View>
 
           {/* Password Input */}
+          <Animated.View entering={FadeInDown.delay(300)}>
           <Input
             label="Password"
             placeholder="Enter your password"
@@ -121,9 +126,10 @@ export default function LoginScreen() {
             autoComplete="password"
             containerStyle={{ marginBottom: spacing.sm }}
           />
+          </Animated.View>
 
           {/* Forgot Password */}
-          <Pressable onPress={handleForgotPassword} style={[styles.forgotRow, { marginBottom: spacing.xxl }]}>
+          <Pressable onPress={() => { hapticLight(); handleForgotPassword(); }} accessibilityLabel="Forgot password" style={[styles.forgotRow, { marginBottom: spacing.xxl }]}>
             <Text style={[typography.caption, { color: colors.accent.primary }]}>
               Forgot Password?
             </Text>
@@ -181,7 +187,7 @@ export default function LoginScreen() {
             <Text style={[typography.body, { color: colors.text.secondary }]}>
               Don't have an account?{' '}
             </Text>
-            <Pressable onPress={handleSignUp}>
+            <Pressable onPress={() => { hapticLight(); handleSignUp(); }} accessibilityLabel="Sign up for an account">
               <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>
                 Sign Up
               </Text>

@@ -12,12 +12,14 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { hapticLight } from '@utils/haptics';
 import { isValidEmail } from '@utils/validators';
 
 export default function ForgotPasswordScreen() {
@@ -63,12 +65,14 @@ export default function ForgotPasswordScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
-          <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-            Reset Password
-          </Text>
-          <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-            Enter your email and we'll send you a link to reset your password.
-          </Text>
+          <Animated.View entering={FadeInDown.delay(100)}>
+            <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
+              Reset Password
+            </Text>
+            <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
+              Enter your email and we'll send you a link to reset your password.
+            </Text>
+          </Animated.View>
 
           {/* Error Banner */}
           {error && (
@@ -144,7 +148,7 @@ export default function ForgotPasswordScreen() {
           )}
 
           {/* Back to Login */}
-          <Pressable onPress={handleBackToLogin} style={styles.backRow}>
+          <Pressable onPress={() => { hapticLight(); handleBackToLogin(); }} accessibilityLabel="Back to login" style={styles.backRow}>
             <Text style={[typography.body, { color: colors.accent.primary }]}>
               {'\u2190'} Back to Login
             </Text>

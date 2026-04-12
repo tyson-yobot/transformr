@@ -4,11 +4,13 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
+import { hapticLight } from '@utils/haptics';
 import type { Equipment, Difficulty } from '@app-types/common';
 
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very_active' | 'extra_active';
@@ -86,7 +88,10 @@ export default function FitnessScreen() {
         return (
           <Pressable
             key={level.value}
-            onPress={() => setActivityLevel(level.value)}
+            onPress={() => { hapticLight(); setActivityLevel(level.value); }}
+            accessibilityLabel={`${level.label}: ${level.description}`}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isSelected }}
             style={[
               styles.optionRow,
               {
@@ -124,7 +129,10 @@ export default function FitnessScreen() {
           return (
             <Pressable
               key={day}
-              onPress={() => setWorkoutDays(day)}
+              onPress={() => { hapticLight(); setWorkoutDays(day); }}
+              accessibilityLabel={`${day} days per week`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
               style={[
                 styles.freqButton,
                 {
@@ -159,7 +167,10 @@ export default function FitnessScreen() {
         return (
           <Pressable
             key={level.value}
-            onPress={() => setExperience(level.value)}
+            onPress={() => { hapticLight(); setExperience(level.value); }}
+            accessibilityLabel={`${level.label}: ${level.description}`}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isSelected }}
             style={[
               styles.optionRow,
               {
@@ -197,7 +208,10 @@ export default function FitnessScreen() {
           return (
             <Pressable
               key={item.value}
-              onPress={() => toggleEquipment(item.value)}
+              onPress={() => { hapticLight(); toggleEquipment(item.value); }}
+              accessibilityLabel={`${item.label}${isSelected ? ', selected' : ''}`}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: isSelected }}
               style={[
                 styles.chip,
                 {

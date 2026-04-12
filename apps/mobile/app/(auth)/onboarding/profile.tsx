@@ -16,6 +16,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { useProfileStore } from '@stores/profileStore';
+import { hapticLight } from '@utils/haptics';
 
 type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 type GoalDirection = 'gain' | 'lose' | 'maintain';
@@ -138,9 +139,13 @@ export default function ProfileScreen() {
             <Pressable
               key={g.value}
               onPress={() => {
+                hapticLight();
                 setGender(g.value);
                 setErrors((prev) => ({ ...prev, gender: '' }));
               }}
+              accessibilityLabel={`Gender: ${g.label}`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
               style={[
                 styles.chip,
                 {
@@ -249,7 +254,10 @@ export default function ProfileScreen() {
           return (
             <Pressable
               key={dir.value}
-              onPress={() => setGoalDirection(dir.value)}
+              onPress={() => { hapticLight(); setGoalDirection(dir.value); }}
+              accessibilityLabel={`Goal: ${dir.label}`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
               style={[
                 styles.directionCard,
                 {

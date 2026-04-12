@@ -10,6 +10,7 @@ import { Button } from '@components/ui/Button';
 import { Card } from '@components/ui/Card';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { useProfileStore } from '@stores/profileStore';
+import { hapticLight } from '@utils/haptics';
 import {
   calculateBMR,
   calculateTDEE,
@@ -128,7 +129,7 @@ export default function NutritionScreen() {
             { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs },
           ]}
         >
-          {calculatedValues.tdee} cal
+          <Text style={typography.stat}>{calculatedValues.tdee}</Text> cal
         </Text>
       </Card>
 
@@ -138,7 +139,9 @@ export default function NutritionScreen() {
       </Text>
       <View style={[styles.calorieRow, { marginBottom: spacing.xxl }]}>
         <Pressable
-          onPress={() => adjustCalories(-50)}
+          onPress={() => { hapticLight(); adjustCalories(-50); }}
+          accessibilityLabel="Decrease calories by 50"
+          accessibilityRole="button"
           style={[
             styles.adjustButton,
             {
@@ -160,7 +163,9 @@ export default function NutritionScreen() {
           </Text>
         </View>
         <Pressable
-          onPress={() => adjustCalories(50)}
+          onPress={() => { hapticLight(); adjustCalories(50); }}
+          accessibilityLabel="Increase calories by 50"
+          accessibilityRole="button"
           style={[
             styles.adjustButton,
             {
@@ -186,10 +191,10 @@ export default function NutritionScreen() {
             <View style={[styles.macroDot, { backgroundColor: colors.accent.info }]} />
             <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Protein</Text>
           </View>
-          <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+          <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
             {macros.protein}g
           </Text>
-          <Text style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
+          <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
             {percentages.protein}%
           </Text>
         </View>
@@ -206,10 +211,10 @@ export default function NutritionScreen() {
             <View style={[styles.macroDot, { backgroundColor: colors.accent.success }]} />
             <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Carbs</Text>
           </View>
-          <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+          <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
             {macros.carbs}g
           </Text>
-          <Text style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
+          <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
             {percentages.carbs}%
           </Text>
         </View>
@@ -226,10 +231,10 @@ export default function NutritionScreen() {
             <View style={[styles.macroDot, { backgroundColor: colors.accent.warning }]} />
             <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Fat</Text>
           </View>
-          <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+          <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
             {macros.fat}g
           </Text>
-          <Text style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
+          <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
             {percentages.fat}%
           </Text>
         </View>

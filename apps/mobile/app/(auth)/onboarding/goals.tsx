@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { hapticLight } from '@utils/haptics';
 import type { GoalCategory } from '@app-types/common';
 
 interface GoalOption {
@@ -85,6 +86,7 @@ export default function GoalsScreen() {
             <Pressable
               key={goal.category}
               onPress={() => {
+                hapticLight();
                 if (isSelected) {
                   // If already selected, set as primary or deselect
                   if (isPrimary) {

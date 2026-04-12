@@ -12,12 +12,14 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { hapticLight } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
 
 function getPasswordStrength(password: string): { level: number; label: string; color: string } {
@@ -94,12 +96,14 @@ export default function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
-          <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-            Create Account
-          </Text>
-          <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-            Start your transformation journey
-          </Text>
+          <Animated.View entering={FadeInDown.delay(100)}>
+            <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
+              Create Account
+            </Text>
+            <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
+              Start your transformation journey
+            </Text>
+          </Animated.View>
 
           {/* Error Banner */}
           {error && (
@@ -210,9 +214,11 @@ export default function RegisterScreen() {
           {/* Terms Checkbox */}
           <Pressable
             onPress={() => {
+              hapticLight();
               setAgreedToTerms(!agreedToTerms);
               setFieldErrors((prev) => ({ ...prev, terms: '' }));
             }}
+            accessibilityLabel="Agree to terms of service"
             style={[styles.termsRow, { marginBottom: spacing.xxl }]}
           >
             <View
@@ -261,7 +267,7 @@ export default function RegisterScreen() {
             <Text style={[typography.body, { color: colors.text.secondary }]}>
               Already have an account?{' '}
             </Text>
-            <Pressable onPress={handleSignIn}>
+            <Pressable onPress={() => { hapticLight(); handleSignIn(); }} accessibilityLabel="Go to sign in">
               <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>Sign In</Text>
             </Pressable>
           </View>

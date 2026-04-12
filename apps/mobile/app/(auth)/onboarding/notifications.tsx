@@ -4,12 +4,14 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Switch, Platform, Alert } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { useProfileStore } from '@stores/profileStore';
+import { hapticLight } from '@utils/haptics';
 import type { NotificationPreferences } from '@app-types/database';
 
 interface NotificationGroupState {
@@ -97,6 +99,7 @@ export default function NotificationsScreen() {
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
 
   const toggleGroup = useCallback((key: string) => {
+    hapticLight();
     setGroups((prev) => {
       const current = prev[key] ?? DEFAULT_GROUP_STATE;
       return { ...prev, [key]: { ...current, enabled: !current.enabled } };
@@ -184,11 +187,12 @@ export default function NotificationsScreen() {
       )}
 
       {/* Notification Groups */}
-      {NOTIFICATION_GROUPS.map((group) => {
+      {NOTIFICATION_GROUPS.map((group, groupIndex) => {
         const state = groups[group.key] ?? DEFAULT_GROUP_STATE;
         return (
-          <View
+          <Animated.View
             key={group.key}
+            entering={FadeInDown.delay(100 + groupIndex * 60)}
             style={[
               styles.groupCard,
               {
@@ -214,6 +218,7 @@ export default function NotificationsScreen() {
                 onValueChange={() => toggleGroup(group.key)}
                 trackColor={{ false: colors.background.tertiary, true: colors.accent.primary + '60' }}
                 thumbColor={state.enabled ? colors.accent.primary : colors.text.muted}
+                accessibilityLabel={`Toggle ${group.label} notifications`}
               />
             </View>
 
@@ -232,7 +237,7 @@ export default function NotificationsScreen() {
                 />
               </View>
             )}
-          </View>
+          </Animated.View>
         );
       })}
 

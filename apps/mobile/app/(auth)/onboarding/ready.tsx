@@ -147,7 +147,7 @@ export default function ReadyScreen() {
               <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>
                 {item.label}
               </Text>
-              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+              <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
                 {item.value}
               </Text>
             </View>
