@@ -139,6 +139,10 @@ export interface UserSupplement {
   is_ai_recommended: boolean;
   ai_recommendation_reason: string | null;
   notes: string | null;
+  bottle_size: number | null;
+  purchased_at: string | null;
+  reorder_reminder_sent: boolean;
+  purchase_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -195,6 +199,46 @@ export interface AIWeeklyReport {
   improvements: string[];
   next_week_focus: string[];
   correlations: string[];
+}
+
+// ---------------------------------------------------------------------------
+// Proactive Messages + Predictions (Module 4/7)
+// ---------------------------------------------------------------------------
+
+export type ProactiveCategory =
+  | 'reorder'
+  | 'plateau'
+  | 'overtraining'
+  | 'pr_approaching'
+  | 'weight_stall'
+  | 'calorie_deficit_risk'
+  | 'sleep_debt'
+  | 'streak_risk'
+  | 'goal_ahead'
+  | 'goal_behind'
+  | 'dehydration_risk'
+  | 'recovery_needed'
+  | 'general'
+  | 'meal_gap'
+  | 'supplement_reminder'
+  | 'lab_followup';
+
+export type ProactiveSeverity = 'info' | 'warning' | 'critical';
+
+export interface ProactiveMessage {
+  id: string;
+  user_id: string;
+  category: ProactiveCategory;
+  title: string;
+  body: string;
+  severity: ProactiveSeverity;
+  action_label: string | null;
+  action_url: string | null;
+  reference_id: string | null;
+  is_read: boolean;
+  is_dismissed: boolean;
+  expires_at: string | null;
+  created_at: string;
 }
 
 // ---------------------------------------------------------------------------
