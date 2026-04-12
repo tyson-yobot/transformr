@@ -24,6 +24,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { useGamificationStyle } from '@hooks/useGamificationStyle';
 import { formatDate, formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 
@@ -151,6 +152,7 @@ export default function ProfileScreen() {
   const profile = useProfileStore((s) => s.profile);
   const settings = useSettingsStore();
   const signOut = useAuthStore((s) => s.signOut);
+  const { mode: gamificationMode, toggleMode: toggleGamificationMode } = useGamificationStyle();
 
   // Theme cycle
   const themeOptions: ThemeMode[] = ['dark', 'light', 'system'];
@@ -256,6 +258,27 @@ export default function ProfileScreen() {
       {/* Settings */}
       <SectionHeader title="Preferences" />
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <SettingsRow
+          icon={gamificationMode === 'competitive' ? '🏆' : '🌱'}
+          label="Mode"
+          accessibilityLabel="Toggle gamification mode"
+          rightElement={
+            <View style={{ alignItems: 'flex-end' }}>
+              <Toggle
+                value={gamificationMode === 'competitive'}
+                onValueChange={() => toggleGamificationMode()}
+              />
+              <Text
+                style={[
+                  typography.tiny,
+                  { color: colors.text.muted, marginTop: 2 },
+                ]}
+              >
+                {gamificationMode === 'competitive' ? 'Competitive' : 'Supportive'}
+              </Text>
+            </View>
+          }
+        />
         <SettingsRow
           icon="🎨"
           label="Theme"
