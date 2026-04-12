@@ -21,6 +21,7 @@ import { MonoText } from '@components/ui/MonoText';
 import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { WeatherCard } from '@components/cards/WeatherCard';
 import { CountdownCard } from '@components/cards/CountdownCard';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
@@ -287,6 +288,9 @@ export default function DashboardScreen() {
           })}
         </Text>
       </Animated.View>
+
+      {/* Weather */}
+      <WeatherCard style={{ marginBottom: spacing.md }} />
 
       {/* AI Insight */}
       <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
