@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -55,7 +56,7 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a body composition analysis AI. Analyze progress photos to estimate body composition and track changes.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a body composition analysis AI. Analyze progress photos to estimate body composition and track changes.
 Be encouraging but honest. Focus on visible muscle development and fat distribution changes.
 
 ${previous_analysis ? `Previous analysis for comparison: ${JSON.stringify(previous_analysis)}` : "No previous analysis available."}

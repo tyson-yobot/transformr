@@ -94,7 +94,7 @@ async function verifyWorkout(
 
   if (requireOutdoor) {
     const outdoorCount = qualifyingSessions.filter(
-      (s) => s.location_type === 'outdoor'
+      (s: { location_type?: string }) => s.location_type === 'outdoor'
     ).length;
     // Need at least one outdoor and total >= minCount
     if (outdoorCount < 1) count = Math.min(count, minCount - 1);
@@ -124,7 +124,7 @@ async function verifyWater(
     .lte('logged_at', `${date}T23:59:59`);
 
   const totalOz = (logs ?? []).reduce(
-    (sum, l) => sum + (l.amount_oz ?? 0),
+    (sum: number, l: { amount_oz?: number }) => sum + (l.amount_oz ?? 0),
     0
   );
 
@@ -153,11 +153,11 @@ async function verifyNutrition(
     .lte('logged_at', `${date}T23:59:59`);
 
   const totalCalories = (logs ?? []).reduce(
-    (sum, l) => sum + (l.calories ?? 0),
+    (sum: number, l: { calories?: number }) => sum + (l.calories ?? 0),
     0
   );
   const totalProtein = (logs ?? []).reduce(
-    (sum, l) => sum + (l.protein ?? 0),
+    (sum: number, l: { protein?: number }) => sum + (l.protein ?? 0),
     0
   );
 
@@ -195,7 +195,7 @@ async function verifyReading(
 
   // Estimate pages: ~2 min per page
   const totalMinutes = (logs ?? []).reduce(
-    (sum, l) => sum + (l.duration_minutes ?? 0),
+    (sum: number, l: { duration_minutes?: number }) => sum + (l.duration_minutes ?? 0),
     0
   );
   const estimatedPages = Math.floor(totalMinutes / 2);
@@ -245,7 +245,7 @@ async function verifyMeditation(
     .lte('started_at', `${date}T23:59:59`);
 
   const totalMinutes = (sessions ?? []).reduce(
-    (sum, s) => sum + (s.duration_minutes ?? 0),
+    (sum: number, s: { duration_minutes?: number }) => sum + (s.duration_minutes ?? 0),
     0
   );
 
@@ -274,7 +274,7 @@ async function verifySteps(
     .eq('checkin_date', date)
     .maybeSingle();
 
-  const steps = (data?.data as Record<string, unknown>)?.steps as number ?? 0;
+  const steps = ((data?.data as Record<string, unknown>)?.steps as number | undefined) ?? 0;
 
   return {
     taskId: 'steps',
@@ -299,7 +299,7 @@ async function verifyAlcoholFree(
 
   // Check if any logged items contain alcohol-related keywords
   const alcoholKeywords = ['beer', 'wine', 'cocktail', 'whiskey', 'vodka', 'rum', 'gin', 'tequila', 'alcohol', 'liquor', 'margarita', 'champagne', 'sake', 'bourbon'];
-  const hasAlcohol = (logs ?? []).some((log) => {
+  const hasAlcohol = (logs ?? []).some((log: { food_name?: string; notes?: string }) => {
     const name = (log.food_name ?? '').toLowerCase();
     const notes = (log.notes ?? '').toLowerCase();
     return alcoholKeywords.some((kw) => name.includes(kw) || notes.includes(kw));
@@ -320,7 +320,8 @@ async function verifyFasting(
   config: Record<string, unknown>
 ): Promise<VerificationResult> {
   const protocol = (config.protocol as string) ?? '16:8';
-  const [fastHours] = protocol.split(':').map(Number);
+  const parts = protocol.split(':').map(Number);
+  const fastHours = parts[0] ?? 16;
   const eatWindowHours = 24 - fastHours;
 
   // Check nutrition logs to find eating window
@@ -343,8 +344,19 @@ async function verifyFasting(
     };
   }
 
-  const firstMeal = new Date(logs[0].logged_at);
-  const lastMeal = new Date(logs[logs.length - 1].logged_at);
+  const firstLog = logs[0];
+  const lastLog = logs[logs.length - 1];
+  if (!firstLog || !lastLog) {
+    return {
+      taskId: 'fasting',
+      verified: true,
+      currentValue: 24,
+      targetValue: fastHours,
+      unit: 'hours fasted',
+    };
+  }
+  const firstMeal = new Date(firstLog.logged_at);
+  const lastMeal = new Date(lastLog.logged_at);
   const eatingWindowMs = lastMeal.getTime() - firstMeal.getTime();
   const eatingWindowHours = eatingWindowMs / (1000 * 60 * 60);
 

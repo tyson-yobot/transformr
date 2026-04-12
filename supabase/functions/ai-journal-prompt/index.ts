@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -77,7 +78,7 @@ serve(async (req) => {
     let userMessage: string;
 
     if (action === "generate_prompt") {
-      systemPrompt = `You generate contextual journal prompts based on the user's activities today.
+      systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You generate contextual journal prompts based on the user's activities today.
 Prompts should be reflective, growth-oriented, and relevant to their transformation journey.
 
 ALWAYS respond with valid JSON:
@@ -92,7 +93,7 @@ ALWAYS respond with valid JSON:
 Recent journal entries (for variety): ${JSON.stringify(recent_entries || [])}
 Generate 3-5 contextual journal prompts.`;
     } else if (action === "analyze_entry") {
-      systemPrompt = `You analyze journal entries to find patterns, themes, and growth insights.
+      systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You analyze journal entries to find patterns, themes, and growth insights.
 
 ALWAYS respond with valid JSON:
 {
@@ -107,7 +108,7 @@ ALWAYS respond with valid JSON:
       userMessage = `Journal entry to analyze: ${journal_entry}
 Recent entries for pattern comparison: ${JSON.stringify(recent_entries || [])}`;
     } else {
-      systemPrompt = `You provide coaching responses to journal entries. Be empathetic, insightful, and action-oriented.
+      systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You provide coaching responses to journal entries. Be empathetic, insightful, and action-oriented.
 Reference specific things the user wrote. Help them see new perspectives.
 
 ALWAYS respond with valid JSON:

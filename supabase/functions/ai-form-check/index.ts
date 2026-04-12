@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -48,7 +49,7 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert exercise form analyst. Analyze the provided video frames of an exercise being performed.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are an expert exercise form analyst. Analyze the provided video frames of an exercise being performed.
 Evaluate form quality, identify issues, and provide corrections.
 
 ALWAYS respond with valid JSON in this exact format:

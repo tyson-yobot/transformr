@@ -103,3 +103,166 @@ export interface AIWeeklyReport {
   next_week_focus: string[];
   correlations: string[];
 }
+
+// ---------------------------------------------------------------------------
+// AI Chat Coach
+// ---------------------------------------------------------------------------
+
+export type ChatTopic =
+  | 'general'
+  | 'training'
+  | 'nutrition'
+  | 'supplements'
+  | 'sleep'
+  | 'mindset'
+  | 'business'
+  | 'goals'
+  | 'labs'
+  | 'recovery';
+
+export type ChatDisclaimerType =
+  | 'supplement'
+  | 'lab'
+  | 'nutrition'
+  | 'workout'
+  | 'sleep'
+  | 'general';
+
+export interface ChatConversation {
+  id: string;
+  user_id: string;
+  title: string;
+  topic: ChatTopic;
+  last_message_at: string;
+  message_count: number;
+  is_archived: boolean;
+  pinned: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  suggestions: string[] | null;
+  disclaimer_type: ChatDisclaimerType | null;
+  context_snapshot: Record<string, unknown> | null;
+  model: string | null;
+  tokens_in: number | null;
+  tokens_out: number | null;
+  latency_ms: number | null;
+  created_at: string;
+}
+
+export interface ChatSendResponse {
+  conversation_id: string;
+  message_id: string;
+  role: 'assistant';
+  content: string;
+  suggestions: string[];
+  disclaimer_type: ChatDisclaimerType | null;
+  created_at: string;
+  latency_ms: number;
+}
+
+// ---------------------------------------------------------------------------
+// Lab Work Scanner + Interpreter
+// ---------------------------------------------------------------------------
+
+export type LabUploadStatus = 'pending' | 'processing' | 'complete' | 'failed';
+export type LabFileType = 'image' | 'pdf';
+
+export type BiomarkerCategory =
+  | 'metabolic'
+  | 'lipid'
+  | 'hormone'
+  | 'thyroid'
+  | 'vitamin'
+  | 'mineral'
+  | 'inflammation'
+  | 'liver'
+  | 'kidney'
+  | 'blood_count'
+  | 'other';
+
+export type BiomarkerFlag =
+  | 'low'
+  | 'normal'
+  | 'high'
+  | 'optimal'
+  | 'suboptimal'
+  | 'unknown';
+
+export interface LabUpload {
+  id: string;
+  user_id: string;
+  title: string;
+  lab_name: string | null;
+  collected_at: string | null;
+  storage_path: string;
+  file_type: LabFileType;
+  mime_type: string;
+  file_size_bytes: number | null;
+  status: LabUploadStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LabInterpretation {
+  id: string;
+  upload_id: string;
+  user_id: string;
+  overall_summary: string;
+  wellness_score: number | null;
+  highlights: string[];
+  concerns: string[];
+  lifestyle_suggestions: string[];
+  follow_up_questions: string[];
+  disclaimer_text: string;
+  model: string;
+  tokens_in: number | null;
+  tokens_out: number | null;
+  latency_ms: number | null;
+  created_at: string;
+}
+
+export interface LabBiomarker {
+  id: string;
+  upload_id: string;
+  interpretation_id: string | null;
+  user_id: string;
+  name: string;
+  category: BiomarkerCategory;
+  value: number | null;
+  unit: string | null;
+  reference_low: number | null;
+  reference_high: number | null;
+  flag: BiomarkerFlag;
+  trend_note: string | null;
+  collected_at: string | null;
+  created_at: string;
+}
+
+export interface LabInterpretResponse {
+  upload_id: string;
+  interpretation_id: string;
+  overall_summary: string;
+  wellness_score: number;
+  highlights: string[];
+  concerns: string[];
+  lifestyle_suggestions: string[];
+  follow_up_questions: string[];
+  biomarker_count: number;
+  disclaimer_text: string;
+  latency_ms: number;
+}
+
+export interface LabUploadDetail {
+  upload: LabUpload;
+  interpretation: LabInterpretation | null;
+  biomarkers: LabBiomarker[];
+}

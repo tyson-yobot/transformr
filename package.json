@@ -6,7 +6,7 @@
   "author": "Automate AI LLC",
   "license": "UNLICENSED",
   "engines": {
-    "node": "20.19.4"
+    "node": ">=18.0.0 <20.19.0 || >=22.0.0"
   },
   "workspaces": [
     "apps/mobile"

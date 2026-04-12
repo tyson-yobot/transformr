@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -65,7 +66,7 @@ serve(async (req) => {
       sex,
     } = await req.json();
 
-    const systemPrompt = `You are a supplement recommendation AI. Provide evidence-based supplement recommendations.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a supplement recommendation AI. Provide evidence-based supplement recommendations.
 IMPORTANT: Always include a disclaimer that this is not medical advice and users should consult a healthcare provider.
 
 ALWAYS respond with valid JSON:

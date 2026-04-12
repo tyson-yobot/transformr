@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -79,7 +80,7 @@ serve(async (req) => {
       supabaseClient.from("daily_checkins").select("*").eq("user_id", userId).gte("date", startDateStr).order("date"),
     ]);
 
-    const systemPrompt = `You are a body-business correlation analysis engine. Analyze relationships between fitness metrics and business performance.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a body-business correlation analysis engine. Analyze relationships between fitness metrics and business performance.
 Look for statistically meaningful patterns and correlations. Be specific with data points.
 
 ALWAYS respond with valid JSON:

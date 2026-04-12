@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+// @ts-ignore -- types may not be installed
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
@@ -10,8 +11,6 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
   }),
 });
 

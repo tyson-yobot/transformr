@@ -235,10 +235,10 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       if (error) throw error;
 
       return (data ?? []).map((row: Record<string, unknown>) => ({
-        exercise_id: row.exercise_id ?? exerciseId,
-        set_number: row.set_number,
-        weight: row.weight,
-        reps: row.reps,
+        exercise_id: (row.exercise_id as string) ?? exerciseId,
+        set_number: row.set_number as number,
+        weight: row.weight as number,
+        reps: row.reps as number,
         session_date: '',
       }));
     } catch {

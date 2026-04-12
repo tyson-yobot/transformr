@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -62,7 +63,7 @@ serve(async (req) => {
       projection_weeks,
     } = await req.json();
 
-    const systemPrompt = `You are a future trajectory simulator for a body-and-business transformation app.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a future trajectory simulator for a body-and-business transformation app.
 Given the user's current stats, goals, and historical data, generate two detailed future projections.
 
 Projection period: ${projection_weeks || 12} weeks.

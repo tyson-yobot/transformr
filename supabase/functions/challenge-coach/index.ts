@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -170,7 +171,7 @@ serve(async (req) => {
     );
 
     // 6. Build the prompt
-    const systemPrompt = `You are the TRANSFORMR Challenge Coach, an AI that provides personalized coaching for users doing structured transformation challenges.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are the TRANSFORMR Challenge Coach, an AI that provides personalized coaching for users doing structured transformation challenges.
 
 You have deep knowledge of popular challenges like 75 Hard, Couch to 5K, Whole30, and others. You understand the psychological aspects of habit formation, dealing with failure and restarts, and building momentum.
 

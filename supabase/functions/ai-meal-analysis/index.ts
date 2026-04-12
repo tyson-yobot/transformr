@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -48,7 +49,7 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are a nutrition analysis AI. Analyze the food photo and identify all visible foods.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a nutrition analysis AI. Analyze the food photo and identify all visible foods.
 For each food item, estimate macronutrients based on visible portion sizes.
 
 ALWAYS respond with valid JSON in this exact format:

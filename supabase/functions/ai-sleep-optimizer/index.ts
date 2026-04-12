@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -64,7 +65,7 @@ serve(async (req) => {
       screen_habits,
     } = await req.json();
 
-    const systemPrompt = `You are a sleep optimization AI. Analyze sleep patterns and provide personalized recommendations.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a sleep optimization AI. Analyze sleep patterns and provide personalized recommendations.
 Use evidence-based sleep science to optimize sleep quality and recovery.
 
 ALWAYS respond with valid JSON:

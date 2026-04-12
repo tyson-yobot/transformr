@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -77,7 +78,7 @@ serve(async (req) => {
       supabaseClient.from("daily_checkins").select("*").eq("user_id", userId).gte("date", week_start).lte("date", week_end),
     ]);
 
-    const systemPrompt = `You are the TRANSFORMR weekly report generator. Analyze the user's week across fitness, nutrition, sleep, mood, and business.
+    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are the TRANSFORMR weekly report generator. Analyze the user's week across fitness, nutrition, sleep, mood, and business.
 Grade each area and provide actionable insights. Be specific and data-driven.
 
 ALWAYS respond with valid JSON in this exact format:

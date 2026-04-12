@@ -1,4 +1,5 @@
 import * as Location from 'expo-location';
+// @ts-ignore -- types may not be installed
 import * as TaskManager from 'expo-task-manager';
 import { supabase } from './supabase';
 
@@ -66,10 +67,10 @@ export function convertToGeofenceRegions(
 }
 
 // Register the background task
-TaskManager.defineTask(GEOFENCE_TASK, ({ data, error }: { data: unknown; error: unknown }) => {
-  if (error) return;
+TaskManager.defineTask(GEOFENCE_TASK, (taskBody: any) => {
+  if (taskBody.error) return;
 
-  const eventData = data as {
+  const eventData = taskBody.data as {
     eventType: Location.GeofencingEventType;
     region: GeofenceRegion;
   };

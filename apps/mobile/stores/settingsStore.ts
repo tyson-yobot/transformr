@@ -36,6 +36,8 @@ interface SettingsState {
   notifications: NotificationSettings;
   voiceEnabled: boolean;
   narratorEnabled: boolean;
+  briefingEnabled: boolean;
+  lastBriefingDate: string | null;
 }
 
 type SettingKey = keyof SettingsState;
@@ -64,6 +66,8 @@ export const useSettingsStore = create<SettingsStore>()(
       notifications: DEFAULT_NOTIFICATIONS,
       voiceEnabled: false,
       narratorEnabled: false,
+      briefingEnabled: true,
+      lastBriefingDate: null,
 
       // --- Actions ---
       updateSetting: (key, value) => {

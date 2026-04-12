@@ -1104,6 +1104,7 @@ export interface ChallengeEnrollment {
   status?: ChallengeStatus;
   current_day?: number;
   restart_count?: number;
+  longest_streak?: number;
   configuration?: Record<string, unknown>;
   stake_goal_id?: string;
   created_at?: string;
