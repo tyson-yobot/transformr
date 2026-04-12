@@ -35,6 +35,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro, formatOz, formatDateShort } from '@utils/formatters';
 import { MEAL_TYPES, MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import type { NutritionLog } from '../../../types/database';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -249,6 +250,8 @@ export default function NutritionHomeScreen() {
           />
         }
       >
+        <AIInsightCard screenKey="nutrition/index" style={{ marginBottom: spacing.md }} />
+
         {/* Macro Rings */}
         <Animated.View entering={FadeInDown.duration(400).delay(100)}>
           <Card style={{ marginBottom: spacing.lg }}>

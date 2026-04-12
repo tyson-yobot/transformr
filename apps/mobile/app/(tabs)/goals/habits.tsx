@@ -20,6 +20,7 @@ import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { StreakCalendar } from '@components/charts/StreakCalendar';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useHabitStore } from '@stores/habitStore';
 import { hapticSuccess, hapticStreakMilestone } from '@utils/haptics';
 import type { Habit } from '@app-types/database';
@@ -145,6 +146,8 @@ export default function HabitTracker() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/habits" style={{ marginBottom: spacing.md }} />
+
         {/* Today's Progress */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <Card>

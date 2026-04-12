@@ -21,6 +21,7 @@ import { supabase } from '@services/supabase';
 import { hapticLight, hapticAchievement } from '@utils/haptics';
 import { formatPercentage } from '@utils/formatters';
 import type { Achievement, UserAchievement } from '@app-types/database';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -150,6 +151,8 @@ export default function AchievementsScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <AIInsightCard screenKey="profile/achievements" style={{ marginBottom: spacing.md }} />
+
       {/* Summary */}
       <Animated.View entering={FadeInDown.duration(400)}>
         <Card variant="elevated" style={{ marginBottom: spacing.lg }}>

@@ -22,6 +22,7 @@ import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatters';
@@ -266,6 +267,8 @@ export default function FitnessHomeScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
+        <AIInsightCard screenKey="fitness/index" style={{ marginBottom: spacing.md }} />
+
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
             <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>

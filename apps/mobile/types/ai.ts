@@ -511,3 +511,47 @@ export interface BudgetGroceryListResponse {
   tokens_in: number;
   tokens_out: number;
 }
+
+// ---------------------------------------------------------------------------
+// AI Predictions Types (Module 7)
+// ---------------------------------------------------------------------------
+
+export type PredictionCategory =
+  | 'plateau'
+  | 'overtraining'
+  | 'pr_approaching'
+  | 'weight_stall'
+  | 'calorie_deficit_risk'
+  | 'sleep_debt'
+  | 'streak_risk'
+  | 'goal_ahead'
+  | 'goal_behind'
+  | 'dehydration_risk'
+  | 'recovery_needed';
+
+export interface AIPrediction {
+  id: string;
+  user_id: string;
+  category: PredictionCategory;
+  title: string;
+  body: string;
+  severity: 'info' | 'warning' | 'critical';
+  confidence: number;
+  data_points: Record<string, unknown>;
+  action_label: string | null;
+  action_route: string | null;
+  is_acknowledged: boolean;
+  expires_at: string | null;
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// AI Screen Insight Types (Module 6)
+// ---------------------------------------------------------------------------
+
+export interface ScreenInsight {
+  insight: string;
+  category: string;
+  screen_key: string;
+  cached: boolean;
+}

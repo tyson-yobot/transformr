@@ -30,6 +30,7 @@ import { BudgetBar } from '@components/ui/BudgetBar';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { useSupplementsStore } from '@stores/supplementsStore';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import type {
   SupplementCategory,
   SupplementRecommendation,
@@ -229,6 +230,8 @@ export default function SupplementsScreen() {
           </View>
         ) : (
           <>
+            <AIInsightCard screenKey="nutrition/supplements" style={{ marginBottom: spacing.md }} />
+
             {error && (
               <Pressable
                 onPress={clearError}

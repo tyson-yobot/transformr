@@ -24,6 +24,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { WeightChart } from '@components/charts/WeightChart';
 import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatWeight, formatDate } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
@@ -185,6 +186,8 @@ export default function ProgressScreen() {
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
+        <AIInsightCard screenKey="fitness/progress" style={{ marginBottom: spacing.md }} />
+
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
             <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>

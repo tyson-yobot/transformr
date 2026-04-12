@@ -23,6 +23,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro, formatPercentage } from '@utils/formatters';
 import { MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 type TimeRange = '7d' | '14d' | '30d' | '90d';
 
@@ -256,6 +257,8 @@ export default function NutritionAnalyticsScreen() {
           </View>
         ) : (
           <>
+            <AIInsightCard screenKey="nutrition/analytics" style={{ marginBottom: spacing.md }} />
+
             {/* Time Range */}
             <View style={[styles.rangeRow, { marginBottom: spacing.lg, gap: spacing.sm }]}>
               {TIME_RANGES.map((range) => (

@@ -20,6 +20,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -177,6 +178,8 @@ export default function FormCheckScreen() {
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
+          <AIInsightCard screenKey="fitness/form-check" style={{ marginBottom: spacing.md }} />
+
           <View style={styles.headerBlock}>
             <View
               style={[

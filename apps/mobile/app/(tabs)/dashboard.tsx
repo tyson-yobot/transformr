@@ -20,6 +20,7 @@ import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { ProgressBar } from '@components/ui/ProgressBar';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { CountdownCard } from '@components/cards/CountdownCard';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
@@ -286,6 +287,9 @@ export default function DashboardScreen() {
           })}
         </Text>
       </Animated.View>
+
+      {/* AI Insight */}
+      <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
 
       {/* Primary Countdown */}
       {primaryGoal && primaryGoal.start_date && primaryGoal.target_date && (

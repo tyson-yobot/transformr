@@ -20,6 +20,7 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
@@ -104,6 +105,8 @@ export default function FinanceDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />
         }
       >
+        <AIInsightCard screenKey="goals/finance/index" style={{ marginBottom: spacing.md }} />
+
         {error && (
           <Card style={{ marginBottom: spacing.md }}>
             <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>{error}</Text>

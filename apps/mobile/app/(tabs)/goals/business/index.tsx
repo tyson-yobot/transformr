@@ -26,6 +26,7 @@ import {
   formatNumber,
 } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -91,6 +92,8 @@ export default function BusinessDashboard() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/business/index" style={{ marginBottom: spacing.md }} />
+
         {/* Business Selector */}
         {businesses.length > 1 && (
           <Animated.View entering={FadeInDown.delay(50)}>

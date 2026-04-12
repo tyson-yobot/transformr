@@ -24,6 +24,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -159,6 +160,8 @@ export default function GoalsDashboard() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/index" style={{ marginBottom: spacing.md }} />
+
         {/* Overall Completion Ring */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.ringSection}>
           <ProgressRing progress={overallCompletion} size={140} strokeWidth={12}>

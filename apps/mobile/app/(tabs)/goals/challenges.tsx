@@ -19,6 +19,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
@@ -159,6 +160,8 @@ export default function ChallengesScreen() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/challenges" style={{ marginBottom: spacing.md }} />
+
         {/* ----------------------------------------------------------------- */}
         {/* Active Challenge Card                                              */}
         {/* ----------------------------------------------------------------- */}

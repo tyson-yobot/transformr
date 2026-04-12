@@ -19,6 +19,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
 import { MoodChart } from '@components/charts/MoodChart';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useMoodStore } from '@stores/moodStore';
 import { hapticSuccess, hapticLight } from '@utils/haptics';
 import type { MoodLog } from '@app-types/database';
@@ -148,6 +149,8 @@ export default function MoodLogger() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/mood" style={{ marginBottom: spacing.md }} />
+
         {/* Quick Mood Input */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <Card variant="elevated">

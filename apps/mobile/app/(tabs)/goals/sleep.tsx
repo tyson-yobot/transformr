@@ -19,6 +19,7 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { SleepChart } from '@components/charts/SleepChart';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useSleepStore } from '@stores/sleepStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -146,6 +147,8 @@ export default function SleepTracker() {
           />
         }
       >
+        <AIInsightCard screenKey="goals/sleep" style={{ marginBottom: spacing.md }} />
+
         {/* Sleep Score */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <Card variant="elevated">

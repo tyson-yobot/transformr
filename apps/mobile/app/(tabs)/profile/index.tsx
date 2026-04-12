@@ -23,6 +23,7 @@ import { MonoText } from '@components/ui/MonoText';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate, formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 
@@ -194,6 +195,8 @@ export default function ProfileScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <AIInsightCard screenKey="profile/index" style={{ marginBottom: spacing.md }} />
+
       {/* Avatar + Name + Email */}
       <Animated.View
         entering={FadeInDown.duration(400)}

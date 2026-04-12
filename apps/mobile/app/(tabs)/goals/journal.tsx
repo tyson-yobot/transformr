@@ -18,6 +18,7 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
 
@@ -98,6 +99,8 @@ export default function JournalScreen() {
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
+        <AIInsightCard screenKey="goals/journal" style={{ marginBottom: spacing.md }} />
+
         {/* AI Prompt */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <Card
