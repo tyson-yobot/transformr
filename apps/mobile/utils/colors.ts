@@ -7,32 +7,34 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+export function getDimColor(hex: string, opacity: number = 0.12): string {
+  return hexToRgba(hex, opacity);
+}
+
 export function getProgressColor(percentage: number): string {
-  if (percentage >= 100) return '#22C55E';
-  if (percentage >= 75) return '#3B82F6';
+  if (percentage >= 100) return '#10B981';
+  if (percentage >= 75) return '#A855F7';
   if (percentage >= 50) return '#F59E0B';
   if (percentage >= 25) return '#F97316';
   return '#EF4444';
 }
 
 export function getMoodColor(mood: number): string {
-  if (mood >= 8) return '#22C55E';
-  if (mood >= 6) return '#3B82F6';
+  if (mood >= 8) return '#10B981';
+  if (mood >= 6) return '#A855F7';
   if (mood >= 4) return '#F59E0B';
   if (mood >= 2) return '#F97316';
   return '#EF4444';
 }
 
 export function getReadinessColor(score: number): string {
-  if (score >= 80) return '#22C55E';
-  if (score >= 60) return '#3B82F6';
+  if (score >= 70) return '#10B981';
   if (score >= 40) return '#F59E0B';
-  if (score >= 20) return '#F97316';
   return '#EF4444';
 }
 
 export function getPainColor(level: number): string {
-  if (level <= 2) return '#22C55E';
+  if (level <= 2) return '#10B981';
   if (level <= 4) return '#F59E0B';
   if (level <= 6) return '#F97316';
   if (level <= 8) return '#EF4444';
@@ -40,10 +42,10 @@ export function getPainColor(level: number): string {
 }
 
 export function getStreakColor(days: number): string {
-  if (days >= 100) return '#EAB308'; // gold
-  if (days >= 30) return '#F97316';  // fire
-  if (days >= 7) return '#EF4444';   // red
-  return '#94A3B8';                   // muted
+  if (days >= 100) return '#EAB308';
+  if (days >= 30) return '#F97316';
+  if (days >= 7) return '#EF4444';
+  return '#6B5E8A';
 }
 
 export function getTierColor(tier: string): string {
@@ -53,20 +55,20 @@ export function getTierColor(tier: string): string {
     gold: '#EAB308',
     diamond: '#B9F2FF',
   };
-  return tierColors[tier] ?? '#94A3B8';
+  return tierColors[tier] ?? '#6B5E8A';
 }
 
 export function getCategoryColor(category: string): string {
   const categoryColors: Record<string, string> = {
-    fitness: '#22C55E',
+    fitness: '#10B981',
     nutrition: '#3B82F6',
     business: '#F59E0B',
     financial: '#EAB308',
-    personal: '#8B5CF6',
+    personal: '#A855F7',
     relationship: '#EC4899',
-    education: '#6366F1',
-    health: '#22C55E',
-    mindset: '#8B5CF6',
+    education: '#22D3EE',
+    health: '#10B981',
+    mindset: '#A855F7',
   };
-  return categoryColors[category] ?? '#94A3B8';
+  return categoryColors[category] ?? '#6B5E8A';
 }

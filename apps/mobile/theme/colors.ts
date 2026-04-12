@@ -1,62 +1,92 @@
 export const colors = {
   dark: {
     background: {
-      primary: '#0F172A',
-      secondary: '#1E293B',
-      tertiary: '#334155',
-      input: '#1E293B',
+      primary: '#0C0A15',
+      secondary: '#16122A',
+      tertiary: '#1E1838',
+      input: '#16122A',
+      surface: '#16122A',
+      surfaceElevated: '#1E1838',
+      surfaceHover: '#261F45',
+      alt: '#110E20',
     },
     text: {
-      primary: '#F8FAFC',
-      secondary: '#94A3B8',
-      muted: '#64748B',
-      inverse: '#0F172A',
+      primary: '#F0F0FC',
+      secondary: '#9B8FC0',
+      muted: '#6B5E8A',
+      inverse: '#0C0A15',
     },
     accent: {
-      primary: '#6366F1',
-      secondary: '#8B5CF6',
-      success: '#22C55E',
+      primary: '#A855F7',
+      secondary: '#7E22CE',
+      success: '#10B981',
       warning: '#F59E0B',
       danger: '#EF4444',
       info: '#3B82F6',
       fire: '#F97316',
       gold: '#EAB308',
       pink: '#EC4899',
+      cyan: '#22D3EE',
+      primaryDim: 'rgba(168,85,247,0.12)',
+      cyanDim: 'rgba(34,211,238,0.12)',
+      successDim: 'rgba(16,185,129,0.12)',
+      warningDim: 'rgba(245,158,11,0.12)',
+      dangerDim: 'rgba(239,68,68,0.12)',
+      fireDim: 'rgba(249,115,22,0.12)',
+      goldDim: 'rgba(234,179,8,0.12)',
+      pinkDim: 'rgba(236,72,153,0.12)',
+      purpleGlow: 'rgba(168,85,247,0.25)',
     },
     border: {
-      default: '#334155',
-      subtle: '#1E293B',
-      focus: '#6366F1',
+      default: '#2A2344',
+      subtle: '#1E1838',
+      focus: '#A855F7',
+      glow: 'rgba(168,85,247,0.25)',
     },
   },
   light: {
     background: {
-      primary: '#FFFFFF',
-      secondary: '#F8FAFC',
-      tertiary: '#F1F5F9',
-      input: '#F8FAFC',
+      primary: '#FAFAFE',
+      secondary: '#F0EFF5',
+      tertiary: '#E8E6F0',
+      input: '#F0EFF5',
+      surface: '#F0EFF5',
+      surfaceElevated: '#E8E6F0',
+      surfaceHover: '#DDD9EC',
+      alt: '#F5F4F9',
     },
     text: {
-      primary: '#0F172A',
-      secondary: '#475569',
-      muted: '#94A3B8',
-      inverse: '#F8FAFC',
+      primary: '#1A1530',
+      secondary: '#5C5278',
+      muted: '#8B80A8',
+      inverse: '#F0F0FC',
     },
     accent: {
-      primary: '#6366F1',
-      secondary: '#8B5CF6',
-      success: '#22C55E',
+      primary: '#A855F7',
+      secondary: '#7E22CE',
+      success: '#10B981',
       warning: '#F59E0B',
       danger: '#EF4444',
       info: '#3B82F6',
       fire: '#F97316',
       gold: '#EAB308',
       pink: '#EC4899',
+      cyan: '#22D3EE',
+      primaryDim: 'rgba(168,85,247,0.08)',
+      cyanDim: 'rgba(34,211,238,0.08)',
+      successDim: 'rgba(16,185,129,0.08)',
+      warningDim: 'rgba(245,158,11,0.08)',
+      dangerDim: 'rgba(239,68,68,0.08)',
+      fireDim: 'rgba(249,115,22,0.08)',
+      goldDim: 'rgba(234,179,8,0.08)',
+      pinkDim: 'rgba(236,72,153,0.08)',
+      purpleGlow: 'rgba(168,85,247,0.15)',
     },
     border: {
-      default: '#E2E8F0',
-      subtle: '#F1F5F9',
-      focus: '#6366F1',
+      default: '#D4D0E4',
+      subtle: '#E8E6F0',
+      focus: '#A855F7',
+      glow: 'rgba(168,85,247,0.15)',
     },
   },
 } as const;
@@ -68,6 +98,10 @@ interface BackgroundColors {
   readonly secondary: string;
   readonly tertiary: string;
   readonly input: string;
+  readonly surface: string;
+  readonly surfaceElevated: string;
+  readonly surfaceHover: string;
+  readonly alt: string;
 }
 
 interface TextColors {
@@ -87,12 +121,23 @@ interface AccentColors {
   readonly fire: string;
   readonly gold: string;
   readonly pink: string;
+  readonly cyan: string;
+  readonly primaryDim: string;
+  readonly cyanDim: string;
+  readonly successDim: string;
+  readonly warningDim: string;
+  readonly dangerDim: string;
+  readonly fireDim: string;
+  readonly goldDim: string;
+  readonly pinkDim: string;
+  readonly purpleGlow: string;
 }
 
 interface BorderColors {
   readonly default: string;
   readonly subtle: string;
   readonly focus: string;
+  readonly glow: string;
 }
 
 export interface ColorScheme {
