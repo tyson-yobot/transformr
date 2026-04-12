@@ -2,7 +2,6 @@
   "name": "transformr-mobile",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "main": "expo-router/entry",
   "engines": {
     "node": "20.19.4"
@@ -52,6 +51,7 @@
     "expo-status-bar": "~2.2.0",
     "expo-task-manager": "~12.0.6",
     "expo-updates": "~0.28.0",
+    "getenv": "^2.0.0",
     "lodash": "^4.17.21",
     "lottie-react-native": "^7.0.0",
     "react": "19.0.0",

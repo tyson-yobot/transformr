@@ -67,8 +67,6 @@
       "expo-local-authentication",
       "expo-secure-store",
       "expo-av",
-      "expo-speech",
-      "expo-haptics",
       "expo-file-system",
       ["expo-font", {
         "fonts": []
