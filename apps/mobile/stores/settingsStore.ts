@@ -3,22 +3,8 @@
 // =============================================================================
 
 import { create } from 'zustand';
-import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
-
-const mmkv = new MMKV({ id: 'transformr-settings' });
-
-const mmkvStorage: StateStorage = {
-  getItem: (name: string): string | null => {
-    return mmkv.getString(name) ?? null;
-  },
-  setItem: (name: string, value: string): void => {
-    mmkv.set(name, value);
-  },
-  removeItem: (name: string): void => {
-    mmkv.delete(name);
-  },
-};
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -76,7 +62,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'transformr-settings',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     },
   ),
 );

@@ -5,24 +5,10 @@
 // =============================================================================
 
 import { create } from 'zustand';
-import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
-import { MMKV } from 'react-native-mmkv';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type GamificationMode = 'competitive' | 'supportive';
-
-const mmkv = new MMKV({ id: 'transformr-gamification' });
-
-const mmkvStorage: StateStorage = {
-  getItem: (name: string): string | null => {
-    return mmkv.getString(name) ?? null;
-  },
-  setItem: (name: string, value: string): void => {
-    mmkv.set(name, value);
-  },
-  removeItem: (name: string): void => {
-    mmkv.delete(name);
-  },
-};
 
 interface GamificationState {
   mode: GamificationMode;
@@ -45,7 +31,7 @@ export const useGamificationStore = create<GamificationStore>()(
     }),
     {
       name: 'transformr-gamification',
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     },
   ),
 );

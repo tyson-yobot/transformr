@@ -4,6 +4,13 @@
     "slug": "transformr",
     "version": "1.0.0",
     "orientation": "portrait",
+    "updates": {
+      "enabled": false,
+      "url": "https://u.expo.dev/placeholder"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "icon": "./assets/images/icon.png",
     "scheme": "transformr",
     "userInterfaceStyle": "automatic",
@@ -81,11 +88,8 @@
       "typedRoutes": true
     },
     "extra": {
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      },
-      "supabaseUrl": "YOUR_SUPABASE_URL",
-      "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY"
+      "supabaseUrl": "https://horqwbfsqqmzdbbafvov.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnF3YmZzcXFtemRiYmFmdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MDczOTMsImV4cCI6MjA5MTE4MzM5M30.GAY9ystuTThmXkSmrjSTKuSbZkpcWgkEaYKxSPhMBtM"
     }
   }
 }
