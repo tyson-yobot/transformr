@@ -2,13 +2,12 @@
 // TRANSFORMR -- AI Trajectory Simulator
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +16,7 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
-import { Skeleton } from '@components/ui/Skeleton';
+import { MonoText } from '@components/ui/MonoText';
 import { TrajectoryChart } from '@components/charts/TrajectoryChart';
 import { useProfileStore } from '@stores/profileStore';
 import { useGoalStore } from '@stores/goalStore';
@@ -213,19 +212,19 @@ export default function TrajectoryScreen() {
           <View style={[styles.statsRow, { marginTop: spacing.lg, gap: spacing.md }]}>
             <Card style={{ flex: 1 }}>
               <Text style={[typography.tiny, { color: colors.text.muted }]}>Current Path (12mo)</Text>
-              <Text style={[typography.statSmall, { color: colors.accent.danger }]}>
+              <MonoText variant="statSmall" color={colors.accent.danger}>
                 {selectedDomain === 'revenue'
                   ? formatCurrency(currentPath[currentPath.length - 1]?.value ?? 0)
                   : formatNumber(currentPath[currentPath.length - 1]?.value ?? 0, 1)}
-              </Text>
+              </MonoText>
             </Card>
             <Card style={{ flex: 1 }}>
               <Text style={[typography.tiny, { color: colors.text.muted }]}>Optimal Path (12mo)</Text>
-              <Text style={[typography.statSmall, { color: colors.accent.success }]}>
+              <MonoText variant="statSmall" color={colors.accent.success}>
                 {selectedDomain === 'revenue'
                   ? formatCurrency(optimalPath[optimalPath.length - 1]?.value ?? 0)
                   : formatNumber(optimalPath[optimalPath.length - 1]?.value ?? 0, 1)}
-              </Text>
+              </MonoText>
             </Card>
           </View>
         </Animated.View>

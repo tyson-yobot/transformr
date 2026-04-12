@@ -8,7 +8,6 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -276,11 +275,11 @@ function StatRow({ label, value, delta }: { label: string; value: string; delta:
   return (
     <View style={[styles.statRow, { paddingVertical: spacing.sm }]}>
       <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>{label}</Text>
-      <Text style={[typography.bodyBold, { color: colors.text.primary }]}>{value}</Text>
+      <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>{value}</Text>
       {delta && (
         <Text
           style={[
-            typography.tiny,
+            typography.monoCaption,
             {
               color: delta.startsWith('+') ? colors.accent.success : colors.accent.danger,
               marginLeft: spacing.sm,

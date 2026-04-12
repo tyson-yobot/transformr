@@ -34,6 +34,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { useProfileStore } from '@stores/profileStore';
 import { useGoalStore } from '@stores/goalStore';
 import { formatNumber, formatPercentage, formatCountdown, formatWeight } from '@utils/formatters';
+import { hapticLight } from '@utils/haptics';
 import type { Goal, WeightLog } from '@app-types/database';
 import { supabase } from '@services/supabase';
 
@@ -299,7 +300,7 @@ export default function GoalCinemaScreen() {
         {/* Progress Dots */}
         <View style={styles.dotsRow}>
           {slides.map((_, idx) => (
-            <Pressable key={idx} onPress={() => setCurrentIndex(idx)}>
+            <Pressable key={idx} onPress={() => { hapticLight(); setCurrentIndex(idx); }} accessibilityLabel={`Go to slide ${idx + 1}`} accessibilityRole="button">
               <View
                 style={[
                   styles.dot,
@@ -315,23 +316,25 @@ export default function GoalCinemaScreen() {
 
         {/* Playback Controls */}
         <View style={styles.controlButtons}>
-          <Pressable onPress={handlePrevious} style={styles.controlButton}>
+          <Pressable onPress={() => { hapticLight(); handlePrevious(); }} style={styles.controlButton} accessibilityLabel="Previous slide" accessibilityRole="button">
             <Text style={{ color: '#F8FAFC', fontSize: 24 }}>{'\u25C0'}</Text>
           </Pressable>
-          <Pressable onPress={handleTogglePlay} style={styles.controlButton}>
+          <Pressable onPress={() => { hapticLight(); handleTogglePlay(); }} style={styles.controlButton} accessibilityLabel={isPlaying ? 'Pause slideshow' : 'Play slideshow'} accessibilityRole="button">
             <Text style={{ color: '#F8FAFC', fontSize: 24 }}>
               {isPlaying ? '\u23F8' : '\u25B6'}
             </Text>
           </Pressable>
-          <Pressable onPress={handleNext} style={styles.controlButton}>
+          <Pressable onPress={() => { hapticLight(); handleNext(); }} style={styles.controlButton} accessibilityLabel="Next slide" accessibilityRole="button">
             <Text style={{ color: '#F8FAFC', fontSize: 24 }}>{'\u25B6'}</Text>
           </Pressable>
         </View>
 
         {/* Close */}
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => { hapticLight(); router.back(); }}
           style={[styles.closeButton, { backgroundColor: '#1E293B', borderRadius: 20 }]}
+          accessibilityLabel="Close cinema"
+          accessibilityRole="button"
         >
           <Text style={[typography.captionBold, { color: '#F8FAFC' }]}>Close</Text>
         </Pressable>

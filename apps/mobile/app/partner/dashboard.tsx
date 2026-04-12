@@ -21,6 +21,7 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
 import { formatNumber } from '@utils/formatters';
+import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 
 interface PartnerStats {
@@ -64,7 +65,7 @@ export default function PartnerDashboard() {
 
         if (nudges) {
           setRecentActivity(
-            nudges.map((n) => ({
+            nudges.map((n: { id: string; message: string | null; created_at: string | null; from_user_id: string }) => ({
               id: n.id,
               text: n.message ?? 'Sent a nudge',
               time: n.created_at ?? '',
@@ -124,7 +125,7 @@ export default function PartnerDashboard() {
         {/* Joint Streak */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.streakSection}>
           <ProgressRing progress={Math.min(jointStreak / 30, 1)} size={100} strokeWidth={10}>
-            <Text style={[typography.stat, { color: colors.accent.primary }]}>{jointStreak}</Text>
+            <Text style={[typography.stat, { color: colors.accent.primary, fontVariant: ['tabular-nums'] }]}>{jointStreak}</Text>
           </ProgressRing>
           <Text style={[typography.captionBold, { color: colors.text.secondary, marginTop: spacing.sm }]}>
             Joint Streak (days)
@@ -153,39 +154,39 @@ export default function PartnerDashboard() {
 
             {/* Workouts */}
             <View style={[styles.compareRow, { marginTop: spacing.md }]}>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {myStats.workoutsThisWeek}
               </Text>
               <Text style={[typography.caption, { color: colors.text.muted, width: 80, textAlign: 'center' }]}>
                 Workouts
               </Text>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {partnerStats.workoutsThisWeek}
               </Text>
             </View>
 
             {/* Streaks */}
             <View style={[styles.compareRow, { marginTop: spacing.sm }]}>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {myStats.currentStreak}
               </Text>
               <Text style={[typography.caption, { color: colors.text.muted, width: 80, textAlign: 'center' }]}>
                 Streak
               </Text>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {partnerStats.currentStreak}
               </Text>
             </View>
 
             {/* Habits */}
             <View style={[styles.compareRow, { marginTop: spacing.sm }]}>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {myStats.habitsCompletedToday}/{myStats.habitsTotal}
               </Text>
               <Text style={[typography.caption, { color: colors.text.muted, width: 80, textAlign: 'center' }]}>
                 Habits
               </Text>
-              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
+              <Text style={[typography.statSmall, { color: colors.text.primary, flex: 1, textAlign: 'center', fontVariant: ['tabular-nums'] }]}>
                 {partnerStats.habitsCompletedToday}/{partnerStats.habitsTotal}
               </Text>
             </View>
@@ -195,9 +196,9 @@ export default function PartnerDashboard() {
         {/* Quick Actions */}
         <Animated.View entering={FadeInDown.delay(300)}>
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
-            <Button title="Start Live Workout" onPress={() => router.push('/partner/live-workout')} fullWidth />
-            <Button title="Active Challenges" onPress={() => router.push('/partner/challenges')} variant="secondary" fullWidth />
-            <Button title="Send Nudge" onPress={() => router.push('/partner/nudge')} variant="outline" fullWidth />
+            <Button title="Start Live Workout" onPress={() => { hapticLight(); router.push('/partner/live-workout'); }} accessibilityLabel="Start live workout with partner" fullWidth />
+            <Button title="Active Challenges" onPress={() => { hapticLight(); router.push('/partner/challenges'); }} accessibilityLabel="View active partner challenges" variant="secondary" fullWidth />
+            <Button title="Send Nudge" onPress={() => { hapticLight(); router.push('/partner/nudge'); }} accessibilityLabel="Send a nudge to your partner" variant="outline" fullWidth />
           </View>
         </Animated.View>
 
