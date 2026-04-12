@@ -207,7 +207,7 @@ export default function ChallengeActiveScreen() {
         </Text>
         <Button
           title="Browse Challenges"
-          onPress={() => router.push('/(tabs)/goals/challenges' as `/${string}`)}
+          onPress={() => router.push('/(tabs)/goals/challenges')}
           fullWidth
           style={{ marginTop: spacing.xl }}
         />

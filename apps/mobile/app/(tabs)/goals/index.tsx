@@ -11,7 +11,7 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -189,7 +189,7 @@ export default function GoalsDashboard() {
             {NAV_ITEMS.map((item) => (
               <Pressable
                 key={item.route}
-                onPress={() => { hapticLight(); router.push(item.route as `/${string}`); }}
+                onPress={() => { hapticLight(); router.push(item.route as Href); }}
                 accessibilityLabel={item.label}
                 style={[
                   styles.navItem,
@@ -260,7 +260,7 @@ export default function GoalsDashboard() {
             return (
               <Animated.View key={goal.id} entering={FadeInDown.delay(400 + index * 50)}>
                 <Card
-                  onPress={() => router.push(`/(tabs)/goals/${goal.id}` as `/${string}`)}
+                  onPress={() => router.push(`/(tabs)/goals/${goal.id}` as Href)}
                 >
                   <View style={styles.goalHeader}>
                     <View style={{ flex: 1 }}>

@@ -314,7 +314,7 @@ export default function ChallengeBuilderScreen() {
         icon: '\uD83D\uDEE0\uFE0F',
       });
 
-      router.push('/(tabs)/goals/challenges' as `/${string}`);
+      router.push('/(tabs)/goals/challenges');
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to create challenge. Please try again.';

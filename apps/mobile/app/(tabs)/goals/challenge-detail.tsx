@@ -191,7 +191,7 @@ export default function ChallengeDetailScreen() {
 
       await enrollInChallenge(user.id, definition.id, config);
       hapticSuccess();
-      router.push('/(tabs)/goals/challenge-active' as `/${string}`);
+      router.push('/(tabs)/goals/challenge-active');
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to enroll. Please try again.';
@@ -767,7 +767,7 @@ export default function ChallengeDetailScreen() {
                 size="sm"
                 onPress={() => {
                   hapticLight();
-                  router.push('/(tabs)/goals/stake-goals' as `/${string}`);
+                  router.push('/(tabs)/goals/stake-goals');
                 }}
                 accessibilityLabel="Stake money on this challenge"
               />

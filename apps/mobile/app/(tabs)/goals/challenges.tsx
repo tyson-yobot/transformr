@@ -167,7 +167,7 @@ export default function ChallengesScreen() {
             <Pressable
               onPress={() => {
                 hapticLight();
-                router.push('/(tabs)/goals/challenge-active' as `/${string}`);
+                router.push('/(tabs)/goals/challenge-active');
               }}
               accessibilityLabel={`View active challenge ${activeDef.name}`}
             >
@@ -293,7 +293,7 @@ export default function ChallengesScreen() {
                 onPress={() => {
                   hapticLight();
                   router.push(
-                    `/(tabs)/goals/challenge-detail?id=${def.id}` as `/${string}`,
+                    { pathname: '/(tabs)/goals/challenge-detail', params: { id: def.id } },
                   );
                 }}
                 accessibilityLabel={`View challenge ${def.name}`}
@@ -351,7 +351,7 @@ export default function ChallengesScreen() {
             title="Create Custom Challenge"
             onPress={() => {
               hapticLight();
-              router.push('/(tabs)/goals/challenge-builder' as `/${string}`);
+              router.push('/(tabs)/goals/challenge-builder');
             }}
             accessibilityLabel="Create a custom challenge"
             fullWidth
