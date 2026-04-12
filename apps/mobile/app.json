@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
+      "backgroundColor": "#0C0A15"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -38,7 +38,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#0F172A"
+        "backgroundColor": "#0C0A15"
       },
       "package": "com.automateai.transformr",
       "versionCode": 1,
@@ -74,7 +74,7 @@
         "fonts": []
       }],
       ["expo-splash-screen", {
-        "backgroundColor": "#0F172A",
+        "backgroundColor": "#0C0A15",
         "image": "./assets/images/splash.png",
         "imageWidth": 200
       }]

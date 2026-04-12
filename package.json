@@ -34,7 +34,8 @@
     "ajv-keywords": "^5.1.0",
     "normalize-path": "^3.0.0",
     "picomatch": "^4.0.4",
-    "schema-utils": "^4.3.3"
+    "schema-utils": "^4.3.3",
+    "typescript": "^6.0.2"
   },
   "devDependencies": {
     "tsx": "^4.21.0"
