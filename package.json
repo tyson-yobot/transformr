@@ -6,7 +6,7 @@
   "author": "Automate AI LLC",
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=18.0.0 <20.19.0 || >=22.0.0"
+    "node": "20.19.4"
   },
   "workspaces": [
     "apps/mobile"
@@ -35,5 +35,8 @@
     "normalize-path": "^3.0.0",
     "picomatch": "^4.0.4",
     "schema-utils": "^4.3.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }
