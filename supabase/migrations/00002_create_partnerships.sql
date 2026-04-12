@@ -3,7 +3,7 @@ CREATE TABLE partnerships (
   user_a UUID REFERENCES profiles(id) ON DELETE CASCADE,
   user_b UUID REFERENCES profiles(id) ON DELETE CASCADE,
   status TEXT CHECK (status IN ('pending','active','paused','ended')) DEFAULT 'pending',
-  invite_code TEXT UNIQUE DEFAULT encode(gen_random_bytes(6), 'hex'),
+  invite_code TEXT UNIQUE DEFAULT left(replace(gen_random_uuid()::text, '-', ''), 12),
   shared_preferences JSONB DEFAULT '{
     "can_see_weight": true,
     "can_see_workouts": true,
