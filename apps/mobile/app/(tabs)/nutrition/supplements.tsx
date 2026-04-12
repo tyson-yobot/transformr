@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -21,6 +20,7 @@ import { Badge } from '@components/ui/Badge';
 import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { ProgressRing } from '@components/ui/ProgressRing';
+import { Skeleton } from '@components/ui/Skeleton';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import type { Supplement } from '../../../types/database';
@@ -234,8 +234,11 @@ export default function SupplementsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={colors.accent.primary} />
+          <View style={[styles.loadingState, { gap: spacing.md }]}>
+            <Skeleton variant="card" height={80} />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="card" height={72} />
+            ))}
           </View>
         ) : (
           <>
@@ -249,7 +252,7 @@ export default function SupplementsScreen() {
                     strokeWidth={6}
                     color={colors.accent.success}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {takenCount}/{totalActive}
                     </Text>
                   </ProgressRing>
@@ -378,6 +381,8 @@ export default function SupplementsScreen() {
                           {!supp.takenToday && (
                             <Pressable
                               onPress={() => handleLogSupplement(supp)}
+                              accessibilityLabel={`Mark ${supp.name} as taken`}
+                              accessibilityRole="button"
                               style={[
                                 styles.actionBtn,
                                 { backgroundColor: `${colors.accent.success}20`, borderRadius: borderRadius.md },
@@ -388,6 +393,8 @@ export default function SupplementsScreen() {
                           )}
                           <Pressable
                             onPress={() => handleToggleActive(supp.id)}
+                            accessibilityLabel={`Pause ${supp.name}`}
+                            accessibilityRole="button"
                             style={[
                               styles.actionBtn,
                               { backgroundColor: `${colors.accent.warning}20`, borderRadius: borderRadius.md },
@@ -397,6 +404,8 @@ export default function SupplementsScreen() {
                           </Pressable>
                           <Pressable
                             onPress={() => handleDeleteSupplement(supp.id)}
+                            accessibilityLabel={`Delete ${supp.name}`}
+                            accessibilityRole="button"
                             style={[
                               styles.actionBtn,
                               { backgroundColor: `${colors.accent.danger}20`, borderRadius: borderRadius.md },
@@ -428,6 +437,8 @@ export default function SupplementsScreen() {
                 {inactiveSupplements.map((supp) => (
                   <Pressable
                     key={supp.id}
+                    accessibilityLabel={`Reactivate ${supp.name}`}
+                    accessibilityRole="button"
                     onPress={() => handleToggleActive(supp.id)}
                     style={[
                       styles.inactiveRow,
@@ -478,6 +489,8 @@ export default function SupplementsScreen() {
                       </View>
                       <Pressable
                         onPress={() => handleAddFromRecommendation(rec)}
+                        accessibilityLabel={`Add ${rec.name} to supplements`}
+                        accessibilityRole="button"
                         style={[
                           styles.addRecBtn,
                           { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.md },
@@ -497,6 +510,8 @@ export default function SupplementsScreen() {
       {/* Add FAB */}
       <Pressable
         onPress={() => { hapticLight(); setShowAddModal(true); }}
+        accessibilityLabel="Add new supplement"
+        accessibilityRole="button"
         style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: borderRadius.full }]}
       >
         <Ionicons name="add" size={28} color="#FFFFFF" />

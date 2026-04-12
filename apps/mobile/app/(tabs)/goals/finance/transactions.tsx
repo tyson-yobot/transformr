@@ -65,8 +65,9 @@ export default function TransactionsScreen() {
   }, [fetchAccounts]);
 
   useEffect(() => {
-    if (accounts.length > 0 && !selectedAccountId) {
-      setSelectedAccountId(accounts[0].id);
+    const firstAccount = accounts[0];
+    if (firstAccount && !selectedAccountId) {
+      setSelectedAccountId(firstAccount.id);
     }
   }, [accounts, selectedAccountId]);
 
@@ -202,7 +203,7 @@ export default function TransactionsScreen() {
                   )}
                 </View>
                 <Text
-                  style={[typography.bodyBold, {
+                  style={[typography.monoBody, {
                     color: tx.amount >= 0 ? colors.accent.success : colors.accent.danger,
                   }]}
                 >
@@ -226,7 +227,7 @@ export default function TransactionsScreen() {
 
       {/* FAB */}
       <View style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28 }]}>
-        <Button title="+ Add" onPress={() => setShowAddModal(true)} />
+        <Button title="+ Add" onPress={() => setShowAddModal(true)} accessibilityLabel="Add new transaction" />
       </View>
 
       {/* Add Transaction Modal */}

@@ -9,7 +9,6 @@ import {
   ScrollView,
   FlatList,
   Pressable,
-  ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
@@ -24,6 +23,7 @@ import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { formatDate, formatRelativeTime } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
 import type { PainLog } from '@app-types/database';
 
@@ -193,8 +193,10 @@ export default function PainTrackerScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <Skeleton variant="card" height={440} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={80} />
       </View>
     );
   }
@@ -241,6 +243,8 @@ export default function PainTrackerScreen() {
                 <Pressable
                   key={part.id}
                   onPress={() => handleBodyPartPress(part)}
+                  accessibilityLabel={`${part.label}${hasPain ? `, pain level ${painLevelForPart}` : ''}`}
+                  accessibilityRole="button"
                   style={[
                     styles.bodyPartDot,
                     {
@@ -345,7 +349,7 @@ export default function PainTrackerScreen() {
                         },
                       ]}
                     >
-                      <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+                      <Text style={[typography.monoCaption, { color: '#FFFFFF', fontWeight: '700' }]}>
                         {log.pain_level}
                       </Text>
                     </View>
@@ -402,7 +406,7 @@ export default function PainTrackerScreen() {
                       },
                     ]}
                   >
-                    <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+                    <Text style={[typography.monoBody, { color: '#FFFFFF', fontWeight: '700' }]}>
                       {log.pain_level}
                     </Text>
                   </View>
@@ -466,6 +470,9 @@ export default function PainTrackerScreen() {
                     setPainType(pt.value);
                     hapticLight();
                   }}
+                  accessibilityLabel={`Pain type: ${pt.label}`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: painType === pt.value }}
                   style={[
                     styles.painTypeChip,
                     {

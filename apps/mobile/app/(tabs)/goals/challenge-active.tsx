@@ -21,6 +21,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Modal } from '@components/ui/Modal';
 import { useChallengeStore } from '@stores/challengeStore';
+import { hapticLight } from '@utils/haptics';
 import type {
   ChallengeDefinition,
   ChallengeEnrollment,
@@ -289,15 +290,15 @@ export default function ChallengeActiveScreen() {
             <Card
               style={{
                 marginBottom: spacing.lg,
-                backgroundColor: `${colors.accent.error ?? '#F44336'}20`,
+                backgroundColor: `${colors.accent.danger ?? '#F44336'}20`,
                 borderWidth: 1,
-                borderColor: colors.accent.error ?? '#F44336',
+                borderColor: colors.accent.danger ?? '#F44336',
               }}
             >
               <Text
                 style={[
                   typography.bodyBold,
-                  { color: colors.accent.error ?? '#F44336' },
+                  { color: colors.accent.danger ?? '#F44336' },
                 ]}
               >
                 {'\u26A0\uFE0F'} Warning: {incompleteTasks.length} task
@@ -335,9 +336,11 @@ export default function ChallengeActiveScreen() {
                 key={task.id}
                 onPress={() => {
                   if (isLocked) return;
+                  hapticLight();
                   handleToggleTask(task.id, completed);
                 }}
                 disabled={isLocked}
+                accessibilityLabel={`${completed ? 'Unmark' : 'Mark'} task ${task.label}`}
               >
                 <Card style={{ marginBottom: spacing.md, opacity: isLocked ? 0.85 : 1 }}>
                   <View style={styles.taskRow}>
@@ -368,7 +371,7 @@ export default function ChallengeActiveScreen() {
                               { color: colors.text.secondary },
                             ]}
                           >
-                            {currentValue}/{targetValue} {unit}
+                            <Text style={typography.monoBody}>{currentValue}/{targetValue}</Text> {unit}
                           </Text>
                           <ProgressBar
                             progress={currentValue / targetValue}
@@ -403,7 +406,7 @@ export default function ChallengeActiveScreen() {
               },
             ]}
           >
-            {todayProgress.completed}/{todayProgress.total} tasks complete
+            <Text style={typography.monoBody}>{todayProgress.completed}/{todayProgress.total}</Text> tasks complete
           </Text>
         </Animated.View>
 
@@ -434,7 +437,7 @@ export default function ChallengeActiveScreen() {
                       styles.calendarCell,
                       {
                         backgroundColor: bgColor,
-                        borderRadius: borderRadius.xs ?? 4,
+                        borderRadius: borderRadius.sm,
                         margin: 2,
                       },
                     ]}
@@ -471,7 +474,7 @@ export default function ChallengeActiveScreen() {
                       styles.legendDot,
                       {
                         backgroundColor: item.color,
-                        borderRadius: borderRadius.round ?? 99,
+                        borderRadius: borderRadius.full,
                       },
                     ]}
                   />
@@ -514,12 +517,13 @@ export default function ChallengeActiveScreen() {
 
           {/* Abandon Challenge */}
           <Pressable
-            onPress={() => setAbandonModalVisible(true)}
+            onPress={() => { hapticLight(); setAbandonModalVisible(true); }}
+            accessibilityLabel="Abandon this challenge"
             style={[
               styles.abandonButton,
               {
                 borderRadius: borderRadius.md,
-                borderColor: colors.accent.error ?? '#F44336',
+                borderColor: colors.accent.danger ?? '#F44336',
                 borderWidth: 1,
                 padding: spacing.md,
                 marginBottom: spacing.lg,
@@ -530,7 +534,7 @@ export default function ChallengeActiveScreen() {
               style={[
                 typography.bodyBold,
                 {
-                  color: colors.accent.error ?? '#F44336',
+                  color: colors.accent.danger ?? '#F44336',
                   textAlign: 'center',
                 },
               ]}

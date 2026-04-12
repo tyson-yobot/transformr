@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -26,6 +25,7 @@ import { useNutritionStore } from '@stores/nutritionStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
+import { ProgressRing } from '@components/ui/ProgressRing';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -192,7 +192,7 @@ export default function MenuScannerScreen() {
   if (!permission) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+        <ProgressRing progress={-1} size={64} strokeWidth={6} color={colors.accent.primary} />
       </View>
     );
   }
@@ -241,6 +241,8 @@ export default function MenuScannerScreen() {
             <View style={[styles.captureBottom, { paddingBottom: insets.bottom + spacing.lg }]}>
               <Pressable
                 onPress={handleCapture}
+                accessibilityLabel="Take photo of menu"
+                accessibilityRole="button"
                 style={[styles.captureBtn, { borderColor: '#FFFFFF' }]}
               >
                 <View style={[styles.captureBtnInner, { backgroundColor: '#FFFFFF' }]} />
@@ -253,7 +255,7 @@ export default function MenuScannerScreen() {
       {stage === 'analyzing' && (
         <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
           <Animated.View entering={FadeIn.duration(300)} style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.accent.warning} />
+            <ProgressRing progress={-1} size={80} strokeWidth={8} color={colors.accent.warning} />
             <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.xl }]}>
               Reading the menu...
             </Text>
@@ -380,7 +382,7 @@ export default function MenuScannerScreen() {
                       </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                         {formatCalories(item.estimatedCalories)}
                       </Text>
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>

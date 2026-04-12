@@ -147,20 +147,24 @@ export default function ChallengeBuilderScreen() {
 
   const updateTaskState = useCallback(
     (type: string, partial: Partial<TaskState>) => {
-      setTaskStates((prev) => ({
-        ...prev,
-        [type]: { ...prev[type], ...partial },
-      }));
+      setTaskStates((prev) => {
+        const current = prev[type] ?? createDefaultTaskState();
+        const updated: TaskState = { ...current, ...partial } as TaskState;
+        const next: Record<string, TaskState> = { ...prev, [type]: updated };
+        return next;
+      });
     },
     [],
   );
 
   const toggleTask = useCallback(
     (type: string) => {
-      setTaskStates((prev) => ({
-        ...prev,
-        [type]: { ...prev[type], enabled: !prev[type].enabled },
-      }));
+      setTaskStates((prev) => {
+        const current = prev[type] ?? createDefaultTaskState();
+        const updated: TaskState = { ...current, enabled: !current.enabled };
+        const next: Record<string, TaskState> = { ...prev, [type]: updated };
+        return next;
+      });
     },
     [],
   );
@@ -176,7 +180,7 @@ export default function ChallengeBuilderScreen() {
     const now = Date.now();
 
     for (const def of TASK_DEFINITIONS) {
-      const state = taskStates[def.type];
+      const state: TaskState = taskStates[def.type] ?? createDefaultTaskState();
       if (!state.enabled) continue;
 
       const config: Record<string, unknown> = {};
@@ -240,7 +244,7 @@ export default function ChallengeBuilderScreen() {
     if (enabledTaskCount === 0) return 'Enable at least one daily task.';
 
     // Validate calories fields if enabled
-    const caloriesState = taskStates.calories;
+    const caloriesState = taskStates.calories ?? createDefaultTaskState();
     if (caloriesState.enabled) {
       const minCal = parseInt(caloriesState.caloriesMin, 10);
       const maxCal = parseInt(caloriesState.caloriesMax, 10);
@@ -256,14 +260,14 @@ export default function ChallengeBuilderScreen() {
     }
 
     // Validate protein field if enabled
-    const proteinState = taskStates.protein;
+    const proteinState = taskStates.protein ?? createDefaultTaskState();
     if (proteinState.enabled && proteinState.proteinMin) {
       const val = parseInt(proteinState.proteinMin, 10);
       if (isNaN(val) || val <= 0) return 'Protein target must be a positive number.';
     }
 
     // Validate custom task label
-    const customState = taskStates.custom;
+    const customState = taskStates.custom ?? createDefaultTaskState();
     if (customState.enabled && !customState.customLabel.trim()) {
       return 'Please enter a label for your custom task.';
     }
@@ -578,7 +582,7 @@ export default function ChallengeBuilderScreen() {
           </View>
 
           {TASK_DEFINITIONS.map((def, index) => {
-            const state = taskStates[def.type];
+            const state = taskStates[def.type] ?? createDefaultTaskState();
             return (
               <Animated.View
                 key={def.type}

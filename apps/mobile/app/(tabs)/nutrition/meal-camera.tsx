@@ -8,7 +8,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -184,8 +183,8 @@ export default function MealCameraScreen() {
   // Permission handling
   if (!permission) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
+        <ProgressRing progress={-1} size={64} strokeWidth={6} color={colors.accent.primary} />
       </View>
     );
   }
@@ -245,6 +244,8 @@ export default function MealCameraScreen() {
             <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + spacing.lg, padding: spacing.lg }]}>
               <Pressable
                 onPress={handleCapture}
+                accessibilityLabel="Take photo of meal"
+                accessibilityRole="button"
                 style={[styles.captureBtn, { borderColor: '#FFFFFF' }]}
               >
                 <View style={[styles.captureBtnInner, { backgroundColor: '#FFFFFF' }]} />
@@ -366,7 +367,7 @@ export default function MealCameraScreen() {
                         />
                       </View>
                     </View>
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {Math.round(food.calories * food.quantity)} cal
                     </Text>
                   </View>
@@ -391,7 +392,7 @@ export default function MealCameraScreen() {
                       >
                         <Ionicons name="remove" size={14} color={colors.text.primary} />
                       </Pressable>
-                      <Text style={[typography.captionBold, { color: colors.text.primary, minWidth: 32, textAlign: 'center' }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700', minWidth: 32, textAlign: 'center' }]}>
                         {food.quantity}x
                       </Text>
                       <Pressable

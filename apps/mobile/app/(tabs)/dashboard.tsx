@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
+import { MonoText } from '@components/ui/MonoText';
+import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { CountdownCard } from '@components/cards/CountdownCard';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
@@ -31,28 +33,6 @@ import { useBusinessStore } from '@stores/businessStore';
 import { useCountdown } from '@hooks/useCountdown';
 import { formatNumber, formatCalories, formatCurrency } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
-
-// ---------------------------------------------------------------------------
-// Motivation quotes pool
-// ---------------------------------------------------------------------------
-const MOTIVATION_QUOTES: ReadonlyArray<{ text: string; author: string }> = [
-  { text: 'The body achieves what the mind believes.', author: 'Napoleon Hill' },
-  { text: 'Discipline is choosing between what you want now and what you want most.', author: 'Abraham Lincoln' },
-  { text: 'Success is the sum of small efforts, repeated day in and day out.', author: 'Robert Collier' },
-  { text: 'Your limitation -- it\'s only your imagination.', author: 'AI Coach' },
-  { text: 'Push yourself, because no one else is going to do it for you.', author: 'AI Coach' },
-  { text: 'What you do today can improve all your tomorrows.', author: 'Ralph Marston' },
-  { text: 'It does not matter how slowly you go as long as you do not stop.', author: 'Confucius' },
-  { text: 'Every champion was once a contender who refused to give up.', author: 'Rocky Balboa' },
-];
-
-function getDailyQuote(): { text: string; author: string } {
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) /
-      (1000 * 60 * 60 * 24),
-  );
-  return MOTIVATION_QUOTES[dayOfYear % MOTIVATION_QUOTES.length] as { text: string; author: string };
-}
 
 // ---------------------------------------------------------------------------
 // Mini sparkline component for revenue
@@ -149,9 +129,6 @@ export default function DashboardScreen() {
 
   const countdown = useCountdown(primaryGoal?.target_date ?? null);
 
-  // Daily quote
-  const quote = useMemo(() => getDailyQuote(), []);
-
   // Streak from habits
   const currentStreak = useMemo(() => {
     const streaks = habitStore.habits
@@ -236,21 +213,25 @@ export default function DashboardScreen() {
       {
         icon: <Text style={{ fontSize: 18 }}>🔥</Text>,
         label: 'Streak',
+        valueNode: <MonoText variant="monoBody">{currentStreak}d</MonoText>,
         value: `${currentStreak}d`,
       },
       {
         icon: <Text style={{ fontSize: 18 }}>💪</Text>,
         label: 'Workouts',
+        valueNode: <MonoText variant="monoBody">{workoutsThisWeek}</MonoText>,
         value: String(workoutsThisWeek),
       },
       {
         icon: <Text style={{ fontSize: 18 }}>🍎</Text>,
         label: 'Calories',
+        valueNode: <MonoText variant="monoBody">{formatNumber(caloriesToday)}</MonoText>,
         value: formatNumber(caloriesToday),
       },
       {
         icon: <Text style={{ fontSize: 18 }}>⚡</Text>,
         label: 'Readiness',
+        valueNode: <MonoText variant="monoBody">{readinessScore}%</MonoText>,
         value: `${readinessScore}%`,
       },
     ],
@@ -347,14 +328,16 @@ export default function DashboardScreen() {
           <PlanRow
             emoji="🍽️"
             label="Meals logged"
-            detail={`${nutritionStore.todayLogs.length} / 4`}
+            detail={`${nutritionStore.todayLogs.length}/4`}
             done={nutritionStore.todayLogs.length >= 4}
+            mono
           />
           <PlanRow
             emoji="✅"
             label="Habits remaining"
             detail={`${habitsRemaining} left`}
             done={habitsRemaining === 0}
+            mono
           />
         </Card>
       </Animated.View>
@@ -388,7 +371,8 @@ export default function DashboardScreen() {
                 <Text
                   style={[typography.caption, { color: colors.text.secondary }]}
                 >
-                  Joint streak: {partnerStore.partnership?.joint_streak ?? 0} days
+                  Joint streak:{' '}
+                  <MonoText variant="monoCaption">{partnerStore.partnership?.joint_streak ?? 0}</MonoText> days
                 </Text>
               </View>
               <Text style={[typography.caption, { color: colors.accent.primary }]}>
@@ -457,28 +441,14 @@ export default function DashboardScreen() {
         </Animated.View>
       )}
 
-      {/* Motivation Quote */}
+      {/* AI Insight */}
       <Animated.View entering={FadeInDown.delay(350).duration(400)}>
-        <Card
-          variant="outlined"
-          style={{ marginBottom: spacing.lg }}
-        >
-          <Text
-            style={[
-              typography.body,
-              {
-                color: colors.text.primary,
-                fontStyle: 'italic',
-                marginBottom: spacing.sm,
-              },
-            ]}
-          >
-            "{quote.text}"
+        <Card variant="ai" style={{ marginBottom: spacing.lg }}>
+          <Text style={[typography.body, { color: colors.text.primary }]}>
+            Based on your data, here's your insight for today.
           </Text>
-          <Text
-            style={[typography.caption, { color: colors.accent.primary }]}
-          >
-            -- {quote.author}
+          <Text style={[typography.caption, { color: colors.accent.cyan, marginTop: spacing.sm }]}>
+            AI Coach
           </Text>
         </Card>
       </Animated.View>
@@ -498,6 +468,7 @@ export default function DashboardScreen() {
                   void hapticLight();
                   router.push('/(tabs)/profile/achievements');
                 }}
+                accessibilityLabel="View all achievements"
               >
                 <Text
                   style={[typography.caption, { color: colors.accent.primary }]}
@@ -551,11 +522,13 @@ function PlanRow({
   label,
   detail,
   done,
+  mono = false,
 }: {
   emoji: string;
   label: string;
   detail: string;
   done: boolean;
+  mono?: boolean;
 }) {
   const { colors, typography, spacing } = useTheme();
   return (
@@ -578,14 +551,23 @@ function PlanRow({
       >
         {label}
       </Text>
-      <Text
-        style={[
-          typography.caption,
-          { color: done ? colors.accent.success : colors.text.secondary },
-        ]}
-      >
-        {done ? 'Done' : detail}
-      </Text>
+      {mono && !done ? (
+        <MonoText
+          variant="monoCaption"
+          color={colors.text.secondary}
+        >
+          {detail}
+        </MonoText>
+      ) : (
+        <Text
+          style={[
+            typography.caption,
+            { color: done ? colors.accent.success : colors.text.secondary },
+          ]}
+        >
+          {done ? 'Done' : detail}
+        </Text>
+      )}
     </View>
   );
 }

@@ -20,7 +20,7 @@ import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatPercentage } from '@utils/formatters';
 import type { Skill, Book, Course } from '@app-types/database';
 
@@ -131,7 +131,7 @@ export default function SkillsScreen() {
                 <Text style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}>
                   {skill.name}
                 </Text>
-                <Text style={[typography.captionBold, { color: colors.accent.primary }]}>
+                <Text style={[typography.monoBody, { color: colors.accent.primary }]}>
                   {skill.proficiency}/{skill.target_proficiency}
                 </Text>
               </View>
@@ -142,7 +142,7 @@ export default function SkillsScreen() {
               />
               {skill.hours_practiced != null && skill.hours_practiced > 0 && (
                 <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
-                  {skill.hours_practiced}h practiced
+                  <Text style={typography.monoBody}>{skill.hours_practiced}h</Text> practiced
                 </Text>
               )}
             </Card>
@@ -302,7 +302,8 @@ export default function SkillsScreen() {
           {(['skills', 'books', 'courses'] as ActiveTab[]).map((tab) => (
             <Pressable
               key={tab}
-              onPress={() => setActiveTab(tab)}
+              onPress={() => { hapticLight(); setActiveTab(tab); }}
+              accessibilityLabel={`Switch to ${tab} tab`}
               style={[
                 styles.tab,
                 {

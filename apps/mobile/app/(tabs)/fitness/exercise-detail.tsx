@@ -7,15 +7,17 @@ import {
   View,
   Text,
   ScrollView,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
+import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
+import { hapticLight } from '@utils/haptics';
 import { formatWeight, formatDate, formatSetDisplay } from '@utils/formatters';
 import { supabase } from '@services/supabase';
 import type { Exercise, PersonalRecord, WorkoutSet } from '@app-types/database';
@@ -124,15 +126,14 @@ export default function ExerciseDetailScreen() {
   }, [exerciseId]);
 
   const handleAddToWorkout = useCallback(() => {
+    hapticLight();
     // Navigate back with exercise data, or push to workout-player
     router.push('/(tabs)/fitness/workout-player' as never);
   }, [router]);
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
-      </View>
+      <DetailSkeleton style={{ backgroundColor: colors.background.primary }} />
     );
   }
 
@@ -146,7 +147,8 @@ export default function ExerciseDetailScreen() {
         <Button
           title="Go Back"
           variant="outline"
-          onPress={() => router.back()}
+          onPress={() => { hapticLight(); router.back(); }}
+          accessibilityLabel="Go back to previous screen"
           style={{ marginTop: spacing.lg }}
         />
       </View>
@@ -378,10 +380,10 @@ export default function ExerciseDetailScreen() {
                 <Text style={[typography.caption, { color: colors.text.muted, width: 80 }]}>
                   {formatDate(perf.date)}
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}>
+                <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1, fontWeight: '600' }]}>
                   {perf.bestSet}
                 </Text>
-                <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                <Text style={[typography.monoCaption, { color: colors.text.secondary }]}>
                   {formatWeight(perf.totalVolume)} vol
                 </Text>
               </View>
@@ -407,6 +409,7 @@ export default function ExerciseDetailScreen() {
           onPress={handleAddToWorkout}
           fullWidth
           size="lg"
+          accessibilityLabel={`Add ${exercise.name} to workout`}
           leftIcon={<Ionicons name="add-circle" size={22} color="#FFFFFF" />}
         />
       </View>

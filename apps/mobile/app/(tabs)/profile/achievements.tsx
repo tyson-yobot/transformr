@@ -262,6 +262,9 @@ export default function AchievementsScreen() {
                   void hapticLight();
                   setSelectedTier(filter.key);
                 }}
+                accessibilityLabel={`Filter by ${filter.label} tier`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
                 style={[
                   styles.filterChip,
                   {
@@ -323,6 +326,8 @@ export default function AchievementsScreen() {
                   onPress={() => {
                     if (isEarned) void hapticAchievement();
                   }}
+                  accessibilityLabel={isSecret ? 'Secret achievement' : `${ach.title}${isEarned ? ', earned' : ', locked'}`}
+                  accessibilityRole="button"
                   style={[
                     styles.achievementCard,
                     {

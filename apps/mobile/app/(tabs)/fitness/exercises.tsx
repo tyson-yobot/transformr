@@ -9,10 +9,10 @@ import {
   FlatList,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -20,6 +20,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { hapticLight } from '@utils/haptics';
 import type { Exercise } from '@app-types/database';
@@ -97,10 +98,13 @@ export default function ExercisesScreen() {
   }, [newExerciseName, fetchExercises]);
 
   const renderExerciseItem = useCallback(
-    ({ item }: { item: Exercise }) => (
+    ({ item, index }: { item: Exercise; index: number }) => (
+      <Animated.View entering={FadeInDown.duration(300).delay(index * 50)}>
       <Card
         style={{ marginBottom: spacing.sm }}
         onPress={() => handleExercisePress(item)}
+        accessibilityLabel={`${item.name}, ${item.category ?? ''} exercise`}
+        accessibilityRole="button"
       >
         <View style={styles.exerciseRow}>
           <View
@@ -156,6 +160,7 @@ export default function ExercisesScreen() {
           <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
         </View>
       </Card>
+      </Animated.View>
     ),
     [colors, typography, spacing, borderRadius, handleExercisePress],
   );
@@ -191,6 +196,8 @@ export default function ExercisesScreen() {
             return (
               <Pressable
                 key={item.value ?? 'all'}
+                accessibilityLabel={`Filter by ${item.label}`}
+                accessibilityRole="button"
                 onPress={() => {
                   setSelectedCategory(item.value);
                   hapticLight();
@@ -267,11 +274,9 @@ export default function ExercisesScreen() {
 
       {/* Exercise List */}
       {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent.primary} />
-        </View>
+        <ListSkeleton rows={6} style={{ backgroundColor: colors.background.primary }} />
       ) : (
-        <FlatList
+        <FlatList<Exercise>
           data={filteredExercises}
           keyExtractor={(item) => item.id}
           renderItem={renderExerciseItem}
@@ -301,6 +306,8 @@ export default function ExercisesScreen() {
           hapticLight();
           setShowAddModal(true);
         }}
+        accessibilityLabel="Add custom exercise"
+        accessibilityRole="button"
         style={[
           styles.fab,
           {

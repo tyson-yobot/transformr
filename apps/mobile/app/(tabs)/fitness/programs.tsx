@@ -8,7 +8,6 @@ import {
   Text,
   FlatList,
   Pressable,
-  ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
@@ -23,6 +22,7 @@ import { Modal } from '@components/ui/Modal';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
 import type { WorkoutTemplate, WorkoutTemplateExercise, Exercise } from '@app-types/database';
 
@@ -73,9 +73,9 @@ export default function ProgramsScreen() {
 
           programs.push({
             ...(template as WorkoutTemplate),
-            exercises: (exercisesData ?? []).map((te) => ({
-              ...te,
-              exercise: (te as Record<string, unknown>).exercises as Exercise | undefined,
+            exercises: (exercisesData ?? []).map((te: Record<string, unknown>) => ({
+              ...(te as unknown as WorkoutTemplateExercise),
+              exercise: te.exercises as Exercise | undefined,
             })),
           });
         }
@@ -206,7 +206,7 @@ export default function ProgramsScreen() {
                 <View style={styles.metaItem}>
                   <Ionicons name="barbell-outline" size={14} color={colors.text.muted} />
                   <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
-                    {item.exercises.length} exercises
+                    <Text style={typography.monoCaption}>{item.exercises.length}</Text> exercises
                   </Text>
                 </View>
                 {item.day_of_week !== null && item.day_of_week !== undefined && (
@@ -250,8 +250,8 @@ export default function ProgramsScreen() {
                         {te.exercise?.name ?? 'Unknown Exercise'}
                       </Text>
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>
-                        {te.target_sets ?? '?'} sets x {te.target_reps ?? '?'} reps
-                        {te.rest_seconds ? ` | ${te.rest_seconds}s rest` : ''}
+                        <Text style={typography.monoCaption}>{te.target_sets ?? '?'}</Text> sets x <Text style={typography.monoCaption}>{te.target_reps ?? '?'}</Text> reps
+                        {te.rest_seconds ? <Text>{' | '}<Text style={typography.monoCaption}>{te.rest_seconds}</Text>s rest</Text> : ''}
                       </Text>
                     </View>
                     {te.target_weight && (
@@ -282,6 +282,8 @@ export default function ProgramsScreen() {
                 />
                 <Pressable
                   onPress={() => handleDeleteProgram(item.id, item.name)}
+                  accessibilityLabel={`Delete program ${item.name}`}
+                  accessibilityRole="button"
                   style={[
                     styles.deleteBtn,
                     {
@@ -313,8 +315,10 @@ export default function ProgramsScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.sm }} />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.sm }} />
+        <Skeleton variant="card" height={120} />
       </View>
     );
   }
@@ -333,7 +337,7 @@ export default function ProgramsScreen() {
         </Card>
       )}
 
-      <FlatList
+      <FlatList<ProgramWithExercises>
         data={programsWithExercises}
         keyExtractor={(item) => item.id}
         renderItem={renderProgram}
@@ -359,6 +363,8 @@ export default function ProgramsScreen() {
           hapticLight();
           setShowCreateModal(true);
         }}
+        accessibilityLabel="Create new workout program"
+        accessibilityRole="button"
         style={[
           styles.fab,
           {

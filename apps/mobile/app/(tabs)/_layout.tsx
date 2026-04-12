@@ -3,10 +3,11 @@
 // =============================================================================
 
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChatFAB } from '@components/ui/ChatFAB';
 
 interface TabIconProps {
   icon: string;
@@ -48,64 +49,69 @@ export default function TabsLayout() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
+  const tabBarHeight = 60 + insets.bottom;
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.background.secondary,
-          borderTopColor: colors.border.subtle,
-          borderTopWidth: 1,
-          height: 60 + insets.bottom,
-          paddingTop: spacing.sm,
-          paddingBottom: insets.bottom,
-        },
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: colors.accent.primary,
-        tabBarInactiveTintColor: colors.text.muted,
-      }}
-    >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabIcon icon={'\uD83C\uDFE0'} label="Home" focused={focused} />
-          ),
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: colors.background.secondary,
+            borderTopColor: colors.border.subtle,
+            borderTopWidth: 1,
+            height: tabBarHeight,
+            paddingTop: spacing.sm,
+            paddingBottom: insets.bottom,
+          },
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: colors.accent.primary,
+          tabBarInactiveTintColor: colors.text.muted,
         }}
-      />
-      <Tabs.Screen
-        name="fitness"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabIcon icon={'\uD83C\uDFCB\uFE0F'} label="Fitness" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="nutrition"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabIcon icon={'\uD83C\uDF4E'} label="Nutrition" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="goals"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabIcon icon={'\uD83C\uDFAF'} label="Goals" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <TabIcon icon={'\uD83D\uDC64'} label="Profile" focused={focused} />
-          ),
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon icon={'\uD83C\uDFE0'} label="Home" focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="fitness"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon icon={'\uD83C\uDFCB\uFE0F'} label="Fitness" focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="nutrition"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon icon={'\uD83C\uDF4E'} label="Nutrition" focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="goals"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon icon={'\uD83C\uDFAF'} label="Goals" focused={focused} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ({ focused }: { focused: boolean }) => (
+              <TabIcon icon={'\uD83D\uDC64'} label="Profile" focused={focused} />
+            ),
+          }}
+        />
+      </Tabs>
+      <ChatFAB bottom={tabBarHeight + 16} right={20} />
+    </View>
   );
 }
 

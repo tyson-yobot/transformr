@@ -22,6 +22,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { MonoText } from '@components/ui/MonoText';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -200,13 +201,15 @@ export default function NutritionHomeScreen() {
         <Text style={[typography.h1, { color: colors.text.primary }]}>Nutrition</Text>
         <View style={styles.headerActions}>
           <Pressable
-            onPress={() => router.push('/(tabs)/nutrition/saved-meals')}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/saved-meals'); }}
+            accessibilityLabel="Saved meals"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md }]}
           >
             <Ionicons name="bookmark-outline" size={20} color={colors.text.secondary} />
           </Pressable>
           <Pressable
-            onPress={() => router.push('/(tabs)/nutrition/analytics')}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/analytics'); }}
+            accessibilityLabel="Nutrition analytics"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, marginLeft: spacing.sm }]}
           >
             <Ionicons name="analytics-outline" size={20} color={colors.text.secondary} />
@@ -256,9 +259,9 @@ export default function NutritionHomeScreen() {
                 strokeWidth={8}
                 color={colors.accent.primary}
               >
-                <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                <MonoText variant="statSmall" color={colors.text.primary}>
                   {Math.round(todayMacros.calories)}
-                </Text>
+                </MonoText>
                 <Text style={[typography.tiny, { color: colors.text.muted }]}>cal</Text>
               </ProgressRing>
 
@@ -270,9 +273,9 @@ export default function NutritionHomeScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.protein}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <MonoText variant="monoCaption" color={colors.text.primary}>
                       {Math.round(todayMacros.protein)}g
-                    </Text>
+                    </MonoText>
                   </ProgressRing>
                   <Text style={[typography.tiny, { color: MACRO_COLORS.protein, marginTop: 4 }]}>
                     Protein
@@ -286,9 +289,9 @@ export default function NutritionHomeScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.carbs}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <MonoText variant="monoCaption" color={colors.text.primary}>
                       {Math.round(todayMacros.carbs)}g
-                    </Text>
+                    </MonoText>
                   </ProgressRing>
                   <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, marginTop: 4 }]}>
                     Carbs
@@ -302,9 +305,9 @@ export default function NutritionHomeScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.fat}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <MonoText variant="monoCaption" color={colors.text.primary}>
                       {Math.round(todayMacros.fat)}g
-                    </Text>
+                    </MonoText>
                   </ProgressRing>
                   <Text style={[typography.tiny, { color: MACRO_COLORS.fat, marginTop: 4 }]}>
                     Fat
@@ -317,27 +320,27 @@ export default function NutritionHomeScreen() {
             <View style={[styles.remainingRow, { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border.subtle }]}>
               <View style={styles.remainingItem}>
                 <Text style={[typography.tiny, { color: colors.text.muted }]}>Remaining</Text>
-                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                <MonoText variant="monoCaption" color={colors.text.primary}>
                   {formatCalories(remaining.calories)}
-                </Text>
+                </MonoText>
               </View>
               <View style={styles.remainingItem}>
                 <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>P</Text>
-                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                <MonoText variant="monoCaption" color={colors.text.primary}>
                   {formatMacro(remaining.protein)}
-                </Text>
+                </MonoText>
               </View>
               <View style={styles.remainingItem}>
                 <Text style={[typography.tiny, { color: MACRO_COLORS.carbs }]}>C</Text>
-                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                <MonoText variant="monoCaption" color={colors.text.primary}>
                   {formatMacro(remaining.carbs)}
-                </Text>
+                </MonoText>
               </View>
               <View style={styles.remainingItem}>
                 <Text style={[typography.tiny, { color: MACRO_COLORS.fat }]}>F</Text>
-                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                <MonoText variant="monoCaption" color={colors.text.primary}>
                   {formatMacro(remaining.fat)}
-                </Text>
+                </MonoText>
               </View>
             </View>
           </Card>
@@ -352,28 +355,32 @@ export default function NutritionHomeScreen() {
             contentContainerStyle={{ gap: spacing.sm }}
           >
             <Pressable
-              onPress={() => router.push('/(tabs)/nutrition/meal-plans')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-plans'); }}
+              accessibilityLabel="Meal plans"
               style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
             >
               <Ionicons name="calendar-outline" size={16} color={colors.accent.primary} />
               <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Plans</Text>
             </Pressable>
             <Pressable
-              onPress={() => router.push('/(tabs)/nutrition/meal-prep')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-prep'); }}
+              accessibilityLabel="Meal prep"
               style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
             >
               <Ionicons name="restaurant-outline" size={16} color={colors.accent.success} />
               <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Prep</Text>
             </Pressable>
             <Pressable
-              onPress={() => router.push('/(tabs)/nutrition/grocery-list')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/grocery-list'); }}
+              accessibilityLabel="Grocery list"
               style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
             >
               <Ionicons name="cart-outline" size={16} color={colors.accent.warning} />
               <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Groceries</Text>
             </Pressable>
             <Pressable
-              onPress={() => router.push('/(tabs)/nutrition/supplements')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/supplements'); }}
+              accessibilityLabel="View supplements"
               style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
             >
               <Ionicons name="medical-outline" size={16} color={colors.accent.info} />
@@ -456,9 +463,9 @@ export default function NutritionHomeScreen() {
               <Text style={[typography.h3, { color: colors.text.primary }]}>
                 {'\u{1F4A7}'} Water
               </Text>
-              <Text style={[typography.caption, { color: colors.text.muted }]}>
+              <MonoText variant="monoCaption" color={colors.text.muted}>
                 {formatOz(totalWater)} / {formatOz(targets.water)}
-              </Text>
+              </MonoText>
             </View>
 
             <View style={[styles.waterBarContainer, { marginTop: spacing.md }]}>
@@ -501,9 +508,9 @@ export default function NutritionHomeScreen() {
                     },
                   ]}
                 >
-                  <Text style={[typography.captionBold, { color: colors.accent.info }]}>
+                  <MonoText variant="monoCaption" color={colors.accent.info}>
                     +{oz}oz
-                  </Text>
+                  </MonoText>
                 </Pressable>
               ))}
             </View>
@@ -517,7 +524,10 @@ export default function NutritionHomeScreen() {
               <Text style={[typography.h3, { color: colors.text.primary }]}>
                 {'\u{1F48A}'} Supplements
               </Text>
-              <Pressable onPress={() => router.push('/(tabs)/nutrition/supplements')}>
+              <Pressable
+                onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/supplements'); }}
+                accessibilityLabel="Manage supplements"
+              >
                 <Text style={[typography.caption, { color: colors.accent.primary }]}>Manage</Text>
               </Pressable>
             </View>
@@ -593,6 +603,7 @@ export default function NutritionHomeScreen() {
       >
         <Pressable
           onPress={handleFabToggle}
+          accessibilityLabel="Log food"
           onPressIn={() => { fabScale.value = withSpring(0.9); }}
           onPressOut={() => { fabScale.value = withSpring(1); }}
           style={styles.fabInner}

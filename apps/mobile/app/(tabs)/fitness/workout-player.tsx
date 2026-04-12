@@ -9,11 +9,11 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -21,6 +21,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
+import { Skeleton } from '@components/ui/Skeleton';
 import { useWorkout } from '@hooks/useWorkout';
 import { useWorkoutStore } from '@stores/workoutStore';
 import {
@@ -280,7 +281,11 @@ export default function WorkoutPlayerScreen() {
   if (!activeSession) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+        <View style={{ padding: spacing.lg, width: '100%' }}>
+          <Skeleton variant="card" height={60} style={{ marginBottom: spacing.lg }} />
+          <Skeleton variant="card" height={200} style={{ marginBottom: spacing.lg }} />
+          <Skeleton variant="card" height={120} />
+        </View>
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
           Starting workout...
         </Text>
@@ -299,18 +304,18 @@ export default function WorkoutPlayerScreen() {
       >
         <View style={styles.topBarItem}>
           <Ionicons name="time-outline" size={18} color={colors.accent.primary} />
-          <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.xs }]}>
+          <Text style={[typography.statSmall, { color: colors.text.primary, marginLeft: spacing.xs }]}>
             {formatTimerDisplay(elapsedSeconds)}
           </Text>
         </View>
         <View style={styles.topBarItem}>
           <Ionicons name="barbell-outline" size={18} color={colors.accent.success} />
-          <Text style={[typography.bodyBold, { color: colors.text.primary, marginLeft: spacing.xs }]}>
+          <Text style={[typography.monoBody, { color: colors.text.primary, marginLeft: spacing.xs, fontWeight: '600' }]}>
             {formatVolume(totalVolume)}
           </Text>
         </View>
         <View style={styles.topBarItem}>
-          <Text style={[typography.caption, { color: colors.text.muted }]}>
+          <Text style={[typography.monoCaption, { color: colors.text.muted }]}>
             {totalSets} sets
           </Text>
         </View>
@@ -325,7 +330,7 @@ export default function WorkoutPlayerScreen() {
           ]}
         >
           <Ionicons name="timer-outline" size={48} color={colors.accent.info} />
-          <Text style={[typography.hero, { color: colors.text.primary, marginTop: spacing.md }]}>
+          <Text style={[typography.countdown, { color: colors.text.primary, marginTop: spacing.md }]}>
             {formatRestTimer(restSeconds)}
           </Text>
           <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
@@ -335,6 +340,7 @@ export default function WorkoutPlayerScreen() {
             title="Skip Rest"
             variant="outline"
             onPress={handleSkipRest}
+            accessibilityLabel="Skip rest timer"
             style={{ marginTop: spacing.xl }}
           />
         </View>
@@ -342,12 +348,12 @@ export default function WorkoutPlayerScreen() {
 
       {/* PR Celebration */}
       {showPRCelebration && (
-        <View style={[styles.prOverlay, { backgroundColor: `${colors.accent.gold}15` }]}>
-          <Ionicons name="trophy" size={64} color={colors.accent.gold} />
-          <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
+        <View style={[styles.prOverlay, { backgroundColor: 'rgba(234, 179, 8, 0.08)' }]}>
+          <Ionicons name="trophy" size={64} color="#EAB308" />
+          <Text style={[typography.h1, { color: '#EAB308', marginTop: spacing.md }]}>
             NEW PR!
           </Text>
-          <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.sm }]}>
+          <Text style={[typography.statSmall, { color: colors.text.primary, marginTop: spacing.sm }]}>
             {prMessage}
           </Text>
         </View>
@@ -358,7 +364,10 @@ export default function WorkoutPlayerScreen() {
         showsVerticalScrollIndicator={false}
       >
         {loadingExercises ? (
-          <ActivityIndicator size="small" color={colors.accent.primary} />
+          <View style={{ gap: spacing.sm }}>
+            <Skeleton variant="text" width="60%" height={20} />
+            <Skeleton variant="card" height={200} />
+          </View>
         ) : exercisesWithSets.length === 0 ? (
           <Card style={{ marginBottom: spacing.lg }}>
             <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
@@ -383,6 +392,8 @@ export default function WorkoutPlayerScreen() {
               {exercisesWithSets.map((item, idx) => (
                 <Pressable
                   key={item.exercise.id}
+                  accessibilityLabel={`Select exercise ${item.exercise.name}`}
+                  accessibilityRole="tab"
                   onPress={() => {
                     setActiveExerciseIndex(idx);
                     hapticLight();
@@ -447,7 +458,7 @@ export default function WorkoutPlayerScreen() {
                       <Text style={[typography.caption, { color: colors.text.muted }]}>
                         Target
                       </Text>
-                      <Text style={[typography.bodyBold, { color: colors.text.secondary }]}>
+                      <Text style={[typography.monoBody, { color: colors.text.secondary, fontWeight: '600' }]}>
                         {currentExercise.templateExercise.target_sets} x{' '}
                         {currentExercise.templateExercise.target_reps ?? '?'}
                       </Text>
@@ -501,22 +512,22 @@ export default function WorkoutPlayerScreen() {
                         >
                           <Text
                             style={[
-                              typography.captionBold,
-                              { color: set.isPR ? colors.accent.gold : colors.text.primary, width: 30 },
+                              typography.monoCaption,
+                              { color: set.isPR ? '#EAB308' : colors.text.primary, width: 30, fontWeight: '600' },
                             ]}
                           >
                             {set.isPR ? '\u2B50' : `${set.setNumber}`}
                           </Text>
-                          <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1 }]}>
                             {set.weight} lbs
                           </Text>
-                          <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1 }]}>
                             {set.reps}
                           </Text>
                           {showGhostOverlay && (
                             <Text
                               style={[
-                                typography.caption,
+                                typography.monoCaption,
                                 {
                                   color: beatGhost
                                     ? colors.accent.success
@@ -531,7 +542,7 @@ export default function WorkoutPlayerScreen() {
                               {beatGhost ? ' \u2191' : ''}
                             </Text>
                           )}
-                          <Text style={[typography.caption, { color: colors.text.muted, width: 30 }]}>
+                          <Text style={[typography.monoCaption, { color: colors.text.muted, width: 30 }]}>
                             {set.rpe}
                           </Text>
                         </View>
@@ -550,6 +561,7 @@ export default function WorkoutPlayerScreen() {
                       value={currentWeight}
                       onChangeText={setCurrentWeight}
                       keyboardType="numeric"
+                      accessibilityLabel="Weight in pounds"
                       placeholder={
                         currentExercise.templateExercise?.target_weight?.toString() ?? '0'
                       }
@@ -575,6 +587,7 @@ export default function WorkoutPlayerScreen() {
                       value={currentReps}
                       onChangeText={setCurrentReps}
                       keyboardType="numeric"
+                      accessibilityLabel="Number of reps"
                       placeholder={
                         currentExercise.templateExercise?.target_reps ?? '0'
                       }
@@ -598,6 +611,7 @@ export default function WorkoutPlayerScreen() {
                     </Text>
                     <TextInput
                       value={currentRpe.toString()}
+                      accessibilityLabel="Rate of perceived exertion"
                       onChangeText={(v) => {
                         const num = parseInt(v, 10);
                         if (!isNaN(num) && num >= 1 && num <= 10) setCurrentRpe(num);
@@ -624,13 +638,16 @@ export default function WorkoutPlayerScreen() {
                   onPress={handleLogSet}
                   loading={isLoading}
                   fullWidth
+                  accessibilityLabel={`Log set ${currentExercise.loggedSets.length + 1} for ${currentExercise.exercise.name}`}
                   style={{ marginTop: spacing.md }}
                   leftIcon={<Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />}
                 />
 
                 {/* Ghost overlay toggle */}
                 <Pressable
-                  onPress={() => setShowGhostOverlay((prev) => !prev)}
+                  onPress={() => { setShowGhostOverlay((prev) => !prev); hapticLight(); }}
+                  accessibilityLabel={showGhostOverlay ? 'Hide previous session data' : 'Show previous session data'}
+                  accessibilityRole="switch"
                   style={[styles.ghostToggle, { marginTop: spacing.md }]}
                 >
                   <Ionicons
@@ -666,6 +683,7 @@ export default function WorkoutPlayerScreen() {
           loading={isLoading}
           fullWidth
           size="lg"
+          accessibilityLabel="Complete workout session"
           leftIcon={<Ionicons name="checkmark-done" size={22} color="#FFFFFF" />}
         />
       </View>

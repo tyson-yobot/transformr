@@ -19,6 +19,7 @@ import { Badge } from '@components/ui/Badge';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
+import { hapticLight } from '@utils/haptics';
 
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
@@ -178,7 +179,7 @@ export default function FinanceDashboard() {
               </View>
               <Text
                 style={[
-                  typography.bodyBold,
+                  typography.monoBody,
                   { color: (account.balance ?? 0) >= 0 ? colors.accent.success : colors.accent.danger },
                 ]}
               >
@@ -220,7 +221,7 @@ export default function FinanceDashboard() {
               </View>
               <Text
                 style={[
-                  typography.bodyBold,
+                  typography.monoBody,
                   { color: tx.amount >= 0 ? colors.accent.success : colors.accent.danger },
                 ]}
               >
@@ -242,18 +243,21 @@ export default function FinanceDashboard() {
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
             <Button
               title="Transactions"
-              onPress={() => router.push('/(tabs)/goals/finance/transactions')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/finance/transactions'); }}
+              accessibilityLabel="View transactions"
               fullWidth
             />
             <Button
               title="Budgets"
-              onPress={() => router.push('/(tabs)/goals/finance/budgets')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/finance/budgets'); }}
+              accessibilityLabel="View budgets"
               variant="secondary"
               fullWidth
             />
             <Button
               title="Net Worth Tracker"
-              onPress={() => router.push('/(tabs)/goals/finance/net-worth')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/finance/net-worth'); }}
+              accessibilityLabel="View net worth tracker"
               variant="outline"
               fullWidth
             />

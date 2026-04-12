@@ -8,7 +8,6 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -21,6 +20,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { formatTimerDisplay } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
 import type { MobilitySession } from '@app-types/database';
 
@@ -208,7 +208,10 @@ export default function MobilityScreen() {
     if (activeExerciseIndex < activeRoutine.exercises.length - 1) {
       const nextIdx = activeExerciseIndex + 1;
       setActiveExerciseIndex(nextIdx);
-      setTimerSeconds(updatedExercises[nextIdx].durationSeconds);
+      const nextExercise = updatedExercises[nextIdx];
+      if (nextExercise) {
+        setTimerSeconds(nextExercise.durationSeconds);
+      }
       setIsTimerRunning(false);
       setActiveRoutine({ ...activeRoutine, exercises: updatedExercises });
     } else {
@@ -238,7 +241,10 @@ export default function MobilityScreen() {
     if (activeExerciseIndex < activeRoutine.exercises.length - 1) {
       const nextIdx = activeExerciseIndex + 1;
       setActiveExerciseIndex(nextIdx);
-      setTimerSeconds(activeRoutine.exercises[nextIdx].durationSeconds);
+      const nextExercise = activeRoutine.exercises[nextIdx];
+      if (nextExercise) {
+        setTimerSeconds(nextExercise.durationSeconds);
+      }
       setIsTimerRunning(false);
     }
   }, [activeRoutine, activeExerciseIndex]);
@@ -259,8 +265,10 @@ export default function MobilityScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} />
       </View>
     );
   }
@@ -275,7 +283,7 @@ export default function MobilityScreen() {
         >
           {/* Routine Header */}
           <View style={styles.routineHeader}>
-            <Pressable onPress={handleExitRoutine} hitSlop={12}>
+            <Pressable onPress={handleExitRoutine} hitSlop={12} accessibilityLabel="Exit routine" accessibilityRole="button">
               <Ionicons name="close" size={24} color={colors.text.secondary} />
             </Pressable>
             <Text
@@ -286,7 +294,7 @@ export default function MobilityScreen() {
             >
               {activeRoutine.name}
             </Text>
-            <Text style={[typography.captionBold, { color: colors.text.muted }]}>
+            <Text style={[typography.monoCaption, { color: colors.text.muted, fontWeight: '700' }]}>
               {completedCount}/{activeRoutine.exercises.length}
             </Text>
           </View>
@@ -474,7 +482,7 @@ export default function MobilityScreen() {
                     >
                       {exercise.name}
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted }]}>
                       {exercise.durationSeconds}s
                     </Text>
                   </Pressable>
@@ -526,13 +534,13 @@ export default function MobilityScreen() {
                 <View style={[styles.routineMeta, { marginTop: spacing.sm, gap: spacing.md }]}>
                   <View style={styles.metaItem}>
                     <Ionicons name="time-outline" size={14} color={colors.text.muted} />
-                    <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: 4 }]}>
                       {routine.totalDurationMinutes} min
                     </Text>
                   </View>
                   <View style={styles.metaItem}>
                     <Ionicons name="fitness-outline" size={14} color={colors.text.muted} />
-                    <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: 4 }]}>
                       {routine.exercises.length} stretches
                     </Text>
                   </View>
@@ -590,8 +598,8 @@ export default function MobilityScreen() {
                       Mobility Session
                     </Text>
                     <Text style={[typography.tiny, { color: colors.text.muted }]}>
-                      {session.duration_minutes ?? 0} min |{' '}
-                      {session.target_muscles?.length ?? 0} muscle groups
+                      <Text style={typography.monoCaption}>{session.duration_minutes ?? 0}</Text> min |{' '}
+                      <Text style={typography.monoCaption}>{session.target_muscles?.length ?? 0}</Text> muscle groups
                     </Text>
                   </View>
                   {session.completed_at && (

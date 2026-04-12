@@ -9,16 +9,18 @@ import {
   ScrollView,
   FlatList,
   Pressable,
-  ActivityIndicator,
   StyleSheet,
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
+import { MonoText } from '@components/ui/MonoText';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
@@ -141,7 +143,7 @@ export default function FitnessHomeScreen() {
         for (let i = 0; i < 365; i++) {
           const checkDate = new Date(today);
           checkDate.setDate(checkDate.getDate() - i);
-          const dateStr = checkDate.toISOString().split('T')[0];
+          const dateStr = checkDate.toISOString().split('T')[0] ?? '';
           const hasWorkout = allSessions.some((s) => {
             if (!s.completed_at) return false;
             return s.completed_at.startsWith(dateStr);
@@ -228,12 +230,12 @@ export default function FitnessHomeScreen() {
             </Text>
           </View>
           <View style={styles.workoutStats}>
-            <Text style={[typography.captionBold, { color: colors.text.secondary }]}>
+            <MonoText variant="monoCaption" color={colors.text.secondary}>
               {formatDuration(item.duration_minutes)}
-            </Text>
-            <Text style={[typography.tiny, { color: colors.text.muted }]}>
+            </MonoText>
+            <MonoText variant="monoCaption" color={colors.text.muted}>
               {formatVolume(item.total_volume)} / {item.total_sets} sets
-            </Text>
+            </MonoText>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
         </View>
@@ -244,9 +246,10 @@ export default function FitnessHomeScreen() {
 
   if (loadingData) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
-      </View>
+      <ListSkeleton
+        rows={6}
+        style={{ backgroundColor: colors.background.primary }}
+      />
     );
   }
 
@@ -270,6 +273,7 @@ export default function FitnessHomeScreen() {
         )}
 
         {/* Today's Workout */}
+        <Animated.View entering={FadeInDown.delay(0).duration(400)}>
         <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
           <View style={styles.sectionHeader}>
             <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
@@ -321,14 +325,18 @@ export default function FitnessHomeScreen() {
             </View>
           )}
         </Card>
+        </Animated.View>
 
         {/* Quick Stats */}
+        <Animated.View entering={FadeInDown.delay(50).duration(400)}>
         <QuickStatsRow stats={quickStats} style={{ marginBottom: spacing.lg }} />
+        </Animated.View>
 
         {/* Quick Actions */}
-        <View style={[styles.quickActions, { gap: spacing.sm, marginBottom: spacing.lg }]}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.quickActions, { gap: spacing.sm, marginBottom: spacing.lg }]}>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/exercises')}
+            accessibilityLabel="Browse exercises"
             style={[
               styles.quickActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
@@ -341,6 +349,7 @@ export default function FitnessHomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/programs')}
+            accessibilityLabel="View programs"
             style={[
               styles.quickActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
@@ -353,6 +362,7 @@ export default function FitnessHomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/progress')}
+            accessibilityLabel="View progress"
             style={[
               styles.quickActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
@@ -365,6 +375,7 @@ export default function FitnessHomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/form-check')}
+            accessibilityLabel="Form check"
             style={[
               styles.quickActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
@@ -375,7 +386,7 @@ export default function FitnessHomeScreen() {
               Form Check
             </Text>
           </Pressable>
-        </View>
+        </Animated.View>
 
         {/* PR Highlights */}
         {personalRecords.length > 0 && (
@@ -448,7 +459,7 @@ export default function FitnessHomeScreen() {
             Recent Workouts
           </Text>
           {recentWorkouts.length > 0 ? (
-            <FlatList
+            <FlatList<RecentWorkout>
               data={recentWorkouts}
               keyExtractor={(item) => item.id}
               renderItem={renderRecentWorkout}
@@ -467,6 +478,7 @@ export default function FitnessHomeScreen() {
         <View style={[styles.moreActions, { gap: spacing.sm }]}>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/pain-tracker')}
+            accessibilityLabel="Open pain tracker"
             style={[
               styles.moreActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.lg },
@@ -479,6 +491,7 @@ export default function FitnessHomeScreen() {
           </Pressable>
           <Pressable
             onPress={() => handleNavigate('/(tabs)/fitness/mobility')}
+            accessibilityLabel="Open mobility exercises"
             style={[
               styles.moreActionBtn,
               { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.lg },
@@ -495,6 +508,7 @@ export default function FitnessHomeScreen() {
       {/* FAB */}
       <Pressable
         onPress={() => handleStartWorkout(null)}
+        accessibilityLabel="Start a new workout"
         style={[
           styles.fab,
           {

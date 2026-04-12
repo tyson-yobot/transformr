@@ -205,7 +205,7 @@ export default function VisionBoard() {
               key={item.id}
               entering={FadeInDown.delay(200 + index * 50)}
             >
-              <Pressable onPress={() => setFullScreenItem(item)}>
+              <Pressable onPress={() => { hapticLight(); setFullScreenItem(item); }} accessibilityLabel={`View ${item.title ?? 'vision board item'} full screen`}>
                 <View
                   style={[
                     styles.gridTile,
@@ -238,7 +238,7 @@ export default function VisionBoard() {
           ))}
 
           {/* Add Tile */}
-          <Pressable onPress={handlePickFromLibrary}>
+          <Pressable onPress={handlePickFromLibrary} accessibilityLabel="Add new vision board image">
             <View
               style={[
                 styles.gridTile,

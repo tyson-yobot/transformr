@@ -18,7 +18,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
-import { hapticSuccess, hapticWarning } from '@utils/haptics';
+import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
 import type { StakeGoal, StakeEvaluation, Goal } from '@app-types/database';
 
@@ -193,10 +193,10 @@ export default function StakeGoalsScreen() {
                   )}
 
                   <View style={[styles.savedLostRow, { marginTop: spacing.md }]}>
-                    <Text style={[typography.captionBold, { color: colors.accent.success }]}>
+                    <Text style={[typography.monoBody, { color: colors.accent.success }]}>
                       Saved: {formatCurrency(stakeGoal.total_saved ?? 0)}
                     </Text>
-                    <Text style={[typography.captionBold, { color: colors.accent.danger }]}>
+                    <Text style={[typography.monoBody, { color: colors.accent.danger }]}>
                       Lost: {formatCurrency(stakeGoal.total_lost ?? 0)}
                     </Text>
                   </View>
@@ -218,7 +218,8 @@ export default function StakeGoalsScreen() {
         {/* Create Stake Button */}
         <Button
           title="Create New Stake"
-          onPress={() => setShowCreateModal(true)}
+          onPress={() => { hapticLight(); setShowCreateModal(true); }}
+          accessibilityLabel="Create a new stake goal"
           fullWidth
           style={{ marginTop: spacing.xl }}
         />

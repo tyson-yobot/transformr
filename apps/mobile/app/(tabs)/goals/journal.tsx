@@ -17,7 +17,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
 
@@ -259,7 +259,8 @@ export default function JournalScreen() {
 
         {/* Past Entries Toggle */}
         <Pressable
-          onPress={() => setShowPastEntries(!showPastEntries)}
+          onPress={() => { hapticLight(); setShowPastEntries(!showPastEntries); }}
+          accessibilityLabel={showPastEntries ? 'Hide past journal entries' : 'View past journal entries'}
           style={{ marginTop: spacing.xl }}
         >
           <Text

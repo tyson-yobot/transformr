@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -22,6 +21,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
+import { Skeleton } from '@components/ui/Skeleton';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
@@ -307,15 +307,19 @@ export default function AddFoodScreen() {
                 <View style={styles.quantityControls}>
                   <Pressable
                     onPress={() => handleQuantityChange(-0.25)}
+                    accessibilityLabel="Decrease serving quantity"
+                    accessibilityRole="button"
                     style={[styles.quantityBtn, { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.md }]}
                   >
                     <Ionicons name="remove" size={20} color={colors.text.primary} />
                   </Pressable>
-                  <Text style={[typography.h3, { color: colors.text.primary, minWidth: 60, textAlign: 'center' }]}>
+                  <Text style={[typography.statSmall, { color: colors.text.primary, minWidth: 60, textAlign: 'center' }]}>
                     {quantity}
                   </Text>
                   <Pressable
                     onPress={() => handleQuantityChange(0.25)}
+                    accessibilityLabel="Increase serving quantity"
+                    accessibilityRole="button"
                     style={[styles.quantityBtn, { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.md }]}
                   >
                     <Ionicons name="add" size={20} color={colors.text.primary} />
@@ -332,7 +336,7 @@ export default function AddFoodScreen() {
                     strokeWidth={5}
                     color={colors.accent.primary}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                       {Math.round(scaledMacros.calories)}
                     </Text>
                   </ProgressRing>
@@ -345,7 +349,7 @@ export default function AddFoodScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.protein}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                       {Math.round(scaledMacros.protein)}g
                     </Text>
                   </ProgressRing>
@@ -358,7 +362,7 @@ export default function AddFoodScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.carbs}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                       {Math.round(scaledMacros.carbs)}g
                     </Text>
                   </ProgressRing>
@@ -371,7 +375,7 @@ export default function AddFoodScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.fat}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                       {Math.round(scaledMacros.fat)}g
                     </Text>
                   </ProgressRing>
@@ -384,11 +388,10 @@ export default function AddFoodScreen() {
           /* Search Results / Recent Foods */
           <Animated.View entering={FadeInDown.duration(300).delay(200)}>
             {isLoading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.accent.primary} />
-                <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.md }]}>
-                  Searching...
-                </Text>
+              <View style={[styles.loadingContainer, { gap: spacing.md }]}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} variant="card" height={72} style={{ marginBottom: spacing.xs }} />
+                ))}
               </View>
             ) : (
               <>
@@ -401,6 +404,8 @@ export default function AddFoodScreen() {
                     {searchResults.map((food) => (
                       <Pressable
                         key={food.id}
+                        accessibilityLabel={`Select ${food.name}, ${Math.round(food.calories)} calories`}
+                        accessibilityRole="button"
                         onPress={() => handleSelectFood(food)}
                         style={[
                           styles.foodResult,
@@ -425,17 +430,17 @@ export default function AddFoodScreen() {
                           </Text>
                         </View>
                         <View style={styles.foodResultMacros}>
-                          <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                          <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                             {Math.round(food.calories)} cal
                           </Text>
                           <View style={[styles.foodResultMacroRow, { marginTop: 4 }]}>
-                            <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>
+                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.protein, fontSize: 10 }]}>
                               P{Math.round(food.protein)}g
                             </Text>
-                            <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, marginLeft: 6 }]}>
+                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.carbs, fontSize: 10, marginLeft: 6 }]}>
                               C{Math.round(food.carbs)}g
                             </Text>
-                            <Text style={[typography.tiny, { color: MACRO_COLORS.fat, marginLeft: 6 }]}>
+                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.fat, fontSize: 10, marginLeft: 6 }]}>
                               F{Math.round(food.fat)}g
                             </Text>
                           </View>

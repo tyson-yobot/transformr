@@ -10,7 +10,6 @@ import {
   Pressable,
   StyleSheet,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
@@ -19,7 +18,9 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useChallengeStore } from '@stores/challengeStore';
+import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { ChallengeDefinition, ChallengeDifficulty } from '@app-types/database';
 
@@ -139,8 +140,8 @@ export default function ChallengesScreen() {
 
   if (isLoading && challengeDefinitions.length === 0) {
     return (
-      <View style={[styles.screen, styles.center, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ListSkeleton />
       </View>
     );
   }
@@ -164,9 +165,11 @@ export default function ChallengesScreen() {
         {activeEnrollment && activeDef && (
           <Animated.View entering={FadeInDown.delay(100)}>
             <Pressable
-              onPress={() =>
-                router.push('/(tabs)/goals/challenge-active' as `/${string}`)
-              }
+              onPress={() => {
+                hapticLight();
+                router.push('/(tabs)/goals/challenge-active' as `/${string}`);
+              }}
+              accessibilityLabel={`View active challenge ${activeDef.name}`}
             >
               <Card style={{ marginBottom: spacing.lg }}>
                 <View style={styles.activeHeader}>
@@ -256,7 +259,7 @@ export default function ChallengesScreen() {
                       },
                     ]}
                   >
-                    {todayCompleted}/{todayTotal} complete {'  '}
+                    <Text style={typography.monoBody}>{todayCompleted}/{todayTotal}</Text> complete {'  '}
                     {streak > 0 ? `\uD83D\uDD25 ${streak} day streak` : ''}
                   </Text>
                 </View>
@@ -287,11 +290,13 @@ export default function ChallengesScreen() {
               style={styles.gridItem}
             >
               <Pressable
-                onPress={() =>
+                onPress={() => {
+                  hapticLight();
                   router.push(
                     `/(tabs)/goals/challenge-detail?id=${def.id}` as `/${string}`,
-                  )
-                }
+                  );
+                }}
+                accessibilityLabel={`View challenge ${def.name}`}
               >
                 <Card>
                   <View style={styles.programHeader}>
@@ -344,9 +349,11 @@ export default function ChallengesScreen() {
         <Animated.View entering={FadeInDown.delay(900)}>
           <Button
             title="Create Custom Challenge"
-            onPress={() =>
-              router.push('/(tabs)/goals/challenge-builder' as `/${string}`)
-            }
+            onPress={() => {
+              hapticLight();
+              router.push('/(tabs)/goals/challenge-builder' as `/${string}`);
+            }}
+            accessibilityLabel="Create a custom challenge"
             fullWidth
             style={{ marginTop: spacing.lg }}
           />

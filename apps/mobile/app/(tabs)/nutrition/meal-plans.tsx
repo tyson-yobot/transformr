@@ -165,6 +165,8 @@ export default function MealPlansScreen() {
             return (
               <Pressable
                 key={day.day}
+                accessibilityLabel={`Select ${day.day}`}
+                accessibilityRole="tab"
                 onPress={() => { hapticLight(); setSelectedDay(index); }}
                 style={[
                   styles.dayChip,
@@ -179,7 +181,7 @@ export default function MealPlansScreen() {
                 <Text style={[typography.captionBold, { color: isSelected ? '#FFFFFF' : colors.text.primary }]}>
                   {day.dayShort}
                 </Text>
-                <Text style={[typography.tiny, { color: isSelected ? 'rgba(255,255,255,0.7)' : colors.text.muted, marginTop: 4 }]}>
+                <Text style={[typography.monoCaption, { color: isSelected ? 'rgba(255,255,255,0.7)' : colors.text.muted, marginTop: 4, fontSize: 10 }]}>
                   {Math.round(dayTotal)} cal
                 </Text>
               </Pressable>
@@ -208,39 +210,39 @@ export default function MealPlansScreen() {
                         : colors.accent.warning
                     }
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                       {Math.round(dayTotals.calories)}
                     </Text>
                   </ProgressRing>
-                  <Text style={[typography.tiny, { color: colors.text.muted, marginTop: 4 }]}>
+                  <Text style={[typography.monoCaption, { color: colors.text.muted, marginTop: 4, fontSize: 10 }]}>
                     / {targets.calories} cal
                   </Text>
                 </View>
                 <View style={[styles.comparisonMacros, { gap: spacing.md }]}>
                   <View style={styles.comparisonMacroItem}>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>Protein</Text>
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {formatMacro(dayTotals.protein)}
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {formatMacro(targets.protein)}
                     </Text>
                   </View>
                   <View style={styles.comparisonMacroItem}>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.carbs }]}>Carbs</Text>
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {formatMacro(dayTotals.carbs)}
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {formatMacro(targets.carbs)}
                     </Text>
                   </View>
                   <View style={styles.comparisonMacroItem}>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.fat }]}>Fat</Text>
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {formatMacro(dayTotals.fat)}
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {formatMacro(targets.fat)}
                     </Text>
                   </View>
@@ -263,16 +265,16 @@ export default function MealPlansScreen() {
                     <Badge label={meal.mealType} size="sm" variant="info" />
                   </View>
                   <View style={[styles.mealMacros, { marginTop: spacing.sm, gap: spacing.md }]}>
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {formatCalories(meal.calories)}
                     </Text>
-                    <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>
+                    <Text style={[typography.monoCaption, { color: MACRO_COLORS.protein, fontSize: 10 }]}>
                       P: {formatMacro(meal.protein)}
                     </Text>
-                    <Text style={[typography.tiny, { color: MACRO_COLORS.carbs }]}>
+                    <Text style={[typography.monoCaption, { color: MACRO_COLORS.carbs, fontSize: 10 }]}>
                       C: {formatMacro(meal.carbs)}
                     </Text>
-                    <Text style={[typography.tiny, { color: MACRO_COLORS.fat }]}>
+                    <Text style={[typography.monoCaption, { color: MACRO_COLORS.fat, fontSize: 10 }]}>
                       F: {formatMacro(meal.fat)}
                     </Text>
                   </View>
@@ -280,12 +282,16 @@ export default function MealPlansScreen() {
                 <View style={[styles.mealActions, { gap: spacing.xs }]}>
                   <Pressable
                     onPress={() => handleSwapMeal(selectedDay, meal.id)}
+                    accessibilityLabel={`Swap ${meal.name}`}
+                    accessibilityRole="button"
                     hitSlop={8}
                   >
                     <Ionicons name="swap-horizontal" size={18} color={colors.accent.info} />
                   </Pressable>
                   <Pressable
                     onPress={() => handleRemoveMeal(selectedDay, meal.id)}
+                    accessibilityLabel={`Remove ${meal.name}`}
+                    accessibilityRole="button"
                     hitSlop={8}
                   >
                     <Ionicons name="close-circle-outline" size={18} color={colors.accent.danger} />

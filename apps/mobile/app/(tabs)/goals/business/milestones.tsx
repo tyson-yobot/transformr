@@ -22,7 +22,7 @@ import { Modal } from '@components/ui/Modal';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useBusinessStore } from '@stores/businessStore';
 import { formatCurrency, formatDate } from '@utils/formatters';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { BusinessMilestone } from '@app-types/database';
 
@@ -221,7 +221,7 @@ export default function MilestonesScreen() {
                       </Text>
                     )}
                   </View>
-                  <Pressable onPress={() => handleToggleComplete(milestone)}>
+                  <Pressable onPress={() => { hapticLight(); handleToggleComplete(milestone); }} accessibilityLabel={`Mark ${milestone.title} as complete`}>
                     <View style={[styles.checkBox, { borderColor: colors.accent.primary, borderRadius: borderRadius.sm }]} />
                   </Pressable>
                 </View>
@@ -230,7 +230,7 @@ export default function MilestonesScreen() {
 
                 {milestone.target_value != null && (
                   <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
-                    {formatCurrency(milestone.current_value ?? 0)} / {formatCurrency(milestone.target_value)}
+                    <Text style={typography.monoBody}>{formatCurrency(milestone.current_value ?? 0)}</Text> / <Text style={typography.monoBody}>{formatCurrency(milestone.target_value)}</Text>
                   </Text>
                 )}
 
@@ -267,7 +267,7 @@ export default function MilestonesScreen() {
                     marginBottom: spacing.sm,
                   }]}
                 >
-                  <Pressable onPress={() => handleToggleComplete(milestone)}>
+                  <Pressable onPress={() => { hapticLight(); handleToggleComplete(milestone); }} accessibilityLabel={`Mark ${milestone.title} as incomplete`}>
                     <View style={[styles.checkBoxDone, { backgroundColor: colors.accent.success, borderRadius: borderRadius.sm }]}>
                       <Text style={{ color: '#FFFFFF', fontSize: 12 }}>{'\u2713'}</Text>
                     </View>
@@ -296,7 +296,8 @@ export default function MilestonesScreen() {
       </ScrollView>
 
       <Pressable
-        onPress={() => { resetForm(); setShowAddModal(true); }}
+        onPress={() => { hapticLight(); resetForm(); setShowAddModal(true); }}
+        accessibilityLabel="Add new milestone"
         style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28 }]}
       >
         <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>

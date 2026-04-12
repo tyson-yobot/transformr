@@ -25,6 +25,7 @@ import {
   formatCompactNumber,
   formatNumber,
 } from '@utils/formatters';
+import { hapticLight } from '@utils/haptics';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -62,15 +63,18 @@ export default function BusinessDashboard() {
   }, [monthlyMetrics]);
 
   const chartData = useMemo(
-    () =>
-      monthlyMetrics
-        .slice(0, 12)
-        .reverse()
-        .map((m) => ({
+    () => {
+      const reversed = monthlyMetrics.slice(0, 12).reverse();
+      let cumulative = 0;
+      return reversed.map((m) => {
+        cumulative += m.total_revenue;
+        return {
           month: m.month,
           revenue: m.total_revenue,
-          expenses: m.total_expenses,
-        })),
+          cumulative,
+        };
+      });
+    },
     [monthlyMetrics],
   );
 
@@ -98,7 +102,8 @@ export default function BusinessDashboard() {
               {businesses.map((biz, idx) => (
                 <Pressable
                   key={biz.id}
-                  onPress={() => setSelectedBusinessIndex(idx)}
+                  onPress={() => { hapticLight(); setSelectedBusinessIndex(idx); }}
+                  accessibilityLabel={`Select business ${biz.name}`}
                   style={[
                     styles.bizTab,
                     {
@@ -201,7 +206,7 @@ export default function BusinessDashboard() {
               Revenue Trend
             </Text>
             <Card>
-              <RevenueChart data={chartData} showExpenses />
+              <RevenueChart data={chartData} />
             </Card>
           </Animated.View>
         )}
@@ -211,18 +216,21 @@ export default function BusinessDashboard() {
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
             <Button
               title="Log Revenue"
-              onPress={() => router.push('/(tabs)/goals/business/revenue')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/business/revenue'); }}
+              accessibilityLabel="Log revenue"
               fullWidth
             />
             <Button
               title="Customers"
-              onPress={() => router.push('/(tabs)/goals/business/customers')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/business/customers'); }}
+              accessibilityLabel="View customers"
               variant="secondary"
               fullWidth
             />
             <Button
               title="Milestones"
-              onPress={() => router.push('/(tabs)/goals/business/milestones')}
+              onPress={() => { hapticLight(); router.push('/(tabs)/goals/business/milestones'); }}
+              accessibilityLabel="View milestones"
               variant="outline"
               fullWidth
             />

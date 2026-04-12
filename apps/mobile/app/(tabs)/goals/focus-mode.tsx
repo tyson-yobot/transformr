@@ -21,7 +21,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { formatTimerDisplay } from '@utils/formatters';
-import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
+import { hapticLight, hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
 
 type FocusCategory = NonNullable<FocusSession['category']>;
@@ -295,6 +295,7 @@ export default function FocusMode() {
               </View>
               <Pressable
                 onPress={handleDistraction}
+                accessibilityLabel={`Log distraction, current count ${distractions}`}
                 style={[
                   styles.distractionButton,
                   {
@@ -338,7 +339,7 @@ export default function FocusMode() {
                     </Text>
                   </View>
                   <View style={styles.ratingBadge}>
-                    <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>
+                    <Text style={[typography.monoBody, { color: colors.accent.primary }]}>
                       {session.rating}/10
                     </Text>
                   </View>
@@ -370,7 +371,7 @@ export default function FocusMode() {
           fillColor={colors.accent.primary}
         />
         <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
-          Distractions this session: {distractions}
+          Distractions this session: <Text style={typography.monoBody}>{distractions}</Text>
         </Text>
         <Button
           title="Save & Continue"

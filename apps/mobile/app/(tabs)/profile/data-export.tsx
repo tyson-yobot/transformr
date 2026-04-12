@@ -182,6 +182,9 @@ export default function DataExportScreen() {
                   void hapticLight();
                   setFormat(opt.key);
                 }}
+                accessibilityLabel={`Export as ${opt.label}`}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
                 style={[
                   styles.formatOption,
                   {
@@ -240,6 +243,9 @@ export default function DataExportScreen() {
                   void hapticLight();
                   setDateRange(range.key);
                 }}
+                accessibilityLabel={`Date range: ${range.label}`}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
                 style={[
                   styles.rangeChip,
                   {

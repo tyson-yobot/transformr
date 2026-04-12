@@ -179,7 +179,7 @@ export default function HabitTracker() {
                   { color: colors.text.primary, marginLeft: spacing.md },
                 ]}
               >
-                {completedIds.size}/{habits.length}
+                <Text style={typography.monoBody}>{completedIds.size}/{habits.length}</Text>
               </Text>
             </View>
           </Card>
@@ -231,6 +231,7 @@ export default function HabitTracker() {
                 <Pressable
                   onPress={() => handleComplete(habit.id, streak)}
                   disabled={isCompleted}
+                  accessibilityLabel={`${isCompleted ? 'Completed' : 'Complete'} habit ${habit.name}`}
                 >
                   <Card
                     style={
@@ -299,7 +300,7 @@ export default function HabitTracker() {
                       <View style={styles.streakBadge}>
                         <Text
                           style={[
-                            typography.captionBold,
+                            typography.monoBody,
                             { color: colors.accent.fire },
                           ]}
                         >

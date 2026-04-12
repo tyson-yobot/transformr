@@ -21,7 +21,7 @@ import { Modal } from '@components/ui/Modal';
 import { SleepChart } from '@components/charts/SleepChart';
 import { useSleepStore } from '@stores/sleepStore';
 import { formatDuration } from '@utils/formatters';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 
@@ -88,15 +88,22 @@ export default function SleepTracker() {
   }, [bedtime, wakeTime, quality, caffeineCutoff, screenCutoff, logSleep, calculateDuration]);
 
   const chartData = useMemo(
-    () =>
-      sleepHistory
+    () => {
+      const qualityMap = (q: number): 'poor' | 'fair' | 'good' | 'excellent' => {
+        if (q <= 1) return 'poor';
+        if (q <= 2) return 'fair';
+        if (q <= 3) return 'good';
+        return 'excellent';
+      };
+      return sleepHistory
         .filter((s) => s.duration_minutes != null)
         .map((s) => ({
           date: s.created_at ?? s.bedtime,
-          hours: (s.duration_minutes ?? 0) / 60,
-          quality: s.quality ?? 3,
+          duration: (s.duration_minutes ?? 0) / 60,
+          quality: qualityMap(s.quality ?? 3),
         }))
-        .reverse(),
+        .reverse();
+    },
     [sleepHistory],
   );
 
@@ -277,7 +284,7 @@ export default function SleepTracker() {
                 <Text style={[typography.body, { color: colors.text.secondary }]}>
                   Bedtime
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                <Text style={[typography.monoBody, { color: colors.text.primary }]}>
                   {lastSleep.bedtime.substring(11, 16)}
                 </Text>
               </View>
@@ -285,7 +292,7 @@ export default function SleepTracker() {
                 <Text style={[typography.body, { color: colors.text.secondary }]}>
                   Wake Time
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                <Text style={[typography.monoBody, { color: colors.text.primary }]}>
                   {lastSleep.wake_time.substring(11, 16)}
                 </Text>
               </View>
@@ -293,7 +300,7 @@ export default function SleepTracker() {
                 <Text style={[typography.body, { color: colors.text.secondary }]}>
                   Duration
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                <Text style={[typography.monoBody, { color: colors.text.primary }]}>
                   {formatDuration(lastSleep.duration_minutes ?? 0)}
                 </Text>
               </View>
@@ -363,7 +370,7 @@ export default function SleepTracker() {
         </Text>
         <View style={styles.starsRow}>
           {Array.from({ length: 5 }, (_, i) => (
-            <Pressable key={i} onPress={() => setQuality(i + 1)} hitSlop={8}>
+            <Pressable key={i} onPress={() => { hapticLight(); setQuality(i + 1); }} accessibilityLabel={`Set sleep quality to ${i + 1} stars`} hitSlop={8}>
               <Text
                 style={{
                   fontSize: 32,

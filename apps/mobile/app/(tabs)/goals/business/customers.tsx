@@ -17,7 +17,7 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { Chip } from '@components/ui/Chip';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency, formatNumber } from '@utils/formatters';
 import type { Customer } from '@app-types/database';
 
@@ -136,7 +136,7 @@ export default function CustomersScreen() {
                   { color: churnRate > 5 ? colors.accent.danger : colors.text.primary },
                 ]}
               >
-                {churnRate.toFixed(1)}%
+                <Text style={typography.monoBody}>{churnRate.toFixed(1)}%</Text>
               </Text>
             </Card>
           </View>
@@ -200,7 +200,7 @@ export default function CustomersScreen() {
                   {customer.mrr != null && (
                     <Text
                       style={[
-                        typography.captionBold,
+                        typography.monoBody,
                         { color: colors.accent.success, marginTop: spacing.xs },
                       ]}
                     >
@@ -224,7 +224,8 @@ export default function CustomersScreen() {
         {/* Add Customer */}
         <Button
           title="Add Customer"
-          onPress={() => setShowAddModal(true)}
+          onPress={() => { hapticLight(); setShowAddModal(true); }}
+          accessibilityLabel="Add new customer"
           fullWidth
           style={{ marginTop: spacing.xl }}
         />

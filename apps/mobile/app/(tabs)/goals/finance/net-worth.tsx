@@ -157,7 +157,7 @@ export default function NetWorthScreen() {
                     </Text>
                   )}
                 </View>
-                <Text style={[typography.bodyBold, { color: colors.accent.success }]}>
+                <Text style={[typography.monoBody, { color: colors.accent.success }]}>
                   {formatCurrency(account.balance ?? 0)}
                 </Text>
               </View>
@@ -189,7 +189,7 @@ export default function NetWorthScreen() {
                     </Text>
                   )}
                 </View>
-                <Text style={[typography.bodyBold, { color: colors.accent.danger }]}>
+                <Text style={[typography.monoBody, { color: colors.accent.danger }]}>
                   {formatCurrency(Math.abs(account.balance ?? 0))}
                 </Text>
               </View>
@@ -217,7 +217,7 @@ export default function NetWorthScreen() {
                   {snapshot.snapshot_date ? formatDate(snapshot.snapshot_date) : 'N/A'}
                 </Text>
                 <Text
-                  style={[typography.bodyBold, {
+                  style={[typography.monoBody, {
                     color: (snapshot.net_worth ?? 0) >= 0 ? colors.accent.success : colors.accent.danger,
                   }]}
                 >

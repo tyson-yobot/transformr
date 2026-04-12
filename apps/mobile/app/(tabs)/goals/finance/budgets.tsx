@@ -48,7 +48,9 @@ export default function BudgetsScreen() {
   }, []);
 
   const monthLabel = useMemo(() => {
-    const [year, month] = currentMonth.split('-');
+    const parts = currentMonth.split('-');
+    const year = parts[0] ?? '2024';
+    const month = parts[1] ?? '01';
     const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }, [currentMonth]);
@@ -186,7 +188,7 @@ export default function BudgetsScreen() {
                   <Text style={[typography.bodyBold, { color: colors.text.primary, textTransform: 'capitalize' }]}>
                     {budget.category.replace('_', ' ')}
                   </Text>
-                  <Text style={[typography.caption, { color: overBudget ? colors.accent.danger : colors.text.secondary }]}>
+                  <Text style={[typography.monoBody, { color: overBudget ? colors.accent.danger : colors.text.secondary }]}>
                     {formatCurrency(spent)} / {formatCurrency(budget.monthly_limit)}
                   </Text>
                 </View>
@@ -197,7 +199,7 @@ export default function BudgetsScreen() {
                 />
                 {overBudget && (
                   <Text style={[typography.tiny, { color: colors.accent.danger, marginTop: spacing.xs }]}>
-                    Over budget by {formatCurrency(spent - budget.monthly_limit)}
+                    Over budget by <Text style={typography.monoBody}>{formatCurrency(spent - budget.monthly_limit)}</Text>
                   </Text>
                 )}
               </Card>

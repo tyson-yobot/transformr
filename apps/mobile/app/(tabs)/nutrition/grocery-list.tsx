@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Alert,
   Share,
 } from 'react-native';
@@ -24,6 +23,7 @@ import { Input } from '@components/ui/Input';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { formatCurrencyDetailed } from '@utils/formatters';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { Skeleton } from '@components/ui/Skeleton';
 
 const AISLES = [
   'Produce',
@@ -190,8 +190,10 @@ export default function GroceryListScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={colors.accent.primary} />
+          <View style={{ gap: spacing.md }}>
+            <Skeleton variant="card" height={120} />
+            <Skeleton variant="card" height={200} />
+            <Skeleton variant="card" height={200} />
           </View>
         ) : (
           <>
@@ -205,7 +207,7 @@ export default function GroceryListScreen() {
                     strokeWidth={5}
                     color={colors.accent.success}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {checkedCount}/{totalCount}
                     </Text>
                   </ProgressRing>
@@ -260,6 +262,8 @@ export default function GroceryListScreen() {
                 <Animated.View key={aisle} entering={FadeInDown.duration(300).delay(aisleIndex * 60)}>
                   <Pressable
                     onPress={() => handleToggleAisle(aisle)}
+                    accessibilityLabel={`${aisle} section, ${aisleChecked} of ${aisleItems.length} checked`}
+                    accessibilityRole="button"
                     style={[styles.aisleHeader, { marginBottom: spacing.sm, marginTop: aisleIndex > 0 ? spacing.md : 0 }]}
                   >
                     <Ionicons
@@ -350,6 +354,8 @@ export default function GroceryListScreen() {
       {/* Add FAB */}
       <Pressable
         onPress={() => { hapticLight(); setShowAddModal(true); }}
+        accessibilityLabel="Add grocery item"
+        accessibilityRole="button"
         style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: borderRadius.full }]}
       >
         <Ionicons name="add" size={28} color="#FFFFFF" />

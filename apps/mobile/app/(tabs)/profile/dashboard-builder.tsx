@@ -262,6 +262,8 @@ export default function DashboardBuilderScreen() {
               {/* Size cycle */}
               <Pressable
                 onPress={() => handleCycleSize(widget.id)}
+                accessibilityLabel={`Change size of ${widget.title}, currently ${widget.size}`}
+                accessibilityRole="button"
                 style={[
                   styles.sizeBtn,
                   {
@@ -285,6 +287,8 @@ export default function DashboardBuilderScreen() {
               <Pressable
                 onPress={() => handleMoveUp(index)}
                 disabled={index === 0}
+                accessibilityLabel={`Move ${widget.title} up`}
+                accessibilityRole="button"
                 style={[styles.arrowBtn, { opacity: index === 0 ? 0.3 : 1 }]}
               >
                 <Text style={[typography.body, { color: colors.text.muted }]}>
@@ -296,6 +300,8 @@ export default function DashboardBuilderScreen() {
               <Pressable
                 onPress={() => handleMoveDown(index)}
                 disabled={index === visibleWidgets.length - 1}
+                accessibilityLabel={`Move ${widget.title} down`}
+                accessibilityRole="button"
                 style={[
                   styles.arrowBtn,
                   {
@@ -312,6 +318,8 @@ export default function DashboardBuilderScreen() {
               {/* Remove */}
               <Pressable
                 onPress={() => handleToggleWidget(widget.id)}
+                accessibilityLabel={`Remove ${widget.title}`}
+                accessibilityRole="button"
                 style={[styles.arrowBtn, { marginLeft: spacing.xs }]}
               >
                 <Text
@@ -343,6 +351,8 @@ export default function DashboardBuilderScreen() {
               <Pressable
                 key={widget.id}
                 onPress={() => handleToggleWidget(widget.id)}
+                accessibilityLabel={`Add ${widget.title} to dashboard`}
+                accessibilityRole="button"
               >
                 <View
                   style={[

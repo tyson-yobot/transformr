@@ -8,7 +8,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -166,7 +165,7 @@ export default function BarcodeScannerScreen() {
   if (!permission) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+        <ProgressRing progress={-1} size={64} strokeWidth={6} color={colors.accent.primary} />
       </View>
     );
   }
@@ -201,7 +200,7 @@ export default function BarcodeScannerScreen() {
           {/* Overlay */}
           <View style={[styles.scanOverlay, { paddingTop: insets.top }]}>
             <View style={[styles.topBar, { padding: spacing.lg }]}>
-              <Pressable onPress={() => router.back()} hitSlop={12}>
+              <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Close scanner" accessibilityRole="button">
                 <Ionicons name="close" size={28} color="#FFFFFF" />
               </Pressable>
               <Text style={[typography.h3, { color: '#FFFFFF' }]}>Scan Barcode</Text>
@@ -232,11 +231,11 @@ export default function BarcodeScannerScreen() {
 
       {stage === 'loading' && (
         <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
-          <ActivityIndicator size="large" color={colors.accent.primary} />
+          <ProgressRing progress={-1} size={80} strokeWidth={8} color={colors.accent.primary} />
           <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
             Looking up product...
           </Text>
-          <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
+          <Text style={[typography.monoCaption, { color: colors.text.muted, marginTop: spacing.sm }]}>
             Barcode: {scannedBarcode}
           </Text>
         </View>
@@ -306,7 +305,7 @@ export default function BarcodeScannerScreen() {
                     strokeWidth={5}
                     color={colors.accent.primary}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {Math.round(scannedFood.calories * quantity)}
                     </Text>
                   </ProgressRing>
@@ -319,7 +318,7 @@ export default function BarcodeScannerScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.protein}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {Math.round(scannedFood.protein * quantity)}g
                     </Text>
                   </ProgressRing>
@@ -332,7 +331,7 @@ export default function BarcodeScannerScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.carbs}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {Math.round(scannedFood.carbs * quantity)}g
                     </Text>
                   </ProgressRing>
@@ -345,7 +344,7 @@ export default function BarcodeScannerScreen() {
                     strokeWidth={5}
                     color={MACRO_COLORS.fat}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                       {Math.round(scannedFood.fat * quantity)}g
                     </Text>
                   </ProgressRing>
@@ -377,15 +376,19 @@ export default function BarcodeScannerScreen() {
                 <View style={styles.quantityControls}>
                   <Pressable
                     onPress={() => handleQuantityChange(-0.25)}
+                    accessibilityLabel="Decrease quantity"
+                    accessibilityRole="button"
                     style={[styles.qtyBtn, { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.md }]}
                   >
                     <Ionicons name="remove" size={20} color={colors.text.primary} />
                   </Pressable>
-                  <Text style={[typography.h3, { color: colors.text.primary, minWidth: 60, textAlign: 'center' }]}>
+                  <Text style={[typography.stat, { color: colors.text.primary, minWidth: 60, textAlign: 'center' }]}>
                     {quantity}
                   </Text>
                   <Pressable
                     onPress={() => handleQuantityChange(0.25)}
+                    accessibilityLabel="Increase quantity"
+                    accessibilityRole="button"
                     style={[styles.qtyBtn, { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.md }]}
                   >
                     <Ionicons name="add" size={20} color={colors.text.primary} />

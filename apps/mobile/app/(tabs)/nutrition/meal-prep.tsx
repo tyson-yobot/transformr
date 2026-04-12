@@ -194,7 +194,7 @@ export default function MealPrepScreen() {
                 strokeWidth={7}
                 color={colors.accent.success}
               >
-                <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                   {completedCount}/{totalCount}
                 </Text>
               </ProgressRing>
@@ -275,7 +275,7 @@ export default function MealPrepScreen() {
                 {/* Recipe Header */}
                 <Pressable onPress={() => handleToggleRecipe(recipe.id)}>
                   <View style={styles.recipeHeader}>
-                    <Pressable onPress={() => handleMarkComplete(recipe.id)} hitSlop={8}>
+                    <Pressable onPress={() => handleMarkComplete(recipe.id)} hitSlop={8} accessibilityLabel={`Mark ${recipe.name} as ${recipe.completed ? 'incomplete' : 'complete'}`} accessibilityRole="checkbox">
                       <Ionicons
                         name={recipe.completed ? 'checkbox' : 'square-outline'}
                         size={22}
@@ -297,7 +297,7 @@ export default function MealPrepScreen() {
                       <View style={[styles.recipeMeta, { marginTop: 4, gap: spacing.sm }]}>
                         <Badge label={`${recipe.servings} servings`} size="sm" />
                         <Badge label={formatDuration(recipe.prepTimeMinutes + recipe.cookTimeMinutes)} size="sm" variant="info" />
-                        <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                        <Text style={[typography.monoCaption, { color: colors.text.muted }]}>
                           {recipe.calories} cal/serving
                         </Text>
                       </View>
@@ -352,12 +352,12 @@ export default function MealPrepScreen() {
                     {/* Per-serving macros */}
                     <View style={[styles.perServingRow, { marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border.subtle }]}>
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>Per serving:</Text>
-                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary }]}>
                         {recipe.calories} cal
                       </Text>
-                      <Text style={[typography.tiny, { color: '#22C55E' }]}>P: {recipe.protein}g</Text>
-                      <Text style={[typography.tiny, { color: '#3B82F6' }]}>C: {recipe.carbs}g</Text>
-                      <Text style={[typography.tiny, { color: '#F59E0B' }]}>F: {recipe.fat}g</Text>
+                      <Text style={[typography.monoCaption, { color: '#22C55E' }]}>P: {recipe.protein}g</Text>
+                      <Text style={[typography.monoCaption, { color: '#3B82F6' }]}>C: {recipe.carbs}g</Text>
+                      <Text style={[typography.monoCaption, { color: '#F59E0B' }]}>F: {recipe.fat}g</Text>
                     </View>
                   </View>
                 )}

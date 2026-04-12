@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -25,6 +24,7 @@ import { useNutritionStore } from '@stores/nutritionStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { Skeleton } from '@components/ui/Skeleton';
 import type { SavedMeal } from '../../../types/database';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -223,8 +223,10 @@ export default function SavedMealsScreen() {
 
         {/* Meals List */}
         {isLoading ? (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={colors.accent.primary} />
+          <View style={{ gap: spacing.md }}>
+            <Skeleton variant="card" height={120} />
+            <Skeleton variant="card" height={120} />
+            <Skeleton variant="card" height={120} />
           </View>
         ) : filteredMeals.length > 0 ? (
           <View style={{ gap: spacing.sm }}>
@@ -242,7 +244,7 @@ export default function SavedMealsScreen() {
                         </Text>
                       )}
                       <View style={[styles.mealMacros, { marginTop: spacing.sm, gap: spacing.sm }]}>
-                        <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                        <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                           {formatCalories(meal.total_calories ?? 0)}
                         </Text>
                         <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>
@@ -265,12 +267,16 @@ export default function SavedMealsScreen() {
                     <View style={[styles.mealActions, { gap: spacing.sm }]}>
                       <Pressable
                         onPress={() => handleQuickLog(meal)}
+                        accessibilityLabel={`Quick log ${meal.name}`}
+                        accessibilityRole="button"
                         style={[styles.actionBtn, { backgroundColor: `${colors.accent.success}20`, borderRadius: borderRadius.md }]}
                       >
                         <Ionicons name="add-circle" size={20} color={colors.accent.success} />
                       </Pressable>
                       <Pressable
                         onPress={() => handleDeleteMeal(meal.id)}
+                        accessibilityLabel={`Delete ${meal.name}`}
+                        accessibilityRole="button"
                         style={[styles.actionBtn, { backgroundColor: `${colors.accent.danger}20`, borderRadius: borderRadius.md }]}
                       >
                         <Ionicons name="trash-outline" size={18} color={colors.accent.danger} />
@@ -301,6 +307,8 @@ export default function SavedMealsScreen() {
       {/* Create FAB */}
       <Pressable
         onPress={() => { hapticLight(); setCreateModalVisible(true); }}
+        accessibilityLabel="Create new saved meal"
+        accessibilityRole="button"
         style={[
           styles.fab,
           {

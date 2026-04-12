@@ -11,7 +11,6 @@ import {
   Pressable,
   StyleSheet,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -21,8 +20,9 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
+import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
 import { useChallengeStore } from '@stores/challengeStore';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type {
   ChallengeDefinition,
@@ -34,10 +34,10 @@ import type {
 // Constants
 // ---------------------------------------------------------------------------
 
-const DIFFICULTY_VARIANTS: Record<ChallengeDifficulty, 'success' | 'warning' | 'error' | 'info'> = {
+const DIFFICULTY_VARIANTS: Record<ChallengeDifficulty, 'success' | 'warning' | 'danger' | 'info'> = {
   beginner: 'success',
   intermediate: 'warning',
-  advanced: 'error',
+  advanced: 'danger',
   extreme: 'info',
 };
 
@@ -214,14 +214,8 @@ export default function ChallengeDetailScreen() {
   // ---- Loading / Not Found ----
   if (isLoading && !definition) {
     return (
-      <View
-        style={[
-          styles.screen,
-          styles.centeredFallback,
-          { backgroundColor: colors.background.primary },
-        ]}
-      >
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <DetailSkeleton />
       </View>
     );
   }
@@ -408,7 +402,7 @@ export default function ChallengeDetailScreen() {
                     styles.taskNumber,
                     {
                       backgroundColor: colors.accent.primary,
-                      borderRadius: borderRadius.round ?? 99,
+                      borderRadius: borderRadius.full,
                       width: 28,
                       height: 28,
                     },
@@ -431,7 +425,7 @@ export default function ChallengeDetailScreen() {
                         { color: colors.text.secondary, marginTop: 2 },
                       ]}
                     >
-                      Minimum {task.config.min_duration_minutes} minutes
+                      Minimum {String(task.config.min_duration_minutes)} minutes
                     </Text>
                   )}
                   {task.config?.target_pages != null && (
@@ -441,7 +435,7 @@ export default function ChallengeDetailScreen() {
                         { color: colors.text.secondary, marginTop: 2 },
                       ]}
                     >
-                      {task.config.target_pages} pages required
+                      {String(task.config.target_pages)} pages required
                     </Text>
                   )}
                   {task.config?.target_oz != null && (
@@ -451,7 +445,7 @@ export default function ChallengeDetailScreen() {
                         { color: colors.text.secondary, marginTop: 2 },
                       ]}
                     >
-                      Target: {task.config.target_oz} oz
+                      Target: {String(task.config.target_oz)} oz
                     </Text>
                   )}
                   {task.config?.min_count != null && (
@@ -461,7 +455,7 @@ export default function ChallengeDetailScreen() {
                         { color: colors.text.secondary, marginTop: 2 },
                       ]}
                     >
-                      Minimum {task.config.min_count} required
+                      Minimum {String(task.config.min_count)} required
                     </Text>
                   )}
                 </View>
@@ -665,7 +659,7 @@ export default function ChallengeDetailScreen() {
                         flex: 1,
                         color: colors.text.primary,
                         borderWidth: 1,
-                        borderColor: colors.border?.primary ?? colors.text.secondary,
+                        borderColor: colors.border.default,
                         borderRadius: borderRadius.sm,
                         paddingHorizontal: spacing.md,
                         paddingVertical: spacing.sm,
@@ -699,7 +693,7 @@ export default function ChallengeDetailScreen() {
                         { color: colors.accent.success, textAlign: 'center' },
                       ]}
                     >
-                      You will save approximately ${estimatedSavings}
+                      You will save approximately <Text style={typography.monoBody}>${estimatedSavings}</Text>
                     </Text>
                     <Text
                       style={[
@@ -742,7 +736,8 @@ export default function ChallengeDetailScreen() {
               <Button
                 title="Invite"
                 size="sm"
-                onPress={() => setShowPartnerModal(true)}
+                onPress={() => { hapticLight(); setShowPartnerModal(true); }}
+                accessibilityLabel="Invite a partner to this challenge"
               />
             </View>
           </Card>
@@ -770,9 +765,11 @@ export default function ChallengeDetailScreen() {
               <Button
                 title="Stake"
                 size="sm"
-                onPress={() =>
-                  router.push('/(tabs)/goals/stake-goals' as `/${string}`)
-                }
+                onPress={() => {
+                  hapticLight();
+                  router.push('/(tabs)/goals/stake-goals' as `/${string}`);
+                }}
+                accessibilityLabel="Stake money on this challenge"
               />
             </View>
           </Card>

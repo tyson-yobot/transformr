@@ -191,7 +191,7 @@ export default function RevenueScreen() {
                 ]}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                  <Text style={[typography.monoBody, { color: colors.text.primary }]}>
                     {formatCurrencyDetailed(entry.amount)}
                   </Text>
                   <Text style={[typography.caption, { color: colors.text.secondary }]}>
@@ -245,7 +245,7 @@ export default function RevenueScreen() {
                 <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                   {metric.month}
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.accent.success }]}>
+                <Text style={[typography.monoBody, { color: colors.accent.success }]}>
                   {formatCurrency(metric.total_revenue)}
                 </Text>
               </View>

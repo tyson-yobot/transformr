@@ -8,7 +8,6 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
@@ -267,7 +266,7 @@ export default function FormCheckScreen() {
   if (phase === 'countdown') {
     return (
       <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <Text style={[typography.hero, { color: colors.text.primary, fontSize: 80 }]}>
+        <Text style={[typography.hero, { color: colors.text.primary, fontSize: 80, fontVariant: ['tabular-nums'] }]}>
           {countdown}
         </Text>
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.md }]}>
@@ -297,7 +296,7 @@ export default function FormCheckScreen() {
                   { backgroundColor: colors.accent.danger, borderRadius: 5 },
                 ]}
               />
-              <Text style={[typography.bodyBold, { color: '#FFFFFF', marginLeft: spacing.sm }]}>
+              <Text style={[typography.monoBody, { color: '#FFFFFF', fontWeight: '700', marginLeft: spacing.sm }]}>
                 {Math.floor(recordingDuration / 60)}:
                 {(recordingDuration % 60).toString().padStart(2, '0')}
               </Text>
@@ -305,6 +304,8 @@ export default function FormCheckScreen() {
           </View>
           <Pressable
             onPress={handleStopRecording}
+            accessibilityLabel="Stop recording"
+            accessibilityRole="button"
             style={[
               styles.stopButton,
               { borderColor: '#FFFFFF' },
@@ -339,7 +340,7 @@ export default function FormCheckScreen() {
             { color: colors.text.secondary, marginTop: spacing.sm, textAlign: 'center' },
           ]}
         >
-          {recordingDuration} seconds captured.{'\n'}Submit for AI analysis?
+          <Text style={typography.monoBody}>{recordingDuration}</Text> seconds captured.{'\n'}Submit for AI analysis?
         </Text>
         <View style={{ marginTop: spacing.xl, gap: spacing.sm, width: '80%' }}>
           <Button
@@ -364,7 +365,7 @@ export default function FormCheckScreen() {
   if (phase === 'analyzing') {
     return (
       <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+        <ProgressRing progress={-1} size={80} strokeWidth={8} color={colors.accent.primary} />
         <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
           Analyzing Your Form...
         </Text>

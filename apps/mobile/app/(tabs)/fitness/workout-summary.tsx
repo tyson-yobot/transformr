@@ -8,17 +8,19 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   Share,
   Alert,
   StyleSheet,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
+import { Skeleton } from '@components/ui/Skeleton';
+import { hapticLight } from '@utils/haptics';
 import {
   formatDuration,
   formatVolume,
@@ -175,8 +177,15 @@ export default function WorkoutSummaryScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+        <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md }}>
+          <Skeleton variant="card" height={100} style={{ flex: 1 }} />
+          <Skeleton variant="card" height={100} style={{ flex: 1 }} />
+          <Skeleton variant="card" height={100} style={{ flex: 1 }} />
+        </View>
+        <Skeleton variant="card" height={160} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={120} />
       </View>
     );
   }
@@ -205,7 +214,7 @@ export default function WorkoutSummaryScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={[styles.headerBlock, { marginBottom: spacing.xl }]}>
+        <Animated.View entering={FadeInDown.delay(100)} style={[styles.headerBlock, { marginBottom: spacing.xl }]}>
           <Ionicons name="checkmark-circle" size={56} color={colors.accent.success} />
           <Text style={[typography.h1, { color: colors.text.primary, marginTop: spacing.md }]}>
             Workout Complete!
@@ -213,10 +222,10 @@ export default function WorkoutSummaryScreen() {
           <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.xs }]}>
             {session.name}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Summary Stats */}
-        <View style={[styles.statsGrid, { gap: spacing.sm, marginBottom: spacing.lg }]}>
+        <Animated.View entering={FadeInDown.delay(200)} style={[styles.statsGrid, { gap: spacing.sm, marginBottom: spacing.lg }]}>
           <View
             style={[
               styles.statBox,
@@ -265,7 +274,7 @@ export default function WorkoutSummaryScreen() {
             </Text>
             <Text style={[typography.tiny, { color: colors.text.muted }]}>Total Sets</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* PRs Achieved */}
         {prsAchieved.length > 0 && (
@@ -296,11 +305,11 @@ export default function WorkoutSummaryScreen() {
                 <Text style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}>
                   {pr.record_type?.replace(/_/g, ' ')}
                 </Text>
-                <Text style={[typography.bodyBold, { color: colors.accent.gold }]}>
+                <Text style={[typography.monoBody, { color: colors.accent.gold, fontWeight: '700' }]}>
                   {pr.value}
                 </Text>
                 {pr.previous_record ? (
-                  <Text style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
+                  <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
                     (was {pr.previous_record})
                   </Text>
                 ) : null}
@@ -444,21 +453,24 @@ export default function WorkoutSummaryScreen() {
           <Button
             title="Share Workout"
             variant="outline"
-            onPress={handleShare}
+            onPress={() => { hapticLight(); handleShare(); }}
             fullWidth
+            accessibilityLabel="Share workout summary"
             leftIcon={<Ionicons name="share-outline" size={20} color={colors.text.primary} />}
           />
           <Button
             title="Save as Template"
             variant="secondary"
-            onPress={handleSaveAsTemplate}
+            onPress={() => { hapticLight(); handleSaveAsTemplate(); }}
             fullWidth
+            accessibilityLabel="Save workout as template"
             leftIcon={<Ionicons name="bookmark-outline" size={20} color={colors.text.primary} />}
           />
           <Button
             title="Done"
-            onPress={() => router.replace('/(tabs)/fitness' as never)}
+            onPress={() => { hapticLight(); router.replace('/(tabs)/fitness' as never); }}
             fullWidth
+            accessibilityLabel="Return to fitness tab"
           />
         </View>
       </ScrollView>

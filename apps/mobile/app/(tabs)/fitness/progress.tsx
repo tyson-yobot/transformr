@@ -9,13 +9,13 @@ import {
   ScrollView,
   Pressable,
   Image,
-  ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -23,6 +23,7 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { WeightChart } from '@components/charts/WeightChart';
+import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
 import { formatWeight, formatDate } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
@@ -174,9 +175,7 @@ export default function ProgressScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.primary} />
-      </View>
+      <DetailSkeleton style={{ backgroundColor: colors.background.primary }} />
     );
   }
 
@@ -200,11 +199,11 @@ export default function ProgressScreen() {
                 <Text style={[typography.caption, { color: colors.text.muted }]}>
                   Current Weight
                 </Text>
-                <Text style={[typography.hero, { color: colors.text.primary }]}>
+                <Text style={[typography.stat, { color: colors.text.primary }]}>
                   {formatWeight(latestWeight.weight)}
                 </Text>
                 {latestWeight.body_fat_percentage && (
-                  <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                  <Text style={[typography.monoCaption, { color: colors.text.secondary }]}>
                     {latestWeight.body_fat_percentage}% body fat
                   </Text>
                 )}
@@ -218,8 +217,10 @@ export default function ProgressScreen() {
                 {weightLogs.length >= 2 && (
                   <View style={{ marginTop: spacing.xs }}>
                     {(() => {
+                      const previousWeight = weightLogs[weightLogs.length - 2];
+                      if (!previousWeight) return null;
                       const diff =
-                        latestWeight.weight - weightLogs[weightLogs.length - 2].weight;
+                        latestWeight.weight - previousWeight.weight;
                       const isLoss = diff < 0;
                       return (
                         <Badge
@@ -296,7 +297,7 @@ export default function ProgressScreen() {
                     <Text style={[typography.tiny, { color: colors.text.muted }]}>
                       {m.label}
                     </Text>
-                    <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                       {m.value}"
                     </Text>
                   </View>
@@ -325,7 +326,7 @@ export default function ProgressScreen() {
             </Text>
             <View style={{ flex: 1 }} />
             {progressPhotos.length >= 2 && (
-              <Pressable onPress={() => setCompareMode((prev) => !prev)}>
+              <Pressable onPress={() => { hapticLight(); setCompareMode((prev) => !prev); }} accessibilityLabel={compareMode ? 'Switch to grid view' : 'Compare photos'} accessibilityRole="button">
                 <Text style={[typography.captionBold, { color: colors.accent.primary }]}>
                   {compareMode ? 'Grid' : 'Compare'}
                 </Text>
@@ -449,6 +450,8 @@ export default function ProgressScreen() {
             hapticLight();
             setShowLogWeightModal(true);
           }}
+          accessibilityLabel="Log weight"
+          accessibilityRole="button"
           style={[
             styles.fab,
             {
@@ -465,6 +468,8 @@ export default function ProgressScreen() {
             hapticLight();
             handleAddPhoto();
           }}
+          accessibilityLabel="Add progress photo"
+          accessibilityRole="button"
           style={[
             styles.fab,
             {

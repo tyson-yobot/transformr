@@ -19,6 +19,7 @@ import type { ThemeMode } from '@theme/colors';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
 import { Badge } from '@components/ui/Badge';
+import { MonoText } from '@components/ui/MonoText';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
@@ -59,6 +60,7 @@ interface SettingsRowProps {
   onPress?: () => void;
   rightElement?: React.ReactNode;
   danger?: boolean;
+  accessibilityLabel?: string;
 }
 
 function SettingsRow({
@@ -68,6 +70,7 @@ function SettingsRow({
   onPress,
   rightElement,
   danger = false,
+  accessibilityLabel: a11yLabel,
 }: SettingsRowProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
 
@@ -126,6 +129,7 @@ function SettingsRow({
           onPress();
         }}
         accessibilityRole="button"
+        accessibilityLabel={a11yLabel ?? label}
       >
         {content}
       </Pressable>
@@ -263,6 +267,7 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="🎙️"
           label="Voice Commands"
+          accessibilityLabel="Toggle voice commands"
           rightElement={
             <Toggle
               value={settings.voiceEnabled}
@@ -273,6 +278,7 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="📖"
           label="Narrator"
+          accessibilityLabel="Toggle narrator"
           rightElement={
             <Toggle
               value={settings.narratorEnabled}
@@ -376,12 +382,13 @@ function StatBlock({ label, value }: { label: string; value: string }) {
   const { colors, typography, spacing } = useTheme();
   return (
     <View style={styles.statBlock}>
-      <Text
-        style={[typography.statSmall, { color: colors.text.primary }]}
+      <MonoText
+        variant="statSmall"
+        color={colors.text.primary}
         numberOfLines={1}
       >
         {value}
-      </Text>
+      </MonoText>
       <Text
         style={[
           typography.tiny,

@@ -60,6 +60,7 @@ function LinkRow({
         },
       ]}
       accessibilityRole="button"
+      accessibilityLabel={label}
     >
       <Text style={{ fontSize: 18, marginRight: spacing.md }}>{icon}</Text>
       <Text
@@ -145,7 +146,7 @@ export default function AboutScreen() {
               { color: colors.text.secondary, marginTop: spacing.xs },
             ]}
           >
-            Version {APP_VERSION} (Build {BUILD_NUMBER})
+            Version <Text style={typography.monoBody}>{APP_VERSION}</Text> (Build <Text style={typography.monoBody}>{BUILD_NUMBER}</Text>)
           </Text>
         </View>
       </Animated.View>

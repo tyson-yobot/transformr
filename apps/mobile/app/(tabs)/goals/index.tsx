@@ -22,9 +22,11 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
+import { MonoText } from '@components/ui/MonoText';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
-import { hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Goal } from '@app-types/database';
 
 type GoalCategory = NonNullable<Goal['category']>;
@@ -135,6 +137,15 @@ export default function GoalsDashboard() {
     return Math.min((goal.current_value ?? 0) / goal.target_value, 1);
   };
 
+  if (isLoading && goals.length === 0) {
+    return (
+      <ListSkeleton
+        rows={6}
+        style={{ backgroundColor: colors.background.primary }}
+      />
+    );
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
@@ -151,9 +162,9 @@ export default function GoalsDashboard() {
         {/* Overall Completion Ring */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.ringSection}>
           <ProgressRing progress={overallCompletion} size={140} strokeWidth={12}>
-            <Text style={[typography.stat, { color: colors.text.primary }]}>
+            <MonoText variant="stat" color={colors.text.primary}>
               {formatPercentage(overallCompletion * 100)}
-            </Text>
+            </MonoText>
             <Text style={[typography.caption, { color: colors.text.secondary }]}>
               Complete
             </Text>
@@ -178,7 +189,8 @@ export default function GoalsDashboard() {
             {NAV_ITEMS.map((item) => (
               <Pressable
                 key={item.route}
-                onPress={() => router.push(item.route as `/${string}`)}
+                onPress={() => { hapticLight(); router.push(item.route as `/${string}`); }}
+                accessibilityLabel={item.label}
                 style={[
                   styles.navItem,
                   {
@@ -283,21 +295,22 @@ export default function GoalsDashboard() {
                   />
 
                   {goal.target_value != null && (
-                    <Text
-                      style={[
-                        typography.tiny,
-                        { color: colors.text.muted, marginTop: spacing.xs },
-                      ]}
+                    <MonoText
+                      variant="monoCaption"
+                      color={colors.text.muted}
+                      style={{ marginTop: spacing.xs }}
                     >
                       {goal.current_value ?? 0} / {goal.target_value}
                       {goal.unit ? ` ${goal.unit}` : ''}
-                    </Text>
+                    </MonoText>
                   )}
 
                   {goal.target_date && (
                     <View style={[styles.deadlineRow, { marginTop: spacing.sm }]}>
-                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
-                        {formatCountdown(goal.target_date).days}{' '}
+                      <MonoText variant="monoCaption" color={colors.text.muted}>
+                        {formatCountdown(goal.target_date).days}
+                      </MonoText>
+                      <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
                         {formatCountdown(goal.target_date).label}
                       </Text>
                     </View>
@@ -377,7 +390,8 @@ export default function GoalsDashboard() {
 
       {/* FAB */}
       <Pressable
-        onPress={() => setShowAddModal(true)}
+        onPress={() => { hapticLight(); setShowAddModal(true); }}
+        accessibilityLabel="Add new goal"
         style={[
           styles.fab,
           { backgroundColor: colors.accent.primary, borderRadius: 28 },

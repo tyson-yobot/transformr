@@ -9,7 +9,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -18,6 +17,7 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
+import { Skeleton } from '@components/ui/Skeleton';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro, formatPercentage } from '@utils/formatters';
@@ -249,8 +249,10 @@ export default function NutritionAnalyticsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={colors.accent.primary} />
+          <View style={[styles.loadingState, { gap: spacing.lg }]}>
+            <Skeleton variant="card" height={160} />
+            <Skeleton variant="card" height={140} />
+            <Skeleton variant="card" height={100} />
           </View>
         ) : (
           <>
@@ -259,6 +261,8 @@ export default function NutritionAnalyticsScreen() {
               {TIME_RANGES.map((range) => (
                 <Pressable
                   key={range.value}
+                  accessibilityLabel={`Show ${range.label} time range`}
+                  accessibilityRole="button"
                   onPress={() => { hapticLight(); setTimeRange(range.value); }}
                   style={[
                     styles.rangeChip,
@@ -300,14 +304,14 @@ export default function NutritionAnalyticsScreen() {
                           : colors.accent.warning
                       }
                     >
-                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                         {Math.round(averages.calories)}
                       </Text>
                     </ProgressRing>
                     <Text style={[typography.tiny, { color: colors.text.muted, marginTop: 4 }]}>
                       Calories
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {targets.calories}
                     </Text>
                   </View>
@@ -318,14 +322,14 @@ export default function NutritionAnalyticsScreen() {
                       strokeWidth={6}
                       color={MACRO_COLORS.protein}
                     >
-                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                         {averages.protein}g
                       </Text>
                     </ProgressRing>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.protein, marginTop: 4 }]}>
                       Protein
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {targets.protein}g
                     </Text>
                   </View>
@@ -336,14 +340,14 @@ export default function NutritionAnalyticsScreen() {
                       strokeWidth={6}
                       color={MACRO_COLORS.carbs}
                     >
-                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                         {averages.carbs}g
                       </Text>
                     </ProgressRing>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, marginTop: 4 }]}>
                       Carbs
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {targets.carbs}g
                     </Text>
                   </View>
@@ -354,14 +358,14 @@ export default function NutritionAnalyticsScreen() {
                       strokeWidth={6}
                       color={MACRO_COLORS.fat}
                     >
-                      <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 11 }]}>
                         {averages.fat}g
                       </Text>
                     </ProgressRing>
                     <Text style={[typography.tiny, { color: MACRO_COLORS.fat, marginTop: 4 }]}>
                       Fat
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       / {targets.fat}g
                     </Text>
                   </View>
@@ -389,7 +393,7 @@ export default function NutritionAnalyticsScreen() {
                   </View>
                   <View style={styles.legendItem}>
                     <View style={[styles.legendDash, { borderColor: colors.text.muted }]} />
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>Target ({targets.calories})</Text>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>Target ({targets.calories})</Text>
                   </View>
                 </View>
               </Card>
@@ -413,7 +417,7 @@ export default function NutritionAnalyticsScreen() {
                     strokeWidth={7}
                     color={proteinConsistency >= 0.8 ? colors.accent.success : proteinConsistency >= 0.5 ? colors.accent.warning : colors.accent.danger}
                   >
-                    <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
                       {formatPercentage(proteinConsistency * 100)}
                     </Text>
                   </ProgressRing>
@@ -479,7 +483,7 @@ export default function NutritionAnalyticsScreen() {
                         <Text style={[typography.caption, { color: colors.text.primary, width: 80 }]}>
                           {meal.mealType}
                         </Text>
-                        <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                        <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                           {meal.avgCalories} cal
                         </Text>
                       </View>
@@ -493,7 +497,7 @@ export default function NutritionAnalyticsScreen() {
                           }}
                         />
                       </View>
-                      <Text style={[typography.captionBold, { color: colors.text.secondary, width: 40, textAlign: 'right' }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.secondary, width: 40, textAlign: 'right', fontWeight: '600' }]}>
                         {meal.percentage}%
                       </Text>
                     </View>
@@ -537,7 +541,7 @@ export default function NutritionAnalyticsScreen() {
                       <Text style={[typography.body, { color: colors.text.primary }]}>
                         {food.name}
                       </Text>
-                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                         ~{food.avgCalories} cal avg
                       </Text>
                     </View>
@@ -562,19 +566,19 @@ export default function NutritionAnalyticsScreen() {
                     </View>
                     <View style={styles.comparisonCol}>
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>Last Week</Text>
-                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, marginTop: spacing.sm, fontWeight: '600' }]}>
                         {weeklyComparison.lastWeek.calories}
                       </Text>
-                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, marginTop: spacing.sm, fontWeight: '600' }]}>
                         {weeklyComparison.lastWeek.protein}g
                       </Text>
                     </View>
                     <View style={styles.comparisonCol}>
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>This Week</Text>
-                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, marginTop: spacing.sm, fontWeight: '600' }]}>
                         {weeklyComparison.thisWeek.calories}
                       </Text>
-                      <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.primary, marginTop: spacing.sm, fontWeight: '600' }]}>
                         {weeklyComparison.thisWeek.protein}g
                       </Text>
                     </View>
@@ -582,10 +586,11 @@ export default function NutritionAnalyticsScreen() {
                       <Text style={[typography.tiny, { color: colors.text.muted }]}>Change</Text>
                       <Text
                         style={[
-                          typography.captionBold,
+                          typography.monoCaption,
                           {
                             color: weeklyComparison.calorieDiff > 0 ? colors.accent.warning : colors.accent.success,
                             marginTop: spacing.sm,
+                            fontWeight: '600',
                           },
                         ]}
                       >
@@ -593,10 +598,11 @@ export default function NutritionAnalyticsScreen() {
                       </Text>
                       <Text
                         style={[
-                          typography.captionBold,
+                          typography.monoCaption,
                           {
                             color: weeklyComparison.proteinDiff >= 0 ? colors.accent.success : colors.accent.danger,
                             marginTop: spacing.sm,
+                            fontWeight: '600',
                           },
                         ]}
                       >
@@ -614,10 +620,10 @@ export default function NutritionAnalyticsScreen() {
                 <View style={styles.waterRow}>
                   <Ionicons name="water" size={24} color={colors.accent.info} />
                   <View style={{ flex: 1, marginLeft: spacing.md }}>
-                    <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '600' }]}>
                       Avg Water: {averages.water_oz} oz/day
                     </Text>
-                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, fontSize: 10 }]}>
                       Target: {targets.water} oz/day
                     </Text>
                   </View>
@@ -627,7 +633,7 @@ export default function NutritionAnalyticsScreen() {
                     strokeWidth={4}
                     color={colors.accent.info}
                   >
-                    <Text style={[typography.tiny, { color: colors.text.primary }]}>
+                    <Text style={[typography.monoCaption, { color: colors.text.primary, fontSize: 10 }]}>
                       {formatPercentage((averages.water_oz / targets.water) * 100)}
                     </Text>
                   </ProgressRing>
