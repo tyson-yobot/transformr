@@ -1,17 +1,61 @@
 // =============================================================================
 // TRANSFORMR -- Smart Notification Engine (Module 8)
-// Cron job that evaluates 12 trigger rules per user and sends push
-// notifications + inserts proactive_messages when conditions are met.
+// Evaluates smart_notification_rules for all active users and fires Expo push
+// notifications based on real data triggers — not fixed schedules.
+// Inserts proactive_messages and updates last_triggered_at after each send.
 // =============================================================================
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
+
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const AI_MODEL = "claude-sonnet-4-20250514";
+const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+interface ExpoPushTicket {
+  status: "ok" | "error";
+  id?: string;
+  message?: string;
+}
+
+async function sendExpoPushNotification(
+  pushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, unknown>,
+): Promise<boolean> {
+  if (!pushToken.startsWith("ExponentPushToken[")) return false;
+  try {
+    const res = await fetch(EXPO_PUSH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate",
+      },
+      body: JSON.stringify({
+        to: pushToken,
+        title,
+        body,
+        data: data ?? {},
+        sound: "default",
+        priority: "normal",
+      }),
+    });
+    if (!res.ok) return false;
+    const result = (await res.json()) as { data?: ExpoPushTicket };
+    return result.data?.status === "ok";
+  } catch {
+    return false;
+  }
+}
 
 interface NotificationRule {
   id: string;
@@ -259,10 +303,52 @@ async function evaluateJournalPrompt(
     .eq("user_id", userId)
     .gte("created_at", threeDaysAgo);
 
+  if ((count ?? 0) > 0) {
+    return { should_fire: false, title: "", body: "", category: "", severity: "info" };
+  }
+
+  // Generate AI journal prompt if API key is available
+  let aiPrompt =
+    "What's one thing that moved you forward this week, even if it felt small?";
+
+  if (ANTHROPIC_API_KEY) {
+    try {
+      const promptRes = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: AI_MODEL,
+          max_tokens: 80,
+          system:
+            COMPLIANCE_PREAMBLE +
+            "\nGenerate a single, thoughtful wellness journal prompt in under 20 words. Return only the prompt text, no quotes.",
+          messages: [
+            {
+              role: "user",
+              content:
+                "Generate one reflective journal prompt for a wellness check-in.",
+            },
+          ],
+        }),
+      });
+      const promptData = await promptRes.json();
+      const text = promptData?.content?.[0]?.text;
+      if (text && typeof text === "string") {
+        aiPrompt = text.trim();
+      }
+    } catch {
+      // Fall back to default prompt
+    }
+  }
+
   return {
-    should_fire: (count ?? 0) === 0,
+    should_fire: true,
     title: "Reflection time",
-    body: "It's been a few days since your last journal entry. A quick reflection can help clarify your focus.",
+    body: aiPrompt,
     category: "general",
     severity: "info",
   };
@@ -401,6 +487,18 @@ serve(async (req) => {
       );
     }
 
+    // Collect unique user IDs to fetch push tokens in one query
+    const userIds = [...new Set((rules as NotificationRule[]).map((r) => r.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, expo_push_token")
+      .in("id", userIds);
+
+    const pushTokenMap = new Map<string, string | null>();
+    for (const p of (profiles as Array<{ id: string; expo_push_token: string | null }>) ?? []) {
+      pushTokenMap.set(p.id, p.expo_push_token);
+    }
+
     let notificationsSent = 0;
     const now = new Date();
 
@@ -421,6 +519,7 @@ serve(async (req) => {
 
         const messageBody = rule.custom_message ?? result.body;
 
+        // Insert proactive message for in-app display
         await supabase.from("proactive_messages").insert({
           user_id: rule.user_id,
           category: result.category || "general",
@@ -431,6 +530,15 @@ serve(async (req) => {
             now.getTime() + rule.cooldown_hours * 60 * 60 * 1000,
           ).toISOString(),
         });
+
+        // Send Expo push notification if token is available
+        const pushToken = pushTokenMap.get(rule.user_id);
+        if (pushToken) {
+          await sendExpoPushNotification(pushToken, result.title, messageBody, {
+            trigger_type: rule.trigger_type,
+            rule_id: rule.id,
+          });
+        }
 
         await supabase
           .from("smart_notification_rules")
