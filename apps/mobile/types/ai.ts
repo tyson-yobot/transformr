@@ -88,6 +88,99 @@ export interface AISupplementRecommendation {
   interactions: string[];
 }
 
+// ---------------------------------------------------------------------------
+// Budget-Aware Supplement Types (Module 3)
+// ---------------------------------------------------------------------------
+
+export type SupplementTier = 'essential' | 'recommended' | 'optional';
+export type SupplementEvidenceLevel = 'strong' | 'moderate' | 'emerging' | 'anecdotal';
+export type SupplementTiming =
+  | 'morning'
+  | 'pre_workout'
+  | 'post_workout'
+  | 'with_meals'
+  | 'evening'
+  | 'bedtime'
+  | 'as_needed';
+export type SupplementCategory =
+  | 'protein'
+  | 'creatine'
+  | 'vitamin'
+  | 'mineral'
+  | 'amino_acid'
+  | 'pre_workout'
+  | 'post_workout'
+  | 'sleep'
+  | 'adaptogen'
+  | 'omega'
+  | 'probiotic'
+  | 'other';
+
+export interface EvidenceSource {
+  title: string;
+  year: number;
+  type: 'meta_analysis' | 'rct' | 'review' | 'observational' | 'expert_opinion';
+}
+
+export interface UserSupplement {
+  id: string;
+  user_id: string;
+  name: string;
+  dosage: string | null;
+  timing: SupplementTiming;
+  frequency: string;
+  category: SupplementCategory;
+  tier: SupplementTier;
+  priority: number;
+  evidence_level: SupplementEvidenceLevel;
+  evidence_sources: EvidenceSource[];
+  monthly_cost: number;
+  is_active: boolean;
+  is_ai_recommended: boolean;
+  ai_recommendation_reason: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserSupplementLog {
+  id: string;
+  user_id: string;
+  supplement_id: string;
+  taken_at: string;
+}
+
+export interface SupplementRecommendation {
+  name: string;
+  category: SupplementCategory;
+  dosage: string;
+  timing: SupplementTiming;
+  frequency: string;
+  tier: SupplementTier;
+  priority: number;
+  evidence_level: SupplementEvidenceLevel;
+  evidence_sources: EvidenceSource[];
+  monthly_cost: number;
+  reason: string;
+}
+
+export interface InteractionWarning {
+  supplements: string[];
+  warning: string;
+  severity: 'high' | 'medium' | 'low';
+}
+
+export interface SupplementAdvisorResponse {
+  recommendations: SupplementRecommendation[];
+  interactions_warnings: InteractionWarning[];
+  daily_schedule: Record<string, string[]>;
+  total_estimated_monthly_cost: number;
+  budget_fit: boolean;
+  budget_notes: string;
+  tokens_in: number;
+  tokens_out: number;
+}
+
 export interface AIWeeklyReport {
   summary: string;
   grades: {

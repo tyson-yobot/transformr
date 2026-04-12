@@ -1,5 +1,7 @@
 // =============================================================================
-// TRANSFORMR -- Supplement Management
+// TRANSFORMR -- Supplement Management (Budget-Aware + Evidence)
+// Real data from user_supplements table. AI recommendations with evidence
+// badges, budget tracking, tier grouping, and daily logging.
 // =============================================================================
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -10,6 +12,8 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,210 +25,193 @@ import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
-import { useNutritionStore } from '@stores/nutritionStore';
+import { EvidenceBadge } from '@components/ui/EvidenceBadge';
+import { BudgetBar } from '@components/ui/BudgetBar';
+import { Disclaimer } from '@components/ui/Disclaimer';
+import { useSupplementsStore } from '@stores/supplementsStore';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
-import type { Supplement } from '../../../types/database';
+import type {
+  SupplementCategory,
+  SupplementRecommendation,
+  SupplementTier,
+  UserSupplement,
+} from '@app-types/ai';
 
-type SupplementCategory = NonNullable<Supplement['category']>;
+const TIER_ORDER: SupplementTier[] = ['essential', 'recommended', 'optional'];
 
-const SUPPLEMENT_CATEGORIES: Array<{ key: SupplementCategory; label: string; icon: string }> = [
-  { key: 'protein', label: 'Protein', icon: 'barbell' },
-  { key: 'creatine', label: 'Creatine', icon: 'flash' },
-  { key: 'vitamin', label: 'Vitamins', icon: 'sunny' },
-  { key: 'mineral', label: 'Minerals', icon: 'leaf' },
-  { key: 'amino_acid', label: 'Amino Acids', icon: 'fitness' },
-  { key: 'pre_workout', label: 'Pre-Workout', icon: 'rocket' },
-  { key: 'post_workout', label: 'Post-Workout', icon: 'medkit' },
-  { key: 'sleep', label: 'Sleep', icon: 'moon' },
-  { key: 'other', label: 'Other', icon: 'ellipsis-horizontal' },
+const TIER_LABEL: Record<SupplementTier, string> = {
+  essential: 'Essential',
+  recommended: 'Recommended',
+  optional: 'Optional',
+};
+
+const TIER_ICON: Record<SupplementTier, React.ComponentProps<typeof Ionicons>['name']> = {
+  essential: 'shield-checkmark',
+  recommended: 'star',
+  optional: 'leaf',
+};
+
+const CATEGORY_OPTIONS: Array<{ key: SupplementCategory; label: string }> = [
+  { key: 'protein', label: 'Protein' },
+  { key: 'creatine', label: 'Creatine' },
+  { key: 'vitamin', label: 'Vitamins' },
+  { key: 'mineral', label: 'Minerals' },
+  { key: 'amino_acid', label: 'Amino Acids' },
+  { key: 'pre_workout', label: 'Pre-Workout' },
+  { key: 'post_workout', label: 'Post-Workout' },
+  { key: 'sleep', label: 'Sleep' },
+  { key: 'adaptogen', label: 'Adaptogen' },
+  { key: 'omega', label: 'Omega' },
+  { key: 'probiotic', label: 'Probiotic' },
+  { key: 'other', label: 'Other' },
 ];
 
-interface SupplementWithStatus extends Supplement {
-  takenToday: boolean;
-  lastTakenAt: string | null;
+function groupByTier(
+  supplements: UserSupplement[],
+): Array<{ tier: SupplementTier; items: UserSupplement[] }> {
+  const map = new Map<SupplementTier, UserSupplement[]>();
+  for (const sup of supplements) {
+    const list = map.get(sup.tier) ?? [];
+    list.push(sup);
+    map.set(sup.tier, list);
+  }
+  return TIER_ORDER.filter((t) => map.has(t)).map((tier) => ({
+    tier,
+    items: map.get(tier) ?? [],
+  }));
 }
-
-interface AIRecommendation {
-  id: string;
-  name: string;
-  dosage: string;
-  reason: string;
-  category: SupplementCategory;
-}
-
-interface InteractionWarning {
-  id: string;
-  supplements: [string, string];
-  severity: 'low' | 'medium' | 'high';
-  description: string;
-}
-
-const FREQUENCY_OPTIONS = ['Daily', 'Twice daily', 'Pre-workout', 'Post-workout', 'Before bed', 'With meals'] as const;
 
 export default function SupplementsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const { logSupplement } = useNutritionStore();
 
-  const [supplements, setSupplements] = useState<SupplementWithStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [filterCategory, setFilterCategory] = useState<SupplementCategory | 'all'>('all');
+  const supplements = useSupplementsStore((s) => s.supplements);
+  const todayLogs = useSupplementsStore((s) => s.todayLogs);
+  const budget = useSupplementsStore((s) => s.budget);
+  const aiRecommendations = useSupplementsStore((s) => s.aiRecommendations);
+  const interactionWarnings = useSupplementsStore((s) => s.interactionWarnings);
+  const isLoading = useSupplementsStore((s) => s.isLoadingSupplements);
+  const isLoadingRecs = useSupplementsStore((s) => s.isLoadingRecommendations);
+  const error = useSupplementsStore((s) => s.error);
+
+  const fetchAll = useSupplementsStore((s) => s.fetchAll);
+  const fetchRecommendations = useSupplementsStore((s) => s.fetchRecommendations);
+  const addSupplement = useSupplementsStore((s) => s.addSupplement);
+  const addFromRecommendation = useSupplementsStore((s) => s.addFromRecommendation);
+  const toggleActive = useSupplementsStore((s) => s.toggleActive);
+  const removeSupplement = useSupplementsStore((s) => s.removeSupplement);
+  const logTaken = useSupplementsStore((s) => s.logTaken);
+  const setBudget = useSupplementsStore((s) => s.setBudget);
+  const clearError = useSupplementsStore((s) => s.clearError);
+
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetInput, setBudgetInput] = useState('');
   const [newName, setNewName] = useState('');
   const [newDosage, setNewDosage] = useState('');
   const [newCategory, setNewCategory] = useState<SupplementCategory>('vitamin');
-  const [newFrequency, setNewFrequency] = useState('Daily');
-  const [newTiming, setNewTiming] = useState('');
-
-  // AI recommendations
-  const aiRecommendations: AIRecommendation[] = useMemo(() => [
-    {
-      id: 'rec-1',
-      name: 'Vitamin D3',
-      dosage: '5000 IU',
-      reason: 'Based on your training volume and indoor lifestyle, D3 supports recovery and immune function.',
-      category: 'vitamin',
-    },
-    {
-      id: 'rec-2',
-      name: 'Ashwagandha',
-      dosage: '600mg',
-      reason: 'May help with cortisol management given your high-intensity training schedule.',
-      category: 'other',
-    },
-  ], []);
-
-  // Interaction warnings
-  const interactionWarnings: InteractionWarning[] = useMemo(() => [
-    {
-      id: 'warn-1',
-      supplements: ['Calcium', 'Iron'],
-      severity: 'medium',
-      description: 'Calcium can reduce iron absorption. Take at least 2 hours apart.',
-    },
-    {
-      id: 'warn-2',
-      supplements: ['Caffeine', 'Creatine'],
-      severity: 'low',
-      description: 'Some research suggests caffeine may reduce creatine uptake. Consider timing them separately.',
-    },
-  ], []);
+  const [newCost, setNewCost] = useState('');
 
   useEffect(() => {
-    const mockSupplements: SupplementWithStatus[] = [
-      { id: '1', name: 'Whey Protein Isolate', dosage: '30g', frequency: 'Post-workout', category: 'protein', is_active: true, takenToday: true, lastTakenAt: '2026-04-06T08:30:00Z' },
-      { id: '2', name: 'Creatine Monohydrate', dosage: '5g', frequency: 'Daily', category: 'creatine', is_active: true, takenToday: true, lastTakenAt: '2026-04-06T07:00:00Z' },
-      { id: '3', name: 'Vitamin D3', dosage: '5000 IU', frequency: 'Daily', category: 'vitamin', is_active: true, is_ai_recommended: true, ai_recommendation_reason: 'Supports recovery and bone health', takenToday: false, lastTakenAt: null },
-      { id: '4', name: 'Omega-3 Fish Oil', dosage: '2000mg', frequency: 'Daily', category: 'other', is_active: true, takenToday: false, lastTakenAt: null },
-      { id: '5', name: 'Magnesium Glycinate', dosage: '400mg', frequency: 'Before bed', category: 'mineral', is_active: true, takenToday: false, lastTakenAt: null },
-      { id: '6', name: 'Caffeine + L-Theanine', dosage: '200mg/100mg', frequency: 'Pre-workout', category: 'pre_workout', is_active: true, takenToday: true, lastTakenAt: '2026-04-06T06:00:00Z' },
-      { id: '7', name: 'ZMA', dosage: '3 capsules', frequency: 'Before bed', category: 'sleep', is_active: true, takenToday: false, lastTakenAt: null },
-      { id: '8', name: 'BCAAs', dosage: '10g', frequency: 'During workout', category: 'amino_acid', is_active: false, takenToday: false, lastTakenAt: null },
-    ];
-    setSupplements(mockSupplements);
-    setIsLoading(false);
-  }, []);
+    void fetchAll();
+  }, [fetchAll]);
 
   const activeSupplements = useMemo(
-    () => supplements.filter((s) => s.is_active !== false),
+    () => supplements.filter((s) => s.is_active),
     [supplements],
   );
-
-  const filteredSupplements = useMemo(() => {
-    let sups = activeSupplements;
-    if (filterCategory !== 'all') {
-      sups = sups.filter((s) => s.category === filterCategory);
-    }
-    return sups;
-  }, [activeSupplements, filterCategory]);
-
   const inactiveSupplements = useMemo(
-    () => supplements.filter((s) => s.is_active === false),
+    () => supplements.filter((s) => !s.is_active),
     [supplements],
   );
+  const grouped = useMemo(() => groupByTier(activeSupplements), [activeSupplements]);
 
-  const takenCount = activeSupplements.filter((s) => s.takenToday).length;
-  const totalActive = activeSupplements.length;
-
-  const handleLogSupplement = useCallback(
-    async (supp: SupplementWithStatus) => {
-      hapticSuccess();
-      await logSupplement(supp.id);
-      setSupplements((prev) =>
-        prev.map((s) =>
-          s.id === supp.id ? { ...s, takenToday: true, lastTakenAt: new Date().toISOString() } : s,
-        ),
-      );
-    },
-    [logSupplement],
+  const totalMonthlyCost = useMemo(
+    () => activeSupplements.reduce((acc, s) => acc + (s.monthly_cost ?? 0), 0),
+    [activeSupplements],
   );
 
-  const handleToggleActive = useCallback((suppId: string) => {
-    hapticMedium();
-    setSupplements((prev) =>
-      prev.map((s) =>
-        s.id === suppId ? { ...s, is_active: !s.is_active } : s,
-      ),
-    );
-  }, []);
+  const takenIds = useMemo(
+    () => new Set(todayLogs.map((l) => l.supplement_id)),
+    [todayLogs],
+  );
+  const takenCount = activeSupplements.filter((s) => takenIds.has(s.id)).length;
 
-  const handleDeleteSupplement = useCallback((suppId: string) => {
-    hapticMedium();
-    Alert.alert('Delete Supplement', 'Remove this supplement permanently?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => setSupplements((prev) => prev.filter((s) => s.id !== suppId)),
-      },
-    ]);
-  }, []);
+  const handleLogTaken = useCallback(
+    async (sup: UserSupplement) => {
+      void hapticSuccess();
+      await logTaken(sup.id);
+    },
+    [logTaken],
+  );
 
-  const handleAddSupplement = useCallback(() => {
+  const handleToggleActive = useCallback(
+    (sup: UserSupplement) => {
+      void hapticMedium();
+      void toggleActive(sup.id, !sup.is_active);
+    },
+    [toggleActive],
+  );
+
+  const handleDelete = useCallback(
+    (sup: UserSupplement) => {
+      void hapticMedium();
+      Alert.alert('Delete Supplement', `Remove ${sup.name} permanently?`, [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => void removeSupplement(sup.id),
+        },
+      ]);
+    },
+    [removeSupplement],
+  );
+
+  const handleAddSupplement = useCallback(async () => {
     if (newName.trim().length === 0) return;
-    hapticSuccess();
-    const newSup: SupplementWithStatus = {
-      id: Date.now().toString(),
+    void hapticSuccess();
+    await addSupplement({
       name: newName.trim(),
       dosage: newDosage.trim() || undefined,
-      frequency: newFrequency,
-      times: newTiming ? [newTiming] : undefined,
       category: newCategory,
-      is_active: true,
-      takenToday: false,
-      lastTakenAt: null,
-    };
-    setSupplements((prev) => [newSup, ...prev]);
+      monthlyCost: parseFloat(newCost) || 0,
+    });
     setShowAddModal(false);
     setNewName('');
     setNewDosage('');
-    setNewTiming('');
-  }, [newName, newDosage, newCategory, newFrequency, newTiming]);
+    setNewCost('');
+  }, [addSupplement, newCategory, newCost, newDosage, newName]);
 
-  const handleAddFromRecommendation = useCallback((rec: AIRecommendation) => {
-    hapticSuccess();
-    const newSup: SupplementWithStatus = {
-      id: Date.now().toString(),
-      name: rec.name,
-      dosage: rec.dosage,
-      frequency: 'Daily',
-      category: rec.category,
-      is_active: true,
-      is_ai_recommended: true,
-      ai_recommendation_reason: rec.reason,
-      takenToday: false,
-      lastTakenAt: null,
-    };
-    setSupplements((prev) => [newSup, ...prev]);
-    Alert.alert('Added!', `${rec.name} has been added to your supplements.`);
-  }, []);
+  const handleAddRec = useCallback(
+    async (rec: SupplementRecommendation) => {
+      void hapticSuccess();
+      await addFromRecommendation(rec);
+      Alert.alert('Added!', `${rec.name} has been added to your supplements.`);
+    },
+    [addFromRecommendation],
+  );
 
-  const getSeverityColor = (severity: InteractionWarning['severity']): string => {
-    switch (severity) {
-      case 'high': return colors.accent.danger;
-      case 'medium': return colors.accent.warning;
-      case 'low': return colors.accent.info;
-    }
-  };
+  const handleSaveBudget = useCallback(async () => {
+    const amount = parseFloat(budgetInput);
+    if (isNaN(amount) || amount < 0) return;
+    await setBudget(amount);
+    setShowBudgetModal(false);
+    setBudgetInput('');
+  }, [budgetInput, setBudget]);
+
+  const tierColor = useCallback(
+    (tier: SupplementTier): string => {
+      switch (tier) {
+        case 'essential':
+          return colors.accent.success;
+        case 'recommended':
+          return colors.accent.cyan;
+        case 'optional':
+          return colors.text.muted;
+      }
+    },
+    [colors],
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
@@ -234,26 +221,50 @@ export default function SupplementsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <View style={[styles.loadingState, { gap: spacing.md }]}>
+          <View style={{ gap: spacing.md }}>
             <Skeleton variant="card" height={80} />
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} variant="card" height={72} />
             ))}
           </View>
         ) : (
           <>
+            {error && (
+              <Pressable
+                onPress={clearError}
+                style={[
+                  styles.errorBanner,
+                  {
+                    backgroundColor: colors.accent.dangerDim,
+                    borderColor: colors.accent.danger,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.md,
+                    marginBottom: spacing.md,
+                  },
+                ]}
+              >
+                <Ionicons name="alert-circle-outline" size={18} color={colors.accent.danger} />
+                <Text
+                  style={[typography.caption, { color: colors.accent.danger, marginLeft: spacing.sm, flex: 1 }]}
+                  numberOfLines={2}
+                >
+                  {error}
+                </Text>
+              </Pressable>
+            )}
+
             {/* Summary */}
             <Animated.View entering={FadeInDown.duration(300)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.md }}>
                 <View style={styles.summaryRow}>
                   <ProgressRing
-                    progress={totalActive > 0 ? takenCount / totalActive : 0}
+                    progress={activeSupplements.length > 0 ? takenCount / activeSupplements.length : 0}
                     size={72}
                     strokeWidth={6}
                     color={colors.accent.success}
                   >
                     <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
-                      {takenCount}/{totalActive}
+                      {takenCount}/{activeSupplements.length}
                     </Text>
                   </ProgressRing>
                   <View style={{ flex: 1, marginLeft: spacing.lg }}>
@@ -261,36 +272,83 @@ export default function SupplementsScreen() {
                       Today's Supplements
                     </Text>
                     <Text style={[typography.caption, { color: colors.text.muted, marginTop: 4 }]}>
-                      {totalActive - takenCount} remaining
+                      {activeSupplements.length - takenCount} remaining
                     </Text>
                   </View>
                 </View>
               </Card>
             </Animated.View>
 
+            {/* Budget Bar */}
+            <Animated.View entering={FadeInDown.delay(50).duration(300)}>
+              <Card style={{ marginBottom: spacing.md }}>
+                <Pressable
+                  onPress={() => {
+                    void hapticLight();
+                    setBudgetInput(budget > 0 ? budget.toString() : '');
+                    setShowBudgetModal(true);
+                  }}
+                  accessibilityLabel="Edit supplement budget"
+                  accessibilityRole="button"
+                >
+                  {budget > 0 ? (
+                    <BudgetBar spent={totalMonthlyCost} budget={budget} />
+                  ) : (
+                    <View style={styles.noBudgetRow}>
+                      <Ionicons name="wallet-outline" size={20} color={colors.text.muted} />
+                      <Text
+                        style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}
+                      >
+                        Tap to set a monthly supplement budget
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              </Card>
+            </Animated.View>
+
             {/* Interaction Warnings */}
             {interactionWarnings.length > 0 && (
-              <Animated.View entering={FadeInDown.duration(300).delay(50)}>
-                <Card style={{ marginBottom: spacing.lg, borderLeftWidth: 3, borderLeftColor: colors.accent.warning }}>
+              <Animated.View entering={FadeInDown.delay(80).duration(300)}>
+                <Card
+                  style={{
+                    marginBottom: spacing.md,
+                    borderLeftWidth: 3,
+                    borderLeftColor: colors.accent.warning,
+                  }}
+                >
                   <View style={styles.warningHeader}>
                     <Ionicons name="warning-outline" size={20} color={colors.accent.warning} />
-                    <Text style={[typography.bodyBold, { color: colors.accent.warning, marginLeft: spacing.sm }]}>
+                    <Text
+                      style={[
+                        typography.bodyBold,
+                        { color: colors.accent.warning, marginLeft: spacing.sm },
+                      ]}
+                    >
                       Interaction Warnings
                     </Text>
                   </View>
-                  {interactionWarnings.map((warning) => (
-                    <View
-                      key={warning.id}
-                      style={[styles.warningItem, { marginTop: spacing.md }]}
-                    >
+                  {interactionWarnings.map((w, idx) => (
+                    <View key={`warn-${idx}`} style={{ marginTop: spacing.md }}>
                       <Badge
-                        label={warning.severity.toUpperCase()}
-                        variant={warning.severity === 'high' ? 'danger' : warning.severity === 'medium' ? 'warning' : 'info'}
+                        label={w.severity.toUpperCase()}
+                        variant={
+                          w.severity === 'high'
+                            ? 'danger'
+                            : w.severity === 'medium'
+                            ? 'warning'
+                            : 'info'
+                        }
                         size="sm"
                       />
-                      <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]}>
-                        <Text style={{ fontWeight: '600' }}>{warning.supplements.join(' + ')}: </Text>
-                        {warning.description}
+                      <Text
+                        style={[
+                          typography.caption,
+                          { color: colors.text.secondary, marginTop: spacing.xs },
+                        ]}
+                      >
+                        <Text style={{ fontWeight: '600' }}>{w.supplements.join(' + ')}: </Text>
+                        {w.warning}
                       </Text>
                     </View>
                   ))}
@@ -298,117 +356,112 @@ export default function SupplementsScreen() {
               </Animated.View>
             )}
 
-            {/* Category Filter */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginBottom: spacing.lg }}
-              contentContainerStyle={{ gap: spacing.sm }}
-            >
-              <Pressable
-                onPress={() => { hapticLight(); setFilterCategory('all'); }}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: filterCategory === 'all' ? colors.accent.primary : colors.background.secondary,
-                    borderRadius: borderRadius.full,
-                    paddingHorizontal: spacing.md,
-                    paddingVertical: spacing.sm,
-                  },
-                ]}
+            {/* Tier-Grouped Supplements */}
+            {grouped.map((group, groupIdx) => (
+              <Animated.View
+                key={group.tier}
+                entering={FadeInDown.delay(100 + groupIdx * 60).duration(300)}
               >
-                <Text style={[typography.caption, { color: filterCategory === 'all' ? '#FFFFFF' : colors.text.secondary }]}>
-                  All
-                </Text>
-              </Pressable>
-              {SUPPLEMENT_CATEGORIES.map((cat) => (
-                <Pressable
-                  key={cat.key}
-                  onPress={() => { hapticLight(); setFilterCategory(cat.key); }}
-                  style={[
-                    styles.filterChip,
-                    {
-                      backgroundColor: filterCategory === cat.key ? colors.accent.primary : colors.background.secondary,
-                      borderRadius: borderRadius.full,
-                      paddingHorizontal: spacing.md,
-                      paddingVertical: spacing.sm,
-                    },
-                  ]}
-                >
+                <View style={[styles.tierHeader, { marginTop: spacing.md, marginBottom: spacing.sm }]}>
                   <Ionicons
-                    name={cat.icon as keyof typeof Ionicons.glyphMap}
-                    size={12}
-                    color={filterCategory === cat.key ? '#FFFFFF' : colors.text.secondary}
-                    style={{ marginRight: 4 }}
+                    name={TIER_ICON[group.tier]}
+                    size={16}
+                    color={tierColor(group.tier)}
                   />
-                  <Text style={[typography.tiny, { color: filterCategory === cat.key ? '#FFFFFF' : colors.text.secondary }]}>
-                    {cat.label}
+                  <Text
+                    style={[
+                      typography.captionBold,
+                      {
+                        color: tierColor(group.tier),
+                        marginLeft: spacing.xs,
+                        textTransform: 'uppercase',
+                        letterSpacing: 1,
+                      },
+                    ]}
+                  >
+                    {TIER_LABEL[group.tier]}
                   </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-
-            {/* Active Supplements List */}
-            {filteredSupplements.length > 0 ? (
-              <View style={{ gap: spacing.sm }}>
-                {filteredSupplements.map((supp, index) => (
-                  <Animated.View key={supp.id} entering={FadeInDown.duration(300).delay(100 + index * 50)}>
-                    <Card style={{ opacity: supp.takenToday ? 0.7 : 1 }}>
+                </View>
+                {group.items.map((sup) => {
+                  const taken = takenIds.has(sup.id);
+                  return (
+                    <Card key={sup.id} style={{ marginBottom: spacing.sm, opacity: taken ? 0.65 : 1 }}>
                       <View style={styles.suppRow}>
                         <View style={{ flex: 1 }}>
                           <View style={[styles.suppNameRow, { gap: spacing.sm }]}>
                             <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
-                              {supp.name}
+                              {sup.name}
                             </Text>
-                            {supp.takenToday && (
+                            {taken && (
                               <Ionicons name="checkmark-circle" size={18} color={colors.accent.success} />
                             )}
                           </View>
                           <View style={[styles.suppMeta, { gap: spacing.sm, marginTop: spacing.xs }]}>
-                            {supp.dosage && <Badge label={supp.dosage} size="sm" />}
-                            {supp.frequency && <Badge label={supp.frequency} size="sm" variant="info" />}
-                            {supp.is_ai_recommended && (
+                            {sup.dosage && <Badge label={sup.dosage} size="sm" />}
+                            {sup.monthly_cost > 0 && (
+                              <Badge label={`$${sup.monthly_cost}/mo`} size="sm" variant="info" />
+                            )}
+                            {sup.is_ai_recommended && (
                               <Badge label="AI Rec" size="sm" variant="success" />
                             )}
                           </View>
-                          {supp.ai_recommendation_reason && (
-                            <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
-                              {supp.ai_recommendation_reason}
+                          <View style={{ marginTop: spacing.xs }}>
+                            <EvidenceBadge
+                              level={sup.evidence_level}
+                              sources={sup.evidence_sources}
+                              compact
+                            />
+                          </View>
+                          {sup.ai_recommendation_reason && (
+                            <Text
+                              style={[
+                                typography.tiny,
+                                { color: colors.text.muted, marginTop: spacing.xs },
+                              ]}
+                              numberOfLines={2}
+                            >
+                              {sup.ai_recommendation_reason}
                             </Text>
                           )}
                         </View>
                         <View style={[styles.suppActions, { gap: spacing.sm }]}>
-                          {!supp.takenToday && (
+                          {!taken && (
                             <Pressable
-                              onPress={() => handleLogSupplement(supp)}
-                              accessibilityLabel={`Mark ${supp.name} as taken`}
-                              accessibilityRole="button"
+                              onPress={() => void handleLogTaken(sup)}
+                              accessibilityLabel={`Mark ${sup.name} as taken`}
                               style={[
                                 styles.actionBtn,
-                                { backgroundColor: `${colors.accent.success}20`, borderRadius: borderRadius.md },
+                                {
+                                  backgroundColor: colors.accent.successDim,
+                                  borderRadius: borderRadius.md,
+                                },
                               ]}
                             >
                               <Ionicons name="checkmark" size={20} color={colors.accent.success} />
                             </Pressable>
                           )}
                           <Pressable
-                            onPress={() => handleToggleActive(supp.id)}
-                            accessibilityLabel={`Pause ${supp.name}`}
-                            accessibilityRole="button"
+                            onPress={() => handleToggleActive(sup)}
+                            accessibilityLabel={`Pause ${sup.name}`}
                             style={[
                               styles.actionBtn,
-                              { backgroundColor: `${colors.accent.warning}20`, borderRadius: borderRadius.md },
+                              {
+                                backgroundColor: colors.accent.warningDim,
+                                borderRadius: borderRadius.md,
+                              },
                             ]}
                           >
                             <Ionicons name="pause" size={16} color={colors.accent.warning} />
                           </Pressable>
                           <Pressable
-                            onPress={() => handleDeleteSupplement(supp.id)}
-                            accessibilityLabel={`Delete ${supp.name}`}
-                            accessibilityRole="button"
+                            onPress={() => handleDelete(sup)}
+                            accessibilityLabel={`Delete ${sup.name}`}
                             style={[
                               styles.actionBtn,
-                              { backgroundColor: `${colors.accent.danger}20`, borderRadius: borderRadius.md },
+                              {
+                                backgroundColor: colors.accent.dangerDim,
+                                borderRadius: borderRadius.md,
+                              },
                             ]}
                           >
                             <Ionicons name="trash-outline" size={16} color={colors.accent.danger} />
@@ -416,30 +469,31 @@ export default function SupplementsScreen() {
                         </View>
                       </View>
                     </Card>
-                  </Animated.View>
-                ))}
-              </View>
-            ) : (
+                  );
+                })}
+              </Animated.View>
+            ))}
+
+            {activeSupplements.length === 0 && (
               <View style={styles.emptyState}>
                 <Ionicons name="medical-outline" size={48} color={colors.text.muted} />
                 <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
-                  No supplements found
+                  No supplements yet
                 </Text>
               </View>
             )}
 
-            {/* Inactive Supplements */}
+            {/* Inactive */}
             {inactiveSupplements.length > 0 && (
               <View style={{ marginTop: spacing.xl }}>
                 <Text style={[typography.h3, { color: colors.text.muted, marginBottom: spacing.md }]}>
                   Inactive
                 </Text>
-                {inactiveSupplements.map((supp) => (
+                {inactiveSupplements.map((sup) => (
                   <Pressable
-                    key={supp.id}
-                    accessibilityLabel={`Reactivate ${supp.name}`}
-                    accessibilityRole="button"
-                    onPress={() => handleToggleActive(supp.id)}
+                    key={sup.id}
+                    onPress={() => handleToggleActive(sup)}
+                    accessibilityLabel={`Reactivate ${sup.name}`}
                     style={[
                       styles.inactiveRow,
                       {
@@ -452,9 +506,9 @@ export default function SupplementsScreen() {
                     ]}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={[typography.body, { color: colors.text.muted }]}>{supp.name}</Text>
-                      {supp.dosage && (
-                        <Text style={[typography.tiny, { color: colors.text.muted }]}>{supp.dosage}</Text>
+                      <Text style={[typography.body, { color: colors.text.muted }]}>{sup.name}</Text>
+                      {sup.dosage && (
+                        <Text style={[typography.tiny, { color: colors.text.muted }]}>{sup.dosage}</Text>
                       )}
                     </View>
                     <Ionicons name="play-circle-outline" size={22} color={colors.accent.primary} />
@@ -464,52 +518,103 @@ export default function SupplementsScreen() {
             )}
 
             {/* AI Recommendations */}
-            <Animated.View entering={FadeInDown.duration(300).delay(300)}>
-              <View style={{ marginTop: spacing.xl }}>
-                <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
-                  <Ionicons name="sparkles" size={20} color={colors.accent.primary} />
-                  <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
-                    AI Recommendations
+            <View style={{ marginTop: spacing.xl }}>
+              <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
+                <Ionicons name="sparkles" size={20} color={colors.accent.primary} />
+                <Text
+                  style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm, flex: 1 }]}
+                >
+                  AI Recommendations
+                </Text>
+                <Button
+                  title={isLoadingRecs ? 'Analyzing…' : 'Refresh'}
+                  variant="ghost"
+                  size="sm"
+                  loading={isLoadingRecs}
+                  onPress={() => void fetchRecommendations()}
+                />
+              </View>
+
+              {isLoadingRecs && aiRecommendations.length === 0 && (
+                <View style={{ alignItems: 'center', paddingVertical: spacing.xl }}>
+                  <ActivityIndicator color={colors.accent.cyan} />
+                  <Text
+                    style={[
+                      typography.caption,
+                      { color: colors.text.muted, marginTop: spacing.md },
+                    ]}
+                  >
+                    Analyzing your profile, training, nutrition, sleep, and labs…
                   </Text>
                 </View>
+              )}
 
-                {aiRecommendations.map((rec) => (
-                  <Card key={rec.id} style={{ marginBottom: spacing.sm }}>
-                    <View style={styles.recRow}>
-                      <View style={{ flex: 1 }}>
-                        <View style={[styles.recHeader, { gap: spacing.sm }]}>
-                          <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
-                            {rec.name}
-                          </Text>
-                          <Badge label={rec.dosage} size="sm" variant="info" />
-                        </View>
-                        <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.xs }]}>
-                          {rec.reason}
+              {aiRecommendations.map((rec, idx) => (
+                <Card key={`rec-${idx}`} style={{ marginBottom: spacing.sm }}>
+                  <View style={styles.recRow}>
+                    <View style={{ flex: 1 }}>
+                      <View style={[styles.recHeader, { gap: spacing.sm }]}>
+                        <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                          {rec.name}
                         </Text>
+                        <Badge label={rec.dosage} size="sm" variant="info" />
                       </View>
-                      <Pressable
-                        onPress={() => handleAddFromRecommendation(rec)}
-                        accessibilityLabel={`Add ${rec.name} to supplements`}
-                        accessibilityRole="button"
+                      <View style={[styles.recMeta, { gap: spacing.sm, marginTop: spacing.xs }]}>
+                        <Badge
+                          label={TIER_LABEL[rec.tier]}
+                          size="sm"
+                          variant={rec.tier === 'essential' ? 'success' : rec.tier === 'recommended' ? 'info' : 'default'}
+                        />
+                        {rec.monthly_cost > 0 && (
+                          <Badge label={`$${rec.monthly_cost}/mo`} size="sm" />
+                        )}
+                      </View>
+                      <View style={{ marginTop: spacing.xs }}>
+                        <EvidenceBadge
+                          level={rec.evidence_level}
+                          sources={rec.evidence_sources}
+                        />
+                      </View>
+                      <Text
                         style={[
-                          styles.addRecBtn,
-                          { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.md },
+                          typography.caption,
+                          { color: colors.text.muted, marginTop: spacing.xs },
                         ]}
                       >
-                        <Ionicons name="add" size={20} color={colors.accent.primary} />
-                      </Pressable>
+                        {rec.reason}
+                      </Text>
                     </View>
-                  </Card>
-                ))}
-              </View>
-            </Animated.View>
+                    <Pressable
+                      onPress={() => void handleAddRec(rec)}
+                      accessibilityLabel={`Add ${rec.name} to supplements`}
+                      style={[
+                        styles.addRecBtn,
+                        {
+                          backgroundColor: colors.accent.primaryDim,
+                          borderRadius: borderRadius.md,
+                        },
+                      ]}
+                    >
+                      <Ionicons name="add" size={20} color={colors.accent.primary} />
+                    </Pressable>
+                  </View>
+                </Card>
+              ))}
+            </View>
+
+            <View style={{ marginTop: spacing.xl }}>
+              <Disclaimer type="supplement" />
+            </View>
           </>
         )}
       </ScrollView>
 
       {/* Add FAB */}
       <Pressable
-        onPress={() => { hapticLight(); setShowAddModal(true); }}
+        onPress={() => {
+          void hapticLight();
+          setShowAddModal(true);
+        }}
         accessibilityLabel="Add new supplement"
         accessibilityRole="button"
         style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: borderRadius.full }]}
@@ -518,43 +623,24 @@ export default function SupplementsScreen() {
       </Pressable>
 
       {/* Add Modal */}
-      <Modal
-        visible={showAddModal}
-        onDismiss={() => setShowAddModal(false)}
-        title="Add Supplement"
-      >
-        <ScrollView style={{ maxHeight: 500 }} contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}>
+      <Modal visible={showAddModal} onDismiss={() => setShowAddModal(false)} title="Add Supplement">
+        <ScrollView
+          style={{ maxHeight: 500 }}
+          contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+        >
           <Input label="Name" placeholder="e.g. Vitamin D3" value={newName} onChangeText={setNewName} />
           <Input label="Dosage" placeholder="e.g. 5000 IU" value={newDosage} onChangeText={setNewDosage} />
-
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>Frequency</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
-            {FREQUENCY_OPTIONS.map((freq) => (
-              <Pressable
-                key={freq}
-                onPress={() => setNewFrequency(freq)}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: newFrequency === freq ? colors.accent.primary : colors.background.tertiary,
-                    borderRadius: borderRadius.full,
-                    paddingHorizontal: spacing.md,
-                    paddingVertical: spacing.sm,
-                  },
-                ]}
-              >
-                <Text style={[typography.tiny, { color: newFrequency === freq ? '#FFFFFF' : colors.text.secondary }]}>
-                  {freq}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-
-          <Input label="Timing (optional)" placeholder="e.g. 8:00 AM" value={newTiming} onChangeText={setNewTiming} />
+          <Input
+            label="Monthly cost ($)"
+            placeholder="0"
+            value={newCost}
+            onChangeText={setNewCost}
+            keyboardType="decimal-pad"
+          />
 
           <Text style={[typography.caption, { color: colors.text.secondary }]}>Category</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
-            {SUPPLEMENT_CATEGORIES.map((cat) => (
+            {CATEGORY_OPTIONS.map((cat) => (
               <Pressable
                 key={cat.key}
                 onPress={() => setNewCategory(cat.key)}
@@ -568,7 +654,12 @@ export default function SupplementsScreen() {
                   },
                 ]}
               >
-                <Text style={[typography.tiny, { color: newCategory === cat.key ? '#FFFFFF' : colors.text.secondary }]}>
+                <Text
+                  style={[
+                    typography.tiny,
+                    { color: newCategory === cat.key ? '#FFFFFF' : colors.text.secondary },
+                  ]}
+                >
                   {cat.label}
                 </Text>
               </Pressable>
@@ -577,12 +668,34 @@ export default function SupplementsScreen() {
 
           <Button
             title="Add Supplement"
-            onPress={handleAddSupplement}
+            onPress={() => void handleAddSupplement()}
             disabled={newName.trim().length === 0}
             fullWidth
             style={{ marginTop: spacing.md }}
           />
         </ScrollView>
+      </Modal>
+
+      {/* Budget Modal */}
+      <Modal
+        visible={showBudgetModal}
+        onDismiss={() => setShowBudgetModal(false)}
+        title="Monthly Supplement Budget"
+      >
+        <View style={{ padding: spacing.lg, gap: spacing.md }}>
+          <Input
+            label="Budget ($)"
+            placeholder="e.g. 100"
+            value={budgetInput}
+            onChangeText={setBudgetInput}
+            keyboardType="decimal-pad"
+          />
+          <Button
+            title="Save Budget"
+            onPress={() => void handleSaveBudget()}
+            fullWidth
+          />
+        </View>
       </Modal>
     </View>
   );
@@ -591,32 +704,36 @@ export default function SupplementsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { flex: 1 },
-  loadingState: { alignItems: 'center', paddingVertical: 60 },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  warningHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  warningItem: {},
-  filterChip: { flexDirection: 'row', alignItems: 'center' },
+  summaryRow: { flexDirection: 'row', alignItems: 'center' },
+  warningHeader: { flexDirection: 'row', alignItems: 'center' },
+  tierHeader: { flexDirection: 'row', alignItems: 'center' },
   suppRow: { flexDirection: 'row', alignItems: 'flex-start' },
   suppNameRow: { flexDirection: 'row', alignItems: 'center' },
   suppMeta: { flexDirection: 'row', flexWrap: 'wrap' },
   suppActions: { marginLeft: 12, alignItems: 'center' },
   actionBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
   inactiveRow: { flexDirection: 'row', alignItems: 'center' },
+  noBudgetRow: { flexDirection: 'row', alignItems: 'center' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center' },
   recRow: { flexDirection: 'row', alignItems: 'flex-start' },
   recHeader: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  recMeta: { flexDirection: 'row', flexWrap: 'wrap' },
   addRecBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center', marginLeft: 12 },
   emptyState: { alignItems: 'center', paddingVertical: 60 },
+  filterChip: { flexDirection: 'row', alignItems: 'center' },
   fab: {
-    position: 'absolute', bottom: 24, right: 20, width: 56, height: 56,
-    justifyContent: 'center', alignItems: 'center',
-    elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3, shadowRadius: 8,
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
+  errorBanner: { flexDirection: 'row', alignItems: 'center', borderWidth: 1 },
 });

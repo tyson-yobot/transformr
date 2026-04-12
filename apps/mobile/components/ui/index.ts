@@ -19,6 +19,8 @@ export { DraggableGrid } from './DraggableGrid';
 export { MonoText } from './MonoText';
 export { Disclaimer } from './Disclaimer';
 export { ChatFAB } from './ChatFAB';
+export { EvidenceBadge } from './EvidenceBadge';
+export { BudgetBar } from './BudgetBar';
 export { DashboardSkeleton, ListSkeleton, DetailSkeleton, FormSkeleton, CardSkeleton } from './ScreenSkeleton';
 
 export type { BodyPart, PainLevel } from './BodyMap';
