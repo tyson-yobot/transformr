@@ -67,7 +67,7 @@ const FLAG_LABEL: Record<BiomarkerFlag, string> = {
 
 function groupBiomarkers(
   biomarkers: LabBiomarker[],
-): Array<{ category: BiomarkerCategory; items: LabBiomarker[] }> {
+): { category: BiomarkerCategory; items: LabBiomarker[] }[] {
   const map = new Map<BiomarkerCategory, LabBiomarker[]>();
   for (const marker of biomarkers) {
     const existing = map.get(marker.category) ?? [];

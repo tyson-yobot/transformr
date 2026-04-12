@@ -7,11 +7,11 @@ import type { BudgetGroceryListResponse, TieredMeal } from '@app-types/ai';
 
 export interface GroceryListParams {
   meal_plan: {
-    meals: Array<{
+    meals: {
       name: string;
       servings: number;
-      ingredients: Array<{ name: string; quantity: string; estimated_cost: number }>;
-    }>;
+      ingredients: { name: string; quantity: string; estimated_cost: number }[];
+    }[];
   };
   dietary_restrictions?: string[];
   budget_override?: number;

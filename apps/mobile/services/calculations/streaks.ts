@@ -71,14 +71,14 @@ export function calculateStreak(completionDates: string[]): StreakResult {
 export function getStreakHeatmapData(
   completionDates: string[],
   days: number = 90,
-): Array<{ date: string; completed: boolean; count: number }> {
+): { date: string; completed: boolean; count: number }[] {
   const dateMap = new Map<string, number>();
   for (const d of completionDates) {
     const key = format(startOfDay(parseISO(d)), 'yyyy-MM-dd');
     dateMap.set(key, (dateMap.get(key) ?? 0) + 1);
   }
 
-  const result: Array<{ date: string; completed: boolean; count: number }> = [];
+  const result: { date: string; completed: boolean; count: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
     const count = dateMap.get(date) ?? 0;

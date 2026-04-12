@@ -29,7 +29,7 @@ import { useChatStore } from '@stores/chatStore';
 import type { ChatMessage, ChatTopic } from '@app-types/ai';
 import { hapticLight } from '@utils/haptics';
 
-const TOPICS: Array<{ id: ChatTopic; label: string; icon: string }> = [
+const TOPICS: { id: ChatTopic; label: string; icon: string }[] = [
   { id: 'general', label: 'General', icon: 'chatbubble-ellipses-outline' },
   { id: 'training', label: 'Training', icon: 'barbell-outline' },
   { id: 'nutrition', label: 'Nutrition', icon: 'restaurant-outline' },

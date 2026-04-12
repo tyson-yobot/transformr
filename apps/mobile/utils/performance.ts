@@ -2,7 +2,7 @@
 // TRANSFORMR -- Performance Optimization Utilities
 // =============================================================================
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { InteractionManager } from 'react-native';
 
 /**

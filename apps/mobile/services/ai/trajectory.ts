@@ -5,13 +5,13 @@ interface TrajectoryContext {
   userId: string;
   currentWeight: number;
   goalWeight: number;
-  weightHistory: Array<{ date: string; weight: number }>;
+  weightHistory: { date: string; weight: number }[];
   workoutsPerWeek: number;
   avgCalories: number;
   targetCalories: number;
   currentRevenue?: number;
   revenueGoal?: number;
-  revenueHistory?: Array<{ date: string; amount: number }>;
+  revenueHistory?: { date: string; amount: number }[];
   countdownDate?: string;
   currentStreak: number;
   habitsCompletionRate: number;

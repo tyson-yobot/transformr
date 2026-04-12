@@ -14,7 +14,6 @@ const mockUser = { id: 'user-123', email: 'test@transformr.app' };
 /** Builds a chainable query mock that resolves with the given payload. */
 function chainable(resolvedValue: Record<string, unknown> = {}) {
   const obj: Record<string, jest.Mock> = {};
-  const self = () => obj;
   obj.select = jest.fn().mockReturnValue(obj);
   obj.insert = jest.fn().mockReturnValue(obj);
   obj.update = jest.fn().mockReturnValue(obj);
@@ -127,6 +126,7 @@ describe('startWorkout', () => {
   });
 
   it('sets error when user is not authenticated', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { supabase } = require('../../services/supabase');
     supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
 
@@ -662,6 +662,7 @@ describe('getGhostData', () => {
   });
 
   it('returns empty array when user is not authenticated', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { supabase } = require('../../services/supabase');
     supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
 

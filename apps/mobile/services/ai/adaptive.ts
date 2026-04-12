@@ -3,21 +3,21 @@ import { supabase } from '@services/supabase';
 interface AdaptiveContext {
   userId: string;
   templateId: string;
-  recentSessions: Array<{
+  recentSessions: {
     date: string;
-    exercises: Array<{
+    exercises: {
       exerciseId: string;
-      sets: Array<{ weight: number; reps: number; rpe: number | null }>;
-    }>;
+      sets: { weight: number; reps: number; rpe: number | null }[];
+    }[];
     readinessScore: number | null;
-  }>;
+  }[];
   currentReadiness: number;
   painAreas: string[];
   goals: { direction: string; targetWeight: number };
 }
 
 interface AdaptiveResult {
-  adjustedTemplate: Array<{
+  adjustedTemplate: {
     exerciseId: string;
     exerciseName: string;
     targetSets: number;
@@ -26,7 +26,7 @@ interface AdaptiveResult {
     targetRpe: number;
     notes: string;
     reason: string;
-  }>;
+  }[];
   overallNotes: string;
   adjustmentSummary: string;
 }

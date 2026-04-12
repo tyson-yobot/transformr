@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useNutritionStore } from '../../stores/nutritionStore';
-import type { NutritionLog, WaterLog, SavedMeal } from '../../types/database';
+import type { NutritionLog, WaterLog, SavedMeal, Food } from '../../types/database';
 
 // ---------------------------------------------------------------------------
 // Supabase mock
@@ -30,7 +30,7 @@ function createQueryChain(resolvedValue: { data: unknown; error: unknown }) {
   chain.single = jest.fn().mockResolvedValue(resolvedValue);
 
   // When the chain is awaited directly (no .single()), resolve via .then()
-  (chain as any).then = (resolve: (v: unknown) => void) =>
+  (chain as unknown as { then: (resolve: (v: unknown) => void) => void }).then = (resolve: (v: unknown) => void) =>
     resolve(resolvedValue);
 
   return chain;
@@ -55,6 +55,7 @@ jest.mock('../../services/supabase', () => ({
 
 // Replace the mock implementation after we have the reference
 beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mod = require('../../services/supabase');
   Object.defineProperty(mod, 'supabase', { value: mockSupabase, writable: true });
 });
@@ -681,7 +682,7 @@ describe('reset', () => {
     useNutritionStore.setState({
       todayLogs: [makeNutritionLog()],
       waterLogs: [makeWaterLog()],
-      searchResults: [{ id: 'f1', name: 'Test', calories: 100, protein: 10, carbs: 10, fat: 5, serving_size: 100, serving_unit: 'g' } as any],
+      searchResults: [{ id: 'f1', name: 'Test', calories: 100, protein: 10, carbs: 10, fat: 5, serving_size: 100, serving_unit: 'g' } as Food],
       isLoading: true,
       error: 'some error',
     });

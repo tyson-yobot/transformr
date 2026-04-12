@@ -31,7 +31,7 @@ import type { Food } from '../../../types/database';
 
 type MealType = typeof MEAL_TYPES[number];
 
-const MEAL_TYPE_OPTIONS: Array<{ value: MealType; label: string; emoji: string }> = [
+const MEAL_TYPE_OPTIONS: { value: MealType; label: string; emoji: string }[] = [
   { value: 'breakfast', label: 'Breakfast', emoji: '\u{1F373}' },
   { value: 'lunch', label: 'Lunch', emoji: '\u{1F96A}' },
   { value: 'dinner', label: 'Dinner', emoji: '\u{1F35D}' },

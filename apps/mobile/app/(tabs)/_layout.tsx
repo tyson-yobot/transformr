@@ -16,7 +16,7 @@ interface TabIconProps {
 }
 
 function TabIcon({ icon, label, focused }: TabIconProps) {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography } = useTheme();
 
   return (
     <View style={styles.tabIconContainer}>

@@ -20,11 +20,11 @@ interface JournalPrompt {
 
 interface JournalResponse {
   reflection: string;
-  patternsDetected: Array<{
+  patternsDetected: {
     pattern: string;
     insight: string;
     suggestion: string;
-  }>;
+  }[];
   encouragement: string;
 }
 

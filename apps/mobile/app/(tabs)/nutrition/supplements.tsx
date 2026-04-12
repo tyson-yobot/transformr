@@ -52,7 +52,7 @@ const TIER_ICON: Record<SupplementTier, React.ComponentProps<typeof Ionicons>['n
   optional: 'leaf',
 };
 
-const CATEGORY_OPTIONS: Array<{ key: SupplementCategory; label: string }> = [
+const CATEGORY_OPTIONS: { key: SupplementCategory; label: string }[] = [
   { key: 'protein', label: 'Protein' },
   { key: 'creatine', label: 'Creatine' },
   { key: 'vitamin', label: 'Vitamins' },
@@ -69,7 +69,7 @@ const CATEGORY_OPTIONS: Array<{ key: SupplementCategory; label: string }> = [
 
 function groupByTier(
   supplements: UserSupplement[],
-): Array<{ tier: SupplementTier; items: UserSupplement[] }> {
+): { tier: SupplementTier; items: UserSupplement[] }[] {
   const map = new Map<SupplementTier, UserSupplement[]>();
   for (const sup of supplements) {
     const list = map.get(sup.tier) ?? [];

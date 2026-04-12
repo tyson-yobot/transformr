@@ -93,10 +93,10 @@ export default function FitnessHomeScreen() {
       ]);
 
       if (sessionsRes.data) {
-        const sessions = sessionsRes.data as Array<{
+        const sessions = sessionsRes.data as {
           id: string; name: string; completed_at: string | null;
           duration_minutes: number | null; total_volume: number | null; total_sets: number | null;
-        }>;
+        }[];
         setRecentWorkouts(
           sessions.map((s) => ({
             id: s.id,
@@ -125,7 +125,7 @@ export default function FitnessHomeScreen() {
       }
 
       if (weightRes.data) {
-        const weights = weightRes.data as Array<{ weight: number; logged_at: string | null }>;
+        const weights = weightRes.data as { weight: number; logged_at: string | null }[];
         setWeightData(
           weights.map((w) => ({
             date: w.logged_at ?? '',
@@ -136,7 +136,7 @@ export default function FitnessHomeScreen() {
 
       // Calculate streak from sessions
       if (sessionsRes.data && sessionsRes.data.length > 0) {
-        const allSessions = sessionsRes.data as Array<{ completed_at: string | null }>;
+        const allSessions = sessionsRes.data as { completed_at: string | null }[];
         let streak = 0;
         const today = new Date();
         today.setHours(0, 0, 0, 0);

@@ -235,7 +235,7 @@ export default function NutritionAnalyticsScreen() {
     };
   }, [dailyData]);
 
-  const TIME_RANGES: Array<{ value: TimeRange; label: string }> = [
+  const TIME_RANGES: { value: TimeRange; label: string }[] = [
     { value: '7d', label: '7D' },
     { value: '14d', label: '14D' },
     { value: '30d', label: '30D' },

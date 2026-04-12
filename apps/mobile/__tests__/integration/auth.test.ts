@@ -47,7 +47,7 @@ const mockSignInWithPassword = jest.fn();
 const mockSignOut = jest.fn();
 const mockResetPasswordForEmail = jest.fn();
 const mockGetSession = jest.fn();
-const mockOnAuthStateChange = jest.fn().mockImplementation((cb: any) => {
+const mockOnAuthStateChange = jest.fn().mockImplementation((cb: (_event: string, session: Session | null) => void) => {
   authStateCallback = cb;
   return {
     data: {
@@ -59,12 +59,12 @@ const mockOnAuthStateChange = jest.fn().mockImplementation((cb: any) => {
 jest.mock('../../services/supabase', () => ({
   supabase: {
     auth: {
-      signUp: (...args: any[]) => mockSignUp(...args),
-      signInWithPassword: (...args: any[]) => mockSignInWithPassword(...args),
-      signOut: (...args: any[]) => mockSignOut(...args),
-      resetPasswordForEmail: (...args: any[]) => mockResetPasswordForEmail(...args),
-      getSession: (...args: any[]) => mockGetSession(...args),
-      onAuthStateChange: (...args: any[]) => mockOnAuthStateChange(...args),
+      signUp: (...args: unknown[]) => mockSignUp(...args),
+      signInWithPassword: (...args: unknown[]) => mockSignInWithPassword(...args),
+      signOut: (...args: unknown[]) => mockSignOut(...args),
+      resetPasswordForEmail: (...args: unknown[]) => mockResetPasswordForEmail(...args),
+      getSession: (...args: unknown[]) => mockGetSession(...args),
+      onAuthStateChange: (...args: unknown[]) => mockOnAuthStateChange(...args),
     },
   },
 }));
@@ -124,7 +124,7 @@ describe('authStore — signIn', () => {
   });
 
   it('sets loading to true while sign in is in progress', async () => {
-    let resolveSignIn: (value: any) => void;
+    let resolveSignIn: (value: unknown) => void;
     const pending = new Promise((res) => {
       resolveSignIn = res;
     });
@@ -478,7 +478,7 @@ describe('authStore — persistence shape', () => {
 
     // The persist config name should be "transformr-auth"
     // We verify the store has persist API exposed
-    expect((useAuthStore as any).persist).toBeDefined();
-    expect((useAuthStore as any).persist.getOptions().name).toBe('transformr-auth');
+    expect((useAuthStore as unknown as { persist: unknown }).persist).toBeDefined();
+    expect((useAuthStore as unknown as { persist: { getOptions: () => { name: string } } }).persist.getOptions().name).toBe('transformr-auth');
   });
 });

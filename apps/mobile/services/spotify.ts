@@ -84,6 +84,6 @@ export function getPlaylistForWorkoutIntensity(
   };
 
   // In production, would query Spotify API for matching playlists
-  const _range = bpmRanges[intensity];
+  void bpmRanges[intensity];
   return null;
 }

@@ -8,7 +8,6 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
-import { useBusinessStore } from '@stores/businessStore';
 import { hapticLight } from '@utils/haptics';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';

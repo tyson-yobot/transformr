@@ -20,11 +20,11 @@ interface VerificationResult {
 export async function verifyDailyTasks(
   userId: string,
   date: string,
-  tasks: Array<{
+  tasks: {
     id: string;
     type: string;
     config: Record<string, unknown>;
-  }>
+  }[]
 ): Promise<Record<string, VerificationResult>> {
   const results: Record<string, VerificationResult> = {};
 

@@ -3,9 +3,10 @@ import { Text, TextProps, TextStyle } from 'react-native';
 import { useTheme } from '@theme/index';
 import { TypographyVariant } from '@theme/typography';
 
-interface MonoTextProps extends TextProps {
+export interface MonoTextProps extends TextProps {
   variant?: Extract<TypographyVariant, 'stat' | 'statSmall' | 'countdown' | 'monoBody' | 'monoCaption'>;
   color?: string;
+  children?: React.ReactNode;
 }
 
 export function MonoText({

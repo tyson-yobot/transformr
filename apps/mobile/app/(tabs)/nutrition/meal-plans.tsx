@@ -44,7 +44,7 @@ const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'S
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function generateMockPlan(): DayPlan[] {
-  const mealTemplates: Array<Omit<PlannedMeal, 'id'>> = [
+  const mealTemplates: Omit<PlannedMeal, 'id'>[] = [
     { name: 'Egg White Omelette', mealType: 'breakfast', calories: 280, protein: 32, carbs: 8, fat: 14 },
     { name: 'Oatmeal & Berries', mealType: 'breakfast', calories: 350, protein: 12, carbs: 58, fat: 8 },
     { name: 'Chicken & Rice', mealType: 'lunch', calories: 520, protein: 48, carbs: 52, fat: 12 },

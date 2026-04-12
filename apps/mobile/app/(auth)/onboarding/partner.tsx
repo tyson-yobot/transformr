@@ -3,7 +3,7 @@
 // =============================================================================
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';

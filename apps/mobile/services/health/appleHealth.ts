@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved -- react-native-health is an optional native module */
 // =============================================================================
 // TRANSFORMR -- Apple Health Integration Service (Module 9)
 // Bridges Apple HealthKit data into the app. Reads steps, heart rate, sleep,
@@ -162,7 +163,7 @@ export async function getActiveCalories(
   return new Promise((resolve, reject) => {
     hk.default.getActiveEnergyBurned(
       { startDate, endDate },
-      (err: string, results: Array<{ value: number }>) => {
+      (err: string, results: { value: number }[]) => {
         if (err) return reject(new Error(err));
         const total = results.reduce((sum, r) => sum + r.value, 0);
         resolve(total);

@@ -21,12 +21,12 @@ export interface USDAFood {
 export interface USDAFoodDetail extends USDAFood {
   servingSize?: number;
   servingSizeUnit?: string;
-  foodNutrients: Array<{
+  foodNutrients: {
     nutrientId: number;
     name: string;
     amount: number;
     unit: string;
-  }>;
+  }[];
 }
 
 export interface MacroNutrients {

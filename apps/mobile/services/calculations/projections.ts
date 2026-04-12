@@ -86,7 +86,7 @@ export function daysToTarget(
 }
 
 export function calculateLinearRegression(
-  data: Array<{ x: number; y: number }>,
+  data: { x: number; y: number }[],
 ): { slope: number; intercept: number; r2: number } {
   const n = data.length;
   if (n < 2) return { slope: 0, intercept: 0, r2: 0 };

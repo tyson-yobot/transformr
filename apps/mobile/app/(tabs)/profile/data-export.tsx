@@ -34,7 +34,7 @@ interface DataCategory {
   selected: boolean;
 }
 
-const FORMAT_OPTIONS: ReadonlyArray<{ key: ExportFormat; label: string; icon: string }> = [
+const FORMAT_OPTIONS: readonly { key: ExportFormat; label: string; icon: string }[] = [
   { key: 'csv', label: 'CSV', icon: '📄' },
   { key: 'json', label: 'JSON', icon: '🔧' },
   { key: 'pdf', label: 'PDF Report', icon: '📊' },

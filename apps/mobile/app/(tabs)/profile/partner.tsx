@@ -28,11 +28,11 @@ import type { SharedPreferences } from '@app-types/database';
 // ---------------------------------------------------------------------------
 // Privacy toggle keys
 // ---------------------------------------------------------------------------
-const PRIVACY_TOGGLES: ReadonlyArray<{
+const PRIVACY_TOGGLES: readonly {
   key: keyof SharedPreferences;
   label: string;
   icon: string;
-}> = [
+}[] = [
   { key: 'can_see_weight', label: 'Weight & Body Stats', icon: '⚖️' },
   { key: 'can_see_workouts', label: 'Workouts', icon: '🏋️' },
   { key: 'can_see_nutrition', label: 'Nutrition', icon: '🍎' },

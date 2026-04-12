@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved -- optional native module, installed at build time
 import { sendMessage, watchEvents, getReachability } from 'react-native-watch-connectivity';
 
 interface WatchWorkoutData {

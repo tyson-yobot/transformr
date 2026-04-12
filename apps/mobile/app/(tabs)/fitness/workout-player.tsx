@@ -127,7 +127,7 @@ export default function WorkoutPlayerScreen() {
       setLoadingExercises(true);
 
       try {
-        let exercises: Exercise[] = [];
+        const exercises: Exercise[] = [];
 
         if (activeSession.template_id) {
           const { data: templateExercises } = await supabase

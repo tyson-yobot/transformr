@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved -- react-native-health-connect is an optional native module */
 // =============================================================================
 // TRANSFORMR -- Google Health Connect Service (Module 9)
 // Bridges Google Health Connect (Android) data into the app. Reads steps,
@@ -62,7 +63,7 @@ export async function getSteps(
       endTime: endDate,
     },
   });
-  return (result.records as Array<{ count: number }>).reduce(
+  return (result.records as { count: number }[]).reduce(
     (sum, r) => sum + r.count,
     0,
   );
@@ -81,11 +82,11 @@ export async function getHeartRateSamples(
     },
   });
   return (
-    result.records as Array<{
+    result.records as {
       startTime: string;
       endTime: string;
-      samples: Array<{ beatsPerMinute: number }>;
-    }>
+      samples: { beatsPerMinute: number }[];
+    }[]
   ).flatMap((r) =>
     r.samples.map((s) => ({
       startDate: r.startTime,
@@ -110,7 +111,7 @@ export async function getSleepHours(
     },
   });
   const totalMs = (
-    result.records as Array<{ startTime: string; endTime: string }>
+    result.records as { startTime: string; endTime: string }[]
   ).reduce((sum, r) => {
     const start = new Date(r.startTime).getTime();
     const end = new Date(r.endTime).getTime();
@@ -131,9 +132,9 @@ export async function getLatestWeight(): Promise<number | null> {
       endTime: new Date().toISOString(),
     },
   });
-  const records = result.records as Array<{
+  const records = result.records as {
     weight: { inPounds: number };
-  }>;
+  }[];
   if (records.length === 0) return null;
   return records[records.length - 1]!.weight.inPounds;
 }
@@ -151,7 +152,7 @@ export async function getActiveCalories(
     },
   });
   return (
-    result.records as Array<{ energy: { inKilocalories: number } }>
+    result.records as { energy: { inKilocalories: number } }[]
   ).reduce((sum, r) => sum + r.energy.inKilocalories, 0);
 }
 

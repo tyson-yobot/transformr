@@ -65,7 +65,7 @@ export default function SleepTracker() {
     (bed: string, wake: string): number => {
       const [bH, bM] = bed.split(':').map(Number);
       const [wH, wM] = wake.split(':').map(Number);
-      let bedMin = (bH ?? 0) * 60 + (bM ?? 0);
+      const bedMin = (bH ?? 0) * 60 + (bM ?? 0);
       let wakeMin = (wH ?? 0) * 60 + (wM ?? 0);
       if (wakeMin <= bedMin) wakeMin += 24 * 60;
       return wakeMin - bedMin;

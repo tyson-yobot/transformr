@@ -114,7 +114,7 @@ export default function DashboardBuilderScreen() {
   const handleCycleSize = useCallback(
     (widgetId: string) => {
       void hapticLight();
-      const sizes: Array<'small' | 'medium' | 'large'> = ['small', 'medium', 'large'];
+      const sizes: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
       setWidgets((prev) =>
         prev.map((w) => {
           if (w.id !== widgetId) return w;

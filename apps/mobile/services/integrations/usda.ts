@@ -24,25 +24,25 @@ export interface USDAFoodResult {
 }
 
 interface USDASearchResponse {
-  foods: Array<{
+  foods: {
     fdcId: number;
     description: string;
     brandOwner?: string;
     dataType: string;
     servingSize?: number;
     servingSizeUnit?: string;
-    foodNutrients: Array<{
+    foodNutrients: {
       nutrientId: number;
       nutrientName: string;
       value: number;
       unitName: string;
-    }>;
-  }>;
+    }[];
+  }[];
   totalHits: number;
 }
 
 function extractNutrient(
-  nutrients: Array<{ nutrientId: number; value: number }>,
+  nutrients: { nutrientId: number; value: number }[],
   id: number,
 ): number {
   const match = nutrients.find((n) => n.nutrientId === id);
@@ -101,10 +101,10 @@ export async function getFoodDetails(
   const food = await response.json();
 
   const nutrients = (
-    food.foodNutrients as Array<{
+    food.foodNutrients as {
       nutrient: { id: number };
       amount: number;
-    }>
+    }[]
   ).map((n) => ({
     nutrientId: n.nutrient.id,
     value: n.amount ?? 0,

@@ -64,7 +64,7 @@ export default function GroceryListScreen() {
   // Derived data
   const allItems = useMemo(() => {
     if (!groceryData) return [];
-    const items: Array<{ aisle: string; item: GroceryItemType }> = [];
+    const items: { aisle: string; item: GroceryItemType }[] = [];
     for (const aisle of groceryData.aisles) {
       for (const item of aisle.items) {
         items.push({ aisle: aisle.name, item });

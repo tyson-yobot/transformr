@@ -11,7 +11,6 @@ import Animated, {
   withDelay,
   withSpring,
   withSequence,
-  Easing,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
@@ -20,7 +19,7 @@ import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
 
 export default function ReadyScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);

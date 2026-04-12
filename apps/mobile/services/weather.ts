@@ -6,6 +6,7 @@
 // =============================================================================
 
 const OWM_BASE = 'https://api.openweathermap.org/data/2.5';
+// eslint-disable-next-line expo/no-dynamic-env-var
 const API_KEY = process.env['EXPO_PUBLIC_OPENWEATHER_API_KEY'];
 
 // ---------------------------------------------------------------------------
@@ -75,23 +76,23 @@ interface OwmCurrentResponse {
   wind: {
     speed: number;
   };
-  weather: Array<{
+  weather: {
     id: number;
     description: string;
-  }>;
+  }[];
   uvi?: number;
 }
 
 interface OwmForecastResponse {
-  list: Array<{
+  list: {
     dt: number;
     main: {
       temp_max: number;
       temp_min: number;
     };
-    weather: Array<{ id: number }>;
+    weather: { id: number }[];
     pop: number;
-  }>;
+  }[];
 }
 
 // ---------------------------------------------------------------------------

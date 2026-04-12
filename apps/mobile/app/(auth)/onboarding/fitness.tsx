@@ -4,11 +4,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
-import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import type { Equipment, Difficulty } from '@app-types/common';

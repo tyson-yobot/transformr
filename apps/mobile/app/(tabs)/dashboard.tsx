@@ -18,7 +18,6 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
-import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
@@ -33,7 +32,7 @@ import { useGoalStore } from '@stores/goalStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useBusinessStore } from '@stores/businessStore';
 import { useCountdown } from '@hooks/useCountdown';
-import { formatNumber, formatCalories, formatCurrency } from '@utils/formatters';
+import { formatNumber, formatCurrency } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 
 // ---------------------------------------------------------------------------
@@ -129,7 +128,7 @@ export default function DashboardScreen() {
     return goalsWithDates[0] ?? null;
   }, [goalStore.goals]);
 
-  const countdown = useCountdown(primaryGoal?.target_date ?? null);
+  useCountdown(primaryGoal?.target_date ?? null);
 
   // Streak from habits
   const currentStreak = useMemo(() => {

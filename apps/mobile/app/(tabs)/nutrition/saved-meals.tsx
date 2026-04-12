@@ -163,7 +163,7 @@ export default function SavedMealsScreen() {
     ]);
   }, []);
 
-  const FILTER_OPTIONS: Array<{ value: FilterType; label: string }> = [
+  const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'breakfast', label: 'Breakfast' },
     { value: 'lunch', label: 'Lunch' },

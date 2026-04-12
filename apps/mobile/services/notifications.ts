@@ -1,5 +1,5 @@
 import * as Notifications from 'expo-notifications';
-// @ts-ignore -- types may not be installed
+// @ts-expect-error -- types may not be installed
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';

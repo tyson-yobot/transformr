@@ -6,7 +6,7 @@ export interface AICoachResponse {
 }
 
 export interface AIMealAnalysis {
-  foods: Array<{
+  foods: {
     name: string;
     estimated_calories: number;
     estimated_protein: number;
@@ -14,7 +14,7 @@ export interface AIMealAnalysis {
     estimated_fat: number;
     serving_size: string;
     confidence: number;
-  }>;
+  }[];
   total_calories: number;
   total_protein: number;
   total_carbs: number;
@@ -25,27 +25,27 @@ export interface AIMealAnalysis {
 
 export interface AIFormCheckResult {
   overall_score: number;
-  form_issues: Array<{
+  form_issues: {
     body_part: string;
     issue: string;
     severity: 'minor' | 'moderate' | 'major';
     correction: string;
-  }>;
+  }[];
   positive_notes: string[];
   injury_risk: 'low' | 'medium' | 'high';
 }
 
 export interface AITrajectory {
   current_path: {
-    weight_projection: Array<{ date: string; value: number }>;
-    revenue_projection: Array<{ date: string; value: number }>;
-    fitness_projection: Array<{ date: string; value: number }>;
+    weight_projection: { date: string; value: number }[];
+    revenue_projection: { date: string; value: number }[];
+    fitness_projection: { date: string; value: number }[];
     narrative: string;
   };
   optimal_path: {
-    weight_projection: Array<{ date: string; value: number }>;
-    revenue_projection: Array<{ date: string; value: number }>;
-    fitness_projection: Array<{ date: string; value: number }>;
+    weight_projection: { date: string; value: number }[];
+    revenue_projection: { date: string; value: number }[];
+    fitness_projection: { date: string; value: number }[];
     narrative: string;
   };
   key_differences: string[];
@@ -77,13 +77,13 @@ export interface AISleepRecommendation {
 }
 
 export interface AISupplementRecommendation {
-  recommended: Array<{
+  recommended: {
     name: string;
     dosage: string;
     timing: string;
     reason: string;
     priority: 'essential' | 'recommended' | 'optional';
-  }>;
+  }[];
   warnings: string[];
   interactions: string[];
 }

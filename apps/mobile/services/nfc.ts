@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved -- optional native module, installed at build time
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { supabase } from './supabase';
 

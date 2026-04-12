@@ -3,12 +3,12 @@ import type { AISleepRecommendation } from '@app-types/ai';
 
 interface SleepContext {
   userId: string;
-  recentSleepLogs: Array<{
+  recentSleepLogs: {
     bedtime: string;
     wakeTime: string;
     quality: number;
     durationMinutes: number;
-  }>;
+  }[];
   workoutTimes: string[];
   caffeineHabits: string[];
   screenTime: string | null;

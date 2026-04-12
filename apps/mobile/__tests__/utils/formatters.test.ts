@@ -12,8 +12,6 @@ import {
   formatRestTimer,
   formatDate,
   formatDateShort,
-  formatTime,
-  formatDayOfWeek,
   formatRelativeTime,
   formatCountdown,
   formatVolume,

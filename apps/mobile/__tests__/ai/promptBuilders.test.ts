@@ -5,6 +5,30 @@
 import { AI_MODEL } from '@utils/constants';
 
 // ---------------------------------------------------------------------------
+// Imports (after mocks are set up)
+// ---------------------------------------------------------------------------
+import {
+  getAICoaching,
+  getMorningBriefing,
+  getEveningReflection,
+  getWorkoutAdvice,
+} from '@services/ai/coach';
+
+import {
+  analyzeMealPhoto,
+  analyzeMenuPhoto,
+} from '@services/ai/mealCamera';
+
+import {
+  getMotivation,
+  getDailyQuote,
+} from '@services/ai/motivation';
+
+import { analyzeExerciseForm } from '@services/ai/formCheck';
+import { generateTrajectory } from '@services/ai/trajectory';
+import * as FileSystem from 'expo-file-system';
+
+// ---------------------------------------------------------------------------
 // Mock: expo-file-system
 // ---------------------------------------------------------------------------
 jest.mock('expo-file-system', () => ({
@@ -41,30 +65,6 @@ jest.mock('expo-speech', () => ({
   stop: jest.fn(),
   isSpeakingAsync: jest.fn().mockResolvedValue(false),
 }));
-
-// ---------------------------------------------------------------------------
-// Imports (after mocks are set up)
-// ---------------------------------------------------------------------------
-import {
-  getAICoaching,
-  getMorningBriefing,
-  getEveningReflection,
-  getWorkoutAdvice,
-} from '@services/ai/coach';
-
-import {
-  analyzeMealPhoto,
-  analyzeMenuPhoto,
-} from '@services/ai/mealCamera';
-
-import {
-  getMotivation,
-  getDailyQuote,
-} from '@services/ai/motivation';
-
-import { analyzeExerciseForm } from '@services/ai/formCheck';
-import { generateTrajectory } from '@services/ai/trajectory';
-import * as FileSystem from 'expo-file-system';
 
 // =============================================================================
 // Helpers

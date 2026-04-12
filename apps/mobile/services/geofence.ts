@@ -1,6 +1,7 @@
 import * as Location from 'expo-location';
 // @ts-ignore -- types may not be installed
 import * as TaskManager from 'expo-task-manager';
+import type { TaskManagerTaskBody } from 'expo-task-manager';
 import { supabase } from './supabase';
 
 const GEOFENCE_TASK = 'TRANSFORMR_GEOFENCE';
@@ -48,13 +49,13 @@ export async function fetchUserGeofences(userId: string) {
 }
 
 export function convertToGeofenceRegions(
-  triggers: Array<{
+  triggers: {
     id: string;
     latitude: number;
     longitude: number;
     radius_meters: number;
     trigger_on: string;
-  }>,
+  }[],
 ): GeofenceRegion[] {
   return triggers.map((t) => ({
     identifier: t.id,
@@ -67,13 +68,15 @@ export function convertToGeofenceRegions(
 }
 
 // Register the background task
-TaskManager.defineTask(GEOFENCE_TASK, (taskBody: any) => {
+interface GeofenceTaskData {
+  eventType: Location.GeofencingEventType;
+  region: GeofenceRegion;
+}
+
+TaskManager.defineTask(GEOFENCE_TASK, (taskBody: TaskManagerTaskBody<GeofenceTaskData>) => {
   if (taskBody.error) return;
 
-  const eventData = taskBody.data as {
-    eventType: Location.GeofencingEventType;
-    region: GeofenceRegion;
-  };
+  const eventData = taskBody.data;
 
   if (eventData.eventType === Location.GeofencingEventType.Enter) {
     handleGeofenceEnter(eventData.region.identifier);

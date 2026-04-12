@@ -28,7 +28,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 // ---------------------------------------------------------------------------
 type Tier = 'all' | 'bronze' | 'silver' | 'gold' | 'diamond';
 
-const TIER_FILTERS: ReadonlyArray<{ key: Tier; label: string; color: string }> = [
+const TIER_FILTERS: readonly { key: Tier; label: string; color: string }[] = [
   { key: 'all', label: 'All', color: '#94A3B8' },
   { key: 'bronze', label: 'Bronze', color: '#CD7F32' },
   { key: 'silver', label: 'Silver', color: '#C0C0C0' },
