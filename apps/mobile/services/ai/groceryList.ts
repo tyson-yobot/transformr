@@ -1,39 +1,47 @@
+// =============================================================================
+// TRANSFORMR -- Budget-Aware Grocery List Service (Module 5)
+// =============================================================================
+
 import { supabase } from '@services/supabase';
+import type { BudgetGroceryListResponse, TieredMeal } from '@app-types/ai';
 
-interface GroceryContext {
-  userId: string;
-  mealPlanMeals: Array<{
-    name: string;
-    servings: number;
-    ingredients: Array<{ name: string; quantity: number; unit: string }>;
-  }>;
-  dietaryRestrictions: string[];
-  budget?: number;
-  storePreference?: string;
-  existingPantryItems?: string[];
+export interface GroceryListParams {
+  meal_plan: {
+    meals: Array<{
+      name: string;
+      servings: number;
+      ingredients: Array<{ name: string; quantity: string; estimated_cost: number }>;
+    }>;
+  };
+  dietary_restrictions?: string[];
+  budget_override?: number;
+  household_size?: number;
+  existing_pantry?: string[];
 }
 
-interface GroceryListResult {
-  items: Array<{
-    name: string;
-    quantity: number;
-    unit: string;
-    aisle: string;
-    estimatedCost: number;
-    alternatives: string[];
-  }>;
-  totalEstimatedCost: number;
-  budgetSuggestions: string[];
-  mealPrepTips: string[];
-}
-
-export async function generateGroceryList(
-  context: GroceryContext,
-): Promise<GroceryListResult> {
+export async function generateBudgetGroceryList(
+  params: GroceryListParams,
+): Promise<BudgetGroceryListResponse> {
   const { data, error } = await supabase.functions.invoke('ai-grocery-list', {
-    body: context,
+    body: params,
   });
 
   if (error) throw error;
-  return data as GroceryListResult;
+  return data as BudgetGroceryListResponse;
+}
+
+export function mealsToGroceryInput(
+  meals: TieredMeal[],
+): GroceryListParams['meal_plan'] {
+  return {
+    meals: meals.map((m) => ({
+      name: m.name,
+      servings: m.servings,
+      ingredients: m.ingredients.map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        estimated_cost: i.estimated_cost,
+      })),
+    })),
+  };
 }

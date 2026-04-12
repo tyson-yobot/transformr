@@ -403,3 +403,111 @@ export interface LabUploadDetail {
   interpretation: LabInterpretation | null;
   biomarkers: LabBiomarker[];
 }
+
+// ---------------------------------------------------------------------------
+// Budget-Aware Meal Prep Types (Module 5)
+// ---------------------------------------------------------------------------
+
+export type MealPrepTier = 'good' | 'better' | 'best';
+
+export interface TieredMealMacros {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
+
+export interface TieredMealIngredient {
+  name: string;
+  quantity: string;
+  estimated_cost: number;
+}
+
+export interface TieredMeal {
+  name: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  servings: number;
+  per_serving_macros: TieredMealMacros;
+  ingredients: TieredMealIngredient[];
+  instructions: string[];
+  prep_time_minutes: number;
+  cook_time_minutes: number;
+  storage: string;
+  reheat: string;
+  container_label: string;
+}
+
+export interface TieredPrepScheduleStep {
+  order: number;
+  task: string;
+  duration_minutes: number;
+  parallel_note: string | null;
+}
+
+export interface MealPrepTierPlan {
+  tier: MealPrepTier;
+  tier_label: string;
+  description: string;
+  estimated_weekly_cost: number;
+  meals: TieredMeal[];
+  prep_day_schedule: {
+    total_time_hours: number;
+    steps: TieredPrepScheduleStep[];
+  };
+  daily_plan: Record<string, {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+    snacks: string[];
+  }>;
+  weekly_macro_average: TieredMealMacros;
+}
+
+export interface BudgetMealPrepResponse {
+  tiers: MealPrepTierPlan[];
+  budget_usd: number;
+  container_plan: {
+    containers_needed: number;
+    labeling: string[];
+  };
+  cost_comparison_notes: string[];
+  tokens_in: number;
+  tokens_out: number;
+}
+
+// ---------------------------------------------------------------------------
+// Budget-Aware Grocery List Types (Module 5)
+// ---------------------------------------------------------------------------
+
+export interface GroceryItem {
+  name: string;
+  quantity: string;
+  estimated_cost: number;
+  notes: string | null;
+  meals_used_in: string[];
+}
+
+export interface GroceryAisle {
+  name: string;
+  items: GroceryItem[];
+  aisle_subtotal: number;
+}
+
+export interface BudgetSwapSuggestion {
+  original: string;
+  alternative: string;
+  savings: number;
+  nutrition_impact: string;
+}
+
+export interface BudgetGroceryListResponse {
+  aisles: GroceryAisle[];
+  estimated_total: number;
+  budget_usd: number;
+  budget_status: 'under_budget' | 'on_budget' | 'over_budget';
+  budget_swap_suggestions: BudgetSwapSuggestion[];
+  shopping_tips: string[];
+  items_already_have: string[];
+  tokens_in: number;
+  tokens_out: number;
+}

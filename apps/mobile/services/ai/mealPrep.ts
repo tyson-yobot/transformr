@@ -1,62 +1,59 @@
+// =============================================================================
+// TRANSFORMR -- Budget-Aware Meal Prep Service (Module 5)
+// =============================================================================
+
 import { supabase } from '@services/supabase';
+import type { BudgetMealPrepResponse } from '@app-types/ai';
 
-interface MealPrepContext {
-  userId: string;
-  calorieTarget: number;
-  proteinTarget: number;
-  carbTarget: number;
-  fatTarget: number;
-  mealsPerDay: number;
-  daysToPrep: number;
-  servingsPerMeal: number; // 1 for individual, 2 for couples
-  dietaryRestrictions: string[];
-  dislikedFoods: string[];
-  budget?: number;
-  availableEquipment: string[];
-  maxPrepTimeMinutes: number;
+export interface MealPrepParams {
+  macro_targets?: {
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+  };
+  dietary_restrictions?: string[];
+  meals_per_day?: number;
+  prep_time_hours?: number;
+  cooking_skill?: 'beginner' | 'intermediate' | 'advanced';
+  equipment?: string[];
+  flavor_preferences?: string[];
+  budget_override?: number;
 }
 
-interface MealPrepResult {
-  meals: Array<{
-    name: string;
-    mealType: string;
-    servings: number;
-    macros: { calories: number; protein: number; carbs: number; fat: number };
-    ingredients: Array<{ name: string; quantity: number; unit: string }>;
-    instructions: string[];
-    prepTimeMinutes: number;
-  }>;
-  prepSchedule: Array<{
-    step: number;
-    description: string;
-    durationMinutes: number;
-    parallelWith?: number[];
-  }>;
-  containerPlan: Array<{
-    label: string;
-    contents: string;
-    day: string;
-    mealType: string;
-    macros: { calories: number; protein: number; carbs: number; fat: number };
-  }>;
-  totalPrepTimeMinutes: number;
-  groceryList: Array<{
-    name: string;
-    quantity: number;
-    unit: string;
-    estimatedCost: number;
-  }>;
-  totalEstimatedCost: number;
-  tips: string[];
-}
-
-export async function generateMealPrepPlan(
-  context: MealPrepContext,
-): Promise<MealPrepResult> {
+export async function generateBudgetMealPrepPlan(
+  params: MealPrepParams,
+): Promise<BudgetMealPrepResponse> {
   const { data, error } = await supabase.functions.invoke('ai-meal-prep', {
-    body: context,
+    body: params,
   });
 
   if (error) throw error;
-  return data as MealPrepResult;
+  return data as BudgetMealPrepResponse;
+}
+
+export async function getWeeklyGroceryBudget(): Promise<number> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('weekly_grocery_budget_usd')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return (data?.weekly_grocery_budget_usd as number) ?? 0;
+}
+
+export async function updateWeeklyGroceryBudget(budget: number): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ weekly_grocery_budget_usd: budget })
+    .eq('id', user.id);
+
+  if (error) throw error;
 }

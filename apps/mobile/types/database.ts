@@ -44,6 +44,8 @@ export interface Profile {
   stripe_customer_id?: string;
   watch_paired?: boolean;
   expo_push_token?: string;
+  supplement_budget_monthly?: number;
+  weekly_grocery_budget_usd?: number;
   onboarding_completed?: boolean;
   created_at?: string;
   updated_at?: string;

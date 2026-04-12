@@ -1,3 +1,9 @@
+// =============================================================================
+// TRANSFORMR -- Budget-Aware AI Meal Prep (Module 5)
+// Generates tiered meal prep plans (Good / Better / Best) that respect the
+// user's weekly grocery budget. Includes full user context + compliance.
+// =============================================================================
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
@@ -11,7 +17,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function callClaude(systemPrompt: string, userMessage: string) {
+interface CallClaudeResult {
+  text: string;
+  tokens_in: number;
+  tokens_out: number;
+}
+
+async function callClaude(
+  systemPrompt: string,
+  userMessage: string,
+): Promise<CallClaudeResult> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -21,13 +36,62 @@ async function callClaude(systemPrompt: string, userMessage: string) {
     },
     body: JSON.stringify({
       model: AI_MODEL,
-      max_tokens: 4096,
+      max_tokens: 8192,
       system: systemPrompt,
       messages: [{ role: "user", content: userMessage }],
     }),
   });
   const data = await response.json();
-  return data.content[0].text;
+  return {
+    text: data.content[0].text,
+    tokens_in: data.usage?.input_tokens ?? 0,
+    tokens_out: data.usage?.output_tokens ?? 0,
+  };
+}
+
+async function gatherUserContext(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
+  const fourteenDaysAgo = new Date(
+    Date.now() - 14 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  const [profileRes, goalsRes, mealsRes, workoutsRes] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    supabase
+      .from("goals")
+      .select("title, category, target_value, current_value, unit, target_date")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .limit(10),
+    supabase
+      .from("meal_logs")
+      .select("logged_at, calories, protein_g, carbs_g, fat_g")
+      .eq("user_id", userId)
+      .gte("logged_at", fourteenDaysAgo)
+      .order("logged_at", { ascending: false })
+      .limit(30),
+    supabase
+      .from("workout_sessions")
+      .select("started_at, completed_at, total_volume, notes")
+      .eq("user_id", userId)
+      .gte("started_at", fourteenDaysAgo)
+      .order("started_at", { ascending: false })
+      .limit(10),
+  ]);
+
+  const profile = (profileRes.data ?? null) as Record<string, unknown> | null;
+  return {
+    profile,
+    goals: goalsRes.data ?? [],
+    recentMeals: mealsRes.data ?? [],
+    recentWorkouts: workoutsRes.data ?? [],
+    weeklyGroceryBudget:
+      typeof profile?.weekly_grocery_budget_usd === "number"
+        ? (profile.weekly_grocery_budget_usd as number)
+        : 0,
+  };
 }
 
 serve(async (req) => {
@@ -43,7 +107,7 @@ serve(async (req) => {
         global: {
           headers: { Authorization: req.headers.get("Authorization")! },
         },
-      }
+      },
     );
 
     const {
@@ -56,6 +120,7 @@ serve(async (req) => {
       });
     }
 
+    const body = await req.json();
     const {
       macro_targets,
       dietary_restrictions,
@@ -64,102 +129,123 @@ serve(async (req) => {
       cooking_skill,
       equipment,
       flavor_preferences,
-    } = await req.json();
+      budget_override,
+    } = body;
 
-    const systemPrompt = COMPLIANCE_PREAMBLE + "\n\n" + `You are a meal prep planning AI. Generate a complete weekly meal prep plan optimized for macros.
-Include recipes, step-by-step batch cooking instructions, and container organization.
+    const ctx = await gatherUserContext(supabaseClient, user.id);
+    const weeklyBudget =
+      typeof budget_override === "number"
+        ? budget_override
+        : ctx.weeklyGroceryBudget;
 
-ALWAYS respond with valid JSON:
+    const macros = macro_targets ?? {
+      calories: ctx.profile?.daily_calorie_target ?? 2000,
+      protein_g: ctx.profile?.daily_protein_target ?? 150,
+      carbs_g: ctx.profile?.daily_carb_target ?? 200,
+      fat_g: ctx.profile?.daily_fat_target ?? 65,
+    };
+
+    const systemPrompt =
+      COMPLIANCE_PREAMBLE +
+      "\n\n" +
+      `You are a budget-aware meal prep planning AI for TRANSFORMR. You generate THREE tiers of weekly meal prep plans — Good (budget-friendly), Better (quality upgrade), and Best (premium) — so the user can choose based on their budget.
+
+USER CONTEXT:
+- Profile: ${JSON.stringify(ctx.profile ?? {})}
+- Active goals: ${JSON.stringify(ctx.goals)}
+- Recent meals (14d): ${JSON.stringify(ctx.recentMeals)}
+- Recent workouts (14d): ${JSON.stringify(ctx.recentWorkouts)}
+- Weekly grocery budget: $${weeklyBudget > 0 ? weeklyBudget : "not set (estimate reasonable costs)"}
+
+TIER DEFINITIONS:
+- Good: Budget-friendly staples (chicken thighs, rice, frozen veggies, eggs, oats). Maximizes nutrition per dollar. Target ~60-70% of budget.
+- Better: Quality upgrade (chicken breast, quinoa, fresh produce, greek yogurt). Better variety and taste. Target ~85-100% of budget.
+- Best: Premium ingredients (salmon, grass-fed beef, organic produce, specialty items). Optimal nutrition and variety. May exceed budget.
+
+ALWAYS respond with valid JSON matching this exact structure:
 {
-  "prep_day_schedule": {
-    "total_time_hours": 3.5,
-    "steps": [
-      {
-        "order": 1,
-        "task": "Start rice cooker with 4 cups brown rice",
-        "duration_minutes": 5,
-        "parallel_note": "While rice cooks, prep vegetables"
-      }
-    ]
-  },
-  "meals": [
+  "tiers": [
     {
-      "name": "Meal name",
-      "type": "breakfast|lunch|dinner|snack",
-      "servings": 5,
-      "per_serving_macros": {
-        "calories": 450,
-        "protein_g": 40,
-        "carbs_g": 45,
-        "fat_g": 12
-      },
-      "ingredients": [
-        {"item": "Chicken breast", "amount": "2.5 lbs"}
+      "tier": "good",
+      "tier_label": "Good — Budget Friendly",
+      "description": "...",
+      "estimated_weekly_cost": 65.00,
+      "meals": [
+        {
+          "name": "Meal name",
+          "meal_type": "breakfast|lunch|dinner|snack",
+          "servings": 5,
+          "per_serving_macros": { "calories": 450, "protein_g": 40, "carbs_g": 45, "fat_g": 12 },
+          "ingredients": [{ "name": "Chicken thigh", "quantity": "2.5 lbs", "estimated_cost": 6.50 }],
+          "instructions": ["Step 1", "Step 2"],
+          "prep_time_minutes": 15,
+          "cook_time_minutes": 25,
+          "storage": "Glass containers, refrigerate up to 5 days",
+          "reheat": "Microwave 2-3 minutes",
+          "container_label": "Protein - Chicken"
+        }
       ],
-      "instructions": ["Step 1", "Step 2"],
-      "storage": "Glass containers, refrigerate up to 5 days",
-      "reheat": "Microwave 2-3 minutes"
+      "prep_day_schedule": {
+        "total_time_hours": 3.0,
+        "steps": [
+          { "order": 1, "task": "Start rice cooker", "duration_minutes": 5, "parallel_note": "While rice cooks, prep chicken" }
+        ]
+      },
+      "daily_plan": {
+        "monday": { "breakfast": "Meal A", "lunch": "Meal B", "dinner": "Meal C", "snacks": ["Meal D"] },
+        "tuesday": { "breakfast": "Meal A", "lunch": "Meal B", "dinner": "Meal C", "snacks": ["Meal D"] }
+      },
+      "weekly_macro_average": { "calories": 2100, "protein_g": 180, "carbs_g": 200, "fat_g": 65 }
     }
   ],
-  "daily_plan": {
-    "monday": {"breakfast": "Meal A", "lunch": "Meal B", "dinner": "Meal C", "snacks": ["Meal D"]},
-    "tuesday": {"breakfast": "Meal A", "lunch": "Meal B", "dinner": "Meal C", "snacks": ["Meal D"]}
-  },
-  "container_plan": {
-    "containers_needed": 15,
-    "labeling": ["Label format suggestions"]
-  },
-  "grocery_list_summary": {
-    "proteins": ["3 lbs chicken breast"],
-    "carbs": ["4 cups brown rice"],
-    "vegetables": ["2 heads broccoli"],
-    "other": ["Olive oil"]
-  },
-  "weekly_macro_average": {
-    "calories": 2100,
-    "protein_g": 180,
-    "carbs_g": 200,
-    "fat_g": 65
-  }
-}`;
+  "container_plan": { "containers_needed": 15, "labeling": ["Label format suggestions"] },
+  "cost_comparison_notes": ["Good saves $X vs Better by using...", "Best adds premium protein sources..."]
+}
 
-    const userMessage = `Macro targets: ${JSON.stringify(macro_targets || {})}
-Dietary restrictions: ${JSON.stringify(dietary_restrictions || [])}
-Meals per day: ${meals_per_day || 4}
-Available prep time: ${prep_time_hours || 3} hours
-Cooking skill: ${cooking_skill || "intermediate"}
-Kitchen equipment: ${JSON.stringify(equipment || ["oven", "stovetop", "microwave"])}
-Flavor preferences: ${JSON.stringify(flavor_preferences || [])}
+Generate all 7 days (monday-sunday) in each daily_plan. Include ${meals_per_day || 4} meals per day. Match macro targets as closely as possible.`;
 
-Generate a complete weekly meal prep plan.`;
+    const userMessage = `Macro targets: ${JSON.stringify(macros)}
+Dietary restrictions: ${JSON.stringify(dietary_restrictions ?? [])}
+Meals per day: ${meals_per_day ?? 4}
+Available prep time: ${prep_time_hours ?? 3} hours
+Cooking skill: ${cooking_skill ?? "intermediate"}
+Kitchen equipment: ${JSON.stringify(equipment ?? ["oven", "stovetop", "microwave"])}
+Flavor preferences: ${JSON.stringify(flavor_preferences ?? [])}
+Weekly grocery budget: $${weeklyBudget > 0 ? weeklyBudget : "not set"}
 
-    const aiResponse = await callClaude(systemPrompt, userMessage);
+Generate a complete tiered weekly meal prep plan with Good, Better, and Best options.`;
+
+    const result = await callClaude(systemPrompt, userMessage);
 
     let parsed;
     try {
-      parsed = JSON.parse(aiResponse);
+      parsed = JSON.parse(result.text);
     } catch {
-      parsed = {
-        prep_day_schedule: { total_time_hours: 0, steps: [] },
-        meals: [],
-        daily_plan: {},
-        container_plan: { containers_needed: 0, labeling: [] },
-        grocery_list_summary: {},
-        weekly_macro_average: { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 },
-        raw_response: aiResponse,
-      };
+      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0]);
+      } else {
+        parsed = {
+          tiers: [],
+          container_plan: { containers_needed: 0, labeling: [] },
+          cost_comparison_notes: [],
+          raw_response: result.text,
+        };
+      }
     }
+
+    parsed.budget_usd = weeklyBudget;
+    parsed.tokens_in = result.tokens_in;
+    parsed.tokens_out = result.tokens_out;
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
