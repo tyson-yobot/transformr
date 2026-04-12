@@ -44,7 +44,7 @@ function generateParticles(accentColors: string[]): ParticleConfig[] {
       startY: SCREEN_HEIGHT / 2 - 60,
       endX: SCREEN_WIDTH / 2 + Math.cos(angle) * distance,
       endY: SCREEN_HEIGHT / 2 - 60 + Math.sin(angle) * distance + Math.random() * 100,
-      color: accentColors[i % accentColors.length],
+      color: accentColors[i % accentColors.length] ?? accentColors[0] ?? '#FFD700',
       size: 4 + Math.random() * 8,
       delay: Math.random() * 300,
     };

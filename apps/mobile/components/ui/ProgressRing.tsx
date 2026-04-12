@@ -56,7 +56,11 @@ export function ProgressRing({
   }));
 
   return (
-    <View style={[styles.container, { width: size, height: size }, style]}>
+    <View
+      style={[styles.container, { width: size, height: size }, style]}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
+    >
       <Svg width={size} height={size}>
         <Circle
           cx={center}

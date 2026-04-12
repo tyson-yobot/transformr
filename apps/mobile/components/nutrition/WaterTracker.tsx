@@ -207,7 +207,7 @@ export function WaterTracker({
                 styles.progressBarFill,
                 {
                   backgroundColor: progressColor,
-                  width: `${percentage}%` as unknown as number,
+                  width: `${percentage}%`,
                 },
               ]}
             />

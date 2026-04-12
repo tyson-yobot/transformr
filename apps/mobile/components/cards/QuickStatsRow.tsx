@@ -58,13 +58,14 @@ function StatCell({ item }: { item: StatItem }) {
           paddingHorizontal: spacing.sm,
         },
       ]}
+      accessibilityLabel={`${item.label}: ${item.value}`}
     >
       <View style={[styles.iconWrap, { marginBottom: spacing.xs }]}>
         {item.icon}
       </View>
       <Text
         style={[
-          typography.statSmall,
+          typography.monoBody,
           { color: colors.text.primary },
         ]}
         numberOfLines={1}

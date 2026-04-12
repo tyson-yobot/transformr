@@ -112,7 +112,7 @@ export function SupplementChecklist({
           {activeSupplements.map((supplement, index) => {
             const log = takenMap.get(supplement.id);
             const isTaken = !!log;
-            const emoji = CATEGORY_EMOJIS[supplement.category ?? 'other'] ?? CATEGORY_EMOJIS.other;
+            const emoji = CATEGORY_EMOJIS[supplement.category ?? 'other'] ?? '\u{2795}';
 
             return (
               <SupplementItem

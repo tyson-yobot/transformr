@@ -98,7 +98,7 @@ export function ChallengeCard({ challenge, onPress, isActive = false }: Challeng
             ]}
           >
             <Text style={{ fontSize: 28 }}>
-              {challenge.image_url ? catIcon : catIcon}
+              {challenge.icon ?? catIcon}
             </Text>
           </View>
 
@@ -108,7 +108,7 @@ export function ChallengeCard({ challenge, onPress, isActive = false }: Challeng
               style={[typography.bodyBold, { color: colors.text.primary }]}
               numberOfLines={1}
             >
-              {challenge.title}
+              {challenge.name}
             </Text>
             <Text
               style={[

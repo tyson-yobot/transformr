@@ -41,7 +41,7 @@ export function ChallengeCalendar({ dailyLogs, totalDays }: ChallengeCalendarPro
         map.set(day, 'current');
       } else if (!log) {
         map.set(day, 'missed');
-      } else if (log.all_complete) {
+      } else if (log.all_tasks_completed) {
         map.set(day, 'complete');
       } else {
         // Has a log but not all tasks done

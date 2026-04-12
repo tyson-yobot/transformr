@@ -30,6 +30,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  accessibilityLabel?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -46,6 +47,7 @@ export function Button({
   fullWidth = false,
   style,
   textStyle,
+  accessibilityLabel,
 }: ButtonProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const scale = useSharedValue(1);
@@ -69,7 +71,7 @@ export function Button({
   }, [loading, disabled, onPress]);
 
   const sizeConfig: Record<ButtonSize, { height: number; paddingHorizontal: number; fontSize: TextStyle }> = {
-    sm: { height: 36, paddingHorizontal: spacing.md, fontSize: typography.caption },
+    sm: { height: 44, paddingHorizontal: spacing.md, fontSize: typography.caption },
     md: { height: 48, paddingHorizontal: spacing.xl, fontSize: typography.body },
     lg: { height: 56, paddingHorizontal: spacing.xxl, fontSize: typography.h3 },
   };
@@ -84,7 +86,15 @@ export function Button({
     switch (variant) {
       case 'primary':
         return {
-          container: { ...base, backgroundColor: colors.accent.primary },
+          container: {
+            ...base,
+            backgroundColor: colors.accent.primary,
+            shadowColor: '#A855F7',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            elevation: 8,
+          },
           text: { color: '#FFFFFF' },
         };
       case 'secondary':
@@ -129,6 +139,7 @@ export function Button({
         style,
       ]}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
       {loading ? (

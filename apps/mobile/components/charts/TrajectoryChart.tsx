@@ -37,12 +37,12 @@ const CHART_PADDING = { top: 20, right: 16, bottom: 30, left: 48 };
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0].x},${points[0].y}`;
+  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
 
-  let path = `M${points[0].x},${points[0].y}`;
+  let path = `M${points[0]!.x},${points[0]!.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -60,10 +60,10 @@ function buildShadedArea(
 
   let returnPath = '';
   if (reversedLower.length > 0) {
-    returnPath = ` L${reversedLower[0].x},${reversedLower[0].y}`;
+    returnPath = ` L${reversedLower[0]!.x},${reversedLower[0]!.y}`;
     for (let i = 1; i < reversedLower.length; i++) {
-      const prev = reversedLower[i - 1];
-      const curr = reversedLower[i];
+      const prev = reversedLower[i - 1]!;
+      const curr = reversedLower[i]!;
       const cpx = (prev.x + curr.x) / 2;
       returnPath += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
     }
@@ -211,14 +211,14 @@ export function TrajectoryChart({
     const count = Math.min(5, allDates.length);
     const step = Math.floor((allDates.length - 1) / (count - 1));
     const days = differenceInDays(
-      new Date(allDates[allDates.length - 1]),
-      new Date(allDates[0]),
+      new Date(allDates[allDates.length - 1]!),
+      new Date(allDates[0]!),
     );
     const fmt = days > 180 ? 'MMM yy' : 'MMM d';
     return Array.from({ length: count }, (_, i) => {
       const idx = Math.min(i * step, allDates.length - 1);
       const x = chartArea.x + (idx / Math.max(allDates.length - 1, 1)) * chartArea.width;
-      return { label: format(new Date(allDates[idx]), fmt), x };
+      return { label: format(new Date(allDates[idx]!), fmt), x };
     });
   }, [allDates, chartArea]);
 

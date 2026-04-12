@@ -86,11 +86,10 @@ function NumberBlock({
       >
         <Text
           style={[
-            typography.hero,
+            typography.countdown,
             {
               color: colors.text.primary,
               fontSize: 40,
-              fontWeight: '700',
             },
           ]}
         >
@@ -173,6 +172,7 @@ export function CountdownCard({
         },
         style,
       ]}
+      accessibilityLabel={`${title}: ${timeRemaining.days} days remaining`}
     >
       {/* Gradient accent strip */}
       <Svg

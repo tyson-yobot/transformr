@@ -118,7 +118,7 @@ export function SleepChart({
         }
       });
       setSelectedIdx(closest);
-      onBarPress?.(data[closest]);
+      onBarPress?.(data[closest]!);
     },
     [bars, data, onBarPress],
   );
@@ -126,31 +126,34 @@ export function SleepChart({
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
-      {selectedIdx !== null && data[selectedIdx] && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          style={[
-            styles.tooltip,
-            {
-              backgroundColor: colors.background.tertiary,
-              borderRadius: borderRadius.sm,
-              padding: spacing.sm,
-            },
-          ]}
-        >
-          <Text style={[typography.captionBold, { color: colors.text.primary }]}>
-            {format(new Date(data[selectedIdx].date), 'MMM d')}
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {formatDuration(data[selectedIdx].duration)} - {data[selectedIdx].quality}
-          </Text>
-          {data[selectedIdx].bedtime && data[selectedIdx].wakeTime && (
-            <Text style={[typography.tiny, { color: colors.text.muted }]}>
-              {data[selectedIdx].bedtime} - {data[selectedIdx].wakeTime}
+      {selectedIdx !== null && data[selectedIdx] && (() => {
+        const sel = data[selectedIdx]!;
+        return (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            style={[
+              styles.tooltip,
+              {
+                backgroundColor: colors.background.tertiary,
+                borderRadius: borderRadius.sm,
+                padding: spacing.sm,
+              },
+            ]}
+          >
+            <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+              {format(new Date(sel.date), 'MMM d')}
             </Text>
-          )}
-        </Animated.View>
-      )}
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {formatDuration(sel.duration)} - {sel.quality}
+            </Text>
+            {sel.bedtime && sel.wakeTime && (
+              <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                {sel.bedtime} - {sel.wakeTime}
+              </Text>
+            )}
+          </Animated.View>
+        );
+      })()}
 
       <Pressable onPress={handlePress}>
         <Svg width={width} height={chartHeight}>

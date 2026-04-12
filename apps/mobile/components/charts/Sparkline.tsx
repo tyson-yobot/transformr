@@ -23,12 +23,12 @@ interface SparklineProps {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0].x},${points[0].y}`;
+  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
 
-  let path = `M${points[0].x},${points[0].y}`;
+  let path = `M${points[0]!.x},${points[0]!.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -40,9 +40,9 @@ function computeTrend(data: number[]): 'up' | 'down' | 'flat' {
   // Compare average of last third vs first third
   const third = Math.max(1, Math.floor(data.length / 3));
   const firstAvg =
-    data.slice(0, third).reduce((a, b) => a + b, 0) / third;
+    data.slice(0, third).reduce<number>((a, b) => a + b, 0) / third;
   const lastAvg =
-    data.slice(-third).reduce((a, b) => a + b, 0) / third;
+    data.slice(-third).reduce<number>((a, b) => a + b, 0) / third;
   const diff = lastAvg - firstAvg;
   const range = Math.max(...data) - Math.min(...data) || 1;
   const threshold = range * 0.05;
@@ -94,7 +94,7 @@ export function Sparkline({
 
     const line = buildSmoothPath(pts);
     const fill = pts.length > 1
-      ? `${line} L${pts[pts.length - 1].x},${chartHeight - padding} L${pts[0].x},${chartHeight - padding} Z`
+      ? `${line} L${pts[pts.length - 1]!.x},${chartHeight - padding} L${pts[0]!.x},${chartHeight - padding} Z`
       : '';
     const last = pts[pts.length - 1] ?? null;
 

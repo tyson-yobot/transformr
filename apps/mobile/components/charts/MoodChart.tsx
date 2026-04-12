@@ -56,12 +56,12 @@ function getMoodEmoji(value: number): string {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0].x},${points[0].y}`;
+  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
 
-  let path = `M${points[0].x},${points[0].y}`;
+  let path = `M${points[0]!.x},${points[0]!.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -130,7 +130,7 @@ export function MoodChart({
     () =>
       metrics.map((m) => {
         const values = data.map((d) => d[m.key]);
-        const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 5;
+        const avg = values.length > 0 ? values.reduce<number>((a, b) => a + b, 0) / values.length : 5;
         const y = chartArea.y + (1 - avg / 10) * chartArea.height;
         return { ...m, avg, y };
       }),
@@ -142,13 +142,13 @@ export function MoodChart({
     const count = Math.min(6, data.length);
     const step = Math.floor((data.length - 1) / (count - 1));
     const days = data.length > 1
-      ? differenceInDays(new Date(data[data.length - 1].date), new Date(data[0].date))
+      ? differenceInDays(new Date(data[data.length - 1]!.date), new Date(data[0]!.date))
       : 0;
     const fmt = days > 60 ? 'MMM d' : 'M/d';
     return Array.from({ length: count }, (_, i) => {
       const idx = Math.min(i * step, data.length - 1);
       return {
-        label: format(new Date(data[idx].date), fmt),
+        label: format(new Date(data[idx]!.date), fmt),
         x: chartArea.x + (idx / Math.max(data.length - 1, 1)) * chartArea.width,
       };
     });
@@ -161,7 +161,8 @@ export function MoodChart({
       const ratio = Math.max(0, Math.min(1, (touchX - chartArea.x) / chartArea.width));
       const idx = Math.round(ratio * (data.length - 1));
       setSelectedIdx(idx);
-      onPointPress?.(data[idx]);
+      const point = data[idx];
+      if (point) onPointPress?.(point);
     },
     [data, chartArea, onPointPress],
   );
@@ -169,32 +170,35 @@ export function MoodChart({
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
-      {selectedIdx !== null && data[selectedIdx] && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          style={[
-            styles.tooltip,
-            {
-              backgroundColor: colors.background.tertiary,
-              borderRadius: borderRadius.sm,
-              padding: spacing.sm,
-            },
-          ]}
-        >
-          <Text style={[typography.captionBold, { color: colors.text.primary }]}>
-            {format(new Date(data[selectedIdx].date), 'MMM d, yyyy')}
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {getMoodEmoji(data[selectedIdx].mood)} Mood: {data[selectedIdx].mood}/10
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {'\u{26A1}'} Energy: {data[selectedIdx].energy}/10
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {'\u{1F4A5}'} Stress: {data[selectedIdx].stress}/10
-          </Text>
-        </Animated.View>
-      )}
+      {selectedIdx !== null && data[selectedIdx] && (() => {
+        const sel = data[selectedIdx]!;
+        return (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            style={[
+              styles.tooltip,
+              {
+                backgroundColor: colors.background.tertiary,
+                borderRadius: borderRadius.sm,
+                padding: spacing.sm,
+              },
+            ]}
+          >
+            <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+              {format(new Date(sel.date), 'MMM d, yyyy')}
+            </Text>
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {getMoodEmoji(sel.mood)} Mood: {sel.mood}/10
+            </Text>
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {'\u{26A1}'} Energy: {sel.energy}/10
+            </Text>
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {'\u{1F4A5}'} Stress: {sel.stress}/10
+            </Text>
+          </Animated.View>
+        );
+      })()}
 
       <Pressable onPress={handlePress}>
         <Svg width={width} height={chartHeight}>
@@ -246,12 +250,17 @@ export function MoodChart({
           ))}
 
           {/* Mood gradient fill */}
-          {seriesData[0] && seriesData[0].points.length > 1 && (
-            <Path
-              d={`${seriesData[0].path} L${seriesData[0].points[seriesData[0].points.length - 1].x},${chartArea.y + chartArea.height} L${seriesData[0].points[0].x},${chartArea.y + chartArea.height} Z`}
-              fill="url(#moodGrad)"
-            />
-          )}
+          {seriesData[0] && seriesData[0].points.length > 1 && (() => {
+            const s0 = seriesData[0]!;
+            const lastPt = s0.points[s0.points.length - 1]!;
+            const firstPt = s0.points[0]!;
+            return (
+              <Path
+                d={`${s0.path} L${lastPt.x},${chartArea.y + chartArea.height} L${firstPt.x},${chartArea.y + chartArea.height} Z`}
+                fill="url(#moodGrad)"
+              />
+            );
+          })()}
 
           {/* Average lines */}
           {averages.map((avg) => (
@@ -296,7 +305,7 @@ export function MoodChart({
                 textAnchor="middle"
                 fontSize={12}
               >
-                {getMoodEmoji(data[i].mood)}
+                {getMoodEmoji(data[i]!.mood)}
               </SvgText>
             );
           })}
@@ -315,32 +324,36 @@ export function MoodChart({
           )}
 
           {/* Selected indicator */}
-          {selectedIdx !== null && seriesData[0]?.points[selectedIdx] && (
-            <>
-              <Line
-                x1={seriesData[0].points[selectedIdx].x}
-                y1={chartArea.y}
-                x2={seriesData[0].points[selectedIdx].x}
-                y2={chartArea.y + chartArea.height}
-                stroke={colors.text.muted}
-                strokeWidth={1}
-                strokeDasharray="3,3"
-              />
-              {seriesData.map((series) =>
-                series.points[selectedIdx] ? (
-                  <Circle
-                    key={`sel-${series.key}`}
-                    cx={series.points[selectedIdx].x}
-                    cy={series.points[selectedIdx].y}
-                    r={6}
-                    fill={series.color}
-                    stroke={colors.background.primary}
-                    strokeWidth={2}
-                  />
-                ) : null,
-              )}
-            </>
-          )}
+          {selectedIdx !== null && seriesData[0]?.points[selectedIdx] && (() => {
+            const selPt = seriesData[0]!.points[selectedIdx]!;
+            return (
+              <>
+                <Line
+                  x1={selPt.x}
+                  y1={chartArea.y}
+                  x2={selPt.x}
+                  y2={chartArea.y + chartArea.height}
+                  stroke={colors.text.muted}
+                  strokeWidth={1}
+                  strokeDasharray="3,3"
+                />
+                {seriesData.map((series) => {
+                  const pt = series.points[selectedIdx];
+                  return pt ? (
+                    <Circle
+                      key={`sel-${series.key}`}
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={6}
+                      fill={series.color}
+                      stroke={colors.background.primary}
+                      strokeWidth={2}
+                    />
+                  ) : null;
+                })}
+              </>
+            );
+          })()}
         </Svg>
       </Pressable>
 

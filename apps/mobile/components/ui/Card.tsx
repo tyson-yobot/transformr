@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import {
   View,
+  Text,
   Pressable,
   StyleSheet,
   ViewStyle,
@@ -13,7 +14,7 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
-type CardVariant = 'default' | 'elevated' | 'outlined';
+type CardVariant = 'default' | 'elevated' | 'outlined' | 'featured' | 'ai';
 
 interface CardProps {
   children: React.ReactNode;
@@ -22,6 +23,8 @@ interface CardProps {
   footer?: React.ReactNode;
   onPress?: () => void;
   style?: ViewStyle;
+  accessibilityLabel?: string;
+  accessibilityRole?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -33,6 +36,8 @@ export function Card({
   footer,
   onPress,
   style,
+  accessibilityLabel,
+  accessibilityRole,
 }: CardProps) {
   const { colors, spacing, borderRadius } = useTheme();
   const scale = useSharedValue(1);
@@ -83,6 +88,25 @@ export function Card({
           borderWidth: 1,
           borderColor: colors.border.default,
         };
+      case 'featured':
+        return {
+          ...base,
+          borderWidth: 1.5,
+          borderColor: colors.border.glow,
+          shadowColor: colors.accent.purpleGlow,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.6,
+          shadowRadius: 16,
+          elevation: 8,
+        };
+      case 'ai':
+        return {
+          ...base,
+          borderWidth: 1,
+          borderColor: 'rgba(168,85,247,0.15)',
+          borderLeftWidth: 3,
+          borderLeftColor: colors.accent.cyan,
+        };
     }
   };
 
@@ -90,6 +114,11 @@ export function Card({
 
   const content = (
     <>
+      {variant === 'ai' && (
+        <View style={[styles.aiBadge, { backgroundColor: colors.accent.cyanDim, borderRadius: borderRadius.sm }]}>
+          <Text style={{ fontSize: 10, fontWeight: '700', color: colors.accent.cyan, letterSpacing: 0.5 }}>AI</Text>
+        </View>
+      )}
       {header && (
         <View style={[styles.section, { marginBottom: spacing.md, paddingBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border.subtle }]}>
           {header}
@@ -112,6 +141,7 @@ export function Card({
         onPressOut={handlePressOut}
         style={[variantStyle, animatedStyle, style]}
         accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
       >
         {content}
       </AnimatedPressable>
@@ -128,4 +158,12 @@ export function Card({
 const styles = StyleSheet.create({
   section: {},
   body: {},
+  aiBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    zIndex: 1,
+  },
 });

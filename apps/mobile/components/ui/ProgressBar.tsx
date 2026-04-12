@@ -55,7 +55,11 @@ export function ProgressBar({
   }));
 
   return (
-    <View style={[styles.wrapper, style]}>
+    <View
+      style={[styles.wrapper, style]}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
+    >
       {(label || showPercentage) && (
         <View style={[styles.labelRow, { marginBottom: spacing.xs }]}>
           {label && (

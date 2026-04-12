@@ -36,12 +36,12 @@ function formatCurrency(value: number, currency: string): string {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0].x},${points[0].y}`;
+  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
 
-  let path = `M${points[0].x},${points[0].y}`;
+  let path = `M${points[0]!.x},${points[0]!.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -102,7 +102,7 @@ export function RevenueChart({
     if (bars.length === 0) return '';
     const points = bars.map((bar, i) => ({
       x: bar.x + bar.width / 2,
-      y: chartArea.y + (1 - data[i].cumulative / maxCumulative) * chartArea.height,
+      y: chartArea.y + (1 - data[i]!.cumulative / maxCumulative) * chartArea.height,
     }));
     return buildSmoothPath(points);
   }, [bars, data, chartArea, maxCumulative]);
@@ -111,7 +111,7 @@ export function RevenueChart({
     if (bars.length === 0) return [];
     return bars.map((bar, i) => ({
       x: bar.x + bar.width / 2,
-      y: chartArea.y + (1 - data[i].cumulative / maxCumulative) * chartArea.height,
+      y: chartArea.y + (1 - data[i]!.cumulative / maxCumulative) * chartArea.height,
     }));
   }, [bars, data, chartArea, maxCumulative]);
 
@@ -149,7 +149,7 @@ export function RevenueChart({
         }
       });
       setSelectedIdx(closest);
-      onBarPress?.(data[closest]);
+      onBarPress?.(data[closest]!);
     },
     [bars, data, onBarPress],
   );
@@ -160,29 +160,32 @@ export function RevenueChart({
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
-      {selectedIdx !== null && data[selectedIdx] && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          style={[
-            styles.tooltip,
-            {
-              backgroundColor: colors.background.tertiary,
-              borderRadius: borderRadius.sm,
-              padding: spacing.sm,
-            },
-          ]}
-        >
-          <Text style={[typography.captionBold, { color: colors.text.primary }]}>
-            {data[selectedIdx].month}
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            Revenue: {formatCurrency(data[selectedIdx].revenue, currency)}
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            Cumulative: {formatCurrency(data[selectedIdx].cumulative, currency)}
-          </Text>
-        </Animated.View>
-      )}
+      {selectedIdx !== null && data[selectedIdx] && (() => {
+        const sel = data[selectedIdx]!;
+        return (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            style={[
+              styles.tooltip,
+              {
+                backgroundColor: colors.background.tertiary,
+                borderRadius: borderRadius.sm,
+                padding: spacing.sm,
+              },
+            ]}
+          >
+            <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+              {sel.month}
+            </Text>
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              Revenue: {formatCurrency(sel.revenue, currency)}
+            </Text>
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              Cumulative: {formatCurrency(sel.cumulative, currency)}
+            </Text>
+          </Animated.View>
+        );
+      })()}
 
       <Pressable onPress={handlePress}>
         <Svg width={containerWidth} height={chartHeight}>
@@ -289,17 +292,20 @@ export function RevenueChart({
           )}
 
           {/* Selected indicator */}
-          {selectedIdx !== null && bars[selectedIdx] && (
-            <Line
-              x1={bars[selectedIdx].x + bars[selectedIdx].width / 2}
-              y1={chartArea.y}
-              x2={bars[selectedIdx].x + bars[selectedIdx].width / 2}
-              y2={chartArea.y + chartArea.height}
-              stroke={colors.text.muted}
-              strokeWidth={1}
-              strokeDasharray="3,3"
-            />
-          )}
+          {selectedIdx !== null && bars[selectedIdx] && (() => {
+            const selBar = bars[selectedIdx]!;
+            return (
+              <Line
+                x1={selBar.x + selBar.width / 2}
+                y1={chartArea.y}
+                x2={selBar.x + selBar.width / 2}
+                y2={chartArea.y + chartArea.height}
+                stroke={colors.text.muted}
+                strokeWidth={1}
+                strokeDasharray="3,3"
+              />
+            );
+          })()}
         </Svg>
       </Pressable>
 

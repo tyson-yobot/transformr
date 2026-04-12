@@ -185,7 +185,7 @@ export function CorrelationChart({
 
       if (minDist < 40) {
         setSelectedIdx(closest);
-        onPointPress?.(data[closest]);
+        onPointPress?.(data[closest]!);
       } else {
         setSelectedIdx(null);
       }
@@ -221,31 +221,34 @@ export function CorrelationChart({
       </View>
 
       {/* Tooltip */}
-      {selectedIdx !== null && data[selectedIdx] && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          style={[
-            styles.tooltip,
-            {
-              backgroundColor: colors.background.tertiary,
-              borderRadius: borderRadius.sm,
-              padding: spacing.sm,
-            },
-          ]}
-        >
-          {data[selectedIdx].label && (
-            <Text style={[typography.captionBold, { color: colors.text.primary }]}>
-              {data[selectedIdx].label}
+      {selectedIdx !== null && data[selectedIdx] && (() => {
+        const sel = data[selectedIdx]!;
+        return (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            style={[
+              styles.tooltip,
+              {
+                backgroundColor: colors.background.tertiary,
+                borderRadius: borderRadius.sm,
+                padding: spacing.sm,
+              },
+            ]}
+          >
+            {sel.label && (
+              <Text style={[typography.captionBold, { color: colors.text.primary }]}>
+                {sel.label}
+              </Text>
+            )}
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {xAxisLabel}: {sel.x}
             </Text>
-          )}
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {xAxisLabel}: {data[selectedIdx].x}
-          </Text>
-          <Text style={[typography.tiny, { color: colors.text.secondary }]}>
-            {yAxisLabel}: {data[selectedIdx].y}
-          </Text>
-        </Animated.View>
-      )}
+            <Text style={[typography.tiny, { color: colors.text.secondary }]}>
+              {yAxisLabel}: {sel.y}
+            </Text>
+          </Animated.View>
+        );
+      })()}
 
       <Pressable onPress={handlePress}>
         <Svg width={width} height={chartHeight}>
