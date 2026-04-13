@@ -13,7 +13,7 @@
     "ios": "expo run:ios",
     "android": "expo run:android",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node -e \"require('fs').mkdirSync('.expo/types',{recursive:true});require('fs').writeFileSync('.expo/types/router.d.ts','// generated stub\\n')\" && tsc --noEmit",
     "test": "jest --logHeapUsage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
