@@ -18,14 +18,12 @@ expo-env.d.ts
 *.mobileprovision
 
 # iOS
-ios/Pods/
-ios/build/
+ios/
 *.xcworkspace
 *.xcodeproj
 
 # Android
-android/app/build/
-android/build/
+android/
 *.apk
 *.aab
 
