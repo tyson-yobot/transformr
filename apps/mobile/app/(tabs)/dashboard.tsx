@@ -35,6 +35,7 @@ import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
 import { formatNumber, formatCurrency } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
+import { getTodayGreeting } from '@utils/greetings';
 
 // ---------------------------------------------------------------------------
 // Mini sparkline component for revenue
@@ -156,6 +157,9 @@ export default function DashboardScreen() {
   // Readiness score placeholder
   const readinessScore = profile?.current_weight ? 78 : 0;
 
+  // Motivational greeting — rotates by day, adapts to time of day
+  const motivationalGreeting = getTodayGreeting();
+
   // Habits remaining today
   const habitsRemaining = useMemo(() => {
     const totalActive = habitStore.habits.filter((h) => h.is_active !== false).length;
@@ -265,22 +269,22 @@ export default function DashboardScreen() {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Greeting */}
-      <Animated.View entering={FadeInDown.delay(0).duration(400)}>
+      {/* Motivational Greeting */}
+      <Animated.View
+        entering={FadeInDown.delay(0).duration(800)}
+        style={{ marginBottom: spacing.xl }}
+      >
         <Text
           style={[
-            typography.h1,
-            { color: colors.text.primary, marginBottom: spacing.xs },
+            typography.h2,
+            { color: colors.text.primary, lineHeight: 32, marginBottom: spacing.sm },
           ]}
         >
-          {getGreeting()}, {profile?.display_name?.split(' ')[0] ?? 'Champ'}
+          {motivationalGreeting.text}
         </Text>
-        <Text
-          style={[
-            typography.body,
-            { color: colors.text.secondary, marginBottom: spacing.xl },
-          ]}
-        >
+        <Text style={[typography.caption, { color: colors.text.secondary }]}>
+          {motivationalGreeting.timeLabel}
+          {' — '}
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -595,13 +599,6 @@ function PlanRow({
       )}
     </View>
   );
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
 }
 
 // ---------------------------------------------------------------------------
