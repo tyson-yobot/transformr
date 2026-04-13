@@ -1,6 +1,6 @@
 // =============================================================================
 // TRANSFORMR -- OnboardingHero
-// Displays a hero image (top 35%) with a gradient fade into the dark background.
+// Hero image (top 240px) with a gradient fade into the dark background.
 // =============================================================================
 
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
@@ -20,18 +20,17 @@ export function OnboardingHero({ imageUri, heading, subheading, style }: Onboard
 
   return (
     <View style={[styles.container, style]}>
-      {/* Hero image — top 35% */}
+      {/* Hero image */}
       <View style={styles.imageWrap}>
         <Image
           source={{ uri: imageUri }}
           style={styles.image}
           contentFit="cover"
           cachePolicy="memory-disk"
-          placeholder={{ blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
-          transition={400}
         />
+        {/* Gradient fade into background */}
         <LinearGradient
-          colors={['transparent', colors.background.primary as string]}
+          colors={['transparent', colors.background.primary]}
           style={styles.fadeOut}
         />
       </View>
@@ -65,5 +64,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 80,
+    opacity: 0.9,
   },
 });

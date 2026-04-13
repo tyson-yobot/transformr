@@ -97,7 +97,7 @@ export default function RegisterScreen() {
   }, [router]);
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.background.primary }]}>
       {/* Warm gym background */}
       <Image
         source={{ uri: GYM_IMAGE }}
@@ -105,9 +105,9 @@ export default function RegisterScreen() {
         contentFit="cover"
         cachePolicy="memory-disk"
       />
+      {/* Dark gradient overlay */}
       <LinearGradient
-        colors={['rgba(12,10,21,0.75)', 'rgba(12,10,21,0.95)', '#0C0A15']}
-        locations={[0, 0.4, 1]}
+        colors={['rgba(12,10,21,0.65)', 'rgba(12,10,21,0.92)']}
         style={StyleSheet.absoluteFill}
       />
 
@@ -347,7 +347,7 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0C0A15' },
+  root: { flex: 1 },
   safe: { flex: 1 },
   flex: { flex: 1 },
   scroll: { flexGrow: 1 },

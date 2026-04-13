@@ -10,8 +10,6 @@ import * as Linking from 'expo-linking';
 import type { Session, User, Subscription } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
-WebBrowser.maybeCompleteAuthSession();
-
 interface AuthState {
   session: Session | null;
   user: User | null;
