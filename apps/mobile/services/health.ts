@@ -51,7 +51,7 @@ function todayISO(): string {
 }
 
 function todayDateString(): string {
-  return new Date().toISOString().split('T')[0]!;
+  return new Date().toISOString().split('T')[0] ?? '';
 }
 
 // ---------------------------------------------------------------------------
@@ -184,7 +184,7 @@ export async function fetchSleepData(days = 7): Promise<SleepRecord[]> {
       const byDate = new Map<string, number>();
       for (const sample of samples) {
         if (sample.value === 'AWAKE' || sample.value === 'INBED') continue;
-        const date = sample.startDate.split('T')[0]!;
+        const date = sample.startDate.split('T')[0] ?? '';
         const durationMs =
           new Date(sample.endDate).getTime() -
           new Date(sample.startDate).getTime();
@@ -206,7 +206,7 @@ export async function fetchSleepData(days = 7): Promise<SleepRecord[]> {
       for (let i = 0; i < days; i++) {
         const date = new Date(Date.now() - i * 24 * 3600 * 1000)
           .toISOString()
-          .split('T')[0]!;
+          .split('T')[0] ?? '';
         const startDate = `${date}T00:00:00.000Z`;
         const endDate = `${date}T23:59:59.999Z`;
         try {

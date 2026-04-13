@@ -161,7 +161,7 @@ export async function fetchWeatherForecast(
     >();
 
     for (const entry of data.list) {
-      const date = new Date(entry.dt * 1000).toISOString().split('T')[0]!;
+      const date = new Date(entry.dt * 1000).toISOString().split('T')[0] ?? '';
       const existing = byDate.get(date) ?? {
         highs: [],
         lows: [],
