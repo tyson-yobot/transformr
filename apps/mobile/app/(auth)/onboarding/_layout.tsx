@@ -20,6 +20,18 @@ const ONBOARDING_STEPS = [
   'ready',
 ] as const;
 
+// Screens where a "Skip" button appears in the top-right
+// welcome and profile are excluded (critical / intro)
+// ready is excluded (it's the final screen)
+const SKIPPABLE_STEPS: readonly string[] = [
+  'goals',
+  'fitness',
+  'nutrition',
+  'business',
+  'partner',
+  'notifications',
+];
+
 export default function OnboardingLayout() {
   const { colors, typography, spacing } = useTheme();
   const pathname = usePathname();
@@ -33,6 +45,16 @@ export default function OnboardingLayout() {
   const progress = stepNumber / totalSteps;
 
   const showBack = stepNumber > 1 && currentSegment !== 'ready';
+  const showSkip = SKIPPABLE_STEPS.includes(currentSegment);
+
+  // Navigate to the next step when skipping
+  const handleSkip = () => {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < ONBOARDING_STEPS.length) {
+      const nextStep = ONBOARDING_STEPS[nextIndex];
+      router.push(`/(auth)/onboarding/${nextStep}` as Parameters<typeof router.push>[0]);
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background.primary }]} edges={['top']}>
@@ -51,6 +73,15 @@ export default function OnboardingLayout() {
           <Text style={[typography.caption, { color: colors.text.muted }]}>
             {stepNumber} of {totalSteps}
           </Text>
+          {showSkip ? (
+            <Pressable onPress={handleSkip} hitSlop={12}>
+              <Text style={[typography.caption, { color: colors.accent.primary }]}>
+                Skip
+              </Text>
+            </Pressable>
+          ) : (
+            <View />
+          )}
         </View>
         <ProgressBar
           progress={progress}
