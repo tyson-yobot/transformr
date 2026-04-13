@@ -260,7 +260,7 @@ export default function DataExportScreen() {
                   style={[
                     typography.captionBold,
                     {
-                      color: isActive ? '#FFFFFF' : colors.text.secondary,
+                      color: isActive ? colors.text.inverse : colors.text.secondary,
                     },
                   ]}
                 >
@@ -345,7 +345,7 @@ export default function DataExportScreen() {
                 ]}
               >
                 {cat.selected && (
-                  <Text style={{ color: '#FFFFFF', fontSize: 12 }}>
+                  <Text style={{ color: colors.text.inverse, fontSize: 12 }}>
                     {'\u2713'}
                   </Text>
                 )}

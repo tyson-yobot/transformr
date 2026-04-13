@@ -11,11 +11,11 @@ interface ChallengeCardProps {
   isActive?: boolean;
 }
 
-const difficultyConfig: Record<ChallengeDifficulty, { label: string; color: string }> = {
-  beginner: { label: 'Beginner', color: '#22C55E' },
-  intermediate: { label: 'Intermediate', color: '#F59E0B' },
-  advanced: { label: 'Advanced', color: '#F97316' },
-  extreme: { label: 'Extreme', color: '#EF4444' },
+const difficultyLabels: Record<ChallengeDifficulty, string> = {
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  extreme: 'Extreme',
 };
 
 const categoryLabels: Record<ChallengeCategory, string> = {
@@ -43,8 +43,14 @@ export function ChallengeCard({ challenge, onPress, isActive = false }: Challeng
 
   const difficulty = challenge.difficulty ?? 'intermediate';
   const category = challenge.category ?? 'custom';
-  const diffColor = difficultyConfig[difficulty].color;
-  const diffLabel = difficultyConfig[difficulty].label;
+  const diffColor = difficulty === 'beginner'
+    ? colors.accent.success
+    : difficulty === 'intermediate'
+      ? colors.accent.warning
+      : difficulty === 'advanced'
+        ? colors.accent.fire
+        : colors.accent.danger;
+  const diffLabel = difficultyLabels[difficulty];
   const catLabel = categoryLabels[category];
   const catIcon = categoryIcons[category];
 

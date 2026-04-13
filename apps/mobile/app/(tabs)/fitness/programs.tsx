@@ -341,6 +341,10 @@ export default function ProgramsScreen() {
         data={programsWithExercises}
         keyExtractor={(item) => item.id}
         renderItem={renderProgram}
+        removeClippedSubviews={true}
+        windowSize={5}
+        maxToRenderPerBatch={5}
+        initialNumToRender={6}
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
         ListEmptyComponent={
           <View style={[styles.centered, { paddingVertical: spacing.xxxl }]}>

@@ -1,13 +1,13 @@
 // =============================================================================
 // TRANSFORMR -- Auth Group Layout
+// Auth screens are always dark regardless of device color scheme.
 // =============================================================================
 
 import { Stack } from 'expo-router';
-import { useTheme } from '@theme/index';
+import { ThemeProvider, useTheme } from '@theme/index';
 
-export default function AuthLayout() {
+function AuthStack() {
   const { colors } = useTheme();
-
   return (
     <Stack
       screenOptions={{
@@ -16,5 +16,13 @@ export default function AuthLayout() {
         animation: 'slide_from_right',
       }}
     />
+  );
+}
+
+export default function AuthLayout() {
+  return (
+    <ThemeProvider mode="dark">
+      <AuthStack />
+    </ThemeProvider>
   );
 }

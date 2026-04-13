@@ -459,6 +459,10 @@ export default function ChatScreen() {
           data={messages}
           renderItem={renderMessage}
           keyExtractor={keyExtractor}
+          removeClippedSubviews={true}
+          windowSize={8}
+          maxToRenderPerBatch={10}
+          initialNumToRender={15}
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.md,

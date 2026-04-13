@@ -20,6 +20,7 @@ import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { EmptyState } from '@components/ui/EmptyState';
 
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
@@ -190,11 +191,12 @@ export default function FinanceDashboard() {
             </View>
           ))}
           {accounts.length === 0 && (
-            <Card>
-              <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-                No accounts added yet.
-              </Text>
-            </Card>
+            <EmptyState
+              icon="\uD83C\uDFE6"
+              title="No accounts yet"
+              subtitle="Connect your accounts to get a clear picture of your financial health in one place."
+              style={{ paddingVertical: 24 }}
+            />
           )}
         </Animated.View>
 
@@ -232,11 +234,12 @@ export default function FinanceDashboard() {
             </View>
           ))}
           {recentTransactions.length === 0 && (
-            <Card>
-              <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-                No transactions yet.
-              </Text>
-            </Card>
+            <EmptyState
+              icon="\uD83E\uDDFE"
+              title="No transactions yet"
+              subtitle="Track every purchase and payment to understand where your money goes and where it can grow."
+              style={{ paddingVertical: 24 }}
+            />
           )}
         </Animated.View>
 

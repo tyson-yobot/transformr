@@ -252,7 +252,7 @@ export default function PainTrackerScreen() {
                         : isSelected
                           ? colors.accent.primary
                           : `${colors.text.muted}40`,
-                      borderColor: isSelected ? '#FFFFFF' : 'transparent',
+                      borderColor: isSelected ? colors.text.inverse : 'transparent',
                       borderWidth: isSelected ? 2 : 0,
                       width: hasPain ? 20 : 16,
                       height: hasPain ? 20 : 16,
@@ -346,7 +346,7 @@ export default function PainTrackerScreen() {
                         },
                       ]}
                     >
-                      <Text style={[typography.monoCaption, { color: '#FFFFFF', fontWeight: '700' }]}>
+                      <Text style={[typography.monoCaption, { color: colors.text.inverse, fontWeight: '700' }]}>
                         {log.pain_level}
                       </Text>
                     </View>
@@ -403,7 +403,7 @@ export default function PainTrackerScreen() {
                       },
                     ]}
                   >
-                    <Text style={[typography.monoBody, { color: '#FFFFFF', fontWeight: '700' }]}>
+                    <Text style={[typography.monoBody, { color: colors.text.inverse, fontWeight: '700' }]}>
                       {log.pain_level}
                     </Text>
                   </View>
@@ -485,13 +485,13 @@ export default function PainTrackerScreen() {
                   <Ionicons
                     name={pt.icon as keyof typeof Ionicons.glyphMap}
                     size={18}
-                    color={painType === pt.value ? '#FFFFFF' : colors.text.secondary}
+                    color={painType === pt.value ? colors.text.inverse : colors.text.secondary}
                   />
                   <Text
                     style={[
                       typography.tiny,
                       {
-                        color: painType === pt.value ? '#FFFFFF' : colors.text.secondary,
+                        color: painType === pt.value ? colors.text.inverse : colors.text.secondary,
                         marginTop: 2,
                       },
                     ]}

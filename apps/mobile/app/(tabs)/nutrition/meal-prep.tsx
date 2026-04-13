@@ -38,10 +38,10 @@ import type {
 } from '@app-types/ai';
 import type { MealPrepParams } from '@services/ai/mealPrep';
 
-const TIER_CONFIG: Record<MealPrepTier, { label: string; icon: string; color: string }> = {
-  good: { label: 'Good', icon: 'wallet-outline', color: '#10B981' },   // accent.success
-  better: { label: 'Better', icon: 'star-half-outline', color: '#22D3EE' }, // accent.cyan
-  best: { label: 'Best', icon: 'diamond-outline', color: '#F59E0B' },  // accent.warning
+const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
+  good: { label: 'Good', icon: 'wallet-outline' },
+  better: { label: 'Better', icon: 'star-half-outline' },
+  best: { label: 'Best', icon: 'diamond-outline' },
 };
 
 export default function MealPrepScreen() {
@@ -298,7 +298,12 @@ export default function MealPrepScreen() {
           </Text>
           <View style={[styles.tierRow, { gap: spacing.sm, marginBottom: spacing.lg }]}>
             {prepResponse.tiers.map((tierPlan) => {
-              const config = TIER_CONFIG[tierPlan.tier];
+              const tierColor = tierPlan.tier === 'good'
+                ? colors.accent.success
+                : tierPlan.tier === 'better'
+                  ? colors.accent.cyan
+                  : colors.accent.warning;
+              const config = { ...TIER_ICONS[tierPlan.tier], color: tierColor };
               const isActive = selectedTier === tierPlan.tier;
 
               return (
@@ -437,8 +442,8 @@ export default function MealPrepScreen() {
                   </Text>
                 </View>
                 <View style={styles.macroItem}>
-                  <Text style={[typography.monoCaption, { color: '#F59E0B' }]}>Fat</Text>
-                  <Text style={[typography.bodyBold, { color: '#F59E0B' }]}>
+                  <Text style={[typography.monoCaption, { color: colors.accent.warning }]}>Fat</Text>
+                  <Text style={[typography.bodyBold, { color: colors.accent.warning }]}>
                     {currentTierPlan.weekly_macro_average.fat_g}g
                   </Text>
                 </View>
@@ -583,7 +588,7 @@ export default function MealPrepScreen() {
                                 },
                               ]}
                             >
-                              <Text style={[typography.tiny, { color: '#FFFFFF' }]}>{i + 1}</Text>
+                              <Text style={[typography.tiny, { color: colors.text.inverse }]}>{i + 1}</Text>
                             </View>
                             <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.md }]}>
                               {step}
@@ -615,7 +620,7 @@ export default function MealPrepScreen() {
                           <Text style={[typography.monoCaption, { color: colors.accent.info }]}>
                             C: {meal.per_serving_macros.carbs_g}g
                           </Text>
-                          <Text style={[typography.monoCaption, { color: '#F59E0B' }]}>
+                          <Text style={[typography.monoCaption, { color: colors.accent.warning }]}>
                             F: {meal.per_serving_macros.fat_g}g
                           </Text>
                         </View>

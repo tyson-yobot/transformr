@@ -10,6 +10,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import type { GoalCategory } from '@app-types/common';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 interface GoalOption {
   category: GoalCategory;
@@ -67,15 +68,16 @@ export default function GoalsScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        Your Goals
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxl }]}>
-        Select all areas you want to improve. Then tap one to make it your primary focus.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&q=80"
+        heading="Dream big. Then build a plan."
+        subheading="What does your life look like 12 months from now? Let's make it real."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* Goal Cards */}
       <View style={styles.grid}>
@@ -137,7 +139,7 @@ export default function GoalsScreen() {
                           },
                         ]}
                       >
-                        <Text style={[typography.tiny, { color: '#FFFFFF' }]}>PRIMARY</Text>
+                        <Text style={[typography.tiny, { color: colors.text.inverse }]}>PRIMARY</Text>
                       </View>
                     )}
                   </View>
@@ -179,6 +181,7 @@ export default function GoalsScreen() {
         fullWidth
         size="lg"
       />
+      </View>
     </ScrollView>
   );
 }

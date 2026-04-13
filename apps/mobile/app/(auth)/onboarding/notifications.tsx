@@ -13,6 +13,7 @@ import { Input } from '@components/ui/Input';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import type { NotificationPreferences } from '@app-types/database';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 interface NotificationGroupState {
   enabled: boolean;
@@ -155,15 +156,16 @@ export default function NotificationsScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        Notifications
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxl }]}>
-        Set up reminders to stay on track. You can adjust these anytime in settings.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80"
+        heading="Your AI coach has your back."
+        subheading="We'll nudge you when you need it, celebrate when you earn it, and stay quiet when you don't."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* Permission Status */}
       {permissionGranted === false && (
@@ -261,6 +263,7 @@ export default function NotificationsScreen() {
         size="lg"
         style={{ marginTop: spacing.xl }}
       />
+      </View>
     </ScrollView>
   );
 }

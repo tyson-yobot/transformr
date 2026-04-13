@@ -10,6 +10,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Card } from '@components/ui/Card';
 import { hapticLight } from '@utils/haptics';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 interface PrivacyToggle {
   key: string;
@@ -61,7 +62,7 @@ export default function PartnerScreen() {
             {'\uD83D\uDC65'}
           </Text>
           <Text style={[typography.h1, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
-            Accountability Partner
+            Transform together.
           </Text>
           <Text
             style={[
@@ -69,7 +70,7 @@ export default function PartnerScreen() {
               { color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xxxl },
             ]}
           >
-            Connect with a partner to share progress, challenge each other, and stay accountable.
+            Invite someone to share the journey. Couples who train together, grow together.
           </Text>
 
           <Button
@@ -102,18 +103,17 @@ export default function PartnerScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        {mode === 'invite' ? 'Invite Partner' : 'Join Partner'}
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxl }]}>
-        {mode === 'invite'
-          ? 'Share this code with your partner so they can connect with you.'
-          : 'Enter the invite code you received from your partner.'}
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
+        heading="Transform together."
+        subheading="Invite someone to share the journey. Couples who train together, grow together."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {mode === 'invite' ? (
         <Card style={{ marginBottom: spacing.xxl, alignItems: 'center' as const }}>
@@ -194,6 +194,7 @@ export default function PartnerScreen() {
         fullWidth
         size="md"
       />
+      </View>
     </ScrollView>
   );
 }

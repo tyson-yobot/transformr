@@ -203,14 +203,14 @@ export default function BarcodeScannerScreen() {
               <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Close scanner" accessibilityRole="button">
                 <Ionicons name="close" size={28} color="#FFFFFF" />
               </Pressable>
-              <Text style={[typography.h3, { color: '#FFFFFF' }]}>Scan Barcode</Text>
+              <Text style={[typography.h3, { color: colors.text.inverse }]}>Scan Barcode</Text>
               <View style={{ width: 28 }} />
             </View>
 
             <View style={styles.scanCenter}>
               <View style={[styles.scanLine, { backgroundColor: colors.accent.primary }]} />
-              <View style={[styles.scanFrameBar, { borderColor: '#FFFFFF' }]} />
-              <Text style={[typography.caption, { color: '#FFFFFF', marginTop: spacing.lg }]}>
+              <View style={[styles.scanFrameBar, { borderColor: colors.text.inverse }]} />
+              <Text style={[typography.caption, { color: colors.text.inverse, marginTop: spacing.lg }]}>
                 Point camera at a barcode
               </Text>
             </View>
@@ -222,7 +222,7 @@ export default function BarcodeScannerScreen() {
                 onPress={handleManualEntry}
                 fullWidth
                 style={{ borderColor: 'rgba(255,255,255,0.4)' }}
-                textStyle={{ color: '#FFFFFF' }}
+                textStyle={{ color: colors.text.inverse }}
               />
             </View>
           </View>
@@ -417,7 +417,7 @@ export default function BarcodeScannerScreen() {
                       },
                     ]}
                   >
-                    <Text style={[typography.caption, { color: mealType === mt ? '#FFFFFF' : colors.text.secondary }]}>
+                    <Text style={[typography.caption, { color: mealType === mt ? colors.text.inverse : colors.text.secondary }]}>
                       {mt.charAt(0).toUpperCase() + mt.slice(1)}
                     </Text>
                   </Pressable>

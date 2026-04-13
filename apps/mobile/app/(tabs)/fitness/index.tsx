@@ -28,6 +28,7 @@ import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatt
 import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '@services/supabase';
 
 interface RecentWorkout {
@@ -470,11 +471,13 @@ export default function FitnessHomeScreen() {
               scrollEnabled={false}
             />
           ) : (
-            <Card>
-              <Text style={[typography.body, { color: colors.text.muted, textAlign: 'center' }]}>
-                No workouts yet. Start your first one!
-              </Text>
-            </Card>
+            <EmptyState
+              icon="\uD83C\uDFCB\uFE0F"
+              title="No workouts yet"
+              subtitle="Every legend started with a first rep. Log your first workout and let's see what you're made of."
+              actionLabel="Start a Workout"
+              onAction={() => router.push('/(tabs)/fitness/exercises')}
+            />
           )}
         </View>
 

@@ -15,12 +15,16 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
+
+const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
 
 function getPasswordStrength(password: string): { level: number; label: string } {
   if (password.length === 0) return { level: 0, label: '' };
@@ -35,7 +39,7 @@ function getPasswordStrength(password: string): { level: number; label: string }
 export default function RegisterScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { signUp, loading, error, clearError } = useAuthStore();
+  const { signUp, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -47,15 +51,13 @@ export default function RegisterScreen() {
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  // Map strength level to a theme color token — resolved here so we have
-  // access to the live `colors` object from useTheme().
   const strengthColor = useMemo((): string => {
     switch (passwordStrength.level) {
       case 0:  return 'transparent';
-      case 1:  return colors.accent.danger;   // Weak
-      case 2:  return colors.accent.warning;  // Fair
-      case 3:  return colors.accent.primary;  // Good (closest brand token to blue)
-      case 4:  return colors.accent.success;  // Strong
+      case 1:  return colors.accent.danger;
+      case 2:  return colors.accent.warning;
+      case 3:  return colors.accent.primary;
+      case 4:  return colors.accent.success;
       default: return 'transparent';
     }
   }, [passwordStrength.level, colors]);
@@ -88,9 +90,6 @@ export default function RegisterScreen() {
     clearError();
     if (!validate()) return;
     await signUp(email, password, displayName);
-
-    // If sign-up succeeds the auth listener will update session,
-    // and the root index will redirect to onboarding.
   }, [validate, email, password, displayName, signUp, clearError]);
 
   const handleSignIn = useCallback(() => {
@@ -98,202 +97,262 @@ export default function RegisterScreen() {
   }, [router]);
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background.primary }]}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView
-          contentContainerStyle={[styles.scroll, { padding: spacing.xxl }]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+    <View style={styles.root}>
+      {/* Warm gym background */}
+      <Image
+        source={{ uri: GYM_IMAGE }}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+      />
+      <LinearGradient
+        colors={['rgba(12,10,21,0.75)', 'rgba(12,10,21,0.95)', '#0C0A15']}
+        locations={[0, 0.4, 1]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          {/* Header */}
-          <Animated.View entering={FadeInDown.delay(100)}>
-            <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-              Create Account
-            </Text>
-            <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-              Start your transformation journey
-            </Text>
-          </Animated.View>
-
-          {/* Error Banner */}
-          {error && (
-            <View
-              style={[
-                styles.errorBanner,
-                {
-                  backgroundColor: colors.accent.danger + '18',
-                  borderRadius: borderRadius.md,
-                  padding: spacing.md,
-                  marginBottom: spacing.lg,
-                  borderWidth: 1,
-                  borderColor: colors.accent.danger + '40',
-                },
-              ]}
-            >
-              <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
-            </View>
-          )}
-
-          {/* Display Name */}
-          <Input
-            label="Display Name"
-            placeholder="What should we call you?"
-            value={displayName}
-            onChangeText={(t: string) => {
-              setDisplayName(t);
-              setFieldErrors((prev) => ({ ...prev, displayName: '' }));
-            }}
-            error={fieldErrors.displayName}
-            autoCapitalize="words"
-            autoComplete="name"
-            containerStyle={{ marginBottom: spacing.lg }}
-          />
-
-          {/* Email */}
-          <Input
-            label="Email"
-            placeholder="you@example.com"
-            value={email}
-            onChangeText={(t: string) => {
-              setEmail(t);
-              setFieldErrors((prev) => ({ ...prev, email: '' }));
-            }}
-            error={fieldErrors.email}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            containerStyle={{ marginBottom: spacing.lg }}
-          />
-
-          {/* Password */}
-          <Input
-            label="Password"
-            placeholder="Create a strong password"
-            value={password}
-            onChangeText={(t: string) => {
-              setPassword(t);
-              setFieldErrors((prev) => ({ ...prev, password: '' }));
-            }}
-            error={fieldErrors.password}
-            secureTextEntry
-            autoCapitalize="none"
-            containerStyle={{ marginBottom: spacing.sm }}
-          />
-
-          {/* Password Strength Indicator */}
-          {password.length > 0 && (
-            <View style={[styles.strengthRow, { marginBottom: spacing.lg }]}>
-              <View style={styles.strengthBars}>
-                {[1, 2, 3, 4].map((level) => (
-                  <View
-                    key={level}
-                    style={[
-                      styles.strengthBar,
-                      {
-                        backgroundColor:
-                          level <= passwordStrength.level
-                            ? strengthColor
-                            : colors.background.tertiary,
-                        borderRadius: 2,
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-              <Text style={[typography.caption, { color: strengthColor, marginLeft: spacing.sm }]}>
-                {passwordStrength.label}
-              </Text>
-            </View>
-          )}
-
-          {/* Confirm Password */}
-          <Input
-            label="Confirm Password"
-            placeholder="Re-enter your password"
-            value={confirmPassword}
-            onChangeText={(t: string) => {
-              setConfirmPassword(t);
-              setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
-            }}
-            error={fieldErrors.confirmPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            containerStyle={{ marginBottom: spacing.xl }}
-          />
-
-          {/* Terms Checkbox */}
-          <Pressable
-            onPress={() => {
-              hapticLight();
-              setAgreedToTerms(!agreedToTerms);
-              setFieldErrors((prev) => ({ ...prev, terms: '' }));
-            }}
-            accessibilityLabel="Agree to terms of service"
-            style={[styles.termsRow, { marginBottom: spacing.xxl }]}
+          <ScrollView
+            contentContainerStyle={[styles.scroll, { padding: spacing.xxl }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            <View
-              style={[
-                styles.checkbox,
-                {
-                  borderColor: fieldErrors.terms ? colors.accent.danger : colors.border.default,
-                  borderRadius: borderRadius.sm / 2,
-                  backgroundColor: agreedToTerms ? colors.accent.primary : 'transparent',
-                },
-              ]}
-            >
-              {agreedToTerms && (
-                <Text style={{ color: '#FFFFFF', fontSize: 12, lineHeight: 14 }}>
-                  {'\u2713'}
+            {/* Logo / Brand */}
+            <Animated.View entering={FadeInDown.delay(100)} style={[styles.logoSection, { marginBottom: spacing.xxxl }]}>
+              <Image
+                source={require('@assets/images/icon.png')}
+                style={[styles.icon, { marginBottom: spacing.md }]}
+                contentFit="contain"
+              />
+              <Text style={[typography.hero, { color: colors.accent.primary, letterSpacing: 4, textAlign: 'center' }]}>
+                TRANSFORMR
+              </Text>
+              <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm, textAlign: 'center' }]}>
+                Start your transformation journey
+              </Text>
+            </Animated.View>
+
+            {/* Error Banner */}
+            {error && (
+              <View
+                style={[
+                  styles.errorBanner,
+                  {
+                    backgroundColor: colors.accent.danger + '18',
+                    borderRadius: borderRadius.md,
+                    padding: spacing.md,
+                    marginBottom: spacing.lg,
+                    borderWidth: 1,
+                    borderColor: colors.accent.danger + '40',
+                  },
+                ]}
+              >
+                <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
+              </View>
+            )}
+
+            {/* Display Name */}
+            <Input
+              label="Display Name"
+              placeholder="What should we call you?"
+              value={displayName}
+              onChangeText={(t: string) => {
+                setDisplayName(t);
+                setFieldErrors((prev) => ({ ...prev, displayName: '' }));
+              }}
+              error={fieldErrors.displayName}
+              autoCapitalize="words"
+              autoComplete="name"
+              containerStyle={{ marginBottom: spacing.lg }}
+            />
+
+            {/* Email */}
+            <Input
+              label="Email"
+              placeholder="you@example.com"
+              value={email}
+              onChangeText={(t: string) => {
+                setEmail(t);
+                setFieldErrors((prev) => ({ ...prev, email: '' }));
+              }}
+              error={fieldErrors.email}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              containerStyle={{ marginBottom: spacing.lg }}
+            />
+
+            {/* Password */}
+            <Input
+              label="Password"
+              placeholder="Create a strong password"
+              value={password}
+              onChangeText={(t: string) => {
+                setPassword(t);
+                setFieldErrors((prev) => ({ ...prev, password: '' }));
+              }}
+              error={fieldErrors.password}
+              secureTextEntry
+              autoCapitalize="none"
+              containerStyle={{ marginBottom: spacing.sm }}
+            />
+
+            {/* Password Strength Indicator */}
+            {password.length > 0 && (
+              <View style={[styles.strengthRow, { marginBottom: spacing.lg }]}>
+                <View style={styles.strengthBars}>
+                  {[1, 2, 3, 4].map((level) => (
+                    <View
+                      key={level}
+                      style={[
+                        styles.strengthBar,
+                        {
+                          backgroundColor:
+                            level <= passwordStrength.level
+                              ? strengthColor
+                              : colors.background.tertiary,
+                          borderRadius: 2,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
+                <Text style={[typography.caption, { color: strengthColor, marginLeft: spacing.sm }]}>
+                  {passwordStrength.label}
                 </Text>
-              )}
-            </View>
-            <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
-              I agree to the Terms of Service and Privacy Policy
-            </Text>
-          </Pressable>
-          {fieldErrors.terms && (
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.accent.danger, marginTop: -spacing.lg, marginBottom: spacing.lg },
-              ]}
+              </View>
+            )}
+
+            {/* Confirm Password */}
+            <Input
+              label="Confirm Password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChangeText={(t: string) => {
+                setConfirmPassword(t);
+                setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
+              }}
+              error={fieldErrors.confirmPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              containerStyle={{ marginBottom: spacing.xl }}
+            />
+
+            {/* Terms Checkbox */}
+            <Pressable
+              onPress={() => {
+                hapticLight();
+                setAgreedToTerms(!agreedToTerms);
+                setFieldErrors((prev) => ({ ...prev, terms: '' }));
+              }}
+              accessibilityLabel="Agree to terms of service"
+              style={[styles.termsRow, { marginBottom: spacing.xxl }]}
             >
-              {fieldErrors.terms}
-            </Text>
-          )}
-
-          {/* Create Account Button */}
-          <Button
-            title="Create Account"
-            onPress={handleSignUp}
-            loading={loading}
-            fullWidth
-            size="lg"
-            style={{ marginBottom: spacing.xxl }}
-          />
-
-          {/* Sign In Link */}
-          <View style={styles.signInRow}>
-            <Text style={[typography.body, { color: colors.text.secondary }]}>
-              Already have an account?{' '}
-            </Text>
-            <Pressable onPress={() => { hapticLight(); handleSignIn(); }} accessibilityLabel="Go to sign in">
-              <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>Sign In</Text>
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    borderColor: fieldErrors.terms ? colors.accent.danger : colors.border.default,
+                    borderRadius: borderRadius.sm / 2,
+                    backgroundColor: agreedToTerms ? colors.accent.primary : 'transparent',
+                  },
+                ]}
+              >
+                {agreedToTerms && (
+                  <Text style={{ color: colors.text.inverse, fontSize: 12, lineHeight: 14 }}>
+                    {'\u2713'}
+                  </Text>
+                )}
+              </View>
+              <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
+                I agree to the Terms of Service and Privacy Policy
+              </Text>
             </Pressable>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            {fieldErrors.terms && (
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.accent.danger, marginTop: -spacing.lg, marginBottom: spacing.lg },
+                ]}
+              >
+                {fieldErrors.terms}
+              </Text>
+            )}
+
+            {/* Create Account Button */}
+            <Button
+              title="Create Account"
+              onPress={handleSignUp}
+              loading={loading}
+              fullWidth
+              size="lg"
+              style={{ marginBottom: spacing.xl }}
+            />
+
+            {/* Divider */}
+            <View style={[styles.dividerRow, { marginBottom: spacing.xl }]}>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+              <Text style={[typography.caption, { color: colors.text.muted, marginHorizontal: spacing.md }]}>
+                OR
+              </Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+            </View>
+
+            {/* Social Auth Buttons */}
+            <Button
+              title="Continue with Apple"
+              onPress={() => { hapticLight(); signInWithApple(); }}
+              variant="outline"
+              fullWidth
+              size="lg"
+              leftIcon={
+                <Text style={{ fontSize: 18, color: colors.text.primary, marginRight: spacing.sm }}>
+                  {'\uF8FF'}
+                </Text>
+              }
+              style={{ marginBottom: spacing.md }}
+            />
+            <Button
+              title="Continue with Google"
+              onPress={() => { hapticLight(); signInWithGoogle(); }}
+              variant="outline"
+              fullWidth
+              size="lg"
+              leftIcon={
+                <Text style={{ fontSize: 16, color: colors.text.primary, marginRight: spacing.sm }}>
+                  G
+                </Text>
+              }
+              style={{ marginBottom: spacing.xxxl }}
+            />
+
+            {/* Sign In Link */}
+            <View style={styles.signInRow}>
+              <Text style={[typography.body, { color: colors.text.secondary }]}>
+                Already have an account?{' '}
+              </Text>
+              <Pressable onPress={() => { hapticLight(); handleSignIn(); }} accessibilityLabel="Go to sign in">
+                <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>Sign In</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#0C0A15' },
   safe: { flex: 1 },
   flex: { flex: 1 },
   scroll: { flexGrow: 1 },
+  logoSection: { alignItems: 'center' },
+  icon: { width: 80, height: 80 },
   errorBanner: {},
   strengthRow: { flexDirection: 'row', alignItems: 'center' },
   strengthBars: { flexDirection: 'row', flex: 1, gap: 4 },
@@ -307,5 +366,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 1,
   },
+  dividerRow: { flexDirection: 'row', alignItems: 'center' },
+  dividerLine: { flex: 1, height: 1 },
   signInRow: { flexDirection: 'row', justifyContent: 'center' },
 });

@@ -96,7 +96,7 @@ export default function VisionBoard() {
   if (inspirationMode && filteredItems.length > 0) {
     const currentItem = filteredItems[inspirationIndex];
     return (
-      <View style={[styles.screen, { backgroundColor: '#000000' }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
         <Pressable style={styles.inspirationContainer} onPress={handleNextInspiration}>
           {currentItem && (
             <>
@@ -107,7 +107,7 @@ export default function VisionBoard() {
               />
               {currentItem.title && (
                 <Animated.View entering={FadeIn.duration(500)} style={styles.inspirationOverlay}>
-                  <Text style={[typography.h1, { color: '#FFFFFF', textAlign: 'center' }]}>
+                  <Text style={[typography.h1, { color: colors.text.inverse, textAlign: 'center' }]}>
                     {currentItem.title}
                   </Text>
                 </Animated.View>
@@ -132,7 +132,7 @@ export default function VisionBoard() {
 
   if (fullScreenItem) {
     return (
-      <View style={[styles.screen, { backgroundColor: '#000000' }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
         <Pressable
           style={styles.inspirationContainer}
           onPress={() => setFullScreenItem(null)}
@@ -144,7 +144,7 @@ export default function VisionBoard() {
           />
           {fullScreenItem.title && (
             <View style={styles.inspirationOverlay}>
-              <Text style={[typography.h2, { color: '#FFFFFF', textAlign: 'center' }]}>
+              <Text style={[typography.h2, { color: colors.text.inverse, textAlign: 'center' }]}>
                 {fullScreenItem.title}
               </Text>
             </View>
@@ -223,7 +223,7 @@ export default function VisionBoard() {
                   {item.title && (
                     <View style={styles.tileOverlay}>
                       <Text
-                        style={[typography.caption, { color: '#FFFFFF' }]}
+                        style={[typography.caption, { color: colors.text.inverse }]}
                         numberOfLines={2}
                       >
                         {item.title}

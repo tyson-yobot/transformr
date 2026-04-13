@@ -18,6 +18,7 @@ import {
   calculateAge,
 } from '@services/calculations/bmr';
 import { calculateMacroTargets, calculateMacroPercentages } from '@services/calculations/macros';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 const DIETARY_OPTIONS = [
   'No Restrictions',
@@ -108,15 +109,16 @@ export default function NutritionScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        Nutrition Plan
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxl }]}>
-        We've calculated your targets based on your profile. Adjust as needed.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"
+        heading="Fuel your transformation."
+        subheading="Tell us how you eat and we'll handle the tracking, recommendations, and meal planning."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* TDEE Display */}
       <Card style={{ marginBottom: spacing.xl }}>
@@ -273,7 +275,7 @@ export default function NutritionScreen() {
               <Text
                 style={[
                   typography.caption,
-                  { color: isSelected ? '#FFFFFF' : colors.text.primary },
+                  { color: isSelected ? colors.text.inverse : colors.text.primary },
                 ]}
               >
                 {pref}
@@ -328,6 +330,7 @@ export default function NutritionScreen() {
         size="lg"
         style={{ marginTop: spacing.xxxl }}
       />
+      </View>
     </ScrollView>
   );
 }

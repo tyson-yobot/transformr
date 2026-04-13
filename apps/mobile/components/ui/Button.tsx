@@ -89,13 +89,13 @@ export function Button({
           container: {
             ...base,
             backgroundColor: colors.accent.primary,
-            shadowColor: '#A855F7',
+            shadowColor: colors.accent.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.4,
             shadowRadius: 12,
             elevation: 8,
           },
-          text: { color: '#FFFFFF' },
+          text: { color: colors.text.inverse },
         };
       case 'secondary':
         return {
@@ -115,7 +115,7 @@ export function Button({
       case 'danger':
         return {
           container: { ...base, backgroundColor: colors.accent.danger },
-          text: { color: '#FFFFFF' },
+          text: { color: colors.text.inverse },
         };
     }
   };
@@ -130,6 +130,7 @@ export function Button({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={isDisabled}
+      android_ripple={{ color: 'transparent' }}
       style={[
         styles.container,
         variantStyles.container,

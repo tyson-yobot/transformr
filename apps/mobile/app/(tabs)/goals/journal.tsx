@@ -21,6 +21,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
+import { EmptyState } from '@components/ui/EmptyState';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -277,16 +278,12 @@ export default function JournalScreen() {
         </Pressable>
 
         {showPastEntries && pastEntries.length === 0 && (
-          <Card style={{ marginTop: spacing.md }}>
-            <Text
-              style={[
-                typography.body,
-                { color: colors.text.secondary, textAlign: 'center' },
-              ]}
-            >
-              No past entries yet. Start journaling!
-            </Text>
-          </Card>
+          <EmptyState
+            icon="\uD83D\uDCDD"
+            title="No past entries yet"
+            subtitle="Your journal is a safe place to reflect, celebrate wins, and process the tough days. Write your first entry today."
+            style={{ paddingVertical: 24 }}
+          />
         )}
 
         {showPastEntries &&

@@ -296,15 +296,15 @@ export default function ChallengeActiveScreen() {
             <Card
               style={{
                 marginBottom: spacing.lg,
-                backgroundColor: `${colors.accent.danger ?? '#F44336'}20`,
+                backgroundColor: `${colors.accent.danger}20`,
                 borderWidth: 1,
-                borderColor: colors.accent.danger ?? '#F44336',
+                borderColor: colors.accent.danger,
               }}
             >
               <Text
                 style={[
                   typography.bodyBold,
-                  { color: colors.accent.danger ?? '#F44336' },
+                  { color: colors.accent.danger },
                 ]}
               >
                 {'\u26A0\uFE0F'} Warning: {incompleteTasks.length} task
@@ -452,7 +452,7 @@ export default function ChallengeActiveScreen() {
                       style={[
                         styles.calendarDayText,
                         {
-                          color: status === 'future' ? colors.text.muted : '#FFFFFF',
+                          color: status === 'future' ? colors.text.muted : colors.text.inverse,
                           fontSize: totalDays > 60 ? 8 : totalDays > 30 ? 9 : 10,
                         },
                       ]}
@@ -540,7 +540,7 @@ export default function ChallengeActiveScreen() {
               styles.abandonButton,
               {
                 borderRadius: borderRadius.md,
-                borderColor: colors.accent.danger ?? '#F44336',
+                borderColor: colors.accent.danger,
                 borderWidth: 1,
                 padding: spacing.md,
                 marginBottom: spacing.lg,
@@ -551,7 +551,7 @@ export default function ChallengeActiveScreen() {
               style={[
                 typography.bodyBold,
                 {
-                  color: colors.accent.danger ?? '#F44336',
+                  color: colors.accent.danger,
                   textAlign: 'center',
                 },
               ]}

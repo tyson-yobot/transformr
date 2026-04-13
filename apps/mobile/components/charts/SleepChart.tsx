@@ -30,12 +30,6 @@ interface SleepChartProps {
 
 const CHART_PADDING = { top: 16, right: 12, bottom: 40, left: 36 };
 
-const QUALITY_COLORS: Record<SleepQuality, string> = {
-  poor: '#EF4444',
-  fair: '#F59E0B',
-  good: '#6366F1',
-  excellent: '#22C55E',
-};
 
 function formatDuration(hours: number): string {
   const h = Math.floor(hours);
@@ -49,6 +43,12 @@ export function SleepChart({
   onBarPress,
 }: SleepChartProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const qualityColors: Record<SleepQuality, string> = {
+    poor: colors.accent.danger,
+    fair: colors.accent.warning,
+    good: colors.accent.info,
+    excellent: colors.accent.success,
+  };
   const [width, setWidth] = useState(0);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const chartHeight = 200;
@@ -161,10 +161,10 @@ export function SleepChart({
         <Svg width={width} height={chartHeight}>
           <Defs>
             {/* Gradient per quality */}
-            {(Object.keys(QUALITY_COLORS) as SleepQuality[]).map((q) => (
+            {(Object.keys(qualityColors) as SleepQuality[]).map((q) => (
               <LinearGradient key={q} id={`sleep-${q}`} x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={QUALITY_COLORS[q]} stopOpacity={1} />
-                <Stop offset="1" stopColor={QUALITY_COLORS[q]} stopOpacity={0.5} />
+                <Stop offset="0" stopColor={qualityColors[q]} stopOpacity={1} />
+                <Stop offset="1" stopColor={qualityColors[q]} stopOpacity={0.5} />
               </LinearGradient>
             ))}
           </Defs>
@@ -255,10 +255,10 @@ export function SleepChart({
 
       {/* Quality legend */}
       <View style={[styles.legend, { marginTop: spacing.sm }]}>
-        {(Object.keys(QUALITY_COLORS) as SleepQuality[]).map((q) => (
+        {(Object.keys(qualityColors) as SleepQuality[]).map((q) => (
           <View key={q} style={[styles.legendItem, { gap: spacing.xs }]}>
             <View
-              style={[styles.legendDot, { backgroundColor: QUALITY_COLORS[q] }]}
+              style={[styles.legendDot, { backgroundColor: qualityColors[q] }]}
             />
             <Text style={[typography.tiny, { color: colors.text.secondary }]}>
               {q.charAt(0).toUpperCase() + q.slice(1)}

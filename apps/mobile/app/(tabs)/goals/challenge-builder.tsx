@@ -648,14 +648,14 @@ export default function ChallengeBuilderScreen() {
                 style={[
                   styles.warningBanner,
                   {
-                    backgroundColor: `${colors.accent.fire ?? '#FF6B35'}15`,
+                    backgroundColor: `${colors.accent.fire}15`,
                     borderRadius: borderRadius.sm,
                     padding: spacing.sm,
                     marginTop: spacing.md,
                   },
                 ]}
               >
-                <Text style={[typography.caption, { color: colors.accent.fire ?? '#FF6B35' }]}>
+                <Text style={[typography.caption, { color: colors.accent.fire }]}>
                   {'\u26A0\uFE0F'} Missing any task resets your challenge to Day 1. No exceptions.
                 </Text>
               </View>

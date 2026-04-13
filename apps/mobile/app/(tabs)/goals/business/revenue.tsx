@@ -21,6 +21,7 @@ import { useBusinessStore } from '@stores/businessStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import type { RevenueLog } from '@app-types/database';
+import { EmptyState } from '@components/ui/EmptyState';
 
 type RevenueType = NonNullable<RevenueLog['type']>;
 
@@ -216,11 +217,12 @@ export default function RevenueScreen() {
           ))}
 
           {recentRevenue.length === 0 && (
-            <Card>
-              <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-                No revenue logged yet.
-              </Text>
-            </Card>
+            <EmptyState
+              icon="\uD83D\uDCB0"
+              title="No revenue logged yet"
+              subtitle="Every dollar counts. Log your first win and start building the story of your financial growth."
+              style={{ paddingVertical: 24 }}
+            />
           )}
         </Animated.View>
 

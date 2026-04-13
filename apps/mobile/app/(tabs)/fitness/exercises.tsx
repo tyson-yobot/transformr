@@ -218,7 +218,7 @@ export default function ExercisesScreen() {
                 <Text
                   style={[
                     typography.captionBold,
-                    { color: isActive ? '#FFFFFF' : colors.text.secondary },
+                    { color: isActive ? colors.text.inverse : colors.text.secondary },
                   ]}
                 >
                   {item.label}
@@ -261,7 +261,7 @@ export default function ExercisesScreen() {
                 <Text
                   style={[
                     typography.tiny,
-                    { color: isActive ? '#FFFFFF' : colors.text.muted },
+                    { color: isActive ? colors.text.inverse : colors.text.muted },
                   ]}
                 >
                   {item.label}
@@ -280,6 +280,10 @@ export default function ExercisesScreen() {
           data={filteredExercises}
           keyExtractor={(item) => item.id}
           renderItem={renderExerciseItem}
+          removeClippedSubviews={true}
+          windowSize={5}
+          maxToRenderPerBatch={10}
+          initialNumToRender={12}
           contentContainerStyle={{
             padding: spacing.lg,
             paddingBottom: 100,

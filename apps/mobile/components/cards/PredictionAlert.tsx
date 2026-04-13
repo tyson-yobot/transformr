@@ -24,10 +24,10 @@ interface PredictionAlertProps {
   style?: object;
 }
 
-const SEVERITY_CONFIG = {
-  info: { icon: 'information-circle', borderColor: '#22D3EE' },
-  warning: { icon: 'alert-circle', borderColor: '#F59E0B' },
-  critical: { icon: 'warning', borderColor: '#EF4444' },
+const SEVERITY_ICONS = {
+  info: 'information-circle',
+  warning: 'alert-circle',
+  critical: 'warning',
 } as const;
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -60,7 +60,12 @@ export function PredictionAlert({
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
-  const config = SEVERITY_CONFIG[severity];
+  const severityColor = severity === 'info'
+    ? colors.accent.cyan
+    : severity === 'warning'
+      ? colors.accent.warning
+      : colors.accent.danger;
+  const severityIcon = SEVERITY_ICONS[severity];
   const categoryIcon = CATEGORY_ICONS[category] ?? 'sparkles';
 
   return (
@@ -70,7 +75,7 @@ export function PredictionAlert({
           styles.card,
           {
             borderLeftWidth: 4,
-            borderLeftColor: config.borderColor,
+            borderLeftColor: severityColor,
           },
         ])}
       >
@@ -78,7 +83,7 @@ export function PredictionAlert({
           <Ionicons
             name={categoryIcon as keyof typeof Ionicons.glyphMap}
             size={18}
-            color={config.borderColor}
+            color={severityColor}
           />
           <Text
             style={[

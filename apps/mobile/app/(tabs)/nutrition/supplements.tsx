@@ -689,7 +689,7 @@ export default function SupplementsScreen() {
                 <Text
                   style={[
                     typography.tiny,
-                    { color: newCategory === cat.key ? '#FFFFFF' : colors.text.secondary },
+                    { color: newCategory === cat.key ? colors.text.inverse : colors.text.secondary },
                   ]}
                 >
                   {cat.label}

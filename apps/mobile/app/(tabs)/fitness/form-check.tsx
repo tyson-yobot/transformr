@@ -233,7 +233,7 @@ export default function FormCheckScreen() {
                     },
                   ]}
                 >
-                  <Text style={[typography.tiny, { color: '#FFFFFF', fontWeight: '700' }]}>
+                  <Text style={[typography.tiny, { color: colors.text.inverse, fontWeight: '700' }]}>
                     {idx + 1}
                   </Text>
                 </View>
@@ -279,7 +279,7 @@ export default function FormCheckScreen() {
   // Recording phase
   if (phase === 'recording') {
     return (
-      <View style={[styles.screen, { backgroundColor: '#000000' }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
         {permission?.granted && (
           <CameraView
             ref={cameraRef}
@@ -296,7 +296,7 @@ export default function FormCheckScreen() {
                   { backgroundColor: colors.accent.danger, borderRadius: 5 },
                 ]}
               />
-              <Text style={[typography.monoBody, { color: '#FFFFFF', fontWeight: '700', marginLeft: spacing.sm }]}>
+              <Text style={[typography.monoBody, { color: colors.text.inverse, fontWeight: '700', marginLeft: spacing.sm }]}>
                 {Math.floor(recordingDuration / 60)}:
                 {(recordingDuration % 60).toString().padStart(2, '0')}
               </Text>
@@ -308,7 +308,7 @@ export default function FormCheckScreen() {
             accessibilityRole="button"
             style={[
               styles.stopButton,
-              { borderColor: '#FFFFFF' },
+              { borderColor: colors.text.inverse },
             ]}
           >
             <View

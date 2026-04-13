@@ -10,6 +10,7 @@ import { Button } from '@components/ui/Button';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import type { Equipment, Difficulty } from '@app-types/common';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very_active' | 'extra_active';
 
@@ -67,15 +68,16 @@ export default function FitnessScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        Fitness Profile
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-        Help us build the perfect training plan for you.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80"
+        heading="What does your strongest self look like?"
+        subheading="Set your targets. We'll build the plan. Your AI coach adapts as you grow."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* Activity Level */}
       <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
@@ -146,7 +148,7 @@ export default function FitnessScreen() {
               <Text
                 style={[
                   typography.bodyBold,
-                  { color: isSelected ? '#FFFFFF' : colors.text.primary, textAlign: 'center' },
+                  { color: isSelected ? colors.text.inverse : colors.text.primary, textAlign: 'center' },
                 ]}
               >
                 {day}
@@ -227,7 +229,7 @@ export default function FitnessScreen() {
               <Text
                 style={[
                   typography.caption,
-                  { color: isSelected ? '#FFFFFF' : colors.text.primary },
+                  { color: isSelected ? colors.text.inverse : colors.text.primary },
                 ]}
               >
                 {item.label}
@@ -245,6 +247,7 @@ export default function FitnessScreen() {
         size="lg"
         style={{ marginTop: spacing.xxxl }}
       />
+      </View>
     </ScrollView>
   );
 }

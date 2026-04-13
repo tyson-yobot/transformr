@@ -28,6 +28,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { EmptyState } from '@components/ui/EmptyState';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import type { Goal } from '@app-types/database';
 
@@ -331,16 +332,13 @@ export default function GoalsDashboard() {
           })}
 
           {filteredGoals.length === 0 && (
-            <Card>
-              <Text
-                style={[
-                  typography.body,
-                  { color: colors.text.secondary, textAlign: 'center' },
-                ]}
-              >
-                No goals in this category yet. Add one!
-              </Text>
-            </Card>
+            <EmptyState
+              icon="\uD83C\uDFAF"
+              title="No goals yet"
+              subtitle="Dream big, start small. Set your first goal and watch your momentum build."
+              actionLabel="Add a Goal"
+              onAction={() => { hapticLight(); setShowAddModal(true); }}
+            />
           )}
         </View>
 

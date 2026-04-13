@@ -9,6 +9,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';
 
@@ -48,7 +49,7 @@ export default function BusinessScreen() {
             {'\uD83D\uDCBC'}
           </Text>
           <Text style={[typography.h1, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
-            Track Your Business?
+            Your health and wealth are connected.
           </Text>
           <Text
             style={[
@@ -56,7 +57,7 @@ export default function BusinessScreen() {
               { color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xxxl },
             ]}
           >
-            TRANSFORMR can track revenue, expenses, and business goals alongside your fitness journey.
+            Track both. See the correlation. Build the life you want.
           </Text>
 
           <Button
@@ -81,16 +82,17 @@ export default function BusinessScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        Business Setup
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-        Tell us about your business so we can track your entrepreneurial growth.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+        heading="Your health and wealth are connected."
+        subheading="Track both. See the correlation. Build the life you want."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* Business Name */}
       <Input
@@ -185,6 +187,7 @@ export default function BusinessScreen() {
         fullWidth
         size="md"
       />
+      </View>
     </ScrollView>
   );
 }

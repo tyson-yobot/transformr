@@ -5,39 +5,52 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import type { Session, User, Subscription } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface AuthState {
   session: Session | null;
   user: User | null;
   loading: boolean;
   error: string | null;
+  rateLimitSeconds: number;
 }
 
 interface AuthActions {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   setSession: (session: Session | null) => void;
   listenToAuthChanges: () => Subscription;
   clearError: () => void;
+  tickRateLimit: () => void;
 }
 
 type AuthStore = AuthState & AuthActions;
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // --- State ---
       session: null,
       user: null,
       loading: false,
       error: null,
+      rateLimitSeconds: 0,
 
       // --- Actions ---
       signUp: async (email, password, displayName) => {
+        if (get().rateLimitSeconds > 0) {
+          set({ error: `Please wait ${get().rateLimitSeconds}s before trying again.` });
+          return;
+        }
         set({ loading: true, error: null });
         try {
           const { data, error } = await supabase.auth.signUp({
@@ -47,7 +60,27 @@ export const useAuthStore = create<AuthStore>()(
               data: { display_name: displayName },
             },
           });
-          if (error) throw error;
+          if (error) {
+            // Parse Supabase rate limit errors
+            if (error.message.includes('after') || error.message.includes('seconds') || error.status === 429) {
+              const match = error.message.match(/(\d+)/);
+              const secs = match ? parseInt(match[1], 10) : 60;
+              set({ error: `Please wait ${secs} seconds before trying again.`, loading: false, rateLimitSeconds: secs });
+              // Countdown
+              const interval = setInterval(() => {
+                const remaining = get().rateLimitSeconds - 1;
+                if (remaining <= 0) {
+                  clearInterval(interval);
+                  set({ rateLimitSeconds: 0 });
+                } else {
+                  set({ rateLimitSeconds: remaining });
+                }
+              }, 1000);
+            } else {
+              throw error;
+            }
+            return;
+          }
           set({ session: data.session, user: data.user, loading: false });
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : 'Sign up failed';
@@ -66,6 +99,73 @@ export const useAuthStore = create<AuthStore>()(
           set({ session: data.session, user: data.user, loading: false });
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : 'Sign in failed';
+          set({ error: message, loading: false });
+        }
+      },
+
+      signInWithGoogle: async () => {
+        set({ loading: true, error: null });
+        try {
+          const redirectUrl = Linking.createURL('auth/callback');
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: redirectUrl,
+              queryParams: { access_type: 'offline', prompt: 'consent' },
+              skipBrowserRedirect: true,
+            },
+          });
+          if (error) throw error;
+          if (!data.url) throw new Error('No auth URL returned');
+
+          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+          if (result.type === 'success' && result.url) {
+            const url = new URL(result.url);
+            const accessToken = url.searchParams.get('access_token');
+            const refreshToken = url.searchParams.get('refresh_token');
+            if (accessToken && refreshToken) {
+              await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+            }
+          }
+          set({ loading: false });
+        } catch (err: unknown) {
+          const raw = err instanceof Error ? err.message : 'Google sign-in failed';
+          const message = raw.includes('provider') || raw.includes('not enabled')
+            ? 'Google sign-in is being configured. Use email to create your account — you can link Google later in Settings.'
+            : raw;
+          set({ error: message, loading: false });
+        }
+      },
+
+      signInWithApple: async () => {
+        set({ loading: true, error: null });
+        try {
+          const redirectUrl = Linking.createURL('auth/callback');
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'apple',
+            options: {
+              redirectTo: redirectUrl,
+              skipBrowserRedirect: true,
+            },
+          });
+          if (error) throw error;
+          if (!data.url) throw new Error('No auth URL returned');
+
+          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+          if (result.type === 'success' && result.url) {
+            const url = new URL(result.url);
+            const accessToken = url.searchParams.get('access_token');
+            const refreshToken = url.searchParams.get('refresh_token');
+            if (accessToken && refreshToken) {
+              await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+            }
+          }
+          set({ loading: false });
+        } catch (err: unknown) {
+          const raw = err instanceof Error ? err.message : 'Apple sign-in failed';
+          const message = raw.includes('provider') || raw.includes('not enabled')
+            ? 'Apple sign-in is being configured. Use email to create your account — you can link Apple later in Settings.'
+            : raw;
           set({ error: message, loading: false });
         }
       },
@@ -106,6 +206,11 @@ export const useAuthStore = create<AuthStore>()(
       setSession: (session) => set({ session, user: session?.user ?? null }),
 
       clearError: () => set({ error: null }),
+
+      tickRateLimit: () => {
+        const remaining = get().rateLimitSeconds - 1;
+        set({ rateLimitSeconds: Math.max(0, remaining) });
+      },
     }),
     {
       name: 'transformr-auth',

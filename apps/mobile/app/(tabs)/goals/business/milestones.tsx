@@ -269,7 +269,7 @@ export default function MilestonesScreen() {
                 >
                   <Pressable onPress={() => { hapticLight(); handleToggleComplete(milestone); }} accessibilityLabel={`Mark ${milestone.title} as incomplete`}>
                     <View style={[styles.checkBoxDone, { backgroundColor: colors.accent.success, borderRadius: borderRadius.sm }]}>
-                      <Text style={{ color: '#FFFFFF', fontSize: 12 }}>{'\u2713'}</Text>
+                      <Text style={{ color: colors.text.inverse, fontSize: 12 }}>{'\u2713'}</Text>
                     </View>
                   </Pressable>
                   <View style={{ flex: 1, marginLeft: spacing.md }}>
@@ -300,7 +300,7 @@ export default function MilestonesScreen() {
         accessibilityLabel="Add new milestone"
         style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28, shadowColor: colors.accent.primary }]}
       >
-        <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
+        <Text style={[typography.h2, { color: colors.text.inverse }]}>+</Text>
       </Pressable>
 
       <Modal

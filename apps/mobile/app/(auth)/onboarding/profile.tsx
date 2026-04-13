@@ -17,6 +17,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
 type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 type GoalDirection = 'gain' | 'lose' | 'maintain';
@@ -103,16 +104,17 @@ export default function ProfileScreen() {
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ padding: spacing.xxl, paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 }}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text style={[typography.h1, { color: colors.text.primary, marginBottom: spacing.sm }]}>
-        About You
-      </Text>
-      <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.xxxl }]}>
-        We'll use this to personalize your experience and calculate targets.
-      </Text>
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80"
+        heading="Let's get to know you."
+        subheading="The more we know, the more personalized your AI coach becomes. This takes 2 minutes."
+        style={{ marginBottom: spacing.xl }}
+      />
+      <View style={{ paddingHorizontal: spacing.xxl }}>
 
       {/* Date of Birth */}
       <Input
@@ -163,7 +165,7 @@ export default function ProfileScreen() {
               <Text
                 style={[
                   typography.caption,
-                  { color: isSelected ? '#FFFFFF' : colors.text.primary },
+                  { color: isSelected ? colors.text.inverse : colors.text.primary },
                 ]}
               >
                 {g.label}
@@ -293,6 +295,7 @@ export default function ProfileScreen() {
         fullWidth
         size="lg"
       />
+      </View>
     </ScrollView>
   );
 }

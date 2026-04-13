@@ -227,13 +227,13 @@ export default function MealCameraScreen() {
               <Pressable onPress={() => router.back()} hitSlop={12}>
                 <Ionicons name="close" size={28} color="#FFFFFF" />
               </Pressable>
-              <Text style={[typography.h3, { color: '#FFFFFF' }]}>AI Meal Scanner</Text>
+              <Text style={[typography.h3, { color: colors.text.inverse }]}>AI Meal Scanner</Text>
               <View style={{ width: 28 }} />
             </View>
 
             <View style={styles.cameraCenter}>
               <View style={[styles.scanFrame, { borderColor: colors.accent.primary, borderRadius: borderRadius.xl }]} />
-              <Text style={[typography.caption, { color: '#FFFFFF', marginTop: spacing.md, textAlign: 'center' }]}>
+              <Text style={[typography.caption, { color: colors.text.inverse, marginTop: spacing.md, textAlign: 'center' }]}>
                 Center your meal in the frame
               </Text>
             </View>
@@ -243,9 +243,9 @@ export default function MealCameraScreen() {
                 onPress={handleCapture}
                 accessibilityLabel="Take photo of meal"
                 accessibilityRole="button"
-                style={[styles.captureBtn, { borderColor: '#FFFFFF' }]}
+                style={[styles.captureBtn, { borderColor: colors.text.inverse }]}
               >
-                <View style={[styles.captureBtnInner, { backgroundColor: '#FFFFFF' }]} />
+                <View style={[styles.captureBtnInner, { backgroundColor: colors.text.inverse }]} />
               </Pressable>
             </View>
           </View>
@@ -302,7 +302,7 @@ export default function MealCameraScreen() {
                   },
                 ]}
               >
-                <Text style={[typography.caption, { color: mealType === mt ? '#FFFFFF' : colors.text.secondary }]}>
+                <Text style={[typography.caption, { color: mealType === mt ? colors.text.inverse : colors.text.secondary }]}>
                   {mt.charAt(0).toUpperCase() + mt.slice(1)}
                 </Text>
               </Pressable>

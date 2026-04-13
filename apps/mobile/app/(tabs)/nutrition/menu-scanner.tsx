@@ -227,13 +227,13 @@ export default function MenuScannerScreen() {
               <Pressable onPress={() => router.back()} hitSlop={12}>
                 <Ionicons name="close" size={28} color="#FFFFFF" />
               </Pressable>
-              <Text style={[typography.h3, { color: '#FFFFFF' }]}>Menu Scanner</Text>
+              <Text style={[typography.h3, { color: colors.text.inverse }]}>Menu Scanner</Text>
               <View style={{ width: 28 }} />
             </View>
 
             <View style={styles.captureCenter}>
               <View style={[styles.menuFrame, { borderColor: colors.accent.warning, borderRadius: borderRadius.lg }]} />
-              <Text style={[typography.caption, { color: '#FFFFFF', marginTop: spacing.md }]}>
+              <Text style={[typography.caption, { color: colors.text.inverse, marginTop: spacing.md }]}>
                 Photograph the menu page
               </Text>
             </View>
@@ -243,9 +243,9 @@ export default function MenuScannerScreen() {
                 onPress={handleCapture}
                 accessibilityLabel="Take photo of menu"
                 accessibilityRole="button"
-                style={[styles.captureBtn, { borderColor: '#FFFFFF' }]}
+                style={[styles.captureBtn, { borderColor: colors.text.inverse }]}
               >
-                <View style={[styles.captureBtnInner, { backgroundColor: '#FFFFFF' }]} />
+                <View style={[styles.captureBtnInner, { backgroundColor: colors.text.inverse }]} />
               </Pressable>
             </View>
           </View>
@@ -321,7 +321,7 @@ export default function MenuScannerScreen() {
                     },
                   ]}
                 >
-                  <Text style={[typography.caption, { color: mealType === mt ? '#FFFFFF' : colors.text.secondary }]}>
+                  <Text style={[typography.caption, { color: mealType === mt ? colors.text.inverse : colors.text.secondary }]}>
                     {mt.charAt(0).toUpperCase() + mt.slice(1)}
                   </Text>
                 </Pressable>

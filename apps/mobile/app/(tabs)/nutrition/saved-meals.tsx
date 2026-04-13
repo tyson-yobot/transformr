@@ -210,7 +210,7 @@ export default function SavedMealsScreen() {
               <Text
                 style={[
                   typography.caption,
-                  { color: activeFilter === filter.value ? '#FFFFFF' : colors.text.secondary },
+                  { color: activeFilter === filter.value ? colors.text.inverse : colors.text.secondary },
                 ]}
               >
                 {filter.label}
@@ -347,7 +347,7 @@ export default function SavedMealsScreen() {
                   },
                 ]}
               >
-                <Text style={[typography.caption, { color: newMealType === mt ? '#FFFFFF' : colors.text.secondary }]}>
+                <Text style={[typography.caption, { color: newMealType === mt ? colors.text.inverse : colors.text.secondary }]}>
                   {mt.charAt(0).toUpperCase() + mt.slice(1)}
                 </Text>
               </Pressable>

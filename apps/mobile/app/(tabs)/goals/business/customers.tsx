@@ -20,6 +20,7 @@ import { Chip } from '@components/ui/Chip';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency, formatNumber } from '@utils/formatters';
 import type { Customer } from '@app-types/database';
+import { EmptyState } from '@components/ui/EmptyState';
 
 type CustomerStatus = NonNullable<Customer['status']>;
 
@@ -214,11 +215,12 @@ export default function CustomersScreen() {
         ))}
 
         {filteredCustomers.length === 0 && (
-          <Card>
-            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-              No customers yet. Add your first customer!
-            </Text>
-          </Card>
+          <EmptyState
+            icon="\uD83E\uDD1D"
+            title="No customers yet"
+            subtitle="Your first customer is out there. Add them here and start tracking the relationships that drive your business."
+            style={{ paddingVertical: 24 }}
+          />
         )}
 
         {/* Add Customer */}
