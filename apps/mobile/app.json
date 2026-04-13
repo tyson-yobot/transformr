@@ -89,7 +89,9 @@
     },
     "extra": {
       "supabaseUrl": "https://horqwbfsqqmzdbbafvov.supabase.co",
-      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnF3YmZzcXFtemRiYmFmdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MDczOTMsImV4cCI6MjA5MTE4MzM5M30.GAY9ystuTThmXkSmrjSTKuSbZkpcWgkEaYKxSPhMBtM"
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnF3YmZzcXFtemRiYmFmdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MDczOTMsImV4cCI6MjA5MTE4MzM5M30.GAY9ystuTThmXkSmrjSTKuSbZkpcWgkEaYKxSPhMBtM",
+      "privacyPolicyUrl": "https://transformr.app/privacy",
+      "termsOfServiceUrl": "https://transformr.app/terms"
     }
   }
 }

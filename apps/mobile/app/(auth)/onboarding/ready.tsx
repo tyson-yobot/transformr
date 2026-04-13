@@ -11,12 +11,41 @@ import Animated, {
   withDelay,
   withSpring,
   withSequence,
+  withRepeat,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
+
+// Confetti-style decorative orbs rendered behind the hero text
+function ConfettiOrb({ color, style }: { color: string; style: object }) {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.4);
+
+  useEffect(() => {
+    opacity.value = withDelay(200, withTiming(1, { duration: 600 }));
+    scale.value = withDelay(200, withSpring(1, { damping: 10, stiffness: 120 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        styles.orb,
+        { backgroundColor: color },
+        style,
+        animStyle,
+      ]}
+    />
+  );
+}
 
 export default function ReadyScreen() {
   const { colors, typography, spacing } = useTheme();
@@ -30,12 +59,14 @@ export default function ReadyScreen() {
   const contentOpacity = useSharedValue(0);
   const contentTranslateY = useSharedValue(30);
   const buttonOpacity = useSharedValue(0);
+  const buttonScale = useSharedValue(1);
+  const glowOpacity = useSharedValue(0.4);
 
   useEffect(() => {
     // Celebration entrance
     celebrationOpacity.value = withTiming(1, { duration: 400 });
     celebrationScale.value = withSequence(
-      withSpring(1.2, { damping: 8, stiffness: 200 }),
+      withSpring(1.3, { damping: 6, stiffness: 220 }),
       withSpring(1, { damping: 12, stiffness: 300 }),
     );
 
@@ -45,6 +76,20 @@ export default function ReadyScreen() {
 
     // Button
     buttonOpacity.value = withDelay(900, withTiming(1, { duration: 400 }));
+
+    // Subtle pulsing glow on the button to draw attention
+    glowOpacity.value = withDelay(
+      1100,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 900 }),
+          withTiming(0.4, { duration: 900 }),
+        ),
+        -1,
+        true,
+      ),
+    );
+
     // Reanimated shared values are stable refs — no re-run needed
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -61,6 +106,11 @@ export default function ReadyScreen() {
 
   const buttonStyle = useAnimatedStyle(() => ({
     opacity: buttonOpacity.value,
+    transform: [{ scale: buttonScale.value }],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
   }));
 
   const summaryItems = useMemo(() => {
@@ -97,9 +147,14 @@ export default function ReadyScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary, padding: spacing.xxl }]}>
+      {/* Decorative background orbs */}
+      <ConfettiOrb color={colors.accent.primary + '30'} style={styles.orbTopLeft} />
+      <ConfettiOrb color={colors.accent.secondary + '25'} style={styles.orbTopRight} />
+      <ConfettiOrb color={colors.accent.primary + '18'} style={styles.orbBottomLeft} />
+
       {/* Celebration */}
       <Animated.View style={[styles.celebrationSection, celebrationStyle]}>
-        <Text style={{ fontSize: 64, textAlign: 'center' }}>{'\uD83C\uDF89'}</Text>
+        <Text style={styles.trophyEmoji}>{'\uD83C\uDF89'}</Text>
         <Text
           style={[
             typography.hero,
@@ -116,9 +171,10 @@ export default function ReadyScreen() {
           style={[
             typography.body,
             {
-              color: colors.text.secondary,
+              color: colors.accent.primary,
               textAlign: 'center',
               marginTop: spacing.sm,
+              fontWeight: '600',
             },
           ]}
         >
@@ -161,10 +217,19 @@ export default function ReadyScreen() {
         </Card>
       </Animated.View>
 
-      {/* Start Button */}
+      {/* Start Button with pulsing glow */}
       <Animated.View style={[styles.buttonSection, buttonStyle]}>
+        {/* Glow layer behind the button */}
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFillObject,
+            styles.buttonGlow,
+            { backgroundColor: colors.accent.primary + '40' },
+            glowStyle,
+          ]}
+        />
         <Button
-          title="Start Transforming"
+          title="Let's Go — Start Transforming"
           onPress={handleStart}
           fullWidth
           size="lg"
@@ -176,8 +241,18 @@ export default function ReadyScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'space-between' },
-  celebrationSection: { alignItems: 'center', marginTop: 20 },
-  summarySection: { flex: 1, justifyContent: 'center' },
+  // Decorative orbs
+  orbTopLeft: { position: 'absolute', top: -20, left: -30, width: 160, height: 160, borderRadius: 80 },
+  orbTopRight: { position: 'absolute', top: 60, right: -50, width: 120, height: 120, borderRadius: 60 },
+  orbBottomLeft: { position: 'absolute', bottom: 120, left: -40, width: 100, height: 100, borderRadius: 50 },
+  orb: {},
+  // Hero
+  celebrationSection: { alignItems: 'center', marginTop: 20, zIndex: 1 },
+  trophyEmoji: { fontSize: 72, textAlign: 'center' },
+  // Summary
+  summarySection: { flex: 1, justifyContent: 'center', zIndex: 1 },
   summaryRow: { flexDirection: 'row', alignItems: 'center' },
-  buttonSection: { paddingBottom: 20 },
+  // CTA
+  buttonSection: { paddingBottom: 20, zIndex: 1 },
+  buttonGlow: { borderRadius: 16, top: -6, bottom: -6, left: -6, right: -6 },
 });
