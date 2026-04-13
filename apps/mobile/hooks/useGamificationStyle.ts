@@ -1,18 +1,18 @@
 // =============================================================================
 // TRANSFORMR -- useGamificationStyle Hook (Module 13)
-// Returns a full GamificationStyle object based on the user's stored mode.
-// Provides toggleMode and setMode to switch between competitive/supportive.
-// Persisted via gamificationStore (MMKV-backed Zustand).
+// Returns a full GamificationStyle object based on the user's stored tone.
+// Provides setTone to switch between the 4 coaching tones.
+// Persisted via gamificationStore (AsyncStorage-backed Zustand).
 // =============================================================================
 
 import { useCallback } from 'react';
 import { useTheme } from '@theme/index';
-import { useGamificationStore } from '@stores/gamificationStore';
+import { useGamificationStore, CoachingTone } from '@stores/gamificationStore';
 
-export type GamificationMode = 'competitive' | 'supportive';
+export type { CoachingTone };
 
 export interface GamificationStyle {
-  mode: GamificationMode;
+  tone: CoachingTone;
   // Tone labels
   achievementLabel: string;
   streakLabel: string;
@@ -24,26 +24,44 @@ export interface GamificationStyle {
   showLeaderboard: boolean;
   cardElevation: 'high' | 'normal';
   // Text
-  motivationStyle: 'intense' | 'calm';
+  motivationStyle: 'intense' | 'neutral' | 'calm';
 }
 
 export interface UseGamificationStyleResult {
   style: GamificationStyle;
-  mode: GamificationMode;
-  toggleMode: () => void;
-  setMode: (mode: GamificationMode) => void;
+  tone: CoachingTone;
+  isDrillSergeant: boolean;
+  isMotivational: boolean;
+  isBalanced: boolean;
+  isCalm: boolean;
+  setTone: (tone: CoachingTone) => void;
 }
 
 // ---------------------------------------------------------------------------
 // Style builders
 // ---------------------------------------------------------------------------
 
-function buildCompetitiveStyle(primaryColor: string): GamificationStyle {
+function buildDrillSergeantStyle(primaryColor: string): GamificationStyle {
   return {
-    mode: 'competitive',
-    achievementLabel: 'New PR! 🔥',
+    tone: 'drill_sergeant',
+    achievementLabel: 'PR. Raise the bar.',
+    streakLabel: '{count} days. Keep the streak alive.',
+    missedDayLabel: 'Missed. No excuses. Fix it tomorrow.',
+    progressLabel: 'EXECUTE',
+    primaryColor,
+    showFireEmojis: true,
+    showLeaderboard: true,
+    cardElevation: 'high',
+    motivationStyle: 'intense',
+  };
+}
+
+function buildMotivationalStyle(primaryColor: string): GamificationStyle {
+  return {
+    tone: 'motivational',
+    achievementLabel: "LET'S GO! New PR! 🔥",
     streakLabel: '🔥 {count}-day fire streak!',
-    missedDayLabel: 'Streak broken 💀',
+    missedDayLabel: "Everyone slips — you've got this tomorrow 💪",
     progressLabel: 'CRUSHING IT',
     primaryColor,
     showFireEmojis: true,
@@ -53,12 +71,27 @@ function buildCompetitiveStyle(primaryColor: string): GamificationStyle {
   };
 }
 
-function buildSupportiveStyle(primaryColor: string): GamificationStyle {
+function buildBalancedStyle(primaryColor: string): GamificationStyle {
   return {
-    mode: 'supportive',
-    achievementLabel: 'Nice improvement!',
-    streakLabel: '{count} days consistent',
-    missedDayLabel: 'Everyone misses a day — back tomorrow',
+    tone: 'balanced',
+    achievementLabel: 'Goal achieved.',
+    streakLabel: '{count}-day consistency streak',
+    missedDayLabel: 'Session missed. Adjust your schedule.',
+    progressLabel: 'On track',
+    primaryColor,
+    showFireEmojis: false,
+    showLeaderboard: false,
+    cardElevation: 'normal',
+    motivationStyle: 'neutral',
+  };
+}
+
+function buildCalmStyle(primaryColor: string): GamificationStyle {
+  return {
+    tone: 'calm',
+    achievementLabel: 'Milestone reached.',
+    streakLabel: '{count} days of showing up',
+    missedDayLabel: 'Rest is part of the process.',
     progressLabel: 'Making progress',
     primaryColor,
     showFireEmojis: false,
@@ -74,28 +107,42 @@ function buildSupportiveStyle(primaryColor: string): GamificationStyle {
 
 export function useGamificationStyle(): UseGamificationStyleResult {
   const { colors } = useTheme();
-  const mode = useGamificationStore((s) => s.mode);
-  const setModeInStore = useGamificationStore((s) => s.setMode);
+  const tone = useGamificationStore((s) => s.tone);
+  const setToneInStore = useGamificationStore((s) => s.setTone);
 
-  // Supportive mode uses a slightly softer purple tint
-  const competitivePrimary = colors.accent.primary;
-  const supportivePrimary = colors.accent.secondary; // #7E22CE — softer
+  const intensePrimary = colors.accent.primary;
+  const neutralPrimary = colors.accent.secondary;
 
-  const style: GamificationStyle =
-    mode === 'competitive'
-      ? buildCompetitiveStyle(competitivePrimary)
-      : buildSupportiveStyle(supportivePrimary);
+  let style: GamificationStyle;
+  switch (tone) {
+    case 'drill_sergeant':
+      style = buildDrillSergeantStyle(intensePrimary);
+      break;
+    case 'motivational':
+      style = buildMotivationalStyle(intensePrimary);
+      break;
+    case 'balanced':
+      style = buildBalancedStyle(neutralPrimary);
+      break;
+    case 'calm':
+      style = buildCalmStyle(neutralPrimary);
+      break;
+  }
 
-  const toggleMode = useCallback(() => {
-    setModeInStore(mode === 'competitive' ? 'supportive' : 'competitive');
-  }, [mode, setModeInStore]);
-
-  const setMode = useCallback(
-    (newMode: GamificationMode) => {
-      setModeInStore(newMode);
+  const setTone = useCallback(
+    (newTone: CoachingTone) => {
+      setToneInStore(newTone);
     },
-    [setModeInStore],
+    [setToneInStore],
   );
 
-  return { style, mode, toggleMode, setMode };
+  return {
+    style,
+    tone,
+    isDrillSergeant: tone === 'drill_sergeant',
+    isMotivational: tone === 'motivational',
+    isBalanced: tone === 'balanced',
+    isCalm: tone === 'calm',
+    setTone,
+  };
 }

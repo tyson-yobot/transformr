@@ -87,10 +87,10 @@ export function StreakCalendar({
   style,
 }: StreakCalendarProps) {
   const { colors, typography, spacing } = useTheme();
-  const { style: gamStyle } = useGamificationStyle();
+  const { style: gamStyle, isDrillSergeant, isMotivational } = useGamificationStyle();
 
-  const isCompetitive = gamStyle.mode === 'competitive';
-  const heatmapAccent = isCompetitive ? colors.accent.success : gamStyle.primaryColor;
+  const isIntense = isDrillSergeant || isMotivational;
+  const heatmapAccent = isIntense ? colors.accent.success : gamStyle.primaryColor;
 
   const today = useMemo(() => {
     const d = new Date();
@@ -185,10 +185,10 @@ export function StreakCalendar({
         <Text
           style={[
             typography.statSmall,
-            { color: isCompetitive ? colors.accent.fire : gamStyle.primaryColor },
+            { color: isIntense ? colors.accent.fire : gamStyle.primaryColor },
           ]}
         >
-          {isCompetitive ? `${currentStreak} \u{1F525}` : `${currentStreak} days`}
+          {isIntense ? `${currentStreak} \u{1F525}` : `${currentStreak} days`}
         </Text>
         <Text
           style={[

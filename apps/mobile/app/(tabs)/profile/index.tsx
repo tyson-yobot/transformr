@@ -23,9 +23,10 @@ import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
-import { useGamificationStyle } from '@hooks/useGamificationStyle';
+import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle';
 import { formatDate, formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 // ---------------------------------------------------------------------------
 // Section Header
@@ -141,6 +142,48 @@ function SettingsRow({
 }
 
 // ---------------------------------------------------------------------------
+// Coaching Tone Options
+// ---------------------------------------------------------------------------
+interface CoachingToneOption {
+  id: CoachingTone;
+  label: string;
+  icon: string;
+  description: string;
+  example: string;
+}
+
+const COACHING_TONES: CoachingToneOption[] = [
+  {
+    id: 'drill_sergeant',
+    label: 'Drill Sergeant',
+    icon: '🎖️',
+    description: 'Intense, no-excuses accountability. Calls you out directly.',
+    example: "You said you'd do it. You didn't. Fix that tomorrow.",
+  },
+  {
+    id: 'motivational',
+    label: 'Motivational Builder',
+    icon: '🔥',
+    description: 'Hypes you up, builds you up. Celebrates every win.',
+    example: "You showed up 4 out of 5 days — that's ELITE. Keep pushing!",
+  },
+  {
+    id: 'balanced',
+    label: 'Balanced Coach',
+    icon: '📊',
+    description: 'Data-driven, professional. Gives you the numbers straight.',
+    example: "Your consistency is 87% this week. 13% gap to close.",
+  },
+  {
+    id: 'calm',
+    label: 'Calm Supporter',
+    icon: '🌿',
+    description: 'Gentle, patient, no pressure. Celebrates effort over results.',
+    example: "You've been showing up. That consistency is building something real.",
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Main Screen
 // ---------------------------------------------------------------------------
 export default function ProfileScreen() {
@@ -151,7 +194,7 @@ export default function ProfileScreen() {
   const profile = useProfileStore((s) => s.profile);
   const settings = useSettingsStore();
   const signOut = useAuthStore((s) => s.signOut);
-  const { mode: gamificationMode, toggleMode: toggleGamificationMode } = useGamificationStyle();
+  const { tone: selectedTone, setTone } = useGamificationStyle();
 
   // Theme cycle
   const themeOptions: ThemeMode[] = ['dark', 'light', 'system'];
@@ -254,30 +297,64 @@ export default function ProfileScreen() {
         </Card>
       </Animated.View>
 
+      {/* Coaching Style */}
+      <SectionHeader title="Coaching Style" />
+      <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ marginBottom: spacing.lg }}>
+        {COACHING_TONES.map((toneOption) => {
+          const isSelected = selectedTone === toneOption.id;
+          return (
+            <Pressable
+              key={toneOption.id}
+              onPress={() => {
+                void hapticLight();
+                setTone(toneOption.id);
+              }}
+              accessibilityRole="radio"
+              accessibilityLabel={toneOption.label}
+              accessibilityState={{ selected: isSelected }}
+              style={[
+                styles.toneOption,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: isSelected ? colors.accent.primary : 'transparent',
+                  borderRadius: 12,
+                  marginBottom: spacing.xs,
+                },
+              ]}
+            >
+              <View style={{ flex: 1 }}>
+                <View style={styles.toneLabelRow}>
+                  <Text style={{ fontSize: 18, marginRight: spacing.sm }}>{toneOption.icon}</Text>
+                  <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                    {toneOption.label}
+                  </Text>
+                </View>
+                <Text
+                  style={[typography.caption, { color: colors.text.secondary, marginTop: 2 }]}
+                >
+                  {toneOption.description}
+                </Text>
+                <Text
+                  style={[typography.caption, { color: colors.text.muted, marginTop: 4, fontStyle: 'italic' }]}
+                  numberOfLines={2}
+                >
+                  "{toneOption.example}"
+                </Text>
+              </View>
+              {isSelected && (
+                <Text style={{ fontSize: 20, color: colors.accent.primary, marginLeft: spacing.sm }}>
+                  ✓
+                </Text>
+              )}
+            </Pressable>
+          );
+        })}
+      </Animated.View>
+      <HelpBubble id="profile_coaching" message="Choose how your AI coach talks to you" position="below" />
+
       {/* Settings */}
       <SectionHeader title="Preferences" />
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-        <SettingsRow
-          icon={gamificationMode === 'competitive' ? '🏆' : '🌱'}
-          label="Mode"
-          accessibilityLabel="Toggle gamification mode"
-          rightElement={
-            <View style={{ alignItems: 'flex-end' }}>
-              <Toggle
-                value={gamificationMode === 'competitive'}
-                onValueChange={() => toggleGamificationMode()}
-              />
-              <Text
-                style={[
-                  typography.tiny,
-                  { color: colors.text.muted, marginTop: 2 },
-                ]}
-              >
-                {gamificationMode === 'competitive' ? 'Competitive' : 'Supportive'}
-              </Text>
-            </View>
-          }
-        />
         <SettingsRow
           icon="🎨"
           label="Theme"
@@ -456,5 +533,16 @@ const styles = StyleSheet.create({
   settingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  toneOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 2,
+  },
+  toneLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
 });

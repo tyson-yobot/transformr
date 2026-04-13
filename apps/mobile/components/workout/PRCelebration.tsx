@@ -12,9 +12,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
+import { ShareButton } from '@components/social/ShareButton';
 import {
   useGamificationStyle,
-  type GamificationMode,
+  type CoachingTone,
 } from '@hooks/useGamificationStyle';
 
 interface PRCelebrationProps {
@@ -23,7 +24,7 @@ interface PRCelebrationProps {
   recordType: string;
   onDismiss: () => void;
   autoDismissMs?: number;
-  gamificationMode?: GamificationMode;
+  coachingTone?: CoachingTone;
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -117,20 +118,23 @@ export function PRCelebration({
   recordType,
   onDismiss,
   autoDismissMs = 3000,
-  gamificationMode,
+  coachingTone,
 }: PRCelebrationProps) {
   const { colors, typography, spacing } = useTheme();
-  const { mode: hookMode } = useGamificationStyle();
+  const { tone: hookTone } = useGamificationStyle();
 
-  const activeMode: GamificationMode = gamificationMode ?? hookMode;
-  const isCompetitive = activeMode === 'competitive';
+  const activeTone: CoachingTone = coachingTone ?? hookTone;
+  const isDrillSergeant = activeTone === 'drill_sergeant';
+  const isHype = activeTone === 'motivational';
+  const isBalanced = activeTone === 'balanced';
+  const isIntense = isDrillSergeant || isHype;
 
   const overlayOpacity = useSharedValue(0);
   const textScale = useSharedValue(0);
   const glowOpacity = useSharedValue(0);
   const detailOpacity = useSharedValue(0);
 
-  const competitiveParticleColors = [
+  const intenseParticleColors = [
     colors.accent.gold,
     colors.accent.fire,
     colors.accent.primary,
@@ -138,22 +142,19 @@ export function PRCelebration({
     colors.accent.success,
   ];
 
-  const supportiveParticleColors = [
-    colors.accent.secondary, // muted purple
-    colors.accent.primary,   // softer teal
-    colors.accent.success,   // gentle green
+  const softParticleColors = [
+    colors.accent.secondary,
+    colors.accent.primary,
+    colors.accent.success,
   ];
 
-  const particleColors = isCompetitive
-    ? competitiveParticleColors
-    : supportiveParticleColors;
-
-  const particleCount = isCompetitive ? PARTICLE_COUNT : 12;
+  const particleColors = isIntense ? intenseParticleColors : softParticleColors;
+  const particleCount = isIntense ? PARTICLE_COUNT : 12;
 
   const particles = React.useMemo(
     () => generateParticles(particleColors, particleCount),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isCompetitive],
+    [activeTone],
   );
 
   const triggerDismiss = useCallback(() => {
@@ -163,9 +164,9 @@ export function PRCelebration({
   }, [overlayOpacity, onDismiss]);
 
   useEffect(() => {
-    // Haptic pattern
+    // Haptic pattern — intense tones get the full salvo, soft tones get a single tap
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    if (isCompetitive) {
+    if (isIntense) {
       setTimeout(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       }, 200);
@@ -208,7 +209,7 @@ export function PRCelebration({
     detailOpacity,
     autoDismissMs,
     triggerDismiss,
-    isCompetitive,
+    isIntense,
   ]);
 
   const overlayStyle = useAnimatedStyle(() => ({
@@ -242,7 +243,7 @@ export function PRCelebration({
         style={[
           styles.glow,
           {
-            backgroundColor: isCompetitive ? colors.accent.gold : colors.accent.primary,
+            backgroundColor: isIntense ? colors.accent.gold : colors.accent.primary,
             top: SCREEN_HEIGHT / 2 - 120,
             left: SCREEN_WIDTH / 2 - 100,
           },
@@ -258,12 +259,12 @@ export function PRCelebration({
             style={[
               styles.prText,
               {
-                color: isCompetitive ? colors.accent.gold : colors.accent.primary,
-                textShadowColor: isCompetitive ? colors.accent.gold : colors.accent.primary,
+                color: isIntense ? colors.accent.gold : colors.accent.primary,
+                textShadowColor: isIntense ? colors.accent.gold : colors.accent.primary,
               },
             ]}
           >
-            {isCompetitive ? 'NEW PR!' : 'Nice Improvement!'}
+            {isHype ? 'NEW PR! 🔥' : isDrillSergeant ? 'PR. RAISE THE BAR.' : isBalanced ? 'GOAL ACHIEVED' : 'Milestone Reached'}
           </Text>
         </Animated.View>
 
@@ -281,7 +282,7 @@ export function PRCelebration({
             style={[
               styles.recordValue,
               {
-                color: isCompetitive ? colors.accent.gold : colors.accent.primary,
+                color: isIntense ? colors.accent.gold : colors.accent.primary,
                 marginTop: spacing.md,
               },
             ]}
@@ -294,8 +295,19 @@ export function PRCelebration({
               { color: colors.text.secondary, marginTop: spacing.sm },
             ]}
           >
-            {isCompetitive ? recordType : 'Every rep counts'}
+            {isDrillSergeant ? `${recordType} — now raise the standard` : isHype ? `${recordType} — LET'S GO!` : isBalanced ? recordType : 'Every rep counts'}
           </Text>
+          <View style={{ marginTop: spacing.md }}>
+            <ShareButton
+              type="pr"
+              data={{
+                title: exerciseName,
+                value: recordValue,
+                subtitle: recordType,
+              }}
+              label="Share PR"
+            />
+          </View>
         </Animated.View>
       </View>
     </Animated.View>

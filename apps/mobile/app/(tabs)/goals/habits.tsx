@@ -21,6 +21,7 @@ import { Chip } from '@components/ui/Chip';
 import { StreakCalendar } from '@components/charts/StreakCalendar';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useHabitStore } from '@stores/habitStore';
+import { useGamificationStyle } from '@hooks/useGamificationStyle';
 import { hapticSuccess, hapticStreakMilestone } from '@utils/haptics';
 import type { Habit } from '@app-types/database';
 
@@ -41,6 +42,8 @@ const STREAK_MILESTONES = [7, 14, 21, 30, 50, 75, 100, 200, 365];
 
 export default function HabitTracker() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();
+  const isIntense = isDrillSergeant || isMotivational;
   const {
     habits,
     todayCompletions,
@@ -302,10 +305,10 @@ export default function HabitTracker() {
                         <Text
                           style={[
                             typography.monoBody,
-                            { color: colors.accent.fire },
+                            { color: isIntense ? colors.accent.fire : gamStyle.primaryColor },
                           ]}
                         >
-                          {streak}
+                          {isIntense ? `${streak} 🔥` : `${streak}`}
                         </Text>
                         <Text
                           style={[
@@ -313,7 +316,7 @@ export default function HabitTracker() {
                             { color: colors.text.muted },
                           ]}
                         >
-                          streak
+                          {gamStyle.streakLabel.replace('{count}', String(streak))}
                         </Text>
                       </View>
                     </View>
