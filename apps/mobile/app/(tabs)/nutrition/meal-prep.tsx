@@ -39,9 +39,9 @@ import type {
 import type { MealPrepParams } from '@services/ai/mealPrep';
 
 const TIER_CONFIG: Record<MealPrepTier, { label: string; icon: string; color: string }> = {
-  good: { label: 'Good', icon: 'wallet-outline', color: '#22C55E' },
-  better: { label: 'Better', icon: 'star-half-outline', color: '#22D3EE' },
-  best: { label: 'Best', icon: 'diamond-outline', color: '#F59E0B' },
+  good: { label: 'Good', icon: 'wallet-outline', color: '#10B981' },   // accent.success
+  better: { label: 'Better', icon: 'star-half-outline', color: '#22D3EE' }, // accent.cyan
+  best: { label: 'Best', icon: 'diamond-outline', color: '#F59E0B' },  // accent.warning
 };
 
 export default function MealPrepScreen() {
@@ -425,14 +425,14 @@ export default function MealPrepScreen() {
                   </Text>
                 </View>
                 <View style={styles.macroItem}>
-                  <Text style={[typography.monoCaption, { color: '#22C55E' }]}>Protein</Text>
-                  <Text style={[typography.bodyBold, { color: '#22C55E' }]}>
+                  <Text style={[typography.monoCaption, { color: colors.accent.success }]}>Protein</Text>
+                  <Text style={[typography.bodyBold, { color: colors.accent.success }]}>
                     {currentTierPlan.weekly_macro_average.protein_g}g
                   </Text>
                 </View>
                 <View style={styles.macroItem}>
-                  <Text style={[typography.monoCaption, { color: '#3B82F6' }]}>Carbs</Text>
-                  <Text style={[typography.bodyBold, { color: '#3B82F6' }]}>
+                  <Text style={[typography.monoCaption, { color: colors.accent.info }]}>Carbs</Text>
+                  <Text style={[typography.bodyBold, { color: colors.accent.info }]}>
                     {currentTierPlan.weekly_macro_average.carbs_g}g
                   </Text>
                 </View>
@@ -609,10 +609,10 @@ export default function MealPrepScreen() {
                           <Text style={[typography.monoCaption, { color: colors.text.primary }]}>
                             {meal.per_serving_macros.calories} cal
                           </Text>
-                          <Text style={[typography.monoCaption, { color: '#22C55E' }]}>
+                          <Text style={[typography.monoCaption, { color: colors.accent.success }]}>
                             P: {meal.per_serving_macros.protein_g}g
                           </Text>
-                          <Text style={[typography.monoCaption, { color: '#3B82F6' }]}>
+                          <Text style={[typography.monoCaption, { color: colors.accent.info }]}>
                             C: {meal.per_serving_macros.carbs_g}g
                           </Text>
                           <Text style={[typography.monoCaption, { color: '#F59E0B' }]}>

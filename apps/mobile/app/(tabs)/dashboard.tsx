@@ -33,7 +33,7 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { useBusinessStore } from '@stores/businessStore';
 import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
-import { formatNumber, formatCurrency } from '@utils/formatters';
+import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
@@ -160,6 +160,16 @@ export default function DashboardScreen() {
 
   // Motivational greeting — rotates by day, adapts to time of day
   const motivationalGreeting = getTodayGreeting();
+
+  // Latest accountability message from AI coach
+  const accountabilityMessage = useMemo(() => {
+    const msgs = insightStore.proactiveMessages.filter(
+      (m) =>
+        m.category.startsWith('accountability_') &&
+        !m.is_dismissed,
+    );
+    return msgs[0] ?? null;
+  }, [insightStore.proactiveMessages]);
 
   // Habits remaining today
   const habitsRemaining = useMemo(() => {
@@ -294,6 +304,109 @@ export default function DashboardScreen() {
         </Text>
       </Animated.View>
       <HelpBubble id="dashboard_greeting" message="Pull down to refresh your daily briefing" position="below" />
+
+      {/* Daily Accountability Card */}
+      {accountabilityMessage && (
+        <Animated.View
+          entering={FadeInDown.delay(50).duration(600)}
+          style={{ marginBottom: spacing.md }}
+        >
+          <Card
+            style={{
+              borderLeftWidth: 3,
+              borderLeftColor: colors.accent.cyan,
+            }}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: colors.accent.cyan,
+                  }}
+                />
+                <Text
+                  style={[
+                    typography.captionBold,
+                    { color: colors.accent.cyan, marginLeft: spacing.xs },
+                  ]}
+                >
+                  AI COACH
+                </Text>
+              </View>
+              <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                {formatRelativeTime(accountabilityMessage.created_at)}
+              </Text>
+            </View>
+
+            <Text
+              style={[
+                typography.bodyBold,
+                { color: colors.text.primary, marginTop: spacing.xs },
+              ]}
+            >
+              {accountabilityMessage.title}
+            </Text>
+
+            <Text
+              style={[
+                typography.body,
+                {
+                  color: colors.text.secondary,
+                  marginTop: spacing.xs,
+                  lineHeight: 22,
+                },
+              ]}
+            >
+              {accountabilityMessage.body}
+            </Text>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.md }}>
+              <Pressable
+                onPress={() => {
+                  void hapticLight();
+                  router.push('/chat');
+                }}
+                style={{
+                  paddingHorizontal: spacing.lg,
+                  paddingVertical: spacing.sm,
+                  backgroundColor: `${colors.accent.cyan}20`,
+                  borderWidth: 1,
+                  borderColor: colors.accent.cyan,
+                  borderRadius: borderRadius.sm,
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Talk to Coach"
+              >
+                <Text
+                  style={[
+                    typography.captionBold,
+                    { color: colors.accent.cyan },
+                  ]}
+                >
+                  Talk to Coach
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  void hapticLight();
+                  void insightStore.dismissMessage(accountabilityMessage.id);
+                }}
+                style={{ padding: spacing.xs }}
+                accessibilityRole="button"
+                accessibilityLabel="Dismiss accountability message"
+              >
+                <Text style={[typography.caption, { color: colors.text.muted }]}>
+                  Dismiss
+                </Text>
+              </Pressable>
+            </View>
+          </Card>
+        </Animated.View>
+      )}
 
       {/* Weather */}
       <WeatherCard style={{ marginBottom: spacing.md }} />

@@ -12,6 +12,7 @@ import {
   Linking,
   Alert,
 } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -24,7 +25,9 @@ import { hapticLight } from '@utils/haptics';
 const APP_VERSION = '1.0.0';
 const BUILD_NUMBER = '42';
 const COMPANY_NAME = 'Automate AI LLC';
-const SUPPORT_EMAIL = 'support@transformr.app';
+const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? 'support@transformr.ai';
+const HELP_CENTER_URL = process.env.EXPO_PUBLIC_HELP_CENTER_URL ?? 'https://construktrtm.zendesk.com/hc';
+const SUBMIT_REQUEST_URL = `${HELP_CENTER_URL}/en-us/requests/new`;
 const WEBSITE_URL = 'https://transformr.app';
 const PRIVACY_URL = 'https://transformr.app/privacy';
 const TERMS_URL = 'https://transformr.app/terms';
@@ -87,6 +90,14 @@ export default function AboutScreen() {
 
   const handleContactSupport = useCallback(() => {
     void Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=TRANSFORMR%20Support`);
+  }, []);
+
+  const handleHelpCenter = useCallback(() => {
+    void WebBrowser.openBrowserAsync(HELP_CENTER_URL);
+  }, []);
+
+  const handleSubmitRequest = useCallback(() => {
+    void WebBrowser.openBrowserAsync(SUBMIT_REQUEST_URL);
   }, []);
 
   const handleRateApp = useCallback(() => {
@@ -187,8 +198,55 @@ export default function AboutScreen() {
         </Card>
       </Animated.View>
 
-      {/* Links */}
+      {/* Support */}
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <Text
+          style={[
+            typography.caption,
+            {
+              color: colors.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: 1.2,
+              marginBottom: spacing.xs,
+              marginTop: spacing.xs,
+            },
+          ]}
+        >
+          Support
+        </Text>
+        <LinkRow
+          icon="📚"
+          label="Help Center"
+          onPress={handleHelpCenter}
+        />
+        <LinkRow
+          icon="📧"
+          label="Contact Support"
+          onPress={handleContactSupport}
+        />
+        <LinkRow
+          icon="🎫"
+          label="Submit a Request"
+          onPress={handleSubmitRequest}
+        />
+      </Animated.View>
+
+      {/* Links */}
+      <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+        <Text
+          style={[
+            typography.caption,
+            {
+              color: colors.text.muted,
+              textTransform: 'uppercase',
+              letterSpacing: 1.2,
+              marginBottom: spacing.xs,
+              marginTop: spacing.lg,
+            },
+          ]}
+        >
+          Legal & More
+        </Text>
         <LinkRow
           icon="🌐"
           label="Website"
@@ -203,11 +261,6 @@ export default function AboutScreen() {
           icon="📜"
           label="Terms of Service"
           onPress={() => handleOpenUrl(TERMS_URL)}
-        />
-        <LinkRow
-          icon="📧"
-          label="Contact Support"
-          onPress={handleContactSupport}
         />
         <LinkRow
           icon="⭐"

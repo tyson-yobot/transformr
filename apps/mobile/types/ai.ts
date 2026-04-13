@@ -221,7 +221,10 @@ export type ProactiveCategory =
   | 'general'
   | 'meal_gap'
   | 'supplement_reminder'
-  | 'lab_followup';
+  | 'lab_followup'
+  | 'accountability_morning'
+  | 'accountability_midday'
+  | 'accountability_evening';
 
 export type ProactiveSeverity = 'info' | 'warning' | 'critical';
 

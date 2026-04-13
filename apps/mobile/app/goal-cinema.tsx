@@ -205,7 +205,7 @@ export default function GoalCinemaScreen() {
   }
 
   return (
-    <View style={[styles.screen, { backgroundColor: '#0F172A' }]}>
+    <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       {/* Slide Content */}
       <View style={styles.slideContainer}>
         {currentSlide && (
@@ -217,11 +217,11 @@ export default function GoalCinemaScreen() {
           >
             {currentSlide.type === 'quote' && (
               <View style={styles.quoteSlide}>
-                <Text style={[styles.quoteText, { color: '#F8FAFC' }]}>
+                <Text style={[styles.quoteText, { color: colors.text.primary }]}>
                   "{currentSlide.title}"
                 </Text>
                 {currentSlide.subtitle && (
-                  <Text style={[typography.caption, { color: '#94A3B8', marginTop: spacing.md }]}>
+                  <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.md }]}>
                     {currentSlide.subtitle}
                   </Text>
                 )}
@@ -235,18 +235,18 @@ export default function GoalCinemaScreen() {
                     progress={parseFloat(currentSlide.value?.replace('%', '') ?? '0') / 100}
                     size={160}
                     strokeWidth={14}
-                    color={currentSlide.color ?? '#6366F1'}
+                    color={currentSlide.color ?? colors.accent.primary}
                   >
-                    <Text style={[typography.stat, { color: '#F8FAFC' }]}>
+                    <Text style={[typography.stat, { color: colors.text.primary }]}>
                       {currentSlide.value}
                     </Text>
                   </ProgressRing>
                 </Animated.View>
-                <Text style={[typography.h2, { color: '#F8FAFC', textAlign: 'center', marginTop: spacing.lg }]}>
+                <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginTop: spacing.lg }]}>
                   {currentSlide.title}
                 </Text>
                 {currentSlide.subtitle && (
-                  <Text style={[typography.caption, { color: '#94A3B8', textAlign: 'center', marginTop: spacing.sm }]}>
+                  <Text style={[typography.caption, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.sm }]}>
                     {currentSlide.subtitle}
                   </Text>
                 )}
@@ -255,13 +255,13 @@ export default function GoalCinemaScreen() {
 
             {currentSlide.type === 'countdown' && (
               <View style={styles.countdownSlide}>
-                <Text style={[styles.countdownNumber, { color: '#6366F1' }]}>
+                <Text style={[styles.countdownNumber, { color: colors.accent.primary }]}>
                   {currentSlide.value}
                 </Text>
-                <Text style={[typography.h3, { color: '#94A3B8' }]}>
+                <Text style={[typography.h3, { color: colors.text.secondary }]}>
                   {currentSlide.subtitle}
                 </Text>
-                <Text style={[typography.h2, { color: '#F8FAFC', textAlign: 'center', marginTop: spacing.lg }]}>
+                <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginTop: spacing.lg }]}>
                   {currentSlide.title}
                 </Text>
               </View>
@@ -275,11 +275,11 @@ export default function GoalCinemaScreen() {
                   resizeMode="cover"
                 />
                 <View style={styles.photoOverlay}>
-                  <Text style={[typography.h3, { color: '#F8FAFC' }]}>
+                  <Text style={[typography.h3, { color: colors.text.primary }]}>
                     {currentSlide.title}
                   </Text>
                   {currentSlide.subtitle && (
-                    <Text style={[typography.caption, { color: '#CBD5E1' }]}>
+                    <Text style={[typography.caption, { color: colors.text.secondary }]}>
                       {currentSlide.subtitle}
                     </Text>
                   )}
@@ -300,7 +300,7 @@ export default function GoalCinemaScreen() {
                 style={[
                   styles.dot,
                   {
-                    backgroundColor: idx === currentIndex ? '#6366F1' : '#334155',
+                    backgroundColor: idx === currentIndex ? colors.accent.primary : colors.border.default,
                     width: idx === currentIndex ? 24 : 8,
                   },
                 ]}
@@ -312,22 +312,22 @@ export default function GoalCinemaScreen() {
         {/* Playback Controls */}
         <View style={styles.controlButtons}>
           <Pressable onPress={() => { hapticLight(); handlePrevious(); }} style={styles.controlButton} accessibilityLabel="Previous slide" accessibilityRole="button">
-            <Text style={{ color: '#F8FAFC', fontSize: 24 }}>{'\u25C0'}</Text>
+            <Text style={{ color: colors.text.primary, fontSize: 24 }}>{'\u25C0'}</Text>
           </Pressable>
           <Pressable onPress={() => { hapticLight(); handleTogglePlay(); }} style={styles.controlButton} accessibilityLabel={isPlaying ? 'Pause slideshow' : 'Play slideshow'} accessibilityRole="button">
-            <Text style={{ color: '#F8FAFC', fontSize: 24 }}>
+            <Text style={{ color: colors.text.primary, fontSize: 24 }}>
               {isPlaying ? '\u23F8' : '\u25B6'}
             </Text>
           </Pressable>
           <Pressable onPress={() => { hapticLight(); handleNext(); }} style={styles.controlButton} accessibilityLabel="Next slide" accessibilityRole="button">
-            <Text style={{ color: '#F8FAFC', fontSize: 24 }}>{'\u25B6'}</Text>
+            <Text style={{ color: colors.text.primary, fontSize: 24 }}>{'\u25B6'}</Text>
           </Pressable>
         </View>
 
         {/* Close */}
         <Pressable
           onPress={() => { hapticLight(); router.back(); }}
-          style={[styles.closeButton, { backgroundColor: '#1E293B', borderRadius: 20 }]}
+          style={[styles.closeButton, { backgroundColor: colors.background.tertiary, borderRadius: 20 }]}
           accessibilityLabel="Close cinema"
           accessibilityRole="button"
         >
