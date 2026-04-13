@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Builder Screen
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,6 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { useDashboardStore } from '@stores/dashboardStore';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 
@@ -51,7 +50,6 @@ export default function DashboardBuilderScreen() {
 
   const {
     layout,
-    availableWidgets,
     isLoading,
     saveLayout,
     resetToDefault,

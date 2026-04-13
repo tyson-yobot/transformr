@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { View, Text, StyleSheet, ViewStyle, LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -40,7 +40,7 @@ export function Slider({
   thumbColor,
   style,
 }: SliderProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const trackWidth = useSharedValue(0);
   const thumbX = useSharedValue(0);
   const isDragging = useSharedValue(false);
@@ -114,10 +114,6 @@ export function Slider({
       runOnJS(emitChange)(snappedValue);
       runOnJS(emitHaptic)();
     });
-
-  const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: thumbX.value }],
-  }));
 
   const fillStyle = useAnimatedStyle(() => ({
     width: thumbX.value + THUMB_SIZE / 2,

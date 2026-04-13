@@ -2,12 +2,11 @@
 // TRANSFORMR -- Post-Workout Summary Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  Pressable,
   Share,
   Alert,
   StyleSheet,

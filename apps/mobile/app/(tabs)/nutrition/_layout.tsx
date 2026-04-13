@@ -2,7 +2,6 @@
 // TRANSFORMR -- Nutrition Stack Layout
 // =============================================================================
 
-import React from 'react';
 import { Stack } from 'expo-router';
 import { useTheme } from '@theme/index';
 

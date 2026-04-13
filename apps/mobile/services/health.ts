@@ -239,7 +239,7 @@ export async function fetchSleepData(days = 7): Promise<SleepRecord[]> {
  * Returns weight records for the past N days in kg.
  * @param days - How many days of history to fetch (default 30)
  */
-export async function fetchWeightHistory(days = 30): Promise<WeightRecord[]> {
+export async function fetchWeightHistory(_days = 30): Promise<WeightRecord[]> {
   try {
     // Both platforms currently only expose getLatestWeight.
     // We synthesize a single record from the most recent measurement.

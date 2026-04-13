@@ -2,20 +2,18 @@
 // TRANSFORMR -- Achievements Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Pressable,
   StyleSheet,
-  FlatList,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
-import { Badge } from '@components/ui/Badge';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticAchievement } from '@utils/haptics';

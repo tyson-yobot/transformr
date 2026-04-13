@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '@theme/index';
 import { ProgressRing } from '../ui/ProgressRing';

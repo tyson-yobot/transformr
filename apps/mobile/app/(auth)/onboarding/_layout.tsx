@@ -2,7 +2,6 @@
 // TRANSFORMR -- Onboarding Layout
 // =============================================================================
 
-import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Exercise Library Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,

@@ -2,14 +2,13 @@
 // TRANSFORMR -- Barcode Food Scanner
 // =============================================================================
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
   Pressable,
   StyleSheet,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -20,11 +19,10 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
-import { Input } from '@components/ui/Input';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
-import { formatCalories, formatMacro } from '@utils/formatters';
+import { formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES, OPEN_FOOD_FACTS_API } from '@utils/constants';
 import { hapticSuccess, hapticLight, hapticWarning } from '@utils/haptics';
 

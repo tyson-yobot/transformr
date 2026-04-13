@@ -2,7 +2,7 @@
 // TRANSFORMR -- Partner Management Screen
 // =============================================================================
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,6 @@ import { Input } from '@components/ui/Input';
 import { Toggle } from '@components/ui/Toggle';
 import { Badge } from '@components/ui/Badge';
 import { usePartnerStore } from '@stores/partnerStore';
-import { useProfileStore } from '@stores/profileStore';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
 import type { SharedPreferences } from '@app-types/database';
@@ -47,7 +46,7 @@ const PRIVACY_TOGGLES: readonly {
 ];
 
 export default function PartnerScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
   const {
@@ -57,8 +56,6 @@ export default function PartnerScreen() {
     linkPartner,
     fetchPartnership,
   } = usePartnerStore();
-
-  const profile = useProfileStore((s) => s.profile);
 
   const [inviteCode, setInviteCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);

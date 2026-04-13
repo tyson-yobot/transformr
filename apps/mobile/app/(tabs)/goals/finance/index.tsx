@@ -2,7 +2,7 @@
 // TRANSFORMR -- Personal Finance Dashboard
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Workout Player Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -23,7 +22,6 @@ import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useWorkout } from '@hooks/useWorkout';
-import { useWorkoutStore } from '@stores/workoutStore';
 import {
   formatTimerDisplay,
   formatRestTimer,
@@ -68,7 +66,7 @@ export default function WorkoutPlayerScreen() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [restSeconds, setRestSeconds] = useState(0);
   const [isResting, setIsResting] = useState(false);
-  const [restTarget, setRestTarget] = useState(90);
+  const [restTarget] = useState(90);
   const [totalVolume, setTotalVolume] = useState(0);
   const [totalSets, setTotalSets] = useState(0);
   const [moodBefore, setMoodBefore] = useState(5);
@@ -127,8 +125,6 @@ export default function WorkoutPlayerScreen() {
       setLoadingExercises(true);
 
       try {
-        const exercises: Exercise[] = [];
-
         if (activeSession.template_id) {
           const { data: templateExercises } = await supabase
             .from('workout_template_exercises')

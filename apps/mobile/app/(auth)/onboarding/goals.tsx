@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Goals
 // =============================================================================
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';

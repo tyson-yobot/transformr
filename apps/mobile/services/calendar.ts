@@ -37,7 +37,7 @@ async function getDefaultCalendarId(): Promise<string | null> {
     const writable = calendars.find(
       (c) =>
         c.allowsModifications &&
-        c.type !== ExpoCalendar.CalendarType.BIRTHDAY,
+        c.type !== ExpoCalendar.CalendarType.BIRTHDAYS,
     );
     return writable?.id ?? null;
   } catch {

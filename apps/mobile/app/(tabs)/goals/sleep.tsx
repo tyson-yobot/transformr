@@ -2,7 +2,7 @@
 // TRANSFORMR -- Sleep Tracker
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -27,7 +27,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 
 export default function SleepTracker() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const { lastSleep, sleepHistory, isLoading, fetchSleepHistory, logSleep } =
     useSleepStore();
 

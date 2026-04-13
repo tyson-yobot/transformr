@@ -3,7 +3,7 @@
 // Dashboard card showing current weather with workout & hydration tips.
 // =============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,7 +47,7 @@ interface WeatherCardProps {
 }
 
 export function WeatherCard({ style }: WeatherCardProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
@@ -97,7 +97,7 @@ export function WeatherCard({ style }: WeatherCardProps) {
 
   if (isLoading) {
     return (
-      <Card style={[styles.card, style]}>
+      <Card style={StyleSheet.flatten([styles.card, style])}>
         <View style={styles.loadingRow}>
           <ActivityIndicator size="small" color={colors.accent.cyan} />
           <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.sm }]}>

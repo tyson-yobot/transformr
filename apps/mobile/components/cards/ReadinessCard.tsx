@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -55,7 +55,7 @@ function MiniBar({
   value: number;
   scoreColor: string;
 }) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const animWidth = useSharedValue(0);
 
   useEffect(() => {

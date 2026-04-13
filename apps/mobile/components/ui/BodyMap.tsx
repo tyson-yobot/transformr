@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import Svg, { Path, G } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';

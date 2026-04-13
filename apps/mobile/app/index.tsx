@@ -2,8 +2,8 @@
 // TRANSFORMR -- Entry Redirect
 // =============================================================================
 
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,7 +21,6 @@ export default function Index() {
   const { colors, typography, spacing } = useTheme();
   const session = useAuthStore((s) => s.session);
   const loading = useAuthStore((s) => s.loading);
-  const profile = useProfileStore((s) => s.profile);
   const fetchProfile = useProfileStore((s) => s.fetchProfile);
   const router = useRouter();
   const pulse = useSharedValue(0.3);

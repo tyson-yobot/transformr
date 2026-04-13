@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Notification Preferences
 // =============================================================================
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Switch, Platform, Alert } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';

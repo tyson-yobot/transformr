@@ -16,7 +16,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
-import { Button } from '@components/ui/Button';
 import { hapticLight } from '@utils/haptics';
 
 // ---------------------------------------------------------------------------

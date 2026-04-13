@@ -2,7 +2,7 @@
 // TRANSFORMR -- Challenge Center
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
-import type { ChallengeDefinition, ChallengeDifficulty } from '@app-types/database';
+import type { ChallengeDifficulty } from '@app-types/database';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -64,7 +64,6 @@ export default function ChallengesScreen() {
     fetchChallengeDefinitions,
     fetchActiveEnrollment,
     fetchEnrollments,
-    getTodayProgress,
   } = useChallengeStore();
 
   // Fetch data on mount

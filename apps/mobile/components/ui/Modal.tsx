@@ -14,7 +14,6 @@ import Animated, {
   withTiming,
   withSpring,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 

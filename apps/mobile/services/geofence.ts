@@ -1,5 +1,4 @@
 import * as Location from 'expo-location';
-// @ts-ignore -- types may not be installed
 import * as TaskManager from 'expo-task-manager';
 import type { TaskManagerTaskBody } from 'expo-task-manager';
 import { supabase } from './supabase';
@@ -73,7 +72,7 @@ interface GeofenceTaskData {
   region: GeofenceRegion;
 }
 
-TaskManager.defineTask(GEOFENCE_TASK, (taskBody: TaskManagerTaskBody<GeofenceTaskData>) => {
+TaskManager.defineTask(GEOFENCE_TASK, async (taskBody: TaskManagerTaskBody<GeofenceTaskData>) => {
   if (taskBody.error) return;
 
   const eventData = taskBody.data;

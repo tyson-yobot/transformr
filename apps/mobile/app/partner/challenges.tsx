@@ -2,7 +2,7 @@
 // TRANSFORMR -- Partner Challenges
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -174,10 +174,6 @@ export default function PartnerChallengesScreen() {
         </Text>
 
         {active.map((challenge, index) => {
-          const progress = challenge.target_value
-            ? Math.min(((challenge.user_a_progress ?? 0) + (challenge.user_b_progress ?? 0)) / (challenge.target_value * 2), 1)
-            : 0;
-
           return (
             <Animated.View key={challenge.id} entering={FadeInDown.delay(100 + index * 60)}>
               <Card style={{ marginBottom: spacing.md }}>

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Ready Screen
 // =============================================================================
 
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,

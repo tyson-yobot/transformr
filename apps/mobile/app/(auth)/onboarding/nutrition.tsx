@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Nutrition Setup
 // =============================================================================
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';

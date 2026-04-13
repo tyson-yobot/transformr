@@ -4,7 +4,6 @@
 // that shifts from green → gold → red as spend approaches/exceeds the budget.
 // =============================================================================
 
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@theme/index';
 

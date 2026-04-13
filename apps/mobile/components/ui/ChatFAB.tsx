@@ -4,7 +4,7 @@
 // and opens the /chat route when pressed.
 // =============================================================================
 
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Pressable, StyleSheet, View, ViewStyle, AccessibilityRole } from 'react-native';
 import Animated, {
   useAnimatedStyle,

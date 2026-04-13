@@ -2,7 +2,7 @@
 // TRANSFORMR -- Nutrition Home / Daily View
 // =============================================================================
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,14 +17,12 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  FadeIn,
   FadeInDown,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { MonoText } from '@components/ui/MonoText';
 import { Card } from '@components/ui/Card';
-import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { BottomSheet } from '@components/ui/BottomSheet';
@@ -74,7 +72,7 @@ export default function NutritionHomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { todayMacros, macroProgress, isLoading } = useNutrition();
+  const { todayMacros } = useNutrition();
   const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition } =
     useNutritionStore();
   const { profile } = useProfileStore();

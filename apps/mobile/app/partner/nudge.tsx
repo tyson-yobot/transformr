@@ -2,7 +2,7 @@
 // TRANSFORMR -- Send Nudge
 // =============================================================================
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,12 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { usePartnerStore } from '@stores/partnerStore';
-import { hapticSuccess, hapticMedium } from '@utils/haptics';
+import { hapticSuccess } from '@utils/haptics';
 import type { PartnerNudge } from '@app-types/database';
 
 type NudgeType = NonNullable<PartnerNudge['type']>;
@@ -45,8 +44,7 @@ const PREBUILT_NUDGES: PrebuiltNudge[] = [
 
 export default function NudgeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
-  const { partnership, partnerProfile, isLoading, sendNudge } = usePartnerStore();
+  const { partnership, partnerProfile, sendNudge } = usePartnerStore();
 
   const [customMessage, setCustomMessage] = useState('');
   const [sentMessage, setSentMessage] = useState<string | null>(null);

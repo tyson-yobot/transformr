@@ -358,7 +358,7 @@ export function MealCameraOverlay({
   onClose,
   style,
 }: MealCameraOverlayProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { typography, borderRadius } = useTheme();
 
   const handleClose = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

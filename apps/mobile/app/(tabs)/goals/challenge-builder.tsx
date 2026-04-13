@@ -2,7 +2,7 @@
 // TRANSFORMR -- Custom Challenge Builder
 // =============================================================================
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,

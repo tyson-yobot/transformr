@@ -2,7 +2,7 @@
 // TRANSFORMR -- Vision Board Builder
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,9 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  FlatList,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
-import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';

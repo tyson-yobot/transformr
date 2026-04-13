@@ -2,7 +2,7 @@
 // TRANSFORMR -- Data Export Screen
 // =============================================================================
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,6 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
-import { Toggle } from '@components/ui/Toggle';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 

@@ -2,11 +2,10 @@
 // TRANSFORMR -- Goal Cinema (Motivational Slideshow)
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   Pressable,
   StyleSheet,
   Dimensions,
@@ -15,9 +14,6 @@ import {
 import Animated, {
   FadeIn,
   FadeOut,
-  FadeInDown,
-  SlideInRight,
-  SlideOutLeft,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -28,17 +24,15 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
-import { Card } from '@components/ui/Card';
-import { Button } from '@components/ui/Button';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { useProfileStore } from '@stores/profileStore';
 import { useGoalStore } from '@stores/goalStore';
 import { formatNumber, formatPercentage, formatCountdown, formatWeight } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
-import type { Goal, WeightLog } from '@app-types/database';
+import type { WeightLog } from '@app-types/database';
 import { supabase } from '@services/supabase';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SLIDE_DURATION = 5000; // 5 seconds per slide
 
 interface Slide {

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Root Layout
 // =============================================================================
 
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';

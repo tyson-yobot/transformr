@@ -3,7 +3,7 @@
 // Aggregated view of AI predictions, proactive messages, and pattern alerts.
 // =============================================================================
 
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,6 @@ export default function InsightsScreen() {
     fetchAll,
     acknowledgePrediction,
     dismissMessage,
-    markMessageRead,
   } = useInsightStore();
 
   useEffect(() => {

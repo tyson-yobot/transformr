@@ -1,11 +1,9 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { View, Text, Image, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withRepeat,
-  withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';

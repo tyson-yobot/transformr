@@ -37,7 +37,7 @@ export function Card({
   onPress,
   style,
   accessibilityLabel,
-  accessibilityRole,
+  accessibilityRole: _accessibilityRole,
 }: CardProps) {
   const { colors, spacing, borderRadius } = useTheme();
   const scale = useSharedValue(1);

@@ -2,13 +2,12 @@
 // TRANSFORMR -- Challenge Detail / Enrollment Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TextInput,
-  Pressable,
   StyleSheet,
   Alert,
 } from 'react-native';

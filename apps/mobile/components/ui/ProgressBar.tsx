@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -27,7 +27,7 @@ export function ProgressBar({
   style,
   animationDuration = 500,
 }: ProgressBarProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
 
   const clamped = Math.max(0, Math.min(1, progress));
   const animatedWidth = useSharedValue(0);

@@ -87,7 +87,7 @@ async function syncHealthToSupabase(
 ): Promise<void> {
   const today = new Date().toISOString().split('T')[0]!;
 
-  const ops: Promise<unknown>[] = [];
+  const ops: PromiseLike<unknown>[] = [];
 
   // Sync step count
   if (data.steps > 0) {

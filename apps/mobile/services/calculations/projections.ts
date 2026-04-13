@@ -91,13 +91,12 @@ export function calculateLinearRegression(
   const n = data.length;
   if (n < 2) return { slope: 0, intercept: 0, r2: 0 };
 
-  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
   for (const point of data) {
     sumX += point.x;
     sumY += point.y;
     sumXY += point.x * point.y;
     sumX2 += point.x * point.x;
-    sumY2 += point.y * point.y;
   }
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);

@@ -2,14 +2,13 @@
 // TRANSFORMR -- Partner Live Workout
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Pressable,
   StyleSheet,
-  RefreshControl,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -19,7 +18,7 @@ import { Badge } from '@components/ui/Badge';
 import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
-import { formatSetDisplay, formatRestTimer } from '@utils/formatters';
+import { formatSetDisplay } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { LiveWorkoutSync } from '@app-types/database';
@@ -89,7 +88,7 @@ export default function LiveWorkoutScreen() {
         table: 'live_workout_sync',
       }, (payload) => {
         const record = payload.new as LiveWorkoutSync;
-        const { data: { user } } = { data: { user: null } }; // Placeholder for real-time
+        // Placeholder for real-time user detection
         // In production, check if record.user_id matches current user or partner
         setPartnerSets((prev) => [record, ...prev]);
       })

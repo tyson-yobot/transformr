@@ -2,7 +2,6 @@
 // TRANSFORMR -- Tab Navigator Layout
 // =============================================================================
 
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTheme } from '@theme/index';

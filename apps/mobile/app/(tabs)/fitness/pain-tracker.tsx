@@ -2,17 +2,15 @@
 // TRANSFORMR -- Pain / Injury Tracker Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  FlatList,
   Pressable,
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -21,7 +19,7 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
-import { formatDate, formatRelativeTime } from '@utils/formatters';
+import { formatRelativeTime } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
@@ -76,7 +74,6 @@ const PAIN_TYPES: { value: PainType; label: string; icon: string }[] = [
 
 export default function PainTrackerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -311,7 +308,7 @@ export default function PainTrackerScreen() {
 
                 {/* Mini Trend */}
                 <View style={[styles.trendRow, { marginBottom: spacing.md, gap: spacing.xs }]}>
-                  {selectedPartHistory.slice(0, 14).reverse().map((log, idx) => (
+                  {selectedPartHistory.slice(0, 14).reverse().map((log, _idx) => (
                     <View
                       key={log.id}
                       style={[

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Weekly Meal Plans
 // =============================================================================
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -69,7 +68,6 @@ function generateMockPlan(): DayPlan[] {
 
 export default function MealPlansScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
   const { profile } = useProfileStore();
 
   const [weekPlan, setWeekPlan] = useState<DayPlan[]>(generateMockPlan);
@@ -122,7 +120,7 @@ export default function MealPlansScreen() {
     );
   }, []);
 
-  const handleSwapMeal = useCallback((dayIndex: number, mealId: string) => {
+  const handleSwapMeal = useCallback((_dayIndex: number, _mealId: string) => {
     hapticLight();
     Alert.alert('Swap Meal', 'This would open the food search to replace this meal.');
   }, []);

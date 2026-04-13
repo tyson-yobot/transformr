@@ -2,7 +2,7 @@
 // TRANSFORMR -- Business Dashboard
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -17,12 +17,10 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
-import { ProgressBar } from '@components/ui/ProgressBar';
 import { RevenueChart } from '@components/charts/RevenueChart';
 import { useBusinessStore } from '@stores/businessStore';
 import {
   formatCurrency,
-  formatCompactNumber,
   formatNumber,
 } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
@@ -31,7 +29,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { businesses, revenueData, isLoading, fetchBusinesses, getMonthlyMetrics } =
+  const { businesses, fetchBusinesses, getMonthlyMetrics } =
     useBusinessStore();
 
   const [refreshing, setRefreshing] = useState(false);

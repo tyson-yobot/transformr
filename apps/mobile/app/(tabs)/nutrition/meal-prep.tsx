@@ -12,7 +12,6 @@ import {
   Pressable,
   StyleSheet,
   Alert,
-  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -25,7 +24,6 @@ import { BudgetBar } from '@components/ui/BudgetBar';
 import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { Disclaimer } from '@components/ui/Disclaimer';
-import { Skeleton } from '@components/ui/Skeleton';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { formatDuration, formatCurrencyDetailed } from '@utils/formatters';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
@@ -36,8 +34,6 @@ import {
 } from '@services/ai/mealPrep';
 import type {
   MealPrepTier,
-  MealPrepTierPlan,
-  TieredMeal,
   BudgetMealPrepResponse,
 } from '@app-types/ai';
 import type { MealPrepParams } from '@services/ai/mealPrep';

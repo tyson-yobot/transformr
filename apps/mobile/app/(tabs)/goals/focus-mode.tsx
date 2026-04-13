@@ -2,7 +2,7 @@
 // TRANSFORMR -- Deep Work Focus Timer
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { formatTimerDisplay } from '@utils/formatters';
-import { hapticLight, hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
+import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
 
 type FocusCategory = NonNullable<FocusSession['category']>;

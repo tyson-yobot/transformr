@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
-import { ProgressBar } from '@components/ui/ProgressBar';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
 import { CountdownCard } from '@components/cards/CountdownCard';
@@ -59,14 +58,6 @@ function MiniSparkline({
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-
-  const points = data
-    .map((d, i) => {
-      const x = (i / (data.length - 1)) * width;
-      const y = height - ((d.value - min) / range) * height;
-      return `${x},${y}`;
-    })
-    .join(' ');
 
   // Render as simple text-based representation since we are keeping it lightweight
   return (

@@ -13,7 +13,6 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  TextInput,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';

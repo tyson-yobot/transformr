@@ -2,7 +2,7 @@
 // TRANSFORMR -- Saved Meals Library
 // =============================================================================
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -33,7 +32,6 @@ type FilterType = 'all' | MealType;
 
 export default function SavedMealsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
   const { logFood } = useNutritionStore();
 
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);

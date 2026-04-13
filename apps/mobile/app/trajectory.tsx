@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Trajectory Simulator
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -19,8 +19,7 @@ import { Chip } from '@components/ui/Chip';
 import { MonoText } from '@components/ui/MonoText';
 import { TrajectoryChart } from '@components/charts/TrajectoryChart';
 import { useProfileStore } from '@stores/profileStore';
-import { useGoalStore } from '@stores/goalStore';
-import { formatNumber, formatCurrency, formatWeight } from '@utils/formatters';
+import { formatNumber, formatCurrency } from '@utils/formatters';
 
 type TrajectoryDomain = 'weight' | 'revenue' | 'fitness';
 
@@ -65,8 +64,6 @@ export default function TrajectoryScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const profile = useProfileStore((s) => s.profile);
-  const { goals } = useGoalStore();
-
   const [selectedDomain, setSelectedDomain] = useState<TrajectoryDomain>('weight');
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -148,14 +145,6 @@ export default function TrajectoryScreen() {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsSimulating(false);
   }, []);
-
-  const impactColor = (impact: ActionItem['impact']): string => {
-    switch (impact) {
-      case 'high': return colors.accent.success;
-      case 'medium': return colors.accent.primary;
-      case 'low': return colors.text.muted;
-    }
-  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

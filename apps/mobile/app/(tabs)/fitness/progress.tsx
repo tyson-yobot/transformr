@@ -2,7 +2,7 @@
 // TRANSFORMR -- Progress Tracking Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,8 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -40,8 +38,6 @@ interface ProgressPhoto {
 
 export default function ProgressScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
-
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
@@ -56,8 +52,8 @@ export default function ProgressScreen() {
 
   // Compare photos
   const [compareMode, setCompareMode] = useState(false);
-  const [compareIndex1, setCompareIndex1] = useState(0);
-  const [compareIndex2, setCompareIndex2] = useState(1);
+  const [compareIndex1] = useState(0);
+  const [compareIndex2] = useState(1);
 
   const chartData = weightLogs.map((w) => ({
     date: w.logged_at ?? w.created_at ?? '',

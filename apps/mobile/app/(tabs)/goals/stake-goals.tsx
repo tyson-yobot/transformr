@@ -2,7 +2,7 @@
 // TRANSFORMR -- Stake Goals
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -18,9 +18,9 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
-import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
-import type { StakeGoal, StakeEvaluation, Goal } from '@app-types/database';
+import type { StakeGoal, StakeEvaluation } from '@app-types/database';
 
 interface StakeGoalWithDetails extends StakeGoal {
   goalTitle: string;
@@ -28,7 +28,7 @@ interface StakeGoalWithDetails extends StakeGoal {
 }
 
 export default function StakeGoalsScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
 
   const [stakeGoals, setStakeGoals] = useState<StakeGoalWithDetails[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);

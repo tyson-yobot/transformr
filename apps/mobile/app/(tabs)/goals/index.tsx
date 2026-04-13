@@ -2,7 +2,7 @@
 // TRANSFORMR -- Goals Dashboard
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -61,7 +61,7 @@ const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
 export default function GoalsDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { goals, milestones, isLoading, fetchGoals, createGoal } = useGoalStore();
+  const { goals, isLoading, fetchGoals, createGoal } = useGoalStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);

@@ -4,7 +4,6 @@
 // Never dismissible. Always visible on health-related AI output.
 // =============================================================================
 
-import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';

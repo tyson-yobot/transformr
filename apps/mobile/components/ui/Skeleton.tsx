@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet, ViewStyle, DimensionValue } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -27,7 +27,7 @@ export function Skeleton({
   borderRadius: customBorderRadius,
   style,
 }: SkeletonProps) {
-  const { colors, borderRadius, spacing } = useTheme();
+  const { colors, borderRadius } = useTheme();
   const shimmer = useSharedValue(0);
 
   useEffect(() => {

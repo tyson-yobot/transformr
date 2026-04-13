@@ -2,7 +2,7 @@
 // TRANSFORMR -- Nutrition Analytics
 // =============================================================================
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,9 +18,8 @@ import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
-import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
-import { formatCalories, formatMacro, formatPercentage } from '@utils/formatters';
+import { formatPercentage } from '@utils/formatters';
 import { MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';

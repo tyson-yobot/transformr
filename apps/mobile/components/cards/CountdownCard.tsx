@@ -3,10 +3,7 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
   withSpring,
-  Easing,
-  interpolateColor,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'react-native-svg';
 import Svg, { Defs, Stop, Rect } from 'react-native-svg';

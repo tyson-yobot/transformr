@@ -2,7 +2,7 @@
 // TRANSFORMR -- Add Food Screen
 // =============================================================================
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,14 +19,12 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
-import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
-import { formatCalories, formatMacro } from '@utils/formatters';
 import { MEAL_TYPES, MACRO_COLORS } from '@utils/constants';
-import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Food } from '../../../types/database';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -64,11 +62,6 @@ export default function AddFoodScreen() {
   const [manualProtein, setManualProtein] = useState('');
   const [manualCarbs, setManualCarbs] = useState('');
   const [manualFat, setManualFat] = useState('');
-
-  const recentFoods = useMemo((): Food[] => {
-    // Show search results as "recent" when no query
-    return searchResults.slice(0, 10);
-  }, [searchResults]);
 
   useEffect(() => {
     // Load recent/popular foods on mount

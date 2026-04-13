@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@theme/index';
 import type { ChallengeDailyLog } from '@app-types/database';
@@ -13,9 +13,7 @@ type DayStatus = 'complete' | 'partial' | 'missed' | 'future' | 'current';
 const CELLS_PER_ROW = 7;
 
 export function ChallengeCalendar({ dailyLogs, totalDays }: ChallengeCalendarProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
-
-  const today = new Date().toISOString().split('T')[0];
+  const { colors, spacing, borderRadius } = useTheme();
 
   const dayStatusMap = useMemo(() => {
     const map = new Map<number, DayStatus>();

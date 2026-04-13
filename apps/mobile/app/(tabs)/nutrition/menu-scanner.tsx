@@ -2,7 +2,7 @@
 // TRANSFORMR -- Restaurant Menu Scanner
 // =============================================================================
 
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -65,7 +65,7 @@ export default function MenuScannerScreen() {
     setStage('analyzing');
 
     try {
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
 
       // Simulate AI analysis of menu (replace with real API)
       await new Promise((resolve) => setTimeout(resolve, 3000));

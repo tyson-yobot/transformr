@@ -4,7 +4,6 @@
 // via useScreenInsight, shows shimmer while loading, and allows refresh.
 // =============================================================================
 
-import React from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,12 +28,12 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const { insight, category, isLoading, refresh } = useScreenInsight(screenKey);
 
   if (isLoading && !insight) {
     return (
-      <Card style={[styles.card, { backgroundColor: `${colors.accent.cyan}08` }, style]}>
+      <Card style={StyleSheet.flatten([styles.card, { backgroundColor: `${colors.accent.cyan}08` }, style])}>
         <View style={styles.row}>
           <ActivityIndicator size="small" color={colors.accent.cyan} />
           <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.sm }]}>
@@ -52,14 +51,14 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
   return (
     <Animated.View entering={FadeInDown.duration(300)} style={style}>
       <Card
-        style={[
+        style={StyleSheet.flatten([
           styles.card,
           {
             backgroundColor: `${colors.accent.cyan}08`,
             borderWidth: 1,
             borderColor: `${colors.accent.cyan}20`,
           },
-        ]}
+        ])}
       >
         <View style={styles.row}>
           <Ionicons

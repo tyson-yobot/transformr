@@ -38,7 +38,7 @@ export function Input({
   ...textInputProps
 }: InputProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
+  const [, setIsFocused] = useState(false);
   const [isSecureVisible, setIsSecureVisible] = useState(!initialSecure);
   const focusAnim = useSharedValue(0);
   const inputRef = useRef<TextInput>(null);
@@ -58,12 +58,6 @@ export function Input({
   const toggleSecure = useCallback(() => {
     setIsSecureVisible((prev) => !prev);
   }, []);
-
-  const borderColor = error
-    ? colors.accent.danger
-    : isFocused
-      ? colors.border.focus
-      : colors.border.default;
 
   const animatedBorderStyle = useAnimatedStyle(() => {
     const color = interpolateColor(

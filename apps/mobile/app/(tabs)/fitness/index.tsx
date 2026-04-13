@@ -2,7 +2,7 @@
 // TRANSFORMR -- Fitness Home Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
@@ -27,7 +26,7 @@ import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
-import type { WorkoutSession, WorkoutTemplate, PersonalRecord } from '@app-types/database';
+import type { PersonalRecord } from '@app-types/database';
 import { supabase } from '@services/supabase';
 
 interface RecentWorkout {

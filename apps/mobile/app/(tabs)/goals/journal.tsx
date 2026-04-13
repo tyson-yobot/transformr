@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Journal
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -38,7 +38,7 @@ const SUGGESTED_TAGS = [
 ];
 
 export default function JournalScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
 
   const [currentPrompt] = useState(
     () => AI_PROMPTS[Math.floor(Math.random() * AI_PROMPTS.length)],
@@ -51,7 +51,7 @@ export default function JournalScreen() {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
+  const [pastEntries] = useState<JournalEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
 
   const toggleTag = useCallback((tag: string) => {

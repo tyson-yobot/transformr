@@ -2,7 +2,7 @@
 // TRANSFORMR -- Transactions Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';

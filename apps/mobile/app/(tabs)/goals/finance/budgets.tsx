@@ -2,12 +2,11 @@
 // TRANSFORMR -- Budgets Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  Pressable,
   StyleSheet,
   RefreshControl,
 } from 'react-native';
@@ -21,7 +20,7 @@ import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useFinanceStore } from '@stores/financeStore';
-import { formatCurrency, formatPercentage } from '@utils/formatters';
+import { formatCurrency } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { Budget } from '@app-types/database';
@@ -32,7 +31,7 @@ const BUDGET_CATEGORIES = [
 ];
 
 export default function BudgetsScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const { budgets, isLoading, fetchBudgets } = useFinanceStore();
 
   const [refreshing, setRefreshing] = useState(false);

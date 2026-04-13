@@ -4,7 +4,7 @@
 // collection date, then send it to the AI Lab Interpreter.
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,

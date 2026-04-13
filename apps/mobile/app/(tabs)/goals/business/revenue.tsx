@@ -2,7 +2,7 @@
 // TRANSFORMR -- Revenue Logging
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,

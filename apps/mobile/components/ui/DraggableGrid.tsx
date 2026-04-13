@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, Dimensions, LayoutChangeEvent } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,

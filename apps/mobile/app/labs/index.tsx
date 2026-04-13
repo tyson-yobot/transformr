@@ -3,7 +3,7 @@
 // Lists all lab uploads with their status + quick access to interpretation.
 // =============================================================================
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,

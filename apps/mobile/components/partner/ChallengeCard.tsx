@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withSequence,
-  withTiming,
   FadeIn,
   ZoomIn,
 } from 'react-native-reanimated';
@@ -339,7 +334,7 @@ function ProgressRow({
   trackColor,
   textPrimary,
   textSecondary,
-  borderRadiusValue,
+  borderRadiusValue: _borderRadiusValue,
   spacing,
   typography,
   isWinner,

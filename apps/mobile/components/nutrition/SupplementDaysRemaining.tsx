@@ -4,7 +4,7 @@
 // bottle_size, purchased_at, and consumption rate from logs.
 // =============================================================================
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@theme/index';
 import { ProgressRing } from '@components/ui/ProgressRing';

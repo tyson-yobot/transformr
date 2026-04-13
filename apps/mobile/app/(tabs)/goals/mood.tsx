@@ -2,7 +2,7 @@
 // TRANSFORMR -- Mood Logger
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,

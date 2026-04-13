@@ -2,7 +2,7 @@
 // TRANSFORMR -- Habit Tracker
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,10 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import Animated, { FadeInDown, FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
@@ -56,8 +55,7 @@ export default function HabitTracker() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<HabitCategory>('personal');
-  const [completedAnimations, setCompletedAnimations] = useState<Set<string>>(new Set());
-
+  const [, setCompletedAnimations] = useState<Set<string>>(new Set());
   useEffect(() => {
     fetchHabits();
   }, [fetchHabits]);

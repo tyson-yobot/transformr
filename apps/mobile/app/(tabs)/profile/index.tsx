@@ -2,7 +2,7 @@
 // TRANSFORMR -- Profile & Settings Screen
 // =============================================================================
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import { useTheme } from '@theme/index';
 import type { ThemeMode } from '@theme/colors';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
-import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
@@ -145,7 +144,7 @@ function SettingsRow({
 // Main Screen
 // ---------------------------------------------------------------------------
 export default function ProfileScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 

@@ -1,10 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, LayoutChangeEvent } from 'react-native';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
   FadeIn,
 } from 'react-native-reanimated';
 import Svg, {
@@ -88,7 +84,7 @@ export function WeightChart({
   unit = 'lbs',
   onDataPointPress,
 }: WeightChartProps) {
-  const { colors, typography, spacing, borderRadius, isDark } = useTheme();
+  const { colors, typography, spacing, borderRadius } = useTheme();
   const [selectedRange, setSelectedRange] = useState<TimeRange>('3M');
   const [containerWidth, setContainerWidth] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState<WeightDataPoint | null>(null);

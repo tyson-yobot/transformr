@@ -2,7 +2,7 @@
 // TRANSFORMR -- Workout Programs Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,7 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function ProgramsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { templates, fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
+  const { fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
 
   const [programsWithExercises, setProgramsWithExercises] = useState<ProgramWithExercises[]>([]);
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(null);

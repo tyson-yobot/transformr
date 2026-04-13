@@ -2,15 +2,13 @@
 // TRANSFORMR -- Integrations Screen
 // =============================================================================
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  Pressable,
   StyleSheet,
   Alert,
-  Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -18,7 +16,6 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
-import { Toggle } from '@components/ui/Toggle';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 

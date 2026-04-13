@@ -4,8 +4,6 @@
 // and suggests optimal training windows.
 // =============================================================================
 
-import { Platform } from 'react-native';
-
 export interface CalendarEvent {
   id: string;
   title: string;

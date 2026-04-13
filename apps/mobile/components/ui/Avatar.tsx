@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle, ImageSourcePropType } from 'react-native';
 import { useTheme } from '@theme/index';
 
@@ -42,7 +42,7 @@ export function Avatar({
   isOnline = false,
   style,
 }: AvatarProps) {
-  const { colors, borderRadius } = useTheme();
+  const { colors } = useTheme();
   const [imageError, setImageError] = useState(false);
   const dimension = SIZE_MAP[size];
 

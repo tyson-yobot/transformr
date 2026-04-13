@@ -4,11 +4,10 @@
 // confidence indicator, action button, and dismiss control.
 // =============================================================================
 
-import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, type RelativePathString } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -58,7 +57,7 @@ export function PredictionAlert({
   onDismiss,
   style,
 }: PredictionAlertProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   const config = SEVERITY_CONFIG[severity];
@@ -67,13 +66,13 @@ export function PredictionAlert({
   return (
     <Animated.View entering={FadeInDown.duration(300)} style={style}>
       <Card
-        style={[
+        style={StyleSheet.flatten([
           styles.card,
           {
             borderLeftWidth: 4,
             borderLeftColor: config.borderColor,
           },
-        ]}
+        ])}
       >
         <View style={styles.headerRow}>
           <Ionicons
@@ -119,7 +118,7 @@ export function PredictionAlert({
             title={actionLabel}
             size="sm"
             variant="outline"
-            onPress={() => router.push(actionRoute as `/${string}`)}
+            onPress={() => router.push(actionRoute as RelativePathString)}
             style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
           />
         )}

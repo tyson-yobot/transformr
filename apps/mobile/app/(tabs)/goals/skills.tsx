@@ -2,7 +2,7 @@
 // TRANSFORMR -- Skill & Knowledge Tracker
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,6 @@ import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
-import { formatPercentage } from '@utils/formatters';
 import type { Skill, Book, Course } from '@app-types/database';
 
 type ActiveTab = 'skills' | 'books' | 'courses';

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Forgot Password Screen
 // =============================================================================
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,

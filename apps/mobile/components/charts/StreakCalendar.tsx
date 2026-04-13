@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '@theme/index';

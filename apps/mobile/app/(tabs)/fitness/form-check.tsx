@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Form Check Screen
 // =============================================================================
 
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
-import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
+import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
@@ -33,7 +33,7 @@ interface FormAnalysisResult {
 }
 
 export default function FormCheckScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
@@ -41,7 +41,7 @@ export default function FormCheckScreen() {
   const [phase, setPhase] = useState<FormCheckPhase>('setup');
   const [countdown, setCountdown] = useState(3);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [, setVideoUri] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<FormAnalysisResult | null>(null);
 
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);

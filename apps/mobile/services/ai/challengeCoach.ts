@@ -9,8 +9,6 @@ import type {
   ChallengeDailyLog,
 } from '@app-types/database';
 
-const AI_MODEL = 'claude-sonnet-4-20250514';
-
 interface ChallengeCoachResponse {
   message: string;
   tips: string[];

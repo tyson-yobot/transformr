@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
-import type { PartnerNudge } from '../../types/database';
 
 type NudgeType = 'encouragement' | 'reminder' | 'celebration';
 

@@ -4,7 +4,7 @@
 // and swap suggestion cards for over-budget items.
 // =============================================================================
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,6 @@ import { Input } from '@components/ui/Input';
 import { BudgetBar } from '@components/ui/BudgetBar';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Disclaimer } from '@components/ui/Disclaimer';
-import { Skeleton } from '@components/ui/Skeleton';
 import { formatCurrencyDetailed } from '@utils/formatters';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { generateBudgetGroceryList } from '@services/ai/groceryList';
@@ -35,7 +34,6 @@ import type {
   BudgetGroceryListResponse,
   GroceryAisle,
   GroceryItem as GroceryItemType,
-  BudgetSwapSuggestion,
 } from '@app-types/ai';
 
 interface CheckedState {
@@ -51,7 +49,6 @@ export default function GroceryListScreen() {
 
   const [groceryData, setGroceryData] = useState<BudgetGroceryListResponse | null>(null);
   const [checked, setChecked] = useState<CheckedState>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [weeklyBudget, setWeeklyBudget] = useState(0);
   const [showAddModal, setShowAddModal] = useState(false);

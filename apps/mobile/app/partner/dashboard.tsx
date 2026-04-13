@@ -2,7 +2,7 @@
 // TRANSFORMR -- Partner Dashboard
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -15,12 +15,10 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
-import { formatNumber } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 
@@ -38,8 +36,8 @@ export default function PartnerDashboard() {
   const myProfile = useProfileStore((s) => s.profile);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [myStats, setMyStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
-  const [partnerStats, setPartnerStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
+  const [myStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
+  const [partnerStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
   const [recentActivity, setRecentActivity] = useState<{ id: string; text: string; time: string }[]>([]);
 
   useEffect(() => {
@@ -52,8 +50,6 @@ export default function PartnerDashboard() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !partnership) return;
-
-        const partnerId = partnership.user_a === user.id ? partnership.user_b : partnership.user_a;
 
         // Recent nudges as activity feed
         const { data: nudges } = await supabase

@@ -15,7 +15,6 @@ import Animated, {
   Easing,
   FadeInUp,
 } from 'react-native-reanimated';
-import Svg, { Rect, Defs, ClipPath, Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 import type { WaterLog } from '../../types/database';
@@ -37,8 +36,6 @@ const QUICK_ADD_OPTIONS: QuickAddOption[] = [
   { label: '+16oz', oz: 16 },
   { label: '+32oz', oz: 32 },
 ];
-
-const AnimatedRect = Animated.createAnimatedComponent(Rect);
 
 function formatLogTime(dateStr: string | undefined): string {
   if (!dateStr) return '';
@@ -268,8 +265,8 @@ function QuickAddButton({
   label,
   onPress,
   accentColor,
-  bgColor,
-  textColor,
+  bgColor: _bgColor,
+  textColor: _textColor,
   borderRadiusValue,
   spacingValue,
   typographyValue,

@@ -2,7 +2,6 @@
 // TRANSFORMR -- Daily Briefing Screen
 // =============================================================================
 
-import React from 'react';
 import {
   View,
   Text,
@@ -30,7 +29,7 @@ const ANIMATION_BASE_DELAY = 200;
 const ANIMATION_STAGGER = 150;
 
 export default function DailyBriefingScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const updateSetting = useSettingsStore((s) => s.updateSetting);

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Mobility & Recovery Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -62,8 +61,7 @@ const STRETCH_LIBRARY: StretchExercise[] = [
 ];
 
 export default function MobilityScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
-  const router = useRouter();
+  const { colors, typography, spacing } = useTheme();
 
   const [routines, setRoutines] = useState<MobilityRoutine[]>([]);
   const [activeRoutine, setActiveRoutine] = useState<MobilityRoutine | null>(null);

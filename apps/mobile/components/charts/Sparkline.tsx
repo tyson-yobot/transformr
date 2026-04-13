@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Svg, {
   Path,
@@ -76,7 +76,7 @@ export function Sparkline({
     return colors.text.muted;
   }, [trend, colors]);
 
-  const { points, linePath, fillPath, lastPoint } = useMemo(() => {
+  const { linePath, fillPath, lastPoint } = useMemo(() => {
     if (data.length === 0) {
       return { points: [], linePath: '', fillPath: '', lastPoint: null };
     }

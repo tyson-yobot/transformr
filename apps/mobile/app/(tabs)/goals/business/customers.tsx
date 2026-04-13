@@ -2,7 +2,7 @@
 // TRANSFORMR -- Customer Tracker
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,7 @@ const STATUS_OPTIONS: { key: CustomerStatus; label: string }[] = [
 ];
 
 export default function CustomersScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filterStatus, setFilterStatus] = useState<CustomerStatus | null>(null);

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Weekly Review
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,6 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
-import { Badge } from '@components/ui/Badge';
-import { ProgressBar } from '@components/ui/ProgressBar';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
 import { supabase } from '@services/supabase';
@@ -53,7 +51,7 @@ export default function WeeklyReviewScreen() {
   const [review, setReview] = useState<WeeklyReview | null>(null);
   const [previousReview, setPreviousReview] = useState<WeeklyReview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchReview = async () => {

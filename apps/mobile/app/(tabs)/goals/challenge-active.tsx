@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Challenge Dashboard
 // =============================================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,6 @@ import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
 import type {
   ChallengeDefinition,
-  ChallengeEnrollment,
   ChallengeDailyLog,
   ChallengeTask,
 } from '@app-types/database';

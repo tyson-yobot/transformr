@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Meal Camera Screen
 // =============================================================================
 
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -62,7 +62,7 @@ export default function MealCameraScreen() {
     setStage('analyzing');
 
     try {
-      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
 
       // Simulate AI analysis (replace with actual API call)
       await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -174,11 +174,6 @@ export default function MealCameraScreen() {
     setSelectedItems(new Set());
   }, []);
 
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.9) return colors.accent.success;
-    if (confidence >= 0.7) return colors.accent.warning;
-    return colors.accent.danger;
-  };
 
   // Permission handling
   if (!permission) {
