@@ -181,6 +181,11 @@ export default function GoalsDashboard() {
           >
             {goals.length} active goal{goals.length !== 1 ? 's' : ''}
           </Text>
+          <HelpBubble
+            id="goals_streak"
+            message="Keep your streak alive by completing habits daily"
+            position="below"
+          />
         </Animated.View>
 
         {/* Quick Nav */}
@@ -399,7 +404,7 @@ export default function GoalsDashboard() {
         accessibilityLabel="Add new goal"
         style={[
           styles.fab,
-          { backgroundColor: colors.accent.primary, borderRadius: 28 },
+          { backgroundColor: colors.accent.primary, borderRadius: 28, shadowColor: colors.accent.primary },
         ]}
       >
         <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
@@ -488,7 +493,6 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

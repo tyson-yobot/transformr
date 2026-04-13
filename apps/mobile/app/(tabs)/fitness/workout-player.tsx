@@ -353,6 +353,11 @@ export default function WorkoutPlayerScreen() {
             { backgroundColor: `${colors.background.primary}E6`, padding: spacing.xl },
           ]}
         >
+          <HelpBubble
+            id="workout_rest_timer"
+            message="Timer starts automatically between sets"
+            position="above"
+          />
           <Ionicons name="timer-outline" size={48} color={colors.accent.info} />
           <Text style={[typography.countdown, { color: colors.text.primary, marginTop: spacing.md }]}>
             {formatRestTimer(restSeconds)}
@@ -373,8 +378,8 @@ export default function WorkoutPlayerScreen() {
       {/* PR Celebration */}
       {showPRCelebration && (
         <View style={[styles.prOverlay, { backgroundColor: 'rgba(234, 179, 8, 0.08)' }]}>
-          <Ionicons name="trophy" size={64} color="#EAB308" />
-          <Text style={[typography.h1, { color: '#EAB308', marginTop: spacing.md }]}>
+          <Ionicons name="trophy" size={64} color={colors.accent.gold} />
+          <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
             NEW PR!
           </Text>
           <Text style={[typography.statSmall, { color: colors.text.primary, marginTop: spacing.sm }]}>

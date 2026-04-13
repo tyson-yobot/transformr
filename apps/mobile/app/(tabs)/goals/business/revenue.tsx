@@ -16,6 +16,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { useBusinessStore } from '@stores/businessStore';
 import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
@@ -156,6 +157,11 @@ export default function RevenueScreen() {
               containerStyle={{ marginTop: spacing.md }}
             />
 
+            <HelpBubble
+              id="business_revenue"
+              message="Track every dollar to see your body-business correlation"
+              position="above"
+            />
             <Button
               title="Log Revenue"
               onPress={handleLogRevenue}

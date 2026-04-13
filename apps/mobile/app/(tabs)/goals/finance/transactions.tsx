@@ -225,7 +225,7 @@ export default function TransactionsScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <View style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28 }]}>
+      <View style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28, shadowColor: colors.accent.primary }]}>
         <Button title="+ Add" onPress={() => setShowAddModal(true)} accessibilityLabel="Add new transaction" />
       </View>
 
@@ -283,6 +283,6 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: 'row' },
   fab: {
     position: 'absolute', bottom: 24, right: 24,
-    shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
 });

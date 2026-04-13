@@ -298,7 +298,7 @@ export default function MilestonesScreen() {
       <Pressable
         onPress={() => { hapticLight(); resetForm(); setShowAddModal(true); }}
         accessibilityLabel="Add new milestone"
-        style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28 }]}
+        style={[styles.fab, { backgroundColor: colors.accent.primary, borderRadius: 28, shadowColor: colors.accent.primary }]}
       >
         <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
       </Pressable>
@@ -335,6 +335,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute', bottom: 24, right: 24, width: 56, height: 56,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8,
   },
 });

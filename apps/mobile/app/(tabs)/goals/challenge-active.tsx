@@ -14,6 +14,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
+import type { ColorScheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -64,12 +65,17 @@ function getDayStatus(
   return 'missed';
 }
 
-const DAY_STATUS_COLORS: Record<DayStatus, string> = {
-  completed: '#4CAF50',
-  missed: '#F44336',
-  today: '#FFC107',
-  future: '#555555',
-};
+// getDayStatusColor maps a day status to a theme color token.
+// Defined as a function (not a const map) so callers pass in the live
+// `colors` object from useTheme(), keeping everything theme-aware.
+function getDayStatusColor(status: DayStatus, themeColors: ColorScheme): string {
+  switch (status) {
+    case 'completed': return themeColors.accent.success;
+    case 'missed':    return themeColors.accent.danger;
+    case 'today':     return themeColors.accent.warning;
+    case 'future':    return themeColors.text.muted;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -428,7 +434,7 @@ export default function ChallengeActiveScreen() {
               {Array.from({ length: totalDays }, (_, i) => {
                 const dayNum = i + 1;
                 const status = getDayStatus(dayNum, currentDay, logsMap);
-                const bgColor = DAY_STATUS_COLORS[status];
+                const bgColor = getDayStatusColor(status, colors);
 
                 return (
                   <View
@@ -446,7 +452,7 @@ export default function ChallengeActiveScreen() {
                       style={[
                         styles.calendarDayText,
                         {
-                          color: status === 'future' ? '#999999' : '#FFFFFF',
+                          color: status === 'future' ? colors.text.muted : '#FFFFFF',
                           fontSize: totalDays > 60 ? 8 : totalDays > 30 ? 9 : 10,
                         },
                       ]}
@@ -462,11 +468,11 @@ export default function ChallengeActiveScreen() {
             <View style={[styles.legendRow, { marginTop: spacing.md }]}>
               {(
                 [
-                  { label: 'Done', color: DAY_STATUS_COLORS.completed },
-                  { label: 'Missed', color: DAY_STATUS_COLORS.missed },
-                  { label: 'Today', color: DAY_STATUS_COLORS.today },
-                  { label: 'Upcoming', color: DAY_STATUS_COLORS.future },
-                ] as const
+                  { label: 'Done',     color: getDayStatusColor('completed', colors) },
+                  { label: 'Missed',   color: getDayStatusColor('missed',    colors) },
+                  { label: 'Today',    color: getDayStatusColor('today',     colors) },
+                  { label: 'Upcoming', color: getDayStatusColor('future',    colors) },
+                ]
               ).map((item) => (
                 <View key={item.label} style={styles.legendItem}>
                   <View
