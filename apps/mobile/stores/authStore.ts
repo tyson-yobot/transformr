@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthStore>()(
             // Parse Supabase rate limit errors
             if (error.message.includes('after') || error.message.includes('seconds') || error.status === 429) {
               const match = error.message.match(/(\d+)/);
-              const secs = match ? parseInt(match[1], 10) : 60;
+              const secs = match ? parseInt(match[1] ?? '60', 10) : 60;
               set({ error: `Please wait ${secs} seconds before trying again.`, loading: false, rateLimitSeconds: secs });
               // Countdown
               const interval = setInterval(() => {
