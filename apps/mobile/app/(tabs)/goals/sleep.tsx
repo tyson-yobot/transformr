@@ -20,6 +20,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { SleepChart } from '@components/charts/SleepChart';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { Disclaimer } from '@components/ui/Disclaimer';
 import { useSleepStore } from '@stores/sleepStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -329,6 +330,13 @@ export default function SleepTracker() {
                 </View>
               </View>
             </Card>
+          </Animated.View>
+        )}
+
+        {/* Disclaimer */}
+        {aiRecommendation && (
+          <Animated.View entering={FadeInDown.delay(550)}>
+            <Disclaimer type="sleep" style={{ marginTop: spacing.lg }} />
           </Animated.View>
         )}
 

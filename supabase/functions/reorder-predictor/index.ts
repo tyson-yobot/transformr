@@ -1,3 +1,4 @@
+// NOTE: No AI API calls — compliance preamble not required
 // =============================================================================
 // TRANSFORMR -- Reorder Predictor (Cron)
 // Daily job that checks each user's supplement inventory. For supplements with

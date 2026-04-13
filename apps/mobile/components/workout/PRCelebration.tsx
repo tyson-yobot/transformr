@@ -12,6 +12,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
+import {
+  useGamificationStyle,
+  type GamificationMode,
+} from '@hooks/useGamificationStyle';
 
 interface PRCelebrationProps {
   exerciseName: string;
@@ -19,6 +23,7 @@ interface PRCelebrationProps {
   recordType: string;
   onDismiss: () => void;
   autoDismissMs?: number;
+  gamificationMode?: GamificationMode;
 }
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -35,9 +40,9 @@ interface ParticleConfig {
   delay: number;
 }
 
-function generateParticles(accentColors: string[]): ParticleConfig[] {
-  return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-    const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
+function generateParticles(accentColors: string[], count: number = PARTICLE_COUNT): ParticleConfig[] {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = (i / count) * Math.PI * 2;
     const distance = 120 + Math.random() * 200;
     return {
       startX: SCREEN_WIDTH / 2,
@@ -112,25 +117,43 @@ export function PRCelebration({
   recordType,
   onDismiss,
   autoDismissMs = 3000,
+  gamificationMode,
 }: PRCelebrationProps) {
   const { colors, typography, spacing } = useTheme();
+  const { mode: hookMode } = useGamificationStyle();
+
+  const activeMode: GamificationMode = gamificationMode ?? hookMode;
+  const isCompetitive = activeMode === 'competitive';
 
   const overlayOpacity = useSharedValue(0);
   const textScale = useSharedValue(0);
   const glowOpacity = useSharedValue(0);
   const detailOpacity = useSharedValue(0);
 
-  const particleColors = [
+  const competitiveParticleColors = [
     colors.accent.gold,
     colors.accent.fire,
     colors.accent.primary,
     colors.accent.pink,
     colors.accent.success,
   ];
+
+  const supportiveParticleColors = [
+    colors.accent.secondary, // muted purple
+    colors.accent.primary,   // softer teal
+    colors.accent.success,   // gentle green
+  ];
+
+  const particleColors = isCompetitive
+    ? competitiveParticleColors
+    : supportiveParticleColors;
+
+  const particleCount = isCompetitive ? PARTICLE_COUNT : 12;
+
   const particles = React.useMemo(
-    () => generateParticles(particleColors),
+    () => generateParticles(particleColors, particleCount),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [isCompetitive],
   );
 
   const triggerDismiss = useCallback(() => {
@@ -142,12 +165,18 @@ export function PRCelebration({
   useEffect(() => {
     // Haptic pattern
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setTimeout(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }, 200);
-    setTimeout(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }, 400);
+    if (isCompetitive) {
+      setTimeout(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      }, 200);
+      setTimeout(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }, 400);
+    } else {
+      setTimeout(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }, 200);
+    }
 
     // Animations
     overlayOpacity.value = withTiming(1, { duration: 300 });
@@ -179,6 +208,7 @@ export function PRCelebration({
     detailOpacity,
     autoDismissMs,
     triggerDismiss,
+    isCompetitive,
   ]);
 
   const overlayStyle = useAnimatedStyle(() => ({
@@ -212,7 +242,7 @@ export function PRCelebration({
         style={[
           styles.glow,
           {
-            backgroundColor: colors.accent.gold,
+            backgroundColor: isCompetitive ? colors.accent.gold : colors.accent.primary,
             top: SCREEN_HEIGHT / 2 - 120,
             left: SCREEN_WIDTH / 2 - 100,
           },
@@ -228,12 +258,12 @@ export function PRCelebration({
             style={[
               styles.prText,
               {
-                color: colors.accent.gold,
-                textShadowColor: colors.accent.gold,
+                color: isCompetitive ? colors.accent.gold : colors.accent.primary,
+                textShadowColor: isCompetitive ? colors.accent.gold : colors.accent.primary,
               },
             ]}
           >
-            NEW PR!
+            {isCompetitive ? 'NEW PR!' : 'Nice Improvement!'}
           </Text>
         </Animated.View>
 
@@ -251,7 +281,7 @@ export function PRCelebration({
             style={[
               styles.recordValue,
               {
-                color: colors.accent.gold,
+                color: isCompetitive ? colors.accent.gold : colors.accent.primary,
                 marginTop: spacing.md,
               },
             ]}
@@ -264,7 +294,7 @@ export function PRCelebration({
               { color: colors.text.secondary, marginTop: spacing.sm },
             ]}
           >
-            {recordType}
+            {isCompetitive ? recordType : 'Every rep counts'}
           </Text>
         </Animated.View>
       </View>

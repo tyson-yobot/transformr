@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '@theme/index';
+import { useGamificationStyle } from '@hooks/useGamificationStyle';
 import {
   subDays,
   format,
@@ -86,6 +87,10 @@ export function StreakCalendar({
   style,
 }: StreakCalendarProps) {
   const { colors, typography, spacing } = useTheme();
+  const { style: gamStyle } = useGamificationStyle();
+
+  const isCompetitive = gamStyle.mode === 'competitive';
+  const heatmapAccent = isCompetitive ? colors.accent.success : gamStyle.primaryColor;
 
   const today = useMemo(() => {
     const d = new Date();
@@ -148,7 +153,7 @@ export function StreakCalendar({
         const color = getIntensityColor(
           count,
           maxCount,
-          colors.accent.success,
+          heatmapAccent,
           colors.background.tertiary,
           completed,
         );
@@ -167,7 +172,7 @@ export function StreakCalendar({
     }
 
     return { cells: cellList, monthLabels: months, numWeeks: totalWeeks };
-  }, [startDate, today, dataMap, maxCount, cellSize, cellGap, colors]);
+  }, [startDate, today, dataMap, maxCount, cellSize, cellGap, colors, heatmapAccent]);
 
   const labelHeight = 18;
   const svgWidth = numWeeks * (cellSize + cellGap) - cellGap;
@@ -177,8 +182,13 @@ export function StreakCalendar({
     <View style={[styles.container, style]}>
       {/* Streak counter */}
       <View style={[styles.streakRow, { marginBottom: spacing.md }]}>
-        <Text style={[typography.statSmall, { color: colors.accent.fire }]}>
-          {currentStreak}
+        <Text
+          style={[
+            typography.statSmall,
+            { color: isCompetitive ? colors.accent.fire : gamStyle.primaryColor },
+          ]}
+        >
+          {isCompetitive ? `${currentStreak} \u{1F525}` : `${currentStreak} days`}
         </Text>
         <Text
           style={[
@@ -186,7 +196,7 @@ export function StreakCalendar({
             { color: colors.text.secondary, marginLeft: spacing.xs },
           ]}
         >
-          day streak
+          {gamStyle.streakLabel.replace('{count}', String(currentStreak))}
         </Text>
       </View>
 
@@ -239,7 +249,7 @@ export function StreakCalendar({
                 backgroundColor:
                   level === 0
                     ? colors.background.tertiary
-                    : `${colors.accent.success}${Math.round(level * 255)
+                    : `${heatmapAccent}${Math.round(level * 255)
                         .toString(16)
                         .padStart(2, '0')
                         .toUpperCase()}`,

@@ -75,3 +75,37 @@ export async function analyzePostWorkout(
   if (error) throw error;
   return data as PostWorkoutAnalysis;
 }
+
+export interface CoachingTipParams {
+  exerciseName: string;
+  setsCompleted: number;
+  totalVolume: number;
+  elapsedMinutes: number;
+  recentWeights: number[];
+  recentReps: number[];
+}
+
+export interface CoachingTipResponse {
+  tip: string;
+  tokens_in: number;
+  tokens_out: number;
+}
+
+export async function getMidWorkoutCoachingTip(
+  params: CoachingTipParams,
+): Promise<CoachingTipResponse> {
+  const { data, error } = await supabase.functions.invoke('ai-workout-coach', {
+    body: {
+      mode: 'coaching_tip',
+      exercise_name: params.exerciseName,
+      sets_completed: params.setsCompleted,
+      total_volume: params.totalVolume,
+      elapsed_minutes: params.elapsedMinutes,
+      recent_weights: params.recentWeights,
+      recent_reps: params.recentReps,
+    },
+  });
+
+  if (error) throw error;
+  return data as CoachingTipResponse;
+}

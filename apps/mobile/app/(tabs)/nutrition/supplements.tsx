@@ -27,15 +27,34 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { EvidenceBadge } from '@components/ui/EvidenceBadge';
 import { BudgetBar } from '@components/ui/BudgetBar';
 import { Disclaimer } from '@components/ui/Disclaimer';
+import { SupplementDaysRemaining } from '@components/nutrition/SupplementDaysRemaining';
 import { useSupplementsStore } from '@stores/supplementsStore';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { differenceInDays } from 'date-fns';
 import type {
   SupplementCategory,
   SupplementRecommendation,
   SupplementTier,
   UserSupplement,
 } from '@app-types/ai';
+
+/** Estimate doses taken based on days since purchase/creation and frequency */
+function estimateDosesTaken(sup: UserSupplement): number {
+  const startDate = sup.purchased_at ?? sup.created_at;
+  const daysSince = differenceInDays(new Date(), new Date(startDate));
+  const dailyRate = getDailyRate(sup.frequency);
+  return Math.max(0, Math.round(daysSince * dailyRate));
+}
+
+function getDailyRate(frequency: string): number {
+  switch (frequency) {
+    case 'twice_daily': return 2;
+    case 'weekly': return 1 / 7;
+    case 'as_needed': return 0.5;
+    default: return 1; // 'daily' and fallback
+  }
+}
 
 const TIER_ORDER: SupplementTier[] = ['essential', 'recommended', 'optional'];
 
@@ -414,6 +433,13 @@ export default function SupplementsScreen() {
                               compact
                             />
                           </View>
+                          {sup.bottle_size != null && sup.bottle_size > 0 && (
+                            <SupplementDaysRemaining
+                              bottleSize={sup.bottle_size}
+                              dosesTaken={estimateDosesTaken(sup)}
+                              dailyRate={getDailyRate(sup.frequency)}
+                            />
+                          )}
                           {sup.ai_recommendation_reason && (
                             <Text
                               style={[

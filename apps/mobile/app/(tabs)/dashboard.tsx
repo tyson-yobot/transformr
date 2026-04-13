@@ -20,6 +20,7 @@ import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
+import { PredictionAlert } from '@components/cards/PredictionAlert';
 import { CountdownCard } from '@components/cards/CountdownCard';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
@@ -30,6 +31,7 @@ import { useHabitStore } from '@stores/habitStore';
 import { useGoalStore } from '@stores/goalStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useBusinessStore } from '@stores/businessStore';
+import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
 import { formatNumber, formatCurrency } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
@@ -110,6 +112,13 @@ export default function DashboardScreen() {
   const goalStore = useGoalStore();
   const partnerStore = usePartnerStore();
   const businessStore = useBusinessStore();
+  const insightStore = useInsightStore();
+
+  // Top prediction for dashboard
+  const topPrediction = useMemo(
+    () => insightStore.predictions[0] ?? null,
+    [insightStore.predictions],
+  );
 
   // Primary countdown -- uses the first active goal with a target date
   const primaryGoal = useMemo(() => {
@@ -189,9 +198,10 @@ export default function DashboardScreen() {
       habitStore.fetchHabits(),
       partnerStore.fetchPartnership(),
       businessStore.fetchBusinesses(),
+      insightStore.fetchAll(),
     ]);
     setRefreshing(false);
-  }, [fetchProfile, goalStore, habitStore, partnerStore, businessStore]);
+  }, [fetchProfile, goalStore, habitStore, partnerStore, businessStore, insightStore]);
 
   // Initial fetch
   useEffect(() => {
@@ -284,6 +294,23 @@ export default function DashboardScreen() {
 
       {/* AI Insight */}
       <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
+
+      {/* Top Prediction Alert */}
+      {topPrediction && (
+        <Animated.View entering={FadeInDown.delay(25).duration(400)}>
+          <PredictionAlert
+            title={topPrediction.title}
+            body={topPrediction.body}
+            severity={topPrediction.severity}
+            category={topPrediction.category}
+            confidence={topPrediction.confidence}
+            actionLabel={topPrediction.action_label}
+            actionRoute={topPrediction.action_route}
+            onDismiss={() => void insightStore.acknowledgePrediction(topPrediction.id)}
+            style={{ marginBottom: spacing.md }}
+          />
+        </Animated.View>
+      )}
 
       {/* Primary Countdown */}
       {primaryGoal && primaryGoal.start_date && primaryGoal.target_date && (

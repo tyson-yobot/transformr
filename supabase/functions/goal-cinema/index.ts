@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { COMPLIANCE_PREAMBLE } from "../_shared/compliance.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const AI_MODEL = "claude-sonnet-4-20250514";
@@ -21,7 +22,7 @@ async function callClaude(systemPrompt: string, userMessage: string) {
     body: JSON.stringify({
       model: AI_MODEL,
       max_tokens: 2048,
-      system: systemPrompt,
+      system: COMPLIANCE_PREAMBLE + "\n\n" + systemPrompt,
       messages: [{ role: "user", content: userMessage }],
     }),
   });

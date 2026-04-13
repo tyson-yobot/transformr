@@ -1,3 +1,4 @@
+// NOTE: No AI API calls — compliance preamble not required
 // =============================================================================
 // TRANSFORMR -- AI Pattern Detector (Module 7)
 // Pure-math pattern detection engine. No AI API calls — runs statistical

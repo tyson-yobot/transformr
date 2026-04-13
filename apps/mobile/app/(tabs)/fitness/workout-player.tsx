@@ -30,6 +30,8 @@ import {
 } from '@utils/formatters';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
+import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
+import { Disclaimer } from '@components/ui/Disclaimer';
 import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
 
 interface GhostSet {
@@ -76,6 +78,7 @@ export default function WorkoutPlayerScreen() {
   const [prMessage, setPrMessage] = useState('');
   const [showGhostOverlay, setShowGhostOverlay] = useState(true);
   const [loadingExercises, setLoadingExercises] = useState(true);
+  const [aiCoachTip, setAiCoachTip] = useState<string | null>(null);
 
   // Set logger state per exercise
   const [currentWeight, setCurrentWeight] = useState('');
@@ -216,6 +219,27 @@ export default function WorkoutPlayerScreen() {
       setTimeout(() => setShowPRCelebration(false), 3000);
     }
 
+    // Request AI coaching tip every 3rd set
+    const newTotalSets = totalSets + 1;
+    if (newTotalSets % 3 === 0 && newTotalSets > 0) {
+      const recentSets = currentExercise.loggedSets.slice(-3);
+      getMidWorkoutCoachingTip({
+        exerciseName: currentExercise.exercise.name,
+        setsCompleted: newTotalSets,
+        totalVolume: totalVolume + weight * reps,
+        elapsedMinutes: Math.floor(elapsedSeconds / 60),
+        recentWeights: [...recentSets.map((s) => s.weight), weight],
+        recentReps: [...recentSets.map((s) => s.reps), reps],
+      })
+        .then((response) => {
+          setAiCoachTip(response.tip);
+        })
+        .catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to get coaching tip';
+          console.warn('AI coaching tip request failed:', message);
+        });
+    }
+
     // Start rest timer
     const restDuration = currentExercise.templateExercise?.rest_seconds ?? restTarget;
     setRestSeconds(restDuration);
@@ -235,6 +259,9 @@ export default function WorkoutPlayerScreen() {
     exercisesWithSets,
     logSetWithPRDetection,
     restTarget,
+    totalSets,
+    totalVolume,
+    elapsedSeconds,
   ]);
 
   const handleSkipRest = useCallback(() => {
@@ -431,6 +458,46 @@ export default function WorkoutPlayerScreen() {
                 </Pressable>
               ))}
             </ScrollView>
+
+            {/* AI Coach Tip */}
+            {aiCoachTip && (
+              <Card
+                style={{
+                  marginBottom: spacing.lg,
+                  borderWidth: 1,
+                  borderColor: colors.accent.cyan,
+                }}
+              >
+                <View style={styles.aiCoachHeader}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <Ionicons name="sparkles" size={16} color={colors.accent.cyan} />
+                    <Badge
+                      label="AI Coach"
+                      variant="info"
+                      size="sm"
+                      style={{ marginLeft: spacing.xs }}
+                    />
+                  </View>
+                  <Pressable
+                    onPress={() => { setAiCoachTip(null); hapticLight(); }}
+                    accessibilityLabel="Dismiss AI coaching tip"
+                    accessibilityRole="button"
+                    hitSlop={8}
+                  >
+                    <Ionicons name="close" size={18} color={colors.text.muted} />
+                  </Pressable>
+                </View>
+                <Text
+                  style={[
+                    typography.body,
+                    { color: colors.text.secondary, marginTop: spacing.sm },
+                  ]}
+                >
+                  {aiCoachTip}
+                </Text>
+                <Disclaimer type="workout" compact style={{ marginTop: spacing.sm }} />
+              </Card>
+            )}
 
             {/* Active Exercise Card */}
             {currentExercise && (
@@ -768,6 +835,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  aiCoachHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   bottomBar: {},
 });

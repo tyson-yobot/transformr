@@ -1,3 +1,4 @@
+// NOTE: No AI API calls — compliance preamble not required
 // =============================================================================
 // TRANSFORMR -- Weather Fetch Edge Function (Module 10)
 // Fetches weather from Open-Meteo (free, no API key), caches in weather_cache,
