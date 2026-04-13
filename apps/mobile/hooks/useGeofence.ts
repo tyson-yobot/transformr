@@ -26,6 +26,17 @@ export function useGeofence() {
   const [hasPermission, setHasPermission] = useState(false);
   const { user } = useAuthStore();
 
+  const enableGeofencing = useCallback(async (geofences: GeofenceTrigger[]) => {
+    const granted = await requestLocationPermissions();
+    setHasPermission(granted);
+
+    if (granted && geofences.length > 0) {
+      const regions = convertToGeofenceRegions(geofences);
+      await startGeofencing(regions);
+      setEnabled(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       fetchUserGeofences(user.id).then((data) => {
@@ -41,18 +52,7 @@ export function useGeofence() {
     return () => {
       stopGeofencing().catch(() => {});
     };
-  }, [user?.id]);
-
-  const enableGeofencing = useCallback(async (geofences: GeofenceTrigger[]) => {
-    const granted = await requestLocationPermissions();
-    setHasPermission(granted);
-
-    if (granted && geofences.length > 0) {
-      const regions = convertToGeofenceRegions(geofences);
-      await startGeofencing(regions);
-      setEnabled(true);
-    }
-  }, []);
+  }, [user?.id, enableGeofencing]);
 
   const disableGeofencing = useCallback(async () => {
     await stopGeofencing();

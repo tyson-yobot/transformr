@@ -6,24 +6,26 @@ import { useProfileStore } from '@stores/profileStore';
 
 export function useNutrition() {
   const store = useNutritionStore();
+  const fetchTodayNutrition = useNutritionStore((s) => s.fetchTodayNutrition);
+  const todayLogs = useNutritionStore((s) => s.todayLogs);
   const { user } = useAuthStore();
   const { profile } = useProfileStore();
 
   useEffect(() => {
     if (user?.id) {
-      store.fetchTodayNutrition();
+      fetchTodayNutrition();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchTodayNutrition]);
 
   const todayMacros = useMemo(() => {
-    const logs = store.todayLogs;
+    const logs = todayLogs;
     return {
       calories: logs.reduce((sum, l) => sum + l.calories, 0),
       protein: logs.reduce((sum, l) => sum + l.protein, 0),
       carbs: logs.reduce((sum, l) => sum + l.carbs, 0),
       fat: logs.reduce((sum, l) => sum + l.fat, 0),
     };
-  }, [store.todayLogs]);
+  }, [todayLogs]);
 
   const macroProgress = useMemo(() => ({
     calories: getMacroProgress(profile?.daily_calorie_target ?? 0, todayMacros.calories),

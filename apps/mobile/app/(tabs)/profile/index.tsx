@@ -197,16 +197,16 @@ export default function ProfileScreen() {
   const { tone: selectedTone, setTone } = useGamificationStyle();
 
   // Theme cycle
-  const themeOptions: ThemeMode[] = ['dark', 'light', 'system'];
   const currentThemeLabel = settings.theme.charAt(0).toUpperCase() + settings.theme.slice(1);
 
   const handleThemeCycle = useCallback(() => {
+    const themeOptions: ThemeMode[] = ['dark', 'light', 'system'];
     const currentIdx = themeOptions.indexOf(settings.theme);
     const nextIdx = (currentIdx + 1) % themeOptions.length;
     const nextTheme = themeOptions[nextIdx] as ThemeMode;
     settings.updateSetting('theme', nextTheme);
     void hapticLight();
-  }, [settings, themeOptions]);
+  }, [settings]);
 
   // Stats
   const memberSince = profile?.created_at

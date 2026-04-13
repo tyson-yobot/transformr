@@ -53,7 +53,9 @@ function computeCurrentStreak(data: StreakDay[]): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const firstDate = new Date(sorted[0]!.date);
+  const firstSorted = sorted[0];
+  if (!firstSorted) return 0;
+  const firstDate = new Date(firstSorted.date);
   firstDate.setHours(0, 0, 0, 0);
 
   const diffFromToday = Math.round(
@@ -65,7 +67,9 @@ function computeCurrentStreak(data: StreakDay[]): number {
 
   for (let i = 0; i < sorted.length; i++) {
     const expected = subDays(today, i + (diffFromToday === 1 ? 1 : 0));
-    const current = new Date(sorted[i]!.date);
+    const entry = sorted[i];
+    if (!entry) break;
+    const current = new Date(entry.date);
     current.setHours(0, 0, 0, 0);
     expected.setHours(0, 0, 0, 0);
 

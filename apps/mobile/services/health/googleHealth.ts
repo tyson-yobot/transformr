@@ -136,7 +136,8 @@ export async function getLatestWeight(): Promise<number | null> {
     weight: { inPounds: number };
   }[];
   if (records.length === 0) return null;
-  return records[records.length - 1]!.weight.inPounds;
+  const lastRecord = records[records.length - 1];
+  return lastRecord ? lastRecord.weight.inPounds : null;
 }
 
 export async function getActiveCalories(

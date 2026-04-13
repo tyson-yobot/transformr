@@ -20,6 +20,7 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 
 interface PartnerStats {
@@ -127,6 +128,7 @@ export default function PartnerDashboard() {
             Joint Streak (days)
           </Text>
         </Animated.View>
+        <HelpBubble id="partner_invite" message="Share this code with your partner to sync" position="below" />
 
         {/* Side-by-Side Stats */}
         <Animated.View entering={FadeInDown.delay(200)}>

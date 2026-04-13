@@ -147,51 +147,6 @@ export default function MobilityScreen() {
     loadData();
   }, []);
 
-  // Timer logic
-  useEffect(() => {
-    if (isTimerRunning && timerSeconds > 0) {
-      timerRef.current = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (prev <= 1) {
-            setIsTimerRunning(false);
-            handleStretchComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isTimerRunning]);
-
-  const handleStartRoutine = useCallback(
-    (routine: MobilityRoutine) => {
-      hapticLight();
-      const resetRoutine = {
-        ...routine,
-        exercises: routine.exercises.map((e) => ({ ...e, isCompleted: false })),
-      };
-      setActiveRoutine(resetRoutine);
-      setActiveExerciseIndex(0);
-      setCompletedCount(0);
-      setTimerSeconds(resetRoutine.exercises[0]?.durationSeconds ?? 30);
-      setIsTimerRunning(false);
-    },
-    [],
-  );
-
-  const handleStartTimer = useCallback(() => {
-    setIsTimerRunning(true);
-    hapticLight();
-  }, []);
-
-  const handlePauseTimer = useCallback(() => {
-    setIsTimerRunning(false);
-  }, []);
-
   const handleStretchComplete = useCallback(async () => {
     if (!activeRoutine) return;
     await hapticSuccess();
@@ -231,6 +186,54 @@ export default function MobilityScreen() {
       }
     }
   }, [activeRoutine, activeExerciseIndex, completedCount]);
+
+  const handleStretchCompleteRef = useRef(handleStretchComplete);
+  handleStretchCompleteRef.current = handleStretchComplete;
+
+  // Timer logic
+  useEffect(() => {
+    if (isTimerRunning && timerSeconds > 0) {
+      timerRef.current = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setIsTimerRunning(false);
+            void handleStretchCompleteRef.current();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isTimerRunning, timerSeconds]);
+
+  const handleStartRoutine = useCallback(
+    (routine: MobilityRoutine) => {
+      hapticLight();
+      const resetRoutine = {
+        ...routine,
+        exercises: routine.exercises.map((e) => ({ ...e, isCompleted: false })),
+      };
+      setActiveRoutine(resetRoutine);
+      setActiveExerciseIndex(0);
+      setCompletedCount(0);
+      setTimerSeconds(resetRoutine.exercises[0]?.durationSeconds ?? 30);
+      setIsTimerRunning(false);
+    },
+    [],
+  );
+
+  const handleStartTimer = useCallback(() => {
+    setIsTimerRunning(true);
+    hapticLight();
+  }, []);
+
+  const handlePauseTimer = useCallback(() => {
+    setIsTimerRunning(false);
+  }, []);
 
   const handleSkipStretch = useCallback(() => {
     if (!activeRoutine) return;

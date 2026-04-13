@@ -54,14 +54,16 @@ function generateMockPlan(): DayPlan[] {
     { name: 'Protein Shake', mealType: 'snack', calories: 200, protein: 30, carbs: 10, fat: 4 },
   ];
 
+  const fallback: Omit<PlannedMeal, 'id'> = mealTemplates[0] ?? { name: '', mealType: 'snack', calories: 0, protein: 0, carbs: 0, fat: 0 };
+
   return DAYS_OF_WEEK.map((day, i) => ({
     day,
     dayShort: DAYS_SHORT[i] ?? day.slice(0, 3),
     meals: [
-      { ...mealTemplates[i % 2 === 0 ? 0 : 1]!, id: `${i}-b` },
-      { ...mealTemplates[i % 2 === 0 ? 2 : 3]!, id: `${i}-l` },
-      { ...mealTemplates[i % 2 === 0 ? 4 : 5]!, id: `${i}-d` },
-      { ...mealTemplates[i % 2 === 0 ? 6 : 7]!, id: `${i}-s` },
+      { ...(mealTemplates[i % 2 === 0 ? 0 : 1] ?? fallback), id: `${i}-b` },
+      { ...(mealTemplates[i % 2 === 0 ? 2 : 3] ?? fallback), id: `${i}-l` },
+      { ...(mealTemplates[i % 2 === 0 ? 4 : 5] ?? fallback), id: `${i}-d` },
+      { ...(mealTemplates[i % 2 === 0 ? 6 : 7] ?? fallback), id: `${i}-s` },
     ],
   }));
 }

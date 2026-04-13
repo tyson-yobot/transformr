@@ -25,6 +25,7 @@ import { useNutritionStore } from '@stores/nutritionStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -211,6 +212,7 @@ export default function MealCameraScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <HelpBubble id="meal_camera" message="Point at your plate for AI calorie estimates" position="above" />
       {stage === 'capture' && (
         <>
           <CameraView

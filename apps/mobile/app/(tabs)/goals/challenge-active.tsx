@@ -22,6 +22,7 @@ import { ProgressBar } from '@components/ui/ProgressBar';
 import { Modal } from '@components/ui/Modal';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
+import { ShareButton } from '@components/social/ShareButton';
 import type {
   ChallengeDefinition,
   ChallengeDailyLog,
@@ -117,8 +118,8 @@ export default function ChallengeActiveScreen() {
   const overallProgress = currentDay / totalDays;
   const restartCount = activeEnrollment?.restart_count ?? 0;
 
-  const todayProgress = useMemo(() => getTodayProgress(), [todayLog, tasks]);
-  const tasksCompleted = todayLog?.tasks_completed ?? {};
+  const todayProgress = useMemo(() => getTodayProgress(), [getTodayProgress]);
+  const tasksCompleted = useMemo(() => todayLog?.tasks_completed ?? {}, [todayLog]);
   const autoVerified = todayLog?.auto_verified ?? {};
 
   const incompleteTasks = useMemo(() => {
@@ -495,6 +496,17 @@ export default function ChallengeActiveScreen() {
         {/* Action Buttons                                                     */}
         {/* ----------------------------------------------------------------- */}
         <Animated.View entering={FadeInDown.delay(400)}>
+          {/* Share Progress */}
+          <ShareButton
+            type="challenge_complete"
+            data={{
+              title: definition.name,
+              value: `Day ${currentDay} of ${totalDays}`,
+              subtitle: 'Challenge Progress',
+            }}
+            label="Share Progress"
+          />
+
           {/* Complete Day */}
           <Button
             title="Complete Day"

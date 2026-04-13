@@ -90,7 +90,7 @@ export default function ProfileScreen() {
 
     await updateProfile({
       date_of_birth: dateOfBirth,
-      gender: gender!,
+      gender: gender ?? 'prefer_not_to_say',
       height_inches: totalInches,
       current_weight: parseFloat(currentWeight),
       goal_weight: parseFloat(goalWeight),

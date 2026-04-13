@@ -153,6 +153,13 @@ export default function GoalsLayout() {
         }}
       />
       <Stack.Screen
+        name="community"
+        options={{
+          title: 'Community',
+          headerBackTitle: 'Goals',
+        }}
+      />
+      <Stack.Screen
         name="challenge-detail"
         options={{
           title: 'Challenge',

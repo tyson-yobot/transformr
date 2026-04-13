@@ -36,12 +36,15 @@ function formatCurrency(value: number, currency: string): string {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
+  const first = points[0];
+  if (!first) return '';
+  if (points.length === 1) return `M${first.x},${first.y}`;
 
-  let path = `M${points[0]!.x},${points[0]!.y}`;
+  let path = `M${first.x},${first.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
+    const prev = points[i - 1];
+    const curr = points[i];
+    if (!prev || !curr) continue;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -102,7 +105,7 @@ export function RevenueChart({
     if (bars.length === 0) return '';
     const points = bars.map((bar, i) => ({
       x: bar.x + bar.width / 2,
-      y: chartArea.y + (1 - data[i]!.cumulative / maxCumulative) * chartArea.height,
+      y: chartArea.y + (1 - (data[i]?.cumulative ?? 0) / maxCumulative) * chartArea.height,
     }));
     return buildSmoothPath(points);
   }, [bars, data, chartArea, maxCumulative]);
@@ -111,7 +114,7 @@ export function RevenueChart({
     if (bars.length === 0) return [];
     return bars.map((bar, i) => ({
       x: bar.x + bar.width / 2,
-      y: chartArea.y + (1 - data[i]!.cumulative / maxCumulative) * chartArea.height,
+      y: chartArea.y + (1 - (data[i]?.cumulative ?? 0) / maxCumulative) * chartArea.height,
     }));
   }, [bars, data, chartArea, maxCumulative]);
 
@@ -149,7 +152,8 @@ export function RevenueChart({
         }
       });
       setSelectedIdx(closest);
-      onBarPress?.(data[closest]!);
+      const closestEntry = data[closest];
+      if (closestEntry) onBarPress?.(closestEntry);
     },
     [bars, data, onBarPress],
   );
@@ -161,7 +165,8 @@ export function RevenueChart({
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
       {selectedIdx !== null && data[selectedIdx] && (() => {
-        const sel = data[selectedIdx]!;
+        const sel = data[selectedIdx];
+        if (!sel) return null;
         return (
           <Animated.View
             entering={FadeIn.duration(200)}
@@ -293,7 +298,8 @@ export function RevenueChart({
 
           {/* Selected indicator */}
           {selectedIdx !== null && bars[selectedIdx] && (() => {
-            const selBar = bars[selectedIdx]!;
+            const selBar = bars[selectedIdx];
+            if (!selBar) return null;
             return (
               <Line
                 x1={selBar.x + selBar.width / 2}

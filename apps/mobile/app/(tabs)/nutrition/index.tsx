@@ -34,6 +34,7 @@ import { formatCalories, formatMacro, formatOz, formatDateShort } from '@utils/f
 import { MEAL_TYPES, MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import type { NutritionLog } from '../../../types/database';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -346,6 +347,7 @@ export default function NutritionHomeScreen() {
             </View>
           </Card>
         </Animated.View>
+        <HelpBubble id="nutrition_macros" message="Tap any ring to see your full macro breakdown" position="below" />
 
         {/* Quick Links */}
         <Animated.View entering={FadeInDown.duration(400).delay(200)}>
@@ -588,6 +590,8 @@ export default function NutritionHomeScreen() {
           </Card>
         </Animated.View>
       </ScrollView>
+
+      <HelpBubble id="nutrition_add" message="Log meals with camera, barcode, or search" position="above" />
 
       {/* FAB */}
       <Animated.View

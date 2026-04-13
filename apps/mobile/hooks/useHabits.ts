@@ -4,23 +4,26 @@ import { useAuthStore } from '@stores/authStore';
 
 export function useHabits() {
   const store = useHabitStore();
+  const fetchHabits = useHabitStore((s) => s.fetchHabits);
+  const habits = useHabitStore((s) => s.habits);
+  const todayCompletions = useHabitStore((s) => s.todayCompletions);
   const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.id) {
-      store.fetchHabits();
+      fetchHabits();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchHabits]);
 
   const todayProgress = useMemo(() => {
-    const total = store.habits.filter((h) => h.is_active).length;
-    const completed = store.todayCompletions.length;
+    const total = habits.filter((h) => h.is_active).length;
+    const completed = todayCompletions.length;
     return {
       completed,
       total,
       percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
-  }, [store.habits, store.todayCompletions]);
+  }, [habits, todayCompletions]);
 
   return {
     ...store,

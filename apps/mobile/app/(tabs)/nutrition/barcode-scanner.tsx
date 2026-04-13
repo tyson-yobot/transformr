@@ -25,6 +25,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES, OPEN_FOOD_FACTS_API } from '@utils/constants';
 import { hapticSuccess, hapticLight, hapticWarning } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -186,6 +187,7 @@ export default function BarcodeScannerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <HelpBubble id="barcode_scan" message="Scan any food barcode to auto-fill nutrition" position="above" />
       {stage === 'scanning' && (
         <>
           <CameraView

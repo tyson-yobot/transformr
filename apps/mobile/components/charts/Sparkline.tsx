@@ -23,12 +23,15 @@ interface SparklineProps {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
+  const first = points[0];
+  if (!first) return '';
+  if (points.length === 1) return `M${first.x},${first.y}`;
 
-  let path = `M${points[0]!.x},${points[0]!.y}`;
+  let path = `M${first.x},${first.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
+    const prev = points[i - 1];
+    const curr = points[i];
+    if (!prev || !curr) continue;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -93,8 +96,10 @@ export function Sparkline({
     }));
 
     const line = buildSmoothPath(pts);
-    const fill = pts.length > 1
-      ? `${line} L${pts[pts.length - 1]!.x},${chartHeight - padding} L${pts[0]!.x},${chartHeight - padding} Z`
+    const lastPt = pts[pts.length - 1];
+    const firstPt = pts[0];
+    const fill = pts.length > 1 && lastPt && firstPt
+      ? `${line} L${lastPt.x},${chartHeight - padding} L${firstPt.x},${chartHeight - padding} Z`
       : '';
     const last = pts[pts.length - 1] ?? null;
 

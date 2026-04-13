@@ -45,6 +45,8 @@ export default function ReadyScreen() {
 
     // Button
     buttonOpacity.value = withDelay(900, withTiming(1, { duration: 400 }));
+    // Reanimated shared values are stable refs — no re-run needed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const celebrationStyle = useAnimatedStyle(() => ({

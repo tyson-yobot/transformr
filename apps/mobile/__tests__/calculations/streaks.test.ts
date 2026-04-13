@@ -120,7 +120,7 @@ describe('getStreakHeatmapData', () => {
 
   it('returns entries ordered from oldest to newest', () => {
     const result = getStreakHeatmapData([], 7);
-    expect(result[0]!.date < result[6]!.date).toBe(true);
+    expect(result[0]?.date < result[6]?.date).toBe(true);
   });
 });
 

@@ -28,6 +28,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import type { Goal } from '@app-types/database';
 
 type GoalCategory = NonNullable<Goal['category']>;
@@ -84,7 +85,7 @@ export default function GoalsDashboard() {
     const goalsWithTarget = goals.filter((g) => g.target_value && g.target_value > 0);
     if (goalsWithTarget.length === 0) return 0;
     const total = goalsWithTarget.reduce((sum, g) => {
-      return sum + Math.min((g.current_value ?? 0) / g.target_value!, 1);
+      return sum + Math.min((g.current_value ?? 0) / (g.target_value ?? 1), 1);
     }, 0);
     return total / goalsWithTarget.length;
   }, [goals]);
@@ -103,7 +104,7 @@ export default function GoalsDashboard() {
         .filter((g) => g.target_date && g.status === 'active')
         .sort(
           (a, b) =>
-            new Date(a.target_date!).getTime() - new Date(b.target_date!).getTime(),
+            new Date(a.target_date ?? 0).getTime() - new Date(b.target_date ?? 0).getTime(),
         )
         .slice(0, 5),
     [goals],
@@ -216,6 +217,7 @@ export default function GoalsDashboard() {
             ))}
           </ScrollView>
         </Animated.View>
+        <HelpBubble id="goals_habits" message="Tap a habit to mark it complete for today" position="below" />
 
         {/* Category Filter */}
         <Animated.View entering={FadeInDown.delay(300)}>
@@ -373,13 +375,13 @@ export default function GoalsDashboard() {
                     {goal.title}
                   </Text>
                   <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                    {formatDate(goal.target_date!)}
+                    {formatDate(goal.target_date ?? '')}
                   </Text>
                 </View>
                 <Badge
-                  label={`${formatCountdown(goal.target_date!).days}d`}
+                  label={`${formatCountdown(goal.target_date ?? '').days}d`}
                   variant={
-                    formatCountdown(goal.target_date!).days <= 7 ? 'danger' : 'warning'
+                    formatCountdown(goal.target_date ?? '').days <= 7 ? 'danger' : 'warning'
                   }
                   size="sm"
                 />

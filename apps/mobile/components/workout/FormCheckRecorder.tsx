@@ -102,6 +102,8 @@ export function FormCheckRecorder({
         startRecording();
       }
     }, 1000);
+    // startRecording is defined after startCountdown — circular ref intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdownSeconds, cleanup]);
 
   const startRecording = useCallback(async () => {
@@ -130,6 +132,8 @@ export function FormCheckRecorder({
     } catch {
       setState('idle');
     }
+    // stopRecording is defined after startRecording — circular ref intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxDurationSeconds]);
 
   const stopRecording = useCallback(async () => {

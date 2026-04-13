@@ -57,20 +57,25 @@ function buildLinePath(
   smooth: boolean = true,
 ): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
+  const first = points[0];
+  if (!first) return '';
+  if (points.length === 1) return `M${first.x},${first.y}`;
 
-  let path = `M${points[0]!.x},${points[0]!.y}`;
+  let path = `M${first.x},${first.y}`;
 
   if (!smooth || points.length < 3) {
     for (let i = 1; i < points.length; i++) {
-      path += ` L${points[i]!.x},${points[i]!.y}`;
+      const pt = points[i];
+      if (!pt) continue;
+      path += ` L${pt.x},${pt.y}`;
     }
     return path;
   }
 
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
+    const prev = points[i - 1];
+    const curr = points[i];
+    if (!prev || !curr) continue;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -122,8 +127,10 @@ export function WeightChart({
     }));
 
     const line = buildLinePath(mapped);
-    const fill = mapped.length > 0
-      ? `${line} L${mapped[mapped.length - 1]!.x},${chartArea.y + chartArea.height} L${mapped[0]!.x},${chartArea.y + chartArea.height} Z`
+    const lastMapped = mapped[mapped.length - 1];
+    const firstMapped = mapped[0];
+    const fill = mapped.length > 0 && lastMapped && firstMapped
+      ? `${line} L${lastMapped.x},${chartArea.y + chartArea.height} L${firstMapped.x},${chartArea.y + chartArea.height} Z`
       : '';
 
     return { minWeight: min, maxWeight: max, points: mapped, linePath: line, fillPath: fill };
@@ -153,9 +160,12 @@ export function WeightChart({
     return Array.from({ length: count }, (_, i) => {
       const idx = Math.min(i * step, filteredData.length - 1);
       const x = chartArea.x + (idx / Math.max(filteredData.length - 1, 1)) * chartArea.width;
-      const days = differenceInDays(new Date(), new Date(filteredData[0]!.date));
+      const firstEntry = filteredData[0];
+      const idxEntry = filteredData[idx];
+      if (!firstEntry || !idxEntry) return { label: '', x };
+      const days = differenceInDays(new Date(), new Date(firstEntry.date));
       const fmt = days > 180 ? 'MMM yy' : days > 30 ? 'MMM d' : 'M/d';
-      return { label: format(new Date(filteredData[idx]!.date), fmt), x };
+      return { label: format(new Date(idxEntry.date), fmt), x };
     });
   }, [filteredData, chartArea]);
 
@@ -169,7 +179,8 @@ export function WeightChart({
       const touchX = evt.nativeEvent.locationX;
       const ratio = Math.max(0, Math.min(1, (touchX - chartArea.x) / chartArea.width));
       const idx = Math.round(ratio * (filteredData.length - 1));
-      const point = filteredData[idx]!;
+      const point = filteredData[idx];
+      if (!point) return;
       setSelectedPoint(point);
       onDataPointPress?.(point);
     },
@@ -301,7 +312,8 @@ export function WeightChart({
 
           {/* Selected point indicator */}
           {selectedIdx >= 0 && points[selectedIdx] && (() => {
-            const pt = points[selectedIdx]!;
+            const pt = points[selectedIdx];
+            if (!pt) return null;
             return (
               <>
                 <Line

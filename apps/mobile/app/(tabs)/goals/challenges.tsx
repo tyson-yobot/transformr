@@ -22,6 +22,7 @@ import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 import type { ChallengeDifficulty } from '@app-types/database';
 
@@ -283,6 +284,7 @@ export default function ChallengesScreen() {
             Browse Challenges
           </Text>
         </Animated.View>
+        <HelpBubble id="challenges_browse" message="Pick a challenge to get auto-tracked daily tasks" position="below" />
 
         <View style={styles.grid}>
           {browseChallenges.map((def, index) => (

@@ -47,6 +47,16 @@ export default function FormCheckScreen() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const handleStartRecording = useCallback(async () => {
+    setPhase('recording');
+    setRecordingDuration(0);
+    await hapticSuccess();
+
+    recordingRef.current = setInterval(() => {
+      setRecordingDuration((prev) => prev + 1);
+    }, 1000);
+  }, []);
+
   const handleStartCountdown = useCallback(async () => {
     if (!permission?.granted) {
       const result = await requestPermission();
@@ -69,20 +79,7 @@ export default function FormCheckScreen() {
         handleStartRecording();
       }
     }, 1000);
-  }, [permission, requestPermission]);
-
-  const handleStartRecording = useCallback(async () => {
-    setPhase('recording');
-    setRecordingDuration(0);
-    await hapticSuccess();
-
-    recordingRef.current = setInterval(() => {
-      setRecordingDuration((prev) => prev + 1);
-    }, 1000);
-
-    // Simulate recording with camera (in production, use camera.recordAsync)
-    // The video would be recorded and saved
-  }, []);
+  }, [permission, requestPermission, handleStartRecording]);
 
   const handleStopRecording = useCallback(async () => {
     if (recordingRef.current) clearInterval(recordingRef.current);

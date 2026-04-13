@@ -134,6 +134,7 @@ describe('authStore — signIn', () => {
       const promise = useAuthStore.getState().signIn('test@transformr.app', 'pw');
       // Check loading state before resolution
       expect(useAuthStore.getState().loading).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       resolveSignIn!({ data: { session: mockSession, user: mockUser }, error: null });
       await promise;
     });
@@ -337,6 +338,7 @@ describe('authStore — listenToAuthChanges', () => {
 
     // Simulate Supabase firing an auth state change
     act(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       authStateCallback!('SIGNED_IN', mockSession);
     });
 
@@ -350,6 +352,7 @@ describe('authStore — listenToAuthChanges', () => {
     useAuthStore.getState().listenToAuthChanges();
 
     act(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       authStateCallback!('SIGNED_OUT', null);
     });
 

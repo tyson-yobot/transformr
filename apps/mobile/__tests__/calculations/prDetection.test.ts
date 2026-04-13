@@ -16,8 +16,8 @@ describe('detectPRs', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const weightPR = prs.find((p) => p.recordType === 'max_weight');
     expect(weightPR).toBeDefined();
-    expect(weightPR!.value).toBe(225);
-    expect(weightPR!.previousRecord).toBe(200);
+    expect(weightPR?.value).toBe(225);
+    expect(weightPR?.previousRecord).toBe(200);
   });
 
   it('detects a max reps PR', () => {
@@ -27,8 +27,8 @@ describe('detectPRs', () => {
     const prs = detectPRs({ exerciseId, weight: 135, reps: 15 }, existingPRs);
     const repsPR = prs.find((p) => p.recordType === 'max_reps');
     expect(repsPR).toBeDefined();
-    expect(repsPR!.value).toBe(15);
-    expect(repsPR!.previousRecord).toBe(10);
+    expect(repsPR?.value).toBe(15);
+    expect(repsPR?.previousRecord).toBe(10);
   });
 
   it('detects a max volume PR', () => {
@@ -39,8 +39,8 @@ describe('detectPRs', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const volPR = prs.find((p) => p.recordType === 'max_volume');
     expect(volPR).toBeDefined();
-    expect(volPR!.value).toBe(1125);
-    expect(volPR!.previousRecord).toBe(1000);
+    expect(volPR?.value).toBe(1125);
+    expect(volPR?.previousRecord).toBe(1000);
   });
 
   it('detects an estimated 1RM PR', () => {
@@ -51,8 +51,8 @@ describe('detectPRs', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const e1rmPR = prs.find((p) => p.recordType === 'max_1rm');
     expect(e1rmPR).toBeDefined();
-    expect(e1rmPR!.value).toBeCloseTo(262.5, 0);
-    expect(e1rmPR!.previousRecord).toBe(250);
+    expect(e1rmPR?.value).toBeCloseTo(262.5, 0);
+    expect(e1rmPR?.previousRecord).toBe(250);
   });
 
   it('does not detect PR when values are not beaten', () => {
@@ -86,7 +86,9 @@ describe('detectPRs', () => {
     expect(prs.find((p) => p.recordType === 'max_volume')).toBeDefined();
     expect(prs.find((p) => p.recordType === 'max_1rm')).toBeDefined();
     // previousRecord should be null for first time
-    expect(prs[0]!.previousRecord).toBeNull();
+    const firstPR = prs[0];
+    expect(firstPR).toBeDefined();
+    expect(firstPR?.previousRecord).toBeNull();
   });
 
   it('ignores PRs from other exercises', () => {
@@ -96,7 +98,7 @@ describe('detectPRs', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const weightPR = prs.find((p) => p.recordType === 'max_weight');
     expect(weightPR).toBeDefined();
-    expect(weightPR!.previousRecord).toBeNull(); // no existing PR for this exercise
+    expect(weightPR?.previousRecord).toBeNull(); // no existing PR for this exercise
   });
 
   it('does not detect 1RM PR when reps > 12', () => {
@@ -115,7 +117,7 @@ describe('detectPRs', () => {
     );
     const durPR = prs.find((p) => p.recordType === 'max_duration');
     expect(durPR).toBeDefined();
-    expect(durPR!.value).toBe(90);
+    expect(durPR?.value).toBe(90);
   });
 });
 

@@ -34,6 +34,7 @@ export default function WelcomeScreen() {
   const propsTranslateY = useSharedValue(30);
   const buttonOpacity = useSharedValue(0);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     titleOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
     titleTranslateY.value = withSpring(0, { damping: 15, stiffness: 200 });
@@ -42,6 +43,8 @@ export default function WelcomeScreen() {
     propsOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
     propsTranslateY.value = withDelay(600, withSpring(0, { damping: 15, stiffness: 200 }));
     buttonOpacity.value = withDelay(900, withTiming(1, { duration: 500 }));
+    // Reanimated shared values are stable refs — no re-run needed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const titleStyle = useAnimatedStyle(() => ({

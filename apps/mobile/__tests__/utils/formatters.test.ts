@@ -190,7 +190,7 @@ describe('formatRelativeTime', () => {
 
 describe('formatCountdown', () => {
   it('returns "Today!" for today\'s date', () => {
-    const today = new Date().toISOString().split('T')[0]!;
+    const today = new Date().toISOString().split('T')[0] ?? '';
     const result = formatCountdown(today);
     expect(result.days).toBe(0);
     expect(result.label).toBe('Today!');
@@ -205,7 +205,7 @@ describe('formatCountdown', () => {
   it('returns "day left" for 1 day in future', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]!;
+    const tomorrowStr = tomorrow.toISOString().split('T')[0] ?? '';
     const result = formatCountdown(tomorrowStr);
     expect(result.days).toBe(1);
     expect(result.label).toBe('day left');
@@ -214,7 +214,7 @@ describe('formatCountdown', () => {
   it('returns "days left" for multiple days in future', () => {
     const future = new Date();
     future.setDate(future.getDate() + 10);
-    const futureStr = future.toISOString().split('T')[0]!;
+    const futureStr = future.toISOString().split('T')[0] ?? '';
     const result = formatCountdown(futureStr);
     expect(result.days).toBe(10);
     expect(result.label).toBe('days left');

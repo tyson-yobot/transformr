@@ -15,7 +15,9 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
+import { ShareButton } from '@components/social/ShareButton';
 import { supabase } from '@services/supabase';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import type { WeeklyReview } from '@app-types/database';
 
 interface GradeCardProps {
@@ -135,6 +137,15 @@ export default function WeeklyReviewScreen() {
                 {review.overall_grade}
               </Text>
               <Text style={[typography.caption, { color: colors.text.muted }]}>Overall Grade</Text>
+              <ShareButton
+                type="weekly_grade"
+                data={{
+                  title: 'Weekly Review',
+                  value: review.overall_grade,
+                  subtitle: `Week of ${review.week_start}`,
+                }}
+                label="Share Review"
+              />
             </View>
           )}
         </Animated.View>
@@ -152,6 +163,7 @@ export default function WeeklyReviewScreen() {
             <GradeCard label="Sleep" grade={review.sleep_grade} />
           </View>
         </Animated.View>
+        <HelpBubble id="review_grades" message="AI grades your week across fitness and nutrition" position="below" />
 
         {/* Stats vs Previous Week */}
         <Animated.View entering={FadeInDown.delay(300)}>

@@ -29,6 +29,7 @@ import { Disclaimer } from '@components/ui/Disclaimer';
 import { useLabsStore } from '@stores/labsStore';
 import { useAuthStore } from '@stores/authStore';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 type PickedAsset = {
   uri: string;
@@ -252,6 +253,8 @@ export default function LabUploadScreen() {
             </Text>
           </Pressable>
         )}
+
+        <HelpBubble id="labs_upload" message="Snap a photo of your blood work for AI analysis" position="above" />
 
         <Animated.View entering={FadeInDown.duration(320)}>
           <Text

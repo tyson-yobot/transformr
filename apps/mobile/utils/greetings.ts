@@ -92,10 +92,10 @@ export function getTodayGreeting(): GreetingResult {
   const slotGreetings = greetings.filter((g) => g.timeSlot === timeSlot);
   const dayOfYear = getDayOfYear();
   const index = dayOfYear % slotGreetings.length;
-  const selected = slotGreetings[index];
+  const selected = slotGreetings[index] ?? slotGreetings[0];
 
   return {
-    text: selected.text,
+    text: selected ? selected.text : 'Hello',
     timeLabel: timeSlotLabels[timeSlot],
   };
 }

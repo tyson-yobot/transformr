@@ -4,13 +4,14 @@ import { useAuthStore } from '@stores/authStore';
 
 export function useDashboardLayout() {
   const store = useDashboardStore();
+  const fetchLayout = useDashboardStore((s) => s.fetchLayout);
   const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.id) {
-      store.fetchLayout();
+      fetchLayout();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchLayout]);
 
   const resetToDefault = useCallback(async () => {
     await store.resetToDefault();

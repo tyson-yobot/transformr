@@ -88,7 +88,7 @@ export default function MoodLogger() {
       moodHistory
         .filter((m) => m.logged_at)
         .map((m) => ({
-          date: m.logged_at!,
+          date: m.logged_at ?? '',
           mood: m.mood ?? 5,
           energy: m.energy ?? 5,
           stress: m.stress ?? 5,

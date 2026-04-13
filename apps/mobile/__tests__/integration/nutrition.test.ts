@@ -483,10 +483,10 @@ describe('saved meals (logging from a saved meal)', () => {
     const newLog = makeNutritionLog({
       id: 'log-from-meal',
       saved_meal_id: chickenRiceMeal.id,
-      calories: chickenRiceMeal.total_calories!,
-      protein: chickenRiceMeal.total_protein!,
-      carbs: chickenRiceMeal.total_carbs!,
-      fat: chickenRiceMeal.total_fat!,
+      calories: chickenRiceMeal.total_calories ?? 0,
+      protein: chickenRiceMeal.total_protein ?? 0,
+      carbs: chickenRiceMeal.total_carbs ?? 0,
+      fat: chickenRiceMeal.total_fat ?? 0,
       meal_type: 'lunch',
       source: 'saved_meal',
     });
@@ -498,10 +498,10 @@ describe('saved meals (logging from a saved meal)', () => {
 
     await useNutritionStore.getState().logFood({
       saved_meal_id: chickenRiceMeal.id,
-      calories: chickenRiceMeal.total_calories!,
-      protein: chickenRiceMeal.total_protein!,
-      carbs: chickenRiceMeal.total_carbs!,
-      fat: chickenRiceMeal.total_fat!,
+      calories: chickenRiceMeal.total_calories ?? 0,
+      protein: chickenRiceMeal.total_protein ?? 0,
+      carbs: chickenRiceMeal.total_carbs ?? 0,
+      fat: chickenRiceMeal.total_fat ?? 0,
       meal_type: 'lunch',
       source: 'saved_meal',
     });

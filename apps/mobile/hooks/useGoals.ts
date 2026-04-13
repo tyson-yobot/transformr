@@ -4,21 +4,23 @@ import { useAuthStore } from '@stores/authStore';
 
 export function useGoals() {
   const store = useGoalStore();
+  const fetchGoals = useGoalStore((s) => s.fetchGoals);
+  const goals = useGoalStore((s) => s.goals);
   const { user } = useAuthStore();
 
   useEffect(() => {
     if (user?.id) {
-      store.fetchGoals();
+      fetchGoals();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchGoals]);
 
   const activeGoals = useMemo(
-    () => store.goals.filter((g) => g.status === 'active'),
-    [store.goals],
+    () => goals.filter((g) => g.status === 'active'),
+    [goals],
   );
 
   const goalsByCategory = useMemo(() => {
-    const grouped: Record<string, typeof store.goals> = {};
+    const grouped: Record<string, typeof goals> = {};
     for (const goal of activeGoals) {
       const category = goal.category ?? 'personal';
       if (!grouped[category]) grouped[category] = [];

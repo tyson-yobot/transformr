@@ -56,12 +56,15 @@ function getMoodEmoji(value: number): string {
 
 function buildSmoothPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `M${points[0]!.x},${points[0]!.y}`;
+  const first = points[0];
+  if (!first) return '';
+  if (points.length === 1) return `M${first.x},${first.y}`;
 
-  let path = `M${points[0]!.x},${points[0]!.y}`;
+  let path = `M${first.x},${first.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
+    const prev = points[i - 1];
+    const curr = points[i];
+    if (!prev || !curr) continue;
     const cpx = (prev.x + curr.x) / 2;
     path += ` C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`;
   }
@@ -141,14 +144,17 @@ export function MoodChart({
     if (data.length < 2) return [];
     const count = Math.min(6, data.length);
     const step = Math.floor((data.length - 1) / (count - 1));
-    const days = data.length > 1
-      ? differenceInDays(new Date(data[data.length - 1]!.date), new Date(data[0]!.date))
+    const lastEntry = data[data.length - 1];
+    const firstEntry = data[0];
+    const days = data.length > 1 && lastEntry && firstEntry
+      ? differenceInDays(new Date(lastEntry.date), new Date(firstEntry.date))
       : 0;
     const fmt = days > 60 ? 'MMM d' : 'M/d';
     return Array.from({ length: count }, (_, i) => {
       const idx = Math.min(i * step, data.length - 1);
+      const entry = data[idx];
       return {
-        label: format(new Date(data[idx]!.date), fmt),
+        label: entry ? format(new Date(entry.date), fmt) : '',
         x: chartArea.x + (idx / Math.max(data.length - 1, 1)) * chartArea.width,
       };
     });
@@ -171,7 +177,8 @@ export function MoodChart({
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
       {selectedIdx !== null && data[selectedIdx] && (() => {
-        const sel = data[selectedIdx]!;
+        const sel = data[selectedIdx];
+        if (!sel) return null;
         return (
           <Animated.View
             entering={FadeIn.duration(200)}
@@ -251,9 +258,11 @@ export function MoodChart({
 
           {/* Mood gradient fill */}
           {seriesData[0] && seriesData[0].points.length > 1 && (() => {
-            const s0 = seriesData[0]!;
-            const lastPt = s0.points[s0.points.length - 1]!;
-            const firstPt = s0.points[0]!;
+            const s0 = seriesData[0];
+            if (!s0) return null;
+            const lastPt = s0.points[s0.points.length - 1];
+            const firstPt = s0.points[0];
+            if (!lastPt || !firstPt) return null;
             return (
               <Path
                 d={`${s0.path} L${lastPt.x},${chartArea.y + chartArea.height} L${firstPt.x},${chartArea.y + chartArea.height} Z`}
@@ -305,7 +314,7 @@ export function MoodChart({
                 textAnchor="middle"
                 fontSize={12}
               >
-                {getMoodEmoji(data[i]!.mood)}
+                {getMoodEmoji(data[i]?.mood ?? 5)}
               </SvgText>
             );
           })}
@@ -325,7 +334,9 @@ export function MoodChart({
 
           {/* Selected indicator */}
           {selectedIdx !== null && seriesData[0]?.points[selectedIdx] && (() => {
-            const selPt = seriesData[0]!.points[selectedIdx]!;
+            const selSeries = seriesData[0];
+            const selPt = selSeries?.points[selectedIdx];
+            if (!selPt) return null;
             return (
               <>
                 <Line

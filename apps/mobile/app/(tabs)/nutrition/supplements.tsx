@@ -31,6 +31,7 @@ import { SupplementDaysRemaining } from '@components/nutrition/SupplementDaysRem
 import { useSupplementsStore } from '@stores/supplementsStore';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { differenceInDays } from 'date-fns';
 import type {
   SupplementCategory,
@@ -501,6 +502,7 @@ export default function SupplementsScreen() {
                 })}
               </Animated.View>
             ))}
+            <HelpBubble id="supps_tiers" message="Start with essentials, add more if budget allows" position="below" />
 
             {activeSupplements.length === 0 && (
               <View style={styles.emptyState}>
@@ -562,6 +564,8 @@ export default function SupplementsScreen() {
                   onPress={() => void fetchRecommendations()}
                 />
               </View>
+
+              <HelpBubble id="supps_evidence" message="Tap the badge to see research behind each one" position="below" />
 
               {isLoadingRecs && aiRecommendations.length === 0 && (
                 <View style={{ alignItems: 'center', paddingVertical: spacing.xl }}>

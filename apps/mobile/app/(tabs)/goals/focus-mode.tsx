@@ -71,25 +71,6 @@ export default function FocusMode() {
   const totalDuration = POMODORO_DURATIONS[phase];
   const progress = 1 - timeRemaining / totalDuration;
 
-  useEffect(() => {
-    if (isRunning && timeRemaining > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            clearInterval(intervalRef.current!);
-            handlePhaseComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isRunning]);
-
   const handlePhaseComplete = useCallback(async () => {
     setIsRunning(false);
     await hapticSuccess();
@@ -112,6 +93,28 @@ export default function FocusMode() {
       setTimeRemaining(POMODORO_DURATIONS.work);
     }
   }, [phase, pomodoroCount]);
+
+  const handlePhaseCompleteRef = useRef(handlePhaseComplete);
+  handlePhaseCompleteRef.current = handlePhaseComplete;
+
+  useEffect(() => {
+    if (isRunning && timeRemaining > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            void handlePhaseCompleteRef.current();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isRunning, timeRemaining]);
 
   const handleStart = useCallback(() => {
     setIsRunning(true);

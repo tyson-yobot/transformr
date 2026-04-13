@@ -118,7 +118,8 @@ export function SleepChart({
         }
       });
       setSelectedIdx(closest);
-      onBarPress?.(data[closest]!);
+      const closestEntry = data[closest];
+      if (closestEntry) onBarPress?.(closestEntry);
     },
     [bars, data, onBarPress],
   );
@@ -127,7 +128,8 @@ export function SleepChart({
     <View style={styles.container} onLayout={handleLayout}>
       {/* Tooltip */}
       {selectedIdx !== null && data[selectedIdx] && (() => {
-        const sel = data[selectedIdx]!;
+        const sel = data[selectedIdx];
+        if (!sel) return null;
         return (
           <Animated.View
             entering={FadeIn.duration(200)}

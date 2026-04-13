@@ -14,17 +14,43 @@ interface UseReadinessInput {
 }
 
 export function useReadiness(input: UseReadinessInput) {
-  const readiness = useMemo(() => calculateReadinessScore(input), [
-    input.sleepHours,
-    input.sleepQuality,
-    input.moodScore,
-    input.stressLevel,
-    input.energyLevel,
-    input.sorenessLevel,
-    input.workoutsLast3Days,
-    input.totalVolumeLast3Days,
-    input.avgVolumePer3Days,
-  ]);
+  const {
+    sleepHours,
+    sleepQuality,
+    moodScore,
+    stressLevel,
+    energyLevel,
+    sorenessLevel,
+    workoutsLast3Days,
+    totalVolumeLast3Days,
+    avgVolumePer3Days,
+  } = input;
+
+  const readiness = useMemo(
+    () =>
+      calculateReadinessScore({
+        sleepHours,
+        sleepQuality,
+        moodScore,
+        stressLevel,
+        energyLevel,
+        sorenessLevel,
+        workoutsLast3Days,
+        totalVolumeLast3Days,
+        avgVolumePer3Days,
+      }),
+    [
+      sleepHours,
+      sleepQuality,
+      moodScore,
+      stressLevel,
+      energyLevel,
+      sorenessLevel,
+      workoutsLast3Days,
+      totalVolumeLast3Days,
+      avgVolumePer3Days,
+    ],
+  );
 
   const emoji = useMemo(() => getReadinessEmoji(readiness.score), [readiness.score]);
 

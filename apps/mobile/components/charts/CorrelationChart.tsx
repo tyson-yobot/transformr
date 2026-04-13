@@ -185,7 +185,8 @@ export function CorrelationChart({
 
       if (minDist < 40) {
         setSelectedIdx(closest);
-        onPointPress?.(data[closest]!);
+        const closestEntry = data[closest];
+        if (closestEntry) onPointPress?.(closestEntry);
       } else {
         setSelectedIdx(null);
       }
@@ -222,7 +223,8 @@ export function CorrelationChart({
 
       {/* Tooltip */}
       {selectedIdx !== null && data[selectedIdx] && (() => {
-        const sel = data[selectedIdx]!;
+        const sel = data[selectedIdx];
+        if (!sel) return null;
         return (
           <Animated.View
             entering={FadeIn.duration(200)}

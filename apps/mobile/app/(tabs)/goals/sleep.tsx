@@ -24,6 +24,7 @@ import { Disclaimer } from '@components/ui/Disclaimer';
 import { useSleepStore } from '@stores/sleepStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 
@@ -341,6 +342,7 @@ export default function SleepTracker() {
         )}
 
         {/* Log Sleep Button */}
+        <HelpBubble id="sleep_log" message="Log sleep to unlock AI recovery insights" position="above" />
         <Button
           title="Log Sleep"
           onPress={() => setShowLogModal(true)}

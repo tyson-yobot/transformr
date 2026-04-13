@@ -48,8 +48,9 @@ export function calculateStreak(completionDates: string[]): StreakResult {
   const sortedAsc = [...uniqueDates].reverse();
 
   for (let i = 1; i < sortedAsc.length; i++) {
-    const prev = sortedAsc[i - 1]!;
-    const curr = sortedAsc[i]!;
+    const prev = sortedAsc[i - 1];
+    const curr = sortedAsc[i];
+    if (prev === undefined || curr === undefined) continue;
     const diff = differenceInCalendarDays(parseISO(curr), parseISO(prev));
 
     if (diff === 1) {

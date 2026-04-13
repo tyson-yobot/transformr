@@ -27,6 +27,7 @@ import { useWorkoutStore } from '@stores/workoutStore';
 import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 
 interface RecentWorkout {
@@ -389,6 +390,7 @@ export default function FitnessHomeScreen() {
             </Text>
           </Pressable>
         </Animated.View>
+        <HelpBubble id="fitness_programs" message="Follow a program for structured training" position="below" />
 
         {/* PR Highlights */}
         {personalRecords.length > 0 && (

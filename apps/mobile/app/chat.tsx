@@ -28,6 +28,7 @@ import { Disclaimer } from '@components/ui/Disclaimer';
 import { useChatStore } from '@stores/chatStore';
 import type { ChatMessage, ChatTopic } from '@app-types/ai';
 import { hapticLight } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 const TOPICS: { id: ChatTopic; label: string; icon: string }[] = [
   { id: 'general', label: 'General', icon: 'chatbubble-ellipses-outline' },
@@ -533,6 +534,8 @@ export default function ChatScreen() {
           </Text>
         </Pressable>
       )}
+
+      <HelpBubble id="chat_context" message="Your coach knows all your data — ask anything" position="below" />
 
       {/* Composer */}
       <View

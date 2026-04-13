@@ -387,8 +387,8 @@ describe('PR detection during workout logging', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const weightPR = prs.find((p) => p.recordType === 'max_weight');
     expect(weightPR).toBeDefined();
-    expect(weightPR!.value).toBe(225);
-    expect(weightPR!.previousRecord).toBe(200);
+    expect(weightPR?.value).toBe(225);
+    expect(weightPR?.previousRecord).toBe(200);
   });
 
   it('detects volume PR during a heavy set', () => {
@@ -399,7 +399,7 @@ describe('PR detection during workout logging', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 8 }, existingPRs);
     const volPR = prs.find((p) => p.recordType === 'max_volume');
     expect(volPR).toBeDefined();
-    expect(volPR!.value).toBe(1800);
+    expect(volPR?.value).toBe(1800);
   });
 
   it('detects estimated 1RM PR using Epley formula', () => {
@@ -410,7 +410,7 @@ describe('PR detection during workout logging', () => {
     const prs = detectPRs({ exerciseId, weight: 225, reps: 5 }, existingPRs);
     const e1rmPR = prs.find((p) => p.recordType === 'max_1rm');
     expect(e1rmPR).toBeDefined();
-    expect(e1rmPR!.value).toBeCloseTo(262.5, 0);
+    expect(e1rmPR?.value).toBeCloseTo(262.5, 0);
   });
 
   it('detects all four PR types when all are beaten', () => {
@@ -441,7 +441,7 @@ describe('PR detection during workout logging', () => {
     expect(prs.find((p) => p.recordType === 'max_reps')).toBeDefined();
     expect(prs.find((p) => p.recordType === 'max_volume')).toBeDefined();
     expect(prs.find((p) => p.recordType === 'max_1rm')).toBeDefined();
-    expect(prs[0]!.previousRecord).toBeNull();
+    expect(prs[0]?.previousRecord).toBeNull();
   });
 
   it('skips 1RM detection when reps exceed 12', () => {
@@ -459,7 +459,7 @@ describe('PR detection during workout logging', () => {
     );
     const durPR = prs.find((p) => p.recordType === 'max_duration');
     expect(durPR).toBeDefined();
-    expect(durPR!.value).toBe(90);
+    expect(durPR?.value).toBe(90);
   });
 });
 
@@ -508,7 +508,7 @@ describe('offline queue behavior', () => {
     expect(state.error).toBeTruthy();
     // Session should NOT be cleared so the user can retry
     expect(state.activeSession).not.toBeNull();
-    expect(state.activeSession!.id).toBe(SESSION_ID);
+    expect(state.activeSession?.id).toBe(SESSION_ID);
   });
 
   it('can retry logSet after a transient failure', async () => {

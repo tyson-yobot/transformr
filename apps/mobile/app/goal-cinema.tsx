@@ -137,7 +137,8 @@ export default function GoalCinemaScreen() {
     // Countdowns
     const goalsWithDeadline = goals.filter((g) => g.target_date && g.status === 'active');
     for (const goal of goalsWithDeadline.slice(0, 3)) {
-      const countdown = formatCountdown(goal.target_date!);
+      const targetDate = goal.target_date ?? '';
+      const countdown = formatCountdown(targetDate);
       built.push({
         id: `countdown-${goal.id}`,
         type: 'countdown',

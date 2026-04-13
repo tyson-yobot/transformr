@@ -32,6 +32,7 @@ import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
 import { Disclaimer } from '@components/ui/Disclaimer';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
 
 interface GhostSet {
@@ -705,6 +706,7 @@ export default function WorkoutPlayerScreen() {
                   style={{ marginTop: spacing.md }}
                   leftIcon={<Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />}
                 />
+                <HelpBubble id="workout_log_set" message="Enter weight and reps, then tap check to log" position="above" />
 
                 {/* Ghost overlay toggle */}
                 <Pressable

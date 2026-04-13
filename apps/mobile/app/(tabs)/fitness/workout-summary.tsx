@@ -20,6 +20,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Skeleton } from '@components/ui/Skeleton';
 import { hapticLight } from '@utils/haptics';
+import { ShareButton } from '@components/social/ShareButton';
 import {
   formatDuration,
   formatVolume,
@@ -449,6 +450,15 @@ export default function WorkoutSummaryScreen() {
 
         {/* Actions */}
         <View style={{ gap: spacing.sm }}>
+          <ShareButton
+            type={prsAchieved.length > 0 ? 'pr' : 'achievement'}
+            data={{
+              title: 'Workout Complete',
+              value: formatDuration(session.duration_minutes ?? 0),
+              subtitle: formatDate(session.started_at),
+            }}
+            label="Share Workout"
+          />
           <Button
             title="Share Workout"
             variant="outline"

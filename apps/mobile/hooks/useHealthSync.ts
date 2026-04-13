@@ -82,7 +82,7 @@ export function useHealthSync(): HealthSyncState {
     setError(null);
 
     try {
-      const today = new Date().toISOString().split('T')[0]!;
+      const today = new Date().toISOString().split('T')[0] ?? '';
       let summary: DailySummary;
 
       if (Platform.OS === 'ios') {

@@ -59,7 +59,7 @@ export function RestTimer({
         easing: Easing.linear,
       });
     },
-    [animatedProgress, circumference],
+    [animatedProgress],
   );
 
   // Start timer

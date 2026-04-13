@@ -20,6 +20,7 @@ import { hapticLight, hapticAchievement } from '@utils/haptics';
 import { formatPercentage } from '@utils/formatters';
 import type { Achievement, UserAchievement } from '@app-types/database';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { ShareButton } from '@components/social/ShareButton';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -369,6 +370,17 @@ export default function AchievementsScreen() {
                           marginTop: spacing.xs,
                         },
                       ]}
+                    />
+                  )}
+                  {isEarned && !isSecret && (
+                    <ShareButton
+                      type="achievement"
+                      data={{
+                        title: ach.title,
+                        value: ach.tier ?? ach.description ?? '',
+                        icon: ach.icon ?? undefined,
+                      }}
+                      size="sm"
                     />
                   )}
                 </Pressable>
