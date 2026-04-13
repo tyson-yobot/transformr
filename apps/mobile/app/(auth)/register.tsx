@@ -22,14 +22,14 @@ import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
 
-function getPasswordStrength(password: string): { level: number; label: string; color: string } {
-  if (password.length === 0) return { level: 0, label: '', color: 'transparent' };
+function getPasswordStrength(password: string): { level: number; label: string } {
+  if (password.length === 0) return { level: 0, label: '' };
   const { errors } = isValidPassword(password);
   const passed = 4 - errors.length;
-  if (passed <= 1) return { level: 1, label: 'Weak', color: '#EF4444' };
-  if (passed === 2) return { level: 2, label: 'Fair', color: '#F59E0B' };
-  if (passed === 3) return { level: 3, label: 'Good', color: '#3B82F6' };
-  return { level: 4, label: 'Strong', color: '#22C55E' };
+  if (passed <= 1) return { level: 1, label: 'Weak' };
+  if (passed === 2) return { level: 2, label: 'Fair' };
+  if (passed === 3) return { level: 3, label: 'Good' };
+  return { level: 4, label: 'Strong' };
 }
 
 export default function RegisterScreen() {
@@ -46,6 +46,19 @@ export default function RegisterScreen() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
+
+  // Map strength level to a theme color token — resolved here so we have
+  // access to the live `colors` object from useTheme().
+  const strengthColor = useMemo((): string => {
+    switch (passwordStrength.level) {
+      case 0:  return 'transparent';
+      case 1:  return colors.accent.danger;   // Weak
+      case 2:  return colors.accent.warning;  // Fair
+      case 3:  return colors.accent.primary;  // Good (closest brand token to blue)
+      case 4:  return colors.accent.success;  // Strong
+      default: return 'transparent';
+    }
+  }, [passwordStrength.level, colors]);
 
   const validate = useCallback((): boolean => {
     const errs: Record<string, string> = {};
@@ -182,7 +195,7 @@ export default function RegisterScreen() {
                       {
                         backgroundColor:
                           level <= passwordStrength.level
-                            ? passwordStrength.color
+                            ? strengthColor
                             : colors.background.tertiary,
                         borderRadius: 2,
                       },
@@ -190,7 +203,7 @@ export default function RegisterScreen() {
                   />
                 ))}
               </View>
-              <Text style={[typography.caption, { color: passwordStrength.color, marginLeft: spacing.sm }]}>
+              <Text style={[typography.caption, { color: strengthColor, marginLeft: spacing.sm }]}>
                 {passwordStrength.label}
               </Text>
             </View>

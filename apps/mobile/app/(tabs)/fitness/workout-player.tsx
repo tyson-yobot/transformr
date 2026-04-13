@@ -582,7 +582,7 @@ export default function WorkoutPlayerScreen() {
                           <Text
                             style={[
                               typography.monoCaption,
-                              { color: set.isPR ? '#EAB308' : colors.text.primary, width: 30, fontWeight: '600' },
+                              { color: set.isPR ? colors.accent.gold : colors.text.primary, width: 30, fontWeight: '600' },
                             ]}
                           >
                             {set.isPR ? '\u2B50' : `${set.setNumber}`}

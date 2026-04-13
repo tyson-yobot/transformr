@@ -193,7 +193,7 @@ export default function BudgetsScreen() {
                 </View>
                 <ProgressBar
                   progress={progress}
-                  color={overBudget ? '#EF4444' : undefined}
+                  color={overBudget ? colors.accent.danger : undefined}
                   style={{ marginTop: spacing.sm }}
                 />
                 {overBudget && (
