@@ -4,12 +4,11 @@
 
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native';
-import { useRouteError } from 'expo-router';
+import type { ErrorBoundaryProps } from 'expo-router';
 
 const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? 'support@transformr.ai';
 
-export default function ErrorBoundary() {
-  const error = useRouteError();
+export default function ErrorBoundary({ error }: ErrorBoundaryProps) {
   const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
 
   return (
@@ -39,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: '#0C0A15', // Deep Space brand background
   },
   emoji: {
     fontSize: 48,
@@ -48,25 +47,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#F0F0FC', // text.primary
     marginBottom: 12,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: '#888888',
+    color: '#6B5E8A', // text.muted
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
   },
   button: {
-    backgroundColor: '#A855F7',
+    backgroundColor: '#A855F7', // accent.primary
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: '#F0F0FC', // text.primary
     fontWeight: '600',
     fontSize: 16,
   },
