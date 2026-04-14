@@ -1,0 +1,85 @@
+diff --git a/node_modules/metro/src/Server/MultipartResponse.js b/node_modules/metro/src/Server/MultipartResponse.js
+index 90fec17..e6e369d 100644
+--- a/node_modules/metro/src/Server/MultipartResponse.js
++++ b/node_modules/metro/src/Server/MultipartResponse.js
+@@ -3,8 +3,11 @@
+ const accepts = require("accepts");
+ const CRLF = "\r\n";
+ const BOUNDARY = "3beqjf3apnqeu3h5jqorms4i";
++
+ class MultipartResponse {
+   static wrapIfSupported(req, res) {
++    // On Windows, Node.js chunked encoding causes OkHttp parse failures.
++    // Force plain responses so BundleDownloader uses processNonMultipartResponse.
+     if (accepts(req).types().includes("multipart/mixed")) {
+       return new MultipartResponse(res);
+     }
+@@ -18,26 +21,22 @@ class MultipartResponse {
+   constructor(res) {
+     this.res = res;
+     this.headers = {};
+-    res.writeHead(200, {
+-      "Content-Type": `multipart/mixed; boundary="${BOUNDARY}"`,
+-    });
+-    res.write(
+-      "If you are seeing this, your client does not support multipart response"
+-    );
++    this._data = null;
++    this._preamble =
++      "If you are seeing this, your client does not support multipart response";
+   }
+   writeChunk(headers, data, isLast = false) {
+     if (this.res.finished) {
+       return;
+     }
+-    this.res.write(`${CRLF}--${BOUNDARY}${CRLF}`);
++    // Merge headers and capture the last data chunk (the bundle)
+     if (headers) {
+-      this.res.write(MultipartResponse.serializeHeaders(headers) + CRLF + CRLF);
++      for (const key in headers) {
++        this.headers[key] = headers[key];
++      }
+     }
+     if (data != null) {
+-      this.res.write(data);
+-    }
+-    if (isLast) {
+-      this.res.write(`${CRLF}--${BOUNDARY}--${CRLF}`);
++      this._data = data;
+     }
+   }
+   writeHead(status, headers) {
+@@ -54,7 +53,32 @@ class MultipartResponse {
+   }
+   end(data) {
+     this.writeChunk(this.headers, data, true);
+-    this.res.end();
++
++    const body = this._data;
++    const bodyBuf =
++      body == null
++        ? Buffer.alloc(0)
++        : typeof body === "string"
++        ? Buffer.from(body, "utf8")
++        : body;
++
++    // Send as plain application/javascript so OkHttp uses the
++    // non-multipart code path (no chunked encoding issues on Windows).
++    const responseHeaders = {
++      "X-Metro-Files-Changed-Count":
++        this.headers["X-Metro-Files-Changed-Count"] ?? "0",
++      "Content-Type": "application/javascript; charset=UTF-8",
++      "Content-Length": String(bodyBuf.length),
++    };
++    if (this.headers["X-Metro-Delta-ID"]) {
++      responseHeaders["X-Metro-Delta-ID"] = this.headers["X-Metro-Delta-ID"];
++    }
++    if (this.headers["Last-Modified"]) {
++      responseHeaders["Last-Modified"] = this.headers["Last-Modified"];
++    }
++
++    this.res.writeHead(200, responseHeaders);
++    this.res.end(bodyBuf);
+   }
+   once(name, fn) {
+     this.res.once(name, fn);

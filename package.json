@@ -8,9 +8,27 @@
   "engines": {
     "node": "20.19.4"
   },
-  "workspaces": [
-    "apps/mobile"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/mobile"
+    ],
+    "nohoist": [
+      "**/react-native",
+      "**/react-native/**",
+      "**/expo",
+      "**/expo/**",
+      "**/@expo/**",
+      "**/@shopify/**",
+      "**/victory-native",
+      "**/victory-native/**",
+      "**/lottie-react-native",
+      "**/lottie-react-native/**",
+      "**/@react-native/**",
+      "**/@react-native-community/**",
+      "**/react-native-*",
+      "**/react-native-*/**"
+    ]
+  },
   "scripts": {
     "mobile": "cd apps/mobile && npx expo start",
     "mobile:ios": "cd apps/mobile && npx expo run:ios",

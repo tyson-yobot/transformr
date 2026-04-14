@@ -19,7 +19,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#0C0A15"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.automateai.transformr",
@@ -40,7 +42,9 @@
         "usesNonExemptEncryption": false
       },
       "entitlements": {
-        "com.apple.developer.nfc.readersession.formats": ["TAG"],
+        "com.apple.developer.nfc.readersession.formats": [
+          "TAG"
+        ],
         "com.apple.developer.siri": true
       }
     },
@@ -77,14 +81,27 @@
       "expo-secure-store",
       "expo-av",
       "expo-file-system",
-      ["expo-font", {
-        "fonts": []
-      }],
-      ["expo-splash-screen", {
-        "backgroundColor": "#0C0A15",
-        "image": "./assets/images/splash.png",
-        "imageWidth": 200
-      }]
+      [
+        "expo-font",
+        {
+          "fonts": []
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0C0A15",
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.automateai.transformr",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
