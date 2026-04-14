@@ -104,7 +104,7 @@ export const useAuthStore = create<AuthStore>()(
       signInWithGoogle: async () => {
         set({ loading: true, error: null });
         try {
-          const redirectUrl = Linking.createURL('auth/callback');
+          const redirectUrl = Linking.createURL('callback');
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -131,8 +131,18 @@ export const useAuthStore = create<AuthStore>()(
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
           if (result.type === 'success' && result.url) {
             const url = new URL(result.url);
-            const accessToken = url.searchParams.get('access_token');
-            const refreshToken = url.searchParams.get('refresh_token');
+            // PKCE flow: exchange code for session
+            const code = url.searchParams.get('code');
+            if (code) {
+              await supabase.auth.exchangeCodeForSession(code);
+              set({ loading: false });
+              return;
+            }
+            // Implicit flow: tokens may be in hash fragment
+            const hash = url.hash.startsWith('#') ? url.hash.substring(1) : '';
+            const hashParams = new URLSearchParams(hash);
+            const accessToken = hashParams.get('access_token') ?? url.searchParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') ?? url.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
               set({ loading: false });
@@ -149,7 +159,7 @@ export const useAuthStore = create<AuthStore>()(
       signInWithApple: async () => {
         set({ loading: true, error: null });
         try {
-          const redirectUrl = Linking.createURL('auth/callback');
+          const redirectUrl = Linking.createURL('callback');
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'apple',
             options: {
@@ -173,8 +183,18 @@ export const useAuthStore = create<AuthStore>()(
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
           if (result.type === 'success' && result.url) {
             const url = new URL(result.url);
-            const accessToken = url.searchParams.get('access_token');
-            const refreshToken = url.searchParams.get('refresh_token');
+            // PKCE flow: exchange code for session
+            const code = url.searchParams.get('code');
+            if (code) {
+              await supabase.auth.exchangeCodeForSession(code);
+              set({ loading: false });
+              return;
+            }
+            // Implicit flow: tokens may be in hash fragment
+            const hash = url.hash.startsWith('#') ? url.hash.substring(1) : '';
+            const hashParams = new URLSearchParams(hash);
+            const accessToken = hashParams.get('access_token') ?? url.searchParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') ?? url.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
               set({ loading: false });

@@ -47,6 +47,7 @@ interface NutritionState {
 
 interface NutritionActions {
   logFood: (data: FoodLogInput) => Promise<void>;
+  deleteLog: (id: string) => Promise<void>;
   logWater: (oz: number) => Promise<void>;
   logSupplement: (supplementId: string) => Promise<void>;
   fetchTodayNutrition: () => Promise<void>;
@@ -109,6 +110,19 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to log food';
       set({ error: message, isLoading: false });
+    }
+  },
+
+  deleteLog: async (id) => {
+    try {
+      const { error } = await supabase.from('nutrition_logs').delete().eq('id', id);
+      if (error) throw error;
+      set((state) => ({
+        todayLogs: state.todayLogs.filter((log) => log.id !== id),
+      }));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to delete log';
+      set({ error: message });
     }
   },
 

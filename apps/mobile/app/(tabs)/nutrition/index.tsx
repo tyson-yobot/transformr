@@ -35,7 +35,7 @@ import { MEAL_TYPES, MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/consta
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { HelpBubble } from '@components/ui/HelpBubble';
-import type { NutritionLog } from '../../../types/database';
+import type { NutritionLog } from '@app-types/database';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -74,7 +74,7 @@ export default function NutritionHomeScreen() {
   const router = useRouter();
 
   const { todayMacros } = useNutrition();
-  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition } =
+  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog } =
     useNutritionStore();
   const { profile } = useProfileStore();
 
@@ -145,10 +145,10 @@ export default function NutritionHomeScreen() {
     router.push({ pathname: '/(tabs)/nutrition/add-food', params: { editId: logId } });
   }, [router]);
 
-  const handleDeleteLog = useCallback((_logId: string) => {
+  const handleDeleteLog = useCallback((logId: string) => {
     hapticMedium();
-    // Delete handled by store
-  }, []);
+    void deleteLog(logId);
+  }, [deleteLog]);
 
   const handleAddWater = useCallback(async (oz: number) => {
     hapticSuccess();

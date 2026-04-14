@@ -17,6 +17,7 @@ interface PartnerState {
 
 interface PartnerActions {
   fetchPartnership: () => Promise<void>;
+  createPartnershipInvite: () => Promise<string | null>;
   sendNudge: (type: NudgeType, message: string) => Promise<void>;
   linkPartner: (inviteCode: string) => Promise<void>;
   clearError: () => void;
@@ -78,6 +79,32 @@ export const usePartnerStore = create<PartnerStore>()((set, get) => ({
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch partnership';
       set({ error: message, isLoading: false });
+    }
+  },
+
+  createPartnershipInvite: async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      // Generate a stable, unique invite code
+      const code = `TFR-${Math.random().toString(36).substring(2, 5).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+      const { data, error } = await supabase
+        .from('partnerships')
+        .insert({
+          user_a: user.id,
+          status: 'pending',
+          invite_code: code,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      set({ partnership: data as Partnership });
+      return code;
+    } catch {
+      return null;
     }
   },
 

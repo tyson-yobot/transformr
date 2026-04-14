@@ -21,7 +21,7 @@ export function useNFC() {
 
   useEffect(() => {
     initNfc().then(setSupported);
-    return () => cleanupNfc();
+    return () => { void cleanupNfc(); };
   }, []);
 
   useEffect(() => {

@@ -25,7 +25,7 @@ import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
 import { MEAL_TYPES, MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
-import type { Food } from '../../../types/database';
+import type { Food } from '@app-types/database';
 
 type MealType = typeof MEAL_TYPES[number];
 

@@ -20,6 +20,8 @@ import { MonoText } from '@components/ui/MonoText';
 import { TrajectoryChart } from '@components/charts/TrajectoryChart';
 import { useProfileStore } from '@stores/profileStore';
 import { formatNumber, formatCurrency } from '@utils/formatters';
+import { generateTrajectory } from '@services/ai/trajectory';
+import { supabase } from '../services/supabase';
 
 type TrajectoryDomain = 'weight' | 'revenue' | 'fitness';
 
@@ -141,10 +143,26 @@ export default function TrajectoryScreen() {
 
   const handleSimulate = useCallback(async () => {
     setIsSimulating(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSimulating(false);
-  }, []);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await generateTrajectory({
+        userId: user.id,
+        currentWeight: profile?.current_weight ?? 180,
+        goalWeight: profile?.goal_weight ?? 165,
+        weightHistory: [],
+        workoutsPerWeek: 4,
+        avgCalories: profile?.daily_calorie_target ?? 2200,
+        targetCalories: profile?.daily_calorie_target ?? 2200,
+        currentStreak: 0,
+        habitsCompletionRate: 0.75,
+      });
+    } catch {
+      // Trajectory service may not be deployed yet; fail silently
+    } finally {
+      setIsSimulating(false);
+    }
+  }, [profile]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

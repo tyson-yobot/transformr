@@ -142,7 +142,11 @@ export default function ReadyScreen() {
 
   const handleStart = async () => {
     await updateProfile({ onboarding_completed: true });
-    router.replace('/(tabs)/dashboard');
+    // Only navigate if the update succeeded (profile will be set in store)
+    const { error } = useProfileStore.getState();
+    if (!error) {
+      router.replace('/(tabs)/dashboard');
+    }
   };
 
   return (

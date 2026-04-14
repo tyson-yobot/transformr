@@ -26,6 +26,8 @@ import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
 import { ProgressRing } from '@components/ui/ProgressRing';
+import { analyzeMenuPhoto } from '@services/ai/mealCamera';
+import { supabase } from '../../../services/supabase';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -37,7 +39,7 @@ interface MenuItem {
   estimatedProtein: number;
   estimatedCarbs: number;
   estimatedFat: number;
-  price: string;
+  price?: string;
   confidence: number;
 }
 
@@ -65,65 +67,30 @@ export default function MenuScannerScreen() {
     setStage('analyzing');
 
     try {
-      await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      // Simulate AI analysis of menu (replace with real API)
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const analysis = await analyzeMenuPhoto(photo.uri, user.id, restaurantName || undefined);
+      const items: MenuItem[] = (analysis.foods ?? []).map((f, i) => ({
+        id: String(i + 1),
+        name: f.name,
+        description: f.serving_size ?? '',
+        estimatedCalories: f.estimated_calories ?? 0,
+        estimatedProtein: f.estimated_protein ?? 0,
+        estimatedCarbs: f.estimated_carbs ?? 0,
+        estimatedFat: f.estimated_fat ?? 0,
+        price: undefined,
+        confidence: f.confidence ?? 0.85,
+      }));
 
-      const mockMenuItems: MenuItem[] = [
-        {
-          id: '1',
-          name: 'Grilled Salmon',
-          description: 'Atlantic salmon with roasted vegetables',
-          estimatedCalories: 520,
-          estimatedProtein: 42,
-          estimatedCarbs: 18,
-          estimatedFat: 30,
-          price: '$24.99',
-          confidence: 0.85,
-        },
-        {
-          id: '2',
-          name: 'Caesar Salad',
-          description: 'Romaine lettuce, parmesan, croutons',
-          estimatedCalories: 380,
-          estimatedProtein: 12,
-          estimatedCarbs: 22,
-          estimatedFat: 28,
-          price: '$14.99',
-          confidence: 0.82,
-        },
-        {
-          id: '3',
-          name: 'NY Strip Steak',
-          description: '12oz with mashed potatoes',
-          estimatedCalories: 780,
-          estimatedProtein: 58,
-          estimatedCarbs: 35,
-          estimatedFat: 42,
-          price: '$34.99',
-          confidence: 0.78,
-        },
-        {
-          id: '4',
-          name: 'Chicken Alfredo',
-          description: 'Fettuccine with cream sauce',
-          estimatedCalories: 920,
-          estimatedProtein: 45,
-          estimatedCarbs: 72,
-          estimatedFat: 48,
-          price: '$19.99',
-          confidence: 0.80,
-        },
-      ];
-
-      setMenuItems(mockMenuItems);
+      setMenuItems(items);
       setStage('results');
     } catch {
       setStage('capture');
       Alert.alert('Error', 'Failed to analyze menu. Please try again.');
     }
-  }, []);
+  }, [restaurantName]);
 
   const toggleItem = useCallback((id: string) => {
     hapticLight();

@@ -9,6 +9,7 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -183,6 +184,38 @@ export default function NotificationsSettingsScreen() {
     [prefs, updateProfile],
   );
 
+  // Edit time for a notification group
+  const handleEditTime = useCallback(
+    (key: keyof NotificationPreferences, currentDisplay: string) => {
+      void hapticLight();
+      Alert.prompt(
+        'Set Time',
+        'Enter time in HH:MM (24-hour) format',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Save',
+            onPress: async (value) => {
+              if (!value || !/^\d{2}:\d{2}$/.test(value)) {
+                Alert.alert('Invalid Format', 'Please use HH:MM format, e.g. 07:30');
+                return;
+              }
+              const currentVal = prefs[key];
+              if (typeof currentVal === 'object' && currentVal !== null) {
+                const newPrefs = { ...prefs, [key]: { ...currentVal, time: value } };
+                setPrefs(newPrefs);
+                await updateProfile({ notification_preferences: newPrefs });
+              }
+            },
+          },
+        ],
+        'plain-text',
+        currentDisplay,
+      );
+    },
+    [prefs, updateProfile],
+  );
+
   // Toggle global
   const handleToggleGlobal = useCallback(
     async (enabled: boolean) => {
@@ -282,10 +315,7 @@ export default function NotificationsSettingsScreen() {
                 </Text>
                 {timeDisplay.length > 0 && enabled && (
                   <Pressable
-                    onPress={() => {
-                      // Future: open time picker
-                      void hapticLight();
-                    }}
+                    onPress={() => handleEditTime(group.key as keyof NotificationPreferences, timeDisplay)}
                     style={{ marginTop: spacing.xs }}
                   >
                     <Text

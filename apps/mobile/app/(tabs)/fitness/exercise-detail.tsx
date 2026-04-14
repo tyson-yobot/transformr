@@ -126,9 +126,8 @@ export default function ExerciseDetailScreen() {
 
   const handleAddToWorkout = useCallback(() => {
     hapticLight();
-    // Navigate back with exercise data, or push to workout-player
-    router.push('/(tabs)/fitness/workout-player' as never);
-  }, [router]);
+    router.push({ pathname: '/(tabs)/fitness/workout-player' as never, params: { exerciseId } });
+  }, [router, exerciseId]);
 
   if (loading) {
     return (

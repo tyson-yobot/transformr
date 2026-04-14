@@ -281,6 +281,8 @@ export default function WorkoutPlayerScreen() {
 
   const handleFinishWithMood = useCallback(async () => {
     setShowMoodModal(false);
+    // Capture ID before completeWorkout() clears activeSession
+    const sessionId = activeSession?.id ?? '';
 
     if (activeSession) {
       await supabase
@@ -296,7 +298,7 @@ export default function WorkoutPlayerScreen() {
 
     await completeWorkout();
     router.replace(
-      `/(tabs)/fitness/workout-summary?sessionId=${activeSession?.id ?? ''}` as never,
+      `/(tabs)/fitness/workout-summary?sessionId=${sessionId}` as never,
     );
   }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router]);
 
@@ -657,9 +659,7 @@ export default function WorkoutPlayerScreen() {
                       onChangeText={setCurrentReps}
                       keyboardType="numeric"
                       accessibilityLabel="Number of reps"
-                      placeholder={
-                        currentExercise.templateExercise?.target_reps ?? '0'
-                      }
+                      placeholder={String(currentExercise.templateExercise?.target_reps ?? '0')}
                       placeholderTextColor={colors.text.muted}
                       style={[
                         styles.numericInput,

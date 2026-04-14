@@ -2,7 +2,7 @@
 // TRANSFORMR -- Profile & Settings Screen
 // =============================================================================
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle'
 import { formatDate, formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { supabase } from '../../../services/supabase';
 
 // ---------------------------------------------------------------------------
 // Section Header
@@ -213,7 +214,20 @@ export default function ProfileScreen() {
     ? formatDate(profile.created_at)
     : 'N/A';
 
-  const totalWorkouts = 0; // placeholder; would come from a query
+  const [totalWorkouts, setTotalWorkouts] = useState(0);
+
+  useEffect(() => {
+    const fetchWorkoutCount = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { count } = await supabase
+        .from('workout_sessions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      if (count != null) setTotalWorkouts(count);
+    };
+    void fetchWorkoutCount();
+  }, []);
 
   const handleSignOut = useCallback(() => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -395,7 +409,8 @@ export default function ProfileScreen() {
           label="Units"
           value="Imperial"
           onPress={() => {
-            // Future: toggle metric/imperial
+            hapticLight();
+            Alert.alert('Units', 'Metric/imperial toggle coming in a future update.');
           }}
         />
       </Animated.View>
@@ -435,14 +450,32 @@ export default function ProfileScreen() {
           icon="✏️"
           label="Edit Profile"
           onPress={() => {
-            // Future: Edit profile screen
+            hapticLight();
+            router.push('/(tabs)/profile/edit-profile' as never);
           }}
         />
         <SettingsRow
           icon="🔑"
           label="Change Password"
           onPress={() => {
-            // Future: Change password flow
+            hapticLight();
+            const email = useAuthStore.getState().user?.email;
+            if (!email) return;
+            Alert.alert(
+              'Reset Password',
+              `We'll send a reset link to ${email}`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Send Link',
+                  onPress: async () => {
+                    const { supabase } = await import('@services/supabase');
+                    await supabase.auth.resetPasswordForEmail(email);
+                    Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
+                  },
+                },
+              ],
+            );
           }}
         />
         <SettingsRow
@@ -464,7 +497,8 @@ export default function ProfileScreen() {
           icon="🔒"
           label="Privacy"
           onPress={() => {
-            // Future: Privacy settings
+            hapticLight();
+            router.push('/(tabs)/profile/about' as never);
           }}
         />
         <SettingsRow

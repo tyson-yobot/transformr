@@ -2,7 +2,7 @@
 // TRANSFORMR -- Registration Screen
 // =============================================================================
 
-import { useState, useCallback, useMemo, useEffect, type ComponentType } from 'react';
+import { useState, useCallback, useMemo, type ComponentType } from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,9 @@ import {
   Platform,
   StyleSheet,
   Pressable,
+  Linking,
 } from 'react-native';
-import Animated, {
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
@@ -80,35 +74,6 @@ export default function RegisterScreen() {
     }
   }, [passwordStrength.level, colors]);
 
-  // Entrance animations
-  const iconScale = useSharedValue(0.6);
-  const iconOpacity = useSharedValue(0);
-  const titleOpacity = useSharedValue(0);
-  const formOpacity = useSharedValue(0);
-  const formTranslateY = useSharedValue(24);
-  const socialOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    iconScale.value = withSpring(1, { damping: 12, stiffness: 120 });
-    iconOpacity.value = withTiming(1, { duration: 400 });
-    titleOpacity.value = withDelay(180, withTiming(1, { duration: 500 }));
-    formOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
-    formTranslateY.value = withDelay(400, withSpring(0, { damping: 16 }));
-    socialOpacity.value = withDelay(620, withTiming(1, { duration: 400 }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const iconAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: iconScale.value }],
-    opacity: iconOpacity.value,
-  }));
-  const titleAnimStyle = useAnimatedStyle(() => ({ opacity: titleOpacity.value }));
-  const formAnimStyle = useAnimatedStyle(() => ({
-    opacity: formOpacity.value,
-    transform: [{ translateY: formTranslateY.value }],
-  }));
-  const socialAnimStyle = useAnimatedStyle(() => ({ opacity: socialOpacity.value }));
-
   const validate = useCallback((): boolean => {
     const errs: Record<string, string> = {};
     if (!isNotEmpty(displayName)) errs.displayName = 'Display name is required';
@@ -163,7 +128,7 @@ export default function RegisterScreen() {
             showsVerticalScrollIndicator={false}
           >
             {/* Logo / Brand */}
-            <Animated.View style={[styles.logoSection, iconAnimStyle]}>
+            <Animated.View entering={FadeIn.duration(400)} style={styles.logoSection}>
               <View style={styles.iconGlow} />
               <Image
                 source={require('@assets/images/icon.png')}
@@ -172,12 +137,12 @@ export default function RegisterScreen() {
               />
             </Animated.View>
 
-            <Animated.View style={[styles.brandBlock, titleAnimStyle]}>
+            <Animated.View entering={FadeInDown.delay(180).duration(500)} style={styles.brandBlock}>
               <Text style={styles.heroTitle}>TRANSFORMR</Text>
               <Text style={styles.tagline}>Start your transformation journey</Text>
             </Animated.View>
 
-            <Animated.View style={formAnimStyle}>
+            <Animated.View entering={FadeInDown.delay(350).duration(500)}>
               {/* Error Banner */}
               {error && (
                 <View
@@ -310,7 +275,20 @@ export default function RegisterScreen() {
                   )}
                 </View>
                 <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
-                  I agree to the Terms of Service and Privacy Policy
+                  {'I agree to the '}
+                  <Text
+                    style={{ color: colors.accent.primary, textDecorationLine: 'underline' }}
+                    onPress={() => Linking.openURL('https://transformr.app/terms')}
+                  >
+                    Terms of Service
+                  </Text>
+                  {' and '}
+                  <Text
+                    style={{ color: colors.accent.primary, textDecorationLine: 'underline' }}
+                    onPress={() => Linking.openURL('https://transformr.app/privacy')}
+                  >
+                    Privacy Policy
+                  </Text>
                 </Text>
               </Pressable>
               {fieldErrors.terms && (
@@ -336,17 +314,18 @@ export default function RegisterScreen() {
             </Animated.View>
 
             {/* Divider */}
-            <Animated.View style={[styles.dividerRow, socialAnimStyle]}>
+            <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.dividerRow}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.dividerLine} />
             </Animated.View>
 
             {/* Social Auth Buttons */}
-            <Animated.View style={socialAnimStyle}>
+            <Animated.View entering={FadeInDown.delay(550).duration(400)}>
               <Pressable
                 onPress={() => { hapticLight(); signInWithApple(); }}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed]}
+                disabled={loading}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
               >
                 <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
                 <Text style={styles.socialBtnText}>Continue with Apple</Text>
@@ -354,7 +333,8 @@ export default function RegisterScreen() {
 
               <Pressable
                 onPress={() => { hapticLight(); signInWithGoogle(); }}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }]}
+                disabled={loading}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }, loading && { opacity: 0.5 }]}
               >
                 <GoogleIcon size={18} />
                 <Text style={styles.socialBtnText}>Continue with Google</Text>

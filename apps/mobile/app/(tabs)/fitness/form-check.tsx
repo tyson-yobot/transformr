@@ -18,9 +18,12 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
+import { Input } from '@components/ui/Input';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { analyzeExerciseForm } from '@services/ai/formCheck';
+import { supabase } from '../../../services/supabase';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -41,11 +44,13 @@ export default function FormCheckScreen() {
   const [phase, setPhase] = useState<FormCheckPhase>('setup');
   const [countdown, setCountdown] = useState(3);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [, setVideoUri] = useState<string | null>(null);
+  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState('Squat');
   const [analysisResult, setAnalysisResult] = useState<FormAnalysisResult | null>(null);
 
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingPromiseRef = useRef<Promise<{ uri: string } | undefined> | null>(null);
 
   const handleStartRecording = useCallback(async () => {
     setPhase('recording');
@@ -55,6 +60,8 @@ export default function FormCheckScreen() {
     recordingRef.current = setInterval(() => {
       setRecordingDuration((prev) => prev + 1);
     }, 1000);
+
+    recordingPromiseRef.current = cameraRef.current?.recordAsync?.({ maxDuration: 30 }) ?? null;
   }, []);
 
   const handleStartCountdown = useCallback(async () => {
@@ -86,52 +93,53 @@ export default function FormCheckScreen() {
     setPhase('review');
     await hapticLight();
 
-    // In production: const video = await cameraRef.current?.stopRecording();
-    setVideoUri('recorded-video-placeholder');
+    // stopRecording() triggers the recordAsync() promise to resolve
+    cameraRef.current?.stopRecording?.();
+    if (recordingPromiseRef.current) {
+      try {
+        const video = await recordingPromiseRef.current;
+        if (video?.uri) setVideoUri(video.uri);
+      } catch {
+        // Recording may have been cancelled
+      } finally {
+        recordingPromiseRef.current = null;
+      }
+    }
   }, []);
 
   const handleSubmitForAnalysis = useCallback(async () => {
+    if (!videoUri) return;
     setPhase('analyzing');
 
-    // Simulate AI analysis (in production, upload video to backend)
-    setTimeout(async () => {
-      const mockResult: FormAnalysisResult = {
-        score: 78,
-        issues: [
-          {
-            title: 'Lower back rounding',
-            description:
-              'Your lower back rounds slightly at the bottom of the movement. This increases spinal load.',
-            severity: 'high',
-          },
-          {
-            title: 'Knee tracking',
-            description: 'Left knee caves slightly inward during the ascent.',
-            severity: 'medium',
-          },
-          {
-            title: 'Depth',
-            description:
-              'You are reaching parallel but not quite breaking parallel consistently.',
-            severity: 'low',
-          },
-        ],
-        corrections: [
-          'Brace your core harder before each rep - think "360-degree belt"',
-          'Push knees out actively during the ascent, cue "spread the floor"',
-          'Use a box squat temporarily to train depth consistency',
-          'Consider reducing weight by 10% to reinforce proper mechanics',
-        ],
-        injuryRisk: 'moderate',
-        overallFeedback:
-          'Your squat form is above average but has some key areas to improve. The lower back rounding at the bottom is the main concern as it increases injury risk under heavy loads. Focus on core bracing and mobility work.',
-      };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      setAnalysisResult(mockResult);
+      const aiResult = await analyzeExerciseForm(videoUri, user.id, selectedExercise);
+      const severityMap: Record<string, 'low' | 'medium' | 'high'> = {
+        minor: 'low',
+        moderate: 'medium',
+        major: 'high',
+      };
+      const mapped: FormAnalysisResult = {
+        score: aiResult.overall_score ?? 75,
+        issues: (aiResult.form_issues ?? []).map((issue) => ({
+          title: issue.body_part ?? 'Issue',
+          description: issue.issue ?? '',
+          severity: severityMap[issue.severity] ?? 'medium',
+        })),
+        corrections: (aiResult.form_issues ?? []).map((i) => i.correction).filter(Boolean),
+        injuryRisk: aiResult.injury_risk === 'medium' ? 'moderate' : (aiResult.injury_risk ?? 'low'),
+        overallFeedback: (aiResult.positive_notes ?? []).join(' '),
+      };
+      setAnalysisResult(mapped);
       setPhase('results');
       await hapticSuccess();
-    }, 3000);
-  }, []);
+    } catch {
+      Alert.alert('Error', 'Failed to analyze form. Please try again.');
+      setPhase('review');
+    }
+  }, [videoUri, selectedExercise]);
 
   const handleReset = useCallback(() => {
     setPhase('setup');
@@ -248,6 +256,14 @@ export default function FormCheckScreen() {
               </View>
             ))}
           </Card>
+
+          <Input
+            label="Exercise Name"
+            value={selectedExercise}
+            onChangeText={setSelectedExercise}
+            placeholder="e.g. Squat, Deadlift, Bench Press"
+            containerStyle={{ marginTop: spacing.lg }}
+          />
 
           <Button
             title="Start Recording"

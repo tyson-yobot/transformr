@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { useProfileStore } from '@stores/profileStore';
+import { useSettingsStore } from '@stores/settingsStore';
 import { hapticLight } from '@utils/haptics';
 import type { Equipment, Difficulty } from '@app-types/common';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
@@ -46,6 +47,7 @@ export default function FitnessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
   const updateProfile = useProfileStore((s) => s.updateProfile);
+  const setFitnessPrefs = useSettingsStore((s) => s.setFitnessPrefs);
 
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>('moderate');
   const [workoutDays, setWorkoutDays] = useState(4);
@@ -59,11 +61,10 @@ export default function FitnessScreen() {
   }, []);
 
   const handleContinue = useCallback(async () => {
-    await updateProfile({
-      activity_level: activityLevel,
-    });
+    await updateProfile({ activity_level: activityLevel });
+    setFitnessPrefs({ workoutDaysPerWeek: workoutDays, experienceLevel: experience, equipment });
     router.push('/(auth)/onboarding/nutrition');
-  }, [activityLevel, updateProfile, router]);
+  }, [activityLevel, workoutDays, experience, equipment, updateProfile, setFitnessPrefs, router]);
 
   return (
     <ScrollView

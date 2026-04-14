@@ -2,7 +2,7 @@
 // TRANSFORMR -- Login Screen
 // =============================================================================
 
-import { useState, useCallback, useEffect, type ComponentType } from 'react';
+import { useState, useCallback, type ComponentType } from 'react';
 import {
   View,
   Text,
@@ -12,14 +12,7 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
-import Animated, {
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
@@ -30,7 +23,6 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
-import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { isValidEmail } from '@utils/validators';
@@ -54,44 +46,20 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
-
-  // Entrance animations
-  const iconScale = useSharedValue(0.6);
-  const iconOpacity = useSharedValue(0);
-  const titleOpacity = useSharedValue(0);
-  const formOpacity = useSharedValue(0);
-  const formTranslateY = useSharedValue(24);
-  const socialOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    iconScale.value = withSpring(1, { damping: 12, stiffness: 120 });
-    iconOpacity.value = withTiming(1, { duration: 400 });
-    titleOpacity.value = withDelay(180, withTiming(1, { duration: 500 }));
-    formOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
-    formTranslateY.value = withDelay(400, withSpring(0, { damping: 16 }));
-    socialOpacity.value = withDelay(620, withTiming(1, { duration: 400 }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const iconAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: iconScale.value }],
-    opacity: iconOpacity.value,
-  }));
-  const titleAnimStyle = useAnimatedStyle(() => ({ opacity: titleOpacity.value }));
-  const formAnimStyle = useAnimatedStyle(() => ({
-    opacity: formOpacity.value,
-    transform: [{ translateY: formTranslateY.value }],
-  }));
-  const socialAnimStyle = useAnimatedStyle(() => ({ opacity: socialOpacity.value }));
+  const [passwordError, setPasswordError] = useState('');
 
   const handleSignIn = useCallback(async () => {
     clearError();
     setEmailError('');
+    setPasswordError('');
     if (!isValidEmail(email)) {
       setEmailError('Please enter a valid email address');
       return;
     }
-    if (password.length < 1) return;
+    if (password.length < 1) {
+      setPasswordError('Please enter your password');
+      return;
+    }
     await signIn(email, password);
   }, [email, password, signIn, clearError]);
 
@@ -135,7 +103,7 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             {/* Logo / Brand */}
-            <Animated.View style={[styles.logoSection, iconAnimStyle]}>
+            <Animated.View entering={FadeIn.duration(400)} style={styles.logoSection}>
               {/* Purple glow behind icon */}
               <View style={styles.iconGlow} />
               <Image
@@ -145,14 +113,14 @@ export default function LoginScreen() {
               />
             </Animated.View>
 
-            <Animated.View style={[styles.brandBlock, titleAnimStyle]}>
+            <Animated.View entering={FadeInDown.delay(180).duration(500)} style={styles.brandBlock}>
               <Text style={styles.heroTitle}>TRANSFORMR</Text>
               <Text style={styles.tagline}>
                 Every rep. Every meal. Every dollar. Every day.
               </Text>
             </Animated.View>
 
-            <Animated.View style={formAnimStyle}>
+            <Animated.View entering={FadeInDown.delay(350).duration(500)}>
               {/* Error Banner */}
               {error && (
                 <View
@@ -192,7 +160,8 @@ export default function LoginScreen() {
                 label="Password"
                 placeholder="Enter your password"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(t: string) => { setPassword(t); setPasswordError(''); }}
+                error={passwordError}
                 secureTextEntry
                 autoCapitalize="none"
                 autoComplete="password"
@@ -224,17 +193,18 @@ export default function LoginScreen() {
             </Animated.View>
 
             {/* Divider */}
-            <Animated.View style={[styles.dividerRow, socialAnimStyle]}>
+            <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.dividerRow}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.dividerLine} />
             </Animated.View>
 
             {/* Social Auth Buttons */}
-            <Animated.View style={socialAnimStyle}>
+            <Animated.View entering={FadeInDown.delay(550).duration(400)}>
               <Pressable
                 onPress={() => { hapticLight(); signInWithApple(); }}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed]}
+                disabled={loading}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
               >
                 <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
                 <Text style={styles.socialBtnText}>Continue with Apple</Text>
@@ -242,7 +212,8 @@ export default function LoginScreen() {
 
               <Pressable
                 onPress={() => { hapticLight(); signInWithGoogle(); }}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }]}
+                disabled={loading}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }, loading && { opacity: 0.5 }]}
               >
                 <GoogleIcon size={18} />
                 <Text style={styles.socialBtnText}>Continue with Google</Text>

@@ -65,6 +65,7 @@ export default function RevenueScreen() {
     setAmount('');
     setCustomerName('');
     setDescription('');
+    setTransactionDate(new Date().toISOString().substring(0, 10));
   }, [amount, revenueType, customerName, description, transactionDate, selectedBusiness, logRevenue]);
 
   const monthlyMetrics = useMemo(() => getMonthlyMetrics(), [getMonthlyMetrics]);

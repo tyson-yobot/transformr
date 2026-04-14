@@ -20,6 +20,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useProfileStore } from '@stores/profileStore';
 import { formatPercentage } from '@utils/formatters';
+import { supabase } from '../../../services/supabase';
 import { MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
@@ -126,6 +127,7 @@ export default function NutritionAnalyticsScreen() {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [isLoading, setIsLoading] = useState(true);
   const [dailyData, setDailyData] = useState<DailySnapshot[]>([]);
+  const [mealTypeCounts, setMealTypeCounts] = useState<Record<string, { count: number; totalCalories: number }>>({});
 
   const targets = useMemo(() => ({
     calories: profile?.daily_calorie_target ?? 2200,
@@ -136,23 +138,65 @@ export default function NutritionAnalyticsScreen() {
   }), [profile]);
 
   useEffect(() => {
-    setIsLoading(true);
-    const days = timeRange === '7d' ? 7 : timeRange === '14d' ? 14 : timeRange === '30d' ? 30 : 90;
-    const data: DailySnapshot[] = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toISOString().split('T')[0] ?? '',
-        calories: 1800 + Math.floor(Math.random() * 800),
-        protein: 140 + Math.floor(Math.random() * 80),
-        carbs: 180 + Math.floor(Math.random() * 120),
-        fat: 50 + Math.floor(Math.random() * 50),
-        water_oz: 60 + Math.floor(Math.random() * 50),
-      });
-    }
-    setDailyData(data);
-    setIsLoading(false);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const days = timeRange === '7d' ? 7 : timeRange === '14d' ? 14 : timeRange === '30d' ? 30 : 90;
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days + 1);
+        startDate.setHours(0, 0, 0, 0);
+
+        const { data: logs } = await supabase
+          .from('nutrition_logs')
+          .select('logged_at, calories, protein, carbs, fat, meal_type, food_id')
+          .eq('user_id', user.id)
+          .gte('logged_at', startDate.toISOString())
+          .order('logged_at');
+
+        // Build daily snapshots from the range — fill gaps with 0
+        const logMap = new Map<string, DailySnapshot>();
+        const mealTypeMap: Record<string, { count: number; totalCalories: number }> = {};
+
+        for (const log of (logs ?? []) as { logged_at: string; calories: number; protein: number; carbs: number; fat: number; meal_type?: string }[]) {
+          const dateStr = (log.logged_at ?? '').split('T')[0] ?? '';
+          if (!dateStr) continue;
+          const existing = logMap.get(dateStr) ?? { date: dateStr, calories: 0, protein: 0, carbs: 0, fat: 0, water_oz: 0 };
+          logMap.set(dateStr, {
+            date: dateStr,
+            calories: existing.calories + (log.calories ?? 0),
+            protein: existing.protein + (log.protein ?? 0),
+            carbs: existing.carbs + (log.carbs ?? 0),
+            fat: existing.fat + (log.fat ?? 0),
+            water_oz: 0,
+          });
+
+          if (log.meal_type) {
+            const mt = mealTypeMap[log.meal_type] ?? { count: 0, totalCalories: 0 };
+            mealTypeMap[log.meal_type] = { count: mt.count + 1, totalCalories: mt.totalCalories + (log.calories ?? 0) };
+          }
+        }
+
+        setMealTypeCounts(mealTypeMap);
+
+        const snapshots: DailySnapshot[] = [];
+        for (let i = days - 1; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dateStr = d.toISOString().split('T')[0] ?? '';
+          snapshots.push(logMap.get(dateStr) ?? { date: dateStr, calories: 0, protein: 0, carbs: 0, fat: 0, water_oz: 0 });
+        }
+
+        setDailyData(snapshots);
+      } catch {
+        // Keep existing data on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void fetchData();
   }, [timeRange]);
 
   const averages = useMemo(() => {
@@ -200,22 +244,22 @@ export default function NutritionAnalyticsScreen() {
   const maxCalories = useMemo(() => Math.max(...calorieTrend, targets.calories), [calorieTrend, targets.calories]);
   const maxProtein = useMemo(() => Math.max(...proteinTrend, targets.protein), [proteinTrend, targets.protein]);
 
-  // Mock top foods
-  const topFoods: TopFood[] = useMemo(() => [
-    { name: 'Chicken Breast', timesLogged: 28, avgCalories: 284 },
-    { name: 'Brown Rice', timesLogged: 22, avgCalories: 216 },
-    { name: 'Protein Shake', timesLogged: 20, avgCalories: 200 },
-    { name: 'Greek Yogurt', timesLogged: 18, avgCalories: 150 },
-    { name: 'Eggs', timesLogged: 16, avgCalories: 155 },
-  ], []);
+  // Top foods — placeholder since food names require a join; shown as empty when no data
+  const topFoods: TopFood[] = useMemo(() => [], []);
 
-  // Mock meal distribution
-  const mealDistribution: MealDistribution[] = useMemo(() => [
-    { mealType: 'Breakfast', percentage: 22, avgCalories: 484 },
-    { mealType: 'Lunch', percentage: 32, avgCalories: 704 },
-    { mealType: 'Dinner', percentage: 30, avgCalories: 660 },
-    { mealType: 'Snacks', percentage: 16, avgCalories: 352 },
-  ], []);
+  // Meal distribution derived from real logged meal_type data
+  const mealDistribution: MealDistribution[] = useMemo(() => {
+    const total = Object.values(mealTypeCounts).reduce((sum, v) => sum + v.count, 0);
+    if (total === 0) return [];
+    return Object.entries(mealTypeCounts)
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([mealType, { count, totalCalories }]) => ({
+        mealType: mealType.charAt(0).toUpperCase() + mealType.slice(1),
+        percentage: Math.round((count / total) * 100),
+        avgCalories: count > 0 ? Math.round(totalCalories / count) : 0,
+      }));
+  }, [mealTypeCounts]);
+
 
   // Weekly comparison
   const weeklyComparison = useMemo(() => {

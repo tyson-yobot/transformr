@@ -2,7 +2,7 @@
 // TRANSFORMR -- Skill & Knowledge Tracker
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Skill, Book, Course } from '@app-types/database';
+import { supabase } from '../../../services/supabase';
 
 type ActiveTab = 'skills' | 'books' | 'courses';
 
@@ -38,6 +39,22 @@ export default function SkillsScreen() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const [skillsRes, booksRes, coursesRes] = await Promise.all([
+        supabase.from('skills').select('*').eq('user_id', user.id).order('created_at'),
+        supabase.from('books').select('*').eq('user_id', user.id).order('created_at'),
+        supabase.from('courses').select('*').eq('user_id', user.id).order('created_at'),
+      ]);
+      if (skillsRes.data) setSkills(skillsRes.data as Skill[]);
+      if (booksRes.data) setBooks(booksRes.data as Book[]);
+      if (coursesRes.data) setCourses(coursesRes.data as Course[]);
+    };
+    void fetchAll();
+  }, []);
 
   // Add skill state
   const [showSkillModal, setShowSkillModal] = useState(false);
@@ -64,33 +81,51 @@ export default function SkillsScreen() {
     [books, bookFilter],
   );
 
-  const handleAddSkill = useCallback(() => {
+  const handleAddSkill = useCallback(async () => {
     if (!newSkillName.trim()) return;
-    const skill: Skill = {
-      id: Date.now().toString(),
-      name: newSkillName.trim(),
-      proficiency: newSkillProficiency,
-      target_proficiency: newSkillTarget,
-      hours_practiced: 0,
-    };
-    setSkills((prev) => [...prev, skill]);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('skills')
+      .insert({
+        user_id: user.id,
+        name: newSkillName.trim(),
+        proficiency: newSkillProficiency,
+        target_proficiency: newSkillTarget,
+        hours_practiced: 0,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setSkills((prev) => [...prev, data as Skill]);
+    }
     setShowSkillModal(false);
     setNewSkillName('');
     setNewSkillProficiency(1);
     hapticSuccess();
   }, [newSkillName, newSkillProficiency, newSkillTarget]);
 
-  const handleAddBook = useCallback(() => {
+  const handleAddBook = useCallback(async () => {
     if (!newBookTitle.trim()) return;
-    const book: Book = {
-      id: Date.now().toString(),
-      title: newBookTitle.trim(),
-      author: newBookAuthor.trim() || undefined,
-      pages_total: newBookPages ? parseInt(newBookPages, 10) : undefined,
-      pages_read: 0,
-      status: 'want_to_read',
-    };
-    setBooks((prev) => [...prev, book]);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('books')
+      .insert({
+        user_id: user.id,
+        title: newBookTitle.trim(),
+        author: newBookAuthor.trim() || null,
+        pages_total: newBookPages ? parseInt(newBookPages, 10) : null,
+        pages_read: 0,
+        status: 'want_to_read',
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setBooks((prev) => [...prev, data as Book]);
+    }
     setShowBookModal(false);
     setNewBookTitle('');
     setNewBookAuthor('');
@@ -98,17 +133,26 @@ export default function SkillsScreen() {
     hapticSuccess();
   }, [newBookTitle, newBookAuthor, newBookPages]);
 
-  const handleAddCourse = useCallback(() => {
+  const handleAddCourse = useCallback(async () => {
     if (!newCourseTitle.trim()) return;
-    const course: Course = {
-      id: Date.now().toString(),
-      title: newCourseTitle.trim(),
-      platform: newCoursePlatform.trim() || undefined,
-      url: newCourseUrl.trim() || undefined,
-      progress_percent: 0,
-      status: 'planned',
-    };
-    setCourses((prev) => [...prev, course]);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('courses')
+      .insert({
+        user_id: user.id,
+        title: newCourseTitle.trim(),
+        platform: newCoursePlatform.trim() || null,
+        url: newCourseUrl.trim() || null,
+        progress_percent: 0,
+        status: 'planned',
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setCourses((prev) => [...prev, data as Course]);
+    }
     setShowCourseModal(false);
     setNewCourseTitle('');
     setNewCoursePlatform('');

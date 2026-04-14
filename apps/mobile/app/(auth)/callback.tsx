@@ -8,6 +8,7 @@ import { View, ActivityIndicator } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
+import { supabase } from '@services/supabase';
 
 // Complete any pending auth session — required for expo-web-browser OAuth flow
 WebBrowser.maybeCompleteAuthSession();
@@ -17,11 +18,19 @@ export default function OAuthCallbackScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    // Brief delay then navigate home — auth state change is handled by the auth listener
-    const timer = setTimeout(() => {
-      router.replace('/');
-    }, 1000);
-    return () => clearTimeout(timer);
+    // Navigate as soon as a valid session is detected
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+        router.replace('/');
+      }
+    });
+
+    // Also handle already-authenticated state (token exchanged before listener registered)
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace('/');
+    });
+
+    return () => subscription.unsubscribe();
   }, [router]);
 
   return (

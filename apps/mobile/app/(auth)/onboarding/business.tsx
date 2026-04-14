@@ -10,6 +10,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+import { useBusinessStore } from '@stores/businessStore';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';
 
@@ -24,6 +25,7 @@ const BUSINESS_TYPES: { value: BusinessType; label: string; icon: string }[] = [
 export default function BusinessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const createBusiness = useBusinessStore((s) => s.createBusiness);
 
   const [trackBusiness, setTrackBusiness] = useState<boolean | null>(null);
   const [businessName, setBusinessName] = useState('');
@@ -36,9 +38,16 @@ export default function BusinessScreen() {
   }, [router]);
 
   const handleContinue = useCallback(async () => {
-    // In a full implementation, we would save business data via businessStore
+    if (businessName.trim()) {
+      await createBusiness({
+        name: businessName.trim(),
+        type: businessType ?? undefined,
+        monthly_revenue: currentMRR ? parseFloat(currentMRR) : 0,
+        description: revenueGoal ? `Revenue goal: $${revenueGoal}/mo` : undefined,
+      });
+    }
     router.push('/(auth)/onboarding/partner');
-  }, [router]);
+  }, [businessName, businessType, currentMRR, revenueGoal, createBusiness, router]);
 
   // Show initial decision screen
   if (trackBusiness === null) {

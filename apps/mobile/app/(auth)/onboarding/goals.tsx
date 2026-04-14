@@ -11,6 +11,7 @@ import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import type { GoalCategory } from '@app-types/common';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+import { useGoalStore } from '@stores/goalStore';
 
 interface GoalOption {
   category: GoalCategory;
@@ -34,6 +35,7 @@ const GOAL_OPTIONS: GoalOption[] = [
 export default function GoalsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const createGoal = useGoalStore((s) => s.createGoal);
 
   const [selectedGoals, setSelectedGoals] = useState<GoalCategory[]>([]);
   const [primaryGoal, setPrimaryGoal] = useState<GoalCategory | null>(null);
@@ -53,7 +55,7 @@ export default function GoalsScreen() {
     setError('');
   }, [primaryGoal]);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     if (selectedGoals.length === 0) {
       setError('Select at least one goal category');
       return;
@@ -62,8 +64,20 @@ export default function GoalsScreen() {
       setError('Tap a selected goal again to set it as your primary goal');
       return;
     }
+    // Persist each selected goal — primary goal first with priority 10
+    await Promise.all(
+      selectedGoals.map((category) =>
+        createGoal({
+          title: GOAL_OPTIONS.find((g) => g.category === category)?.label ?? category,
+          category,
+          goal_type: 'habit',
+          priority: category === primaryGoal ? 10 : 5,
+          target_date: targetDate || undefined,
+        }),
+      ),
+    );
     router.push('/(auth)/onboarding/fitness');
-  }, [selectedGoals, primaryGoal, router]);
+  }, [selectedGoals, primaryGoal, targetDate, createGoal, router]);
 
   return (
     <ScrollView

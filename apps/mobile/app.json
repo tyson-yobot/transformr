@@ -74,6 +74,7 @@
       "expo-local-authentication",
       "expo-secure-store",
       "expo-av",
+      "expo-calendar",
       "expo-file-system",
       ["expo-font", {
         "fonts": []

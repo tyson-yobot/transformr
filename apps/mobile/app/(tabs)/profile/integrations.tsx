@@ -18,6 +18,8 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 
 // ---------------------------------------------------------------------------
 // Integration definitions
@@ -141,24 +143,47 @@ export default function IntegrationsScreen() {
       setConnecting(integration.id);
       void hapticLight();
 
-      // Simulate OAuth / pairing flow
-      // In production, this triggers the actual OAuth or native pairing
-      setTimeout(async () => {
-        setConnectionState((prev) => ({
-          ...prev,
-          [integration.connectedKey]: true,
-        }));
-        setConnecting(null);
-        await hapticSuccess();
-
-        if (integration.id === 'spotify') {
-          await updateProfile({ spotify_connected: true });
-        } else if (integration.id === 'appleWatch') {
-          await updateProfile({ watch_paired: true });
+      try {
+        if (integration.id === 'strava') {
+          const clientId = process.env.EXPO_PUBLIC_STRAVA_CLIENT_ID ?? '';
+          const redirectUrl = Linking.createURL('integrations/strava');
+          const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&approval_prompt=force&scope=activity:read_all`;
+          const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+          if (result.type === 'success') {
+            setConnectionState((prev) => ({ ...prev, [integration.connectedKey]: true }));
+            await updateProfile({ [integration.connectedKey]: true } as never);
+            await hapticSuccess();
+            Alert.alert('Connected', `${integration.name} is now linked.`);
+          }
+        } else if (integration.id === 'appleHealth' || integration.id === 'appleWatch') {
+          // Apple HealthKit requires native module — mark as pending
+          Alert.alert(
+            'Coming Soon',
+            'Apple Health integration requires a physical device with HealthKit permissions. This will be enabled in the next build.',
+          );
+        } else if (integration.id === 'googleFit') {
+          Alert.alert(
+            'Coming Soon',
+            'Google Fit integration will be enabled in a future update.',
+          );
+        } else if (integration.id === 'spotify') {
+          // Spotify requires the Spotify iOS/Android SDK or Web OAuth
+          const redirectUrl = Linking.createURL('integrations/spotify');
+          const clientId = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID ?? '';
+          const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=user-read-currently-playing%20user-read-playback-state`;
+          const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+          if (result.type === 'success') {
+            setConnectionState((prev) => ({ ...prev, spotify: true }));
+            await updateProfile({ spotify_connected: true });
+            await hapticSuccess();
+            Alert.alert('Connected', 'Spotify is now linked.');
+          }
+        } else {
+          Alert.alert('Coming Soon', `${integration.name} integration is being configured.`);
         }
-
-        Alert.alert('Connected', `${integration.name} is now linked.`);
-      }, 1500);
+      } finally {
+        setConnecting(null);
+      }
     },
     [connectionState, updateProfile],
   );

@@ -52,9 +52,18 @@ export default function ProfileScreen() {
   const validate = useCallback((): boolean => {
     const errs: Record<string, string> = {};
 
-    // Validate date of birth (simple format check: YYYY-MM-DD or MM/DD/YYYY)
+    // Validate date of birth — must be YYYY-MM-DD and a real calendar date
+    const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateOfBirth.trim()) {
       errs.dob = 'Date of birth is required';
+    } else if (!dobRegex.test(dateOfBirth)) {
+      errs.dob = 'Use format YYYY-MM-DD (e.g. 1990-05-21)';
+    } else {
+      const parsed = new Date(dateOfBirth);
+      const now = new Date();
+      if (isNaN(parsed.getTime()) || parsed >= now) {
+        errs.dob = 'Enter a valid date in the past';
+      }
     }
 
     if (!gender) {

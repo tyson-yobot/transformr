@@ -22,6 +22,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { generateBudgetMealPrepPlan } from '@services/ai/mealPrep';
 
 interface PlannedMeal {
   id: string;
@@ -102,14 +103,49 @@ export default function MealPlansScreen() {
     setIsGenerating(true);
     hapticMedium();
 
-    // Simulate AI generation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const result = await generateBudgetMealPrepPlan({
+        macro_targets: {
+          calories: targets.calories,
+          protein_g: targets.protein,
+          carbs_g: targets.carbs,
+          fat_g: targets.fat,
+        },
+        meals_per_day: 4,
+      });
 
-    setWeekPlan(generateMockPlan());
-    setIsGenerating(false);
-    hapticSuccess();
-    Alert.alert('Plan Generated!', 'Your AI-powered meal plan for the week is ready.');
-  }, []);
+      // Use the first (or only) tier and spread meals across the week
+      const tier = result.tiers[0];
+      if (tier && tier.meals.length > 0) {
+        const mapped: DayPlan[] = DAYS_OF_WEEK.map((day, dayIdx) => ({
+          day,
+          dayShort: DAYS_SHORT[dayIdx] ?? day.slice(0, 3),
+          meals: tier.meals
+            .filter((_, i) => i % 7 === dayIdx % 7 || dayIdx < 4)
+            .slice(0, 4)
+            .map((m, i) => ({
+              id: `${dayIdx}-${i}`,
+              name: m.name,
+              mealType: m.meal_type,
+              calories: m.per_serving_macros.calories,
+              protein: m.per_serving_macros.protein_g,
+              carbs: m.per_serving_macros.carbs_g,
+              fat: m.per_serving_macros.fat_g,
+            })),
+        }));
+        setWeekPlan(mapped);
+      } else {
+        setWeekPlan(generateMockPlan());
+      }
+
+      hapticSuccess();
+      Alert.alert('Plan Generated!', 'Your AI-powered meal plan for the week is ready.');
+    } catch {
+      Alert.alert('Error', 'Could not generate plan. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [targets]);
 
   const handleRemoveMeal = useCallback((dayIndex: number, mealId: string) => {
     hapticLight();

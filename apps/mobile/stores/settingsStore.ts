@@ -17,6 +17,12 @@ interface NotificationSettings {
   weeklyReport: boolean;
 }
 
+export interface FitnessPreferences {
+  workoutDaysPerWeek: number;
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  equipment: string[];
+}
+
 interface SettingsState {
   theme: ThemeMode;
   notifications: NotificationSettings;
@@ -24,6 +30,7 @@ interface SettingsState {
   narratorEnabled: boolean;
   briefingEnabled: boolean;
   lastBriefingDate: string | null;
+  fitnessPreferences: FitnessPreferences;
 }
 
 type SettingKey = keyof SettingsState;
@@ -31,6 +38,7 @@ type SettingValue<K extends SettingKey> = SettingsState[K];
 
 interface SettingsActions {
   updateSetting: <K extends SettingKey>(key: K, value: SettingValue<K>) => void;
+  setFitnessPrefs: (prefs: Partial<FitnessPreferences>) => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -54,10 +62,20 @@ export const useSettingsStore = create<SettingsStore>()(
       narratorEnabled: false,
       briefingEnabled: true,
       lastBriefingDate: null,
+      fitnessPreferences: {
+        workoutDaysPerWeek: 4,
+        experienceLevel: 'intermediate',
+        equipment: ['barbell', 'dumbbell'],
+      },
 
       // --- Actions ---
       updateSetting: (key, value) => {
         set((state) => ({ ...state, [key]: value }));
+      },
+      setFitnessPrefs: (prefs) => {
+        set((state) => ({
+          fitnessPreferences: { ...state.fitnessPreferences, ...prefs },
+        }));
       },
     }),
     {

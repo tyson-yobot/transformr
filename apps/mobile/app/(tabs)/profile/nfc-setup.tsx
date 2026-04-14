@@ -18,6 +18,7 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Badge } from '@components/ui/Badge';
+import { initNfc, readNfcTag } from '@services/nfc';
 import { Modal } from '@components/ui/Modal';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
@@ -81,20 +82,36 @@ export default function NfcSetupScreen() {
     void load();
   }, []);
 
-  // Simulate NFC scan
   const handleScanTag = useCallback(async () => {
     setIsScanning(true);
     await hapticMedium();
 
-    // Simulate NFC tag detection
-    // In production, this uses react-native-nfc-manager
-    setTimeout(async () => {
-      const fakeTagId = `NFC-${Date.now().toString(36).toUpperCase()}`;
-      setPendingTagId(fakeTagId);
+    try {
+      const nfcSupported = await initNfc();
+      if (!nfcSupported) {
+        // Device doesn't support NFC — generate a manual ID for testing
+        const fallbackId = `MANUAL-${Date.now().toString(36).toUpperCase()}`;
+        setPendingTagId(fallbackId);
+        setIsScanning(false);
+        setShowAddModal(true);
+        await hapticSuccess();
+        return;
+      }
+
+      const tagId = await readNfcTag();
+      if (tagId) {
+        setPendingTagId(tagId);
+        setIsScanning(false);
+        setShowAddModal(true);
+        await hapticSuccess();
+      } else {
+        Alert.alert('No Tag Detected', 'Hold your NFC tag closer and try again.');
+        setIsScanning(false);
+      }
+    } catch {
+      Alert.alert('NFC Error', 'Could not read NFC tag. Please try again.');
       setIsScanning(false);
-      setShowAddModal(true);
-      await hapticSuccess();
-    }, 2000);
+    }
   }, []);
 
   // Save trigger

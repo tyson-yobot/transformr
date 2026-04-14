@@ -2,7 +2,7 @@
 // TRANSFORMR -- Vision Board Builder
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { hapticSuccess, hapticLight } from '@utils/haptics';
 import type { VisionBoardItem } from '@app-types/database';
+import { supabase } from '../../../services/supabase';
 
 type VisionCategory = NonNullable<VisionBoardItem['category']>;
 
@@ -43,6 +44,20 @@ export default function VisionBoard() {
 
   const [items, setItems] = useState<VisionBoardItem[]>([]);
   const [filterCategory, setFilterCategory] = useState<VisionCategory | null>(null);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('vision_board_items')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('sort_order');
+      if (data) setItems(data as VisionBoardItem[]);
+    };
+    void fetchItems();
+  }, []);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState<VisionCategory>('personal');
@@ -59,16 +74,25 @@ export default function VisionBoard() {
     [items, filterCategory],
   );
 
-  const handleAddItem = useCallback(() => {
+  const handleAddItem = useCallback(async () => {
     if (!newImageUrl.trim()) return;
-    const newItem: VisionBoardItem = {
-      id: Date.now().toString(),
-      image_url: newImageUrl.trim(),
-      title: newTitle.trim() || undefined,
-      category: newCategory,
-      sort_order: items.length,
-    };
-    setItems((prev) => [...prev, newItem]);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('vision_board_items')
+      .insert({
+        user_id: user.id,
+        image_url: newImageUrl.trim(),
+        title: newTitle.trim() || null,
+        category: newCategory,
+        sort_order: items.length,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setItems((prev) => [...prev, data as VisionBoardItem]);
+    }
     setShowAddModal(false);
     setNewTitle('');
     setNewImageUrl('');

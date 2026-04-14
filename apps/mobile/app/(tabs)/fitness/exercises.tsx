@@ -145,7 +145,7 @@ export default function ExercisesScreen() {
                 />
               )}
             </View>
-            {item.muscle_groups.length > 0 && (
+            {(item.muscle_groups ?? []).length > 0 && (
               <Text
                 style={[
                   typography.tiny,

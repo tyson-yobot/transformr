@@ -2,7 +2,7 @@
 // TRANSFORMR -- Customer Tracker
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,8 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency, formatNumber } from '@utils/formatters';
 import type { Customer } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
+import { supabase } from '../../../../services/supabase';
+import { useBusinessStore } from '@stores/businessStore';
 
 type CustomerStatus = NonNullable<Customer['status']>;
 
@@ -33,6 +35,8 @@ const STATUS_OPTIONS: { key: CustomerStatus; label: string }[] = [
 
 export default function CustomersScreen() {
   const { colors, typography, spacing } = useTheme();
+  const businesses = useBusinessStore((s) => s.businesses);
+  const businessId = businesses[0]?.id ?? null;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filterStatus, setFilterStatus] = useState<CustomerStatus | null>(null);
@@ -41,6 +45,19 @@ export default function CustomersScreen() {
   const [newEmail, setNewEmail] = useState('');
   const [newPlan, setNewPlan] = useState('');
   const [newMrr, setNewMrr] = useState('');
+
+  useEffect(() => {
+    if (!businessId) return;
+    const fetchCustomers = async () => {
+      const { data } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('business_id', businessId)
+        .order('created_at', { ascending: false });
+      if (data) setCustomers(data as Customer[]);
+    };
+    void fetchCustomers();
+  }, [businessId]);
 
   const filteredCustomers = useMemo(
     () =>
@@ -73,25 +90,32 @@ export default function CustomersScreen() {
     return (churned / customers.length) * 100;
   }, [customers]);
 
-  const handleAddCustomer = useCallback(() => {
-    if (!newName.trim()) return;
-    const customer: Customer = {
-      id: Date.now().toString(),
-      name: newName.trim(),
-      email: newEmail.trim() || undefined,
-      plan_tier: newPlan.trim() || undefined,
-      mrr: newMrr ? parseFloat(newMrr) : undefined,
-      status: 'active',
-      started_at: new Date().toISOString(),
-    };
-    setCustomers((prev) => [...prev, customer]);
+  const handleAddCustomer = useCallback(async () => {
+    if (!newName.trim() || !businessId) return;
+    const { data, error } = await supabase
+      .from('customers')
+      .insert({
+        business_id: businessId,
+        name: newName.trim(),
+        email: newEmail.trim() || null,
+        plan_tier: newPlan.trim() || null,
+        mrr: newMrr ? parseFloat(newMrr) : null,
+        status: 'active',
+        started_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (!error && data) {
+      setCustomers((prev) => [data as Customer, ...prev]);
+    }
     setShowAddModal(false);
     setNewName('');
     setNewEmail('');
     setNewPlan('');
     setNewMrr('');
     hapticSuccess();
-  }, [newName, newEmail, newPlan, newMrr]);
+  }, [newName, newEmail, newPlan, newMrr, businessId]);
 
   const getStatusVariant = (status: CustomerStatus): 'success' | 'warning' | 'danger' | 'info' | 'default' => {
     switch (status) {

@@ -19,6 +19,7 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { supabase } from '../../../services/supabase';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,45 +108,89 @@ export default function DataExportScreen() {
     setExportProgress(0);
     await hapticLight();
 
-    // Simulate export progress
-    const interval = setInterval(() => {
-      setExportProgress((prev) => {
-        if (prev >= 1) {
-          clearInterval(interval);
-          return 1;
-        }
-        return prev + 0.15;
-      });
-    }, 300);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-    // Simulate completion
-    setTimeout(async () => {
-      clearInterval(interval);
+      const dateLabel = DATE_RANGES.find((d) => d.key === dateRange)?.label ?? dateRange;
+      const since = (() => {
+        const d = new Date();
+        if (dateRange === 'week') d.setDate(d.getDate() - 7);
+        else if (dateRange === 'month') d.setDate(d.getDate() - 30);
+        else if (dateRange === 'quarter') d.setDate(d.getDate() - 90);
+        else if (dateRange === 'year') d.setFullYear(d.getFullYear() - 1);
+        else return undefined;
+        return d.toISOString();
+      })();
+
+      const exportData: Record<string, unknown[]> = {};
+      const total = selectedCats.length;
+
+      for (let i = 0; i < selectedCats.length; i++) {
+        const cat = selectedCats[i]!;
+        setExportProgress((i + 0.5) / total);
+
+        let query;
+        if (cat.key === 'workouts') {
+          query = supabase.from('workout_sessions').select('*').eq('user_id', user.id);
+        } else if (cat.key === 'nutrition') {
+          query = supabase.from('nutrition_logs').select('*').eq('user_id', user.id);
+        } else if (cat.key === 'habits') {
+          query = supabase.from('habit_completions').select('*').eq('user_id', user.id);
+        } else if (cat.key === 'sleep') {
+          query = supabase.from('sleep_logs').select('*').eq('user_id', user.id);
+        } else if (cat.key === 'mood') {
+          query = supabase.from('mood_logs').select('*').eq('user_id', user.id);
+        } else if (cat.key === 'business') {
+          query = supabase.from('revenue_logs').select('*').eq('user_id', user.id);
+        } else {
+          continue;
+        }
+
+        if (since) query = query.gte('created_at', since);
+        const { data: rows } = await query;
+        exportData[cat.key] = rows ?? [];
+        setExportProgress((i + 1) / total);
+      }
+
       setExportProgress(1);
-      setIsExporting(false);
       await hapticSuccess();
 
-      const categoryNames = selectedCats.map((c) => c.label).join(', ');
-      const dateLabel =
-        DATE_RANGES.find((d) => d.key === dateRange)?.label ?? dateRange;
+      const content =
+        format === 'json'
+          ? JSON.stringify(exportData, null, 2)
+          : Object.entries(exportData)
+              .map(([key, rows]) => {
+                if (rows.length === 0) return `# ${key}\n(no data)\n`;
+                const headers = Object.keys(rows[0] as object).join(',');
+                const csvRows = (rows as Record<string, unknown>[]).map((r) =>
+                  Object.values(r)
+                    .map((v) => (typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : String(v ?? '')))
+                    .join(','),
+                );
+                return [`# ${key}`, headers, ...csvRows].join('\n');
+              })
+              .join('\n\n');
 
-      // In production, this would generate the file and use Share/FileSystem
       Alert.alert(
         'Export Ready',
-        `${format.toUpperCase()} export generated.\nCategories: ${categoryNames}\nRange: ${dateLabel}`,
+        `${format.toUpperCase()} export ready.\nCategories: ${selectedCats.map((c) => c.label).join(', ')}\nRange: ${dateLabel}`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Share',
             onPress: async () => {
-              await Share.share({
-                message: `TRANSFORMR data export (${format.toUpperCase()}) - ${dateLabel}`,
-              });
+              await Share.share({ message: content });
             },
           },
         ],
       );
-    }, 2500);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Export failed';
+      Alert.alert('Export Error', msg);
+    } finally {
+      setIsExporting(false);
+    }
   }, [categories, format, dateRange]);
 
   const selectedCount = categories.filter((c) => c.selected).length;

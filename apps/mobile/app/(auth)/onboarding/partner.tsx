@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Partner Setup (Optional)
 // =============================================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
@@ -11,6 +11,7 @@ import { Input } from '@components/ui/Input';
 import { Card } from '@components/ui/Card';
 import { hapticLight } from '@utils/haptics';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+import { usePartnerStore } from '@stores/partnerStore';
 
 interface PrivacyToggle {
   key: string;
@@ -32,10 +33,22 @@ const DEFAULT_PRIVACY: PrivacyToggle[] = [
 export default function PartnerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const createPartnershipInvite = usePartnerStore((s) => s.createPartnershipInvite);
+  const linkPartner = usePartnerStore((s) => s.linkPartner);
 
   const [mode, setMode] = useState<'choice' | 'invite' | 'join'>('choice');
   const [inviteCode, setInviteCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState<string>('');
   const [privacy, setPrivacy] = useState<PrivacyToggle[]>(DEFAULT_PRIVACY);
+
+  // Generate and persist invite code when entering invite mode
+  useEffect(() => {
+    if (mode === 'invite' && !generatedCode) {
+      createPartnershipInvite().then((code) => {
+        if (code) setGeneratedCode(code);
+      });
+    }
+  }, [mode, generatedCode, createPartnershipInvite]);
 
   const togglePrivacy = useCallback((key: string) => {
     hapticLight();
@@ -48,10 +61,12 @@ export default function PartnerScreen() {
     router.push('/(auth)/onboarding/notifications');
   }, [router]);
 
-  const handleContinue = useCallback(() => {
-    // In full implementation, create/join partnership via partnerStore
+  const handleContinue = useCallback(async () => {
+    if (mode === 'join' && inviteCode.trim()) {
+      await linkPartner(inviteCode.trim().toUpperCase());
+    }
     router.push('/(auth)/onboarding/notifications');
-  }, [router]);
+  }, [mode, inviteCode, linkPartner, router]);
 
   // Choice screen
   if (mode === 'choice') {
@@ -126,7 +141,7 @@ export default function PartnerScreen() {
               { color: colors.accent.primary, letterSpacing: 4 },
             ]}
           >
-            TFR-{Math.random().toString(36).substring(2, 8).toUpperCase()}
+            {generatedCode || 'Generating…'}
           </Text>
           <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
             Share this code with your partner

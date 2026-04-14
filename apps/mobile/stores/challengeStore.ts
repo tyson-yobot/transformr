@@ -318,14 +318,15 @@ export const useChallengeStore = create<ChallengeStore>()((set, get) => ({
       if (logError) throw logError;
 
       // Advance the enrollment's current day
+      // current_day serves as the streak counter; longest_streak is the all-time best
       const nextDay = (activeEnrollment?.current_day ?? 1) + 1;
-      const currentStreak = (activeEnrollment?.longest_streak ?? 0) + 1;
+      const newLongestStreak = Math.max(activeEnrollment?.longest_streak ?? 0, nextDay - 1);
 
       const { data: updatedEnrollment, error: enrollError } = await supabase
         .from('challenge_enrollments')
         .update({
           current_day: nextDay,
-          longest_streak: currentStreak,
+          longest_streak: newLongestStreak,
         })
         .eq('id', enrollmentId)
         .select()

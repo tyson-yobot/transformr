@@ -37,8 +37,8 @@ export default function PartnerDashboard() {
   const myProfile = useProfileStore((s) => s.profile);
 
   const [refreshing, setRefreshing] = useState(false);
-  const [myStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
-  const [partnerStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
+  const [myStats, setMyStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
+  const [partnerStats, setPartnerStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
   const [recentActivity, setRecentActivity] = useState<{ id: string; text: string; time: string }[]>([]);
 
   useEffect(() => {
@@ -46,11 +46,58 @@ export default function PartnerDashboard() {
   }, [fetchPartnership]);
 
   useEffect(() => {
-    // Fetch lightweight stats for both users
     const loadStats = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !partnership) return;
+
+        const partnerId =
+          partnership.user_a === user.id ? partnership.user_b : partnership.user_a;
+
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const fetchStatsForUser = async (uid: string): Promise<PartnerStats> => {
+          const [workoutsRes, habitsRes, completionsRes] = await Promise.all([
+            supabase
+              .from('workout_sessions')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', uid)
+              .gte('started_at', weekStart.toISOString()),
+            supabase
+              .from('habits')
+              .select('id, current_streak, is_active')
+              .eq('user_id', uid)
+              .eq('is_active', true),
+            supabase
+              .from('habit_completions')
+              .select('habit_id')
+              .eq('user_id', uid)
+              .gte('completed_at', `${todayStr}T00:00:00`)
+              .lt('completed_at', `${todayStr}T23:59:59`),
+          ]);
+
+          const habits = (habitsRes.data ?? []) as { id: string; current_streak: number | null; is_active: boolean }[];
+          const completedIds = new Set((completionsRes.data ?? []).map((c: { habit_id: string }) => c.habit_id));
+          const maxStreak = habits.reduce((max, h) => Math.max(max, h.current_streak ?? 0), 0);
+
+          return {
+            workoutsThisWeek: workoutsRes.count ?? 0,
+            currentStreak: maxStreak,
+            habitsCompletedToday: completedIds.size,
+            habitsTotal: habits.length,
+          };
+        };
+
+        const [mine, partner] = await Promise.all([
+          fetchStatsForUser(user.id),
+          partnerId ? fetchStatsForUser(partnerId) : Promise.resolve({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 }),
+        ]);
+
+        setMyStats(mine);
+        setPartnerStats(partner);
 
         // Recent nudges as activity feed
         const { data: nudges } = await supabase
@@ -70,10 +117,10 @@ export default function PartnerDashboard() {
           );
         }
       } catch {
-        // Silently ignore stats loading errors
+        // Stats load silently — UI shows zero values as fallback
       }
     };
-    if (partnership) loadStats();
+    if (partnership) void loadStats();
   }, [partnership]);
 
   const handleRefresh = useCallback(async () => {

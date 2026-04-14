@@ -37,6 +37,7 @@ import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatt
 import { hapticLight } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { supabase } from '../../services/supabase';
 
 // ---------------------------------------------------------------------------
 // Mini sparkline component for revenue
@@ -104,6 +105,9 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [readinessScore, setReadinessScore] = useState<number | null>(null);
+  const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
+  const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
 
   // Stores
   const profile = useProfileStore((s) => s.profile);
@@ -155,8 +159,8 @@ export default function DashboardScreen() {
     return nutritionStore.todayLogs.reduce((sum, log) => sum + log.calories, 0);
   }, [nutritionStore.todayLogs]);
 
-  // Readiness score placeholder
-  const readinessScore = profile?.current_weight ? 78 : 0;
+  // Computed readiness fallback (profile-based estimate until real score loads)
+  const readinessScoreDisplay = readinessScore ?? (profile?.current_weight ? 78 : 0);
 
   // Motivational greeting — rotates by day, adapts to time of day
   const motivationalGreeting = getTodayGreeting();
@@ -178,16 +182,13 @@ export default function DashboardScreen() {
     return Math.max(0, totalActive - completedToday);
   }, [habitStore.habits, habitStore.todayCompletions]);
 
-  // Weight data for sparkline
+  // Weight data for sparkline — real data when available, profile fallback otherwise
   const weightData = useMemo(() => {
+    if (realWeightData.length > 0) return realWeightData;
     if (!profile?.current_weight) return [];
-    // Generate a sample series for display; real data comes from weight logs
     const base = profile.current_weight;
-    return Array.from({ length: 14 }, (_, i) => ({
-      date: new Date(Date.now() - (13 - i) * 86400000).toISOString().split('T')[0] as string,
-      weight: base + Math.sin(i / 3) * 1.5 - i * 0.1,
-    }));
-  }, [profile?.current_weight]);
+    return [{ date: new Date().toISOString().split('T')[0] as string, weight: base }];
+  }, [realWeightData, profile?.current_weight]);
 
   // Revenue sparkline data
   const revenueData = useMemo(() => {
@@ -195,12 +196,61 @@ export default function DashboardScreen() {
     return businessStore.revenueData.slice(-7).map((r) => ({ value: r.amount }));
   }, [businessStore.businesses, businessStore.revenueData]);
 
-  // Recent achievements placeholder
-  const recentAchievements = useMemo(() => {
-    return [
-      { id: '1', title: 'First Workout', icon: '🏋️', tier: 'bronze' as const },
-      { id: '2', title: '7-Day Streak', icon: '🔥', tier: 'silver' as const },
-    ];
+  // Load dashboard-specific data from Supabase
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Readiness score from edge function
+        const { data: readinessData } = await supabase.functions.invoke('readiness-score', {
+          body: { userId: user.id },
+        });
+        if (readinessData?.score != null) setReadinessScore(readinessData.score as number);
+
+        // Weight history from weight_logs
+        const { data: weightLogs } = await supabase
+          .from('weight_logs')
+          .select('logged_at, weight_lbs')
+          .eq('user_id', user.id)
+          .order('logged_at', { ascending: true })
+          .limit(14);
+        if (weightLogs && weightLogs.length > 0) {
+          setRealWeightData(
+            weightLogs.map((w) => ({
+              date: (w.logged_at as string).split('T')[0] ?? '',
+              weight: w.weight_lbs as number,
+            })),
+          );
+        }
+
+        // Recent achievements
+        const { data: achievements } = await supabase
+          .from('user_achievements')
+          .select('id, achievement:achievements(title, icon, tier)')
+          .eq('user_id', user.id)
+          .order('earned_at', { ascending: false })
+          .limit(3);
+        if (achievements && achievements.length > 0) {
+          setRecentAchievements(
+            achievements.map((a) => {
+              const raw = a.achievement;
+              const ach = (Array.isArray(raw) ? raw[0] : raw) as { title?: string; icon?: string; tier?: string } | null;
+              return {
+                id: a.id as string,
+                title: ach?.title ?? 'Achievement',
+                icon: ach?.icon ?? '🏆',
+                tier: (ach?.tier as 'bronze' | 'silver' | 'gold' | 'platinum') ?? 'bronze',
+              };
+            }),
+          );
+        }
+      } catch {
+        // Non-critical — dashboard still renders with fallback values
+      }
+    };
+    void loadDashboardData();
   }, []);
 
   // Refresh handler
@@ -248,11 +298,11 @@ export default function DashboardScreen() {
       {
         icon: <Text style={{ fontSize: 18 }}>⚡</Text>,
         label: 'Readiness',
-        valueNode: <MonoText variant="monoBody">{readinessScore}%</MonoText>,
-        value: `${readinessScore}%`,
+        valueNode: <MonoText variant="monoBody">{readinessScoreDisplay}%</MonoText>,
+        value: `${readinessScoreDisplay}%`,
       },
     ],
-    [currentStreak, workoutsThisWeek, caloriesToday, readinessScore],
+    [currentStreak, workoutsThisWeek, caloriesToday, readinessScoreDisplay],
   );
 
   const tierColors: Record<string, string> = {

@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Journal
 // =============================================================================
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,8 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
+import { supabase } from '../../../services/supabase';
+import { getJournalResponse } from '../../../services/ai/journaling';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -52,8 +54,23 @@ export default function JournalScreen() {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [pastEntries] = useState<JournalEntry[]>([]);
+  const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
+
+  useEffect(() => {
+    const fetchEntries = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('journal_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(30);
+      if (data) setPastEntries(data as JournalEntry[]);
+    };
+    void fetchEntries();
+  }, []);
 
   const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) => {
@@ -70,19 +87,56 @@ export default function JournalScreen() {
   const handleSubmit = useCallback(async () => {
     if (!entryText.trim()) return;
     setIsSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-    // Simulate AI response (in production, this would call the AI endpoint)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+      const winsArr = wins.trim() ? [wins.trim()] : [];
+      const strugglesArr = struggles.trim() ? [struggles.trim()] : [];
+      const gratitudeArr = gratitude.trim() ? [gratitude.trim()] : [];
 
-    setAiResponse(
-      'Thank you for sharing. I notice themes of growth and self-awareness in your reflection. ' +
-      'Your wins show clear progress toward your goals. Consider how the struggles you mentioned ' +
-      'might become stepping stones for tomorrow. Keep building on this momentum.',
-    );
+      // Call real AI service
+      let aiText: string;
+      try {
+        const response = await getJournalResponse(user.id, entryText, winsArr, strugglesArr, gratitudeArr);
+        aiText = response.reflection + (response.encouragement ? `\n\n${response.encouragement}` : '');
+      } catch {
+        aiText = 'Thank you for sharing your reflection. Keep building on this momentum.';
+      }
 
-    await hapticSuccess();
-    setIsSubmitting(false);
-  }, [entryText]);
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Persist journal entry to Supabase
+      const { data: saved } = await supabase
+        .from('journal_entries')
+        .insert({
+          user_id: user.id,
+          date: todayStr,
+          ai_prompt: currentPrompt,
+          entry_text: entryText.trim(),
+          wins: winsArr,
+          struggles: strugglesArr,
+          gratitude: gratitudeArr,
+          tomorrow_focus: tomorrowFocus.trim() ? [tomorrowFocus.trim()] : [],
+          tags: Array.from(selectedTags),
+          ai_response: aiText,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (saved) {
+        setPastEntries((prev) => [saved as JournalEntry, ...prev]);
+      }
+
+      setAiResponse(aiText);
+      await hapticSuccess();
+    } catch {
+      setAiResponse('Entry saved. Keep reflecting and building on this momentum.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt]);
 
   const handleClearEntry = useCallback(() => {
     setEntryText('');

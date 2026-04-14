@@ -26,6 +26,8 @@ import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { analyzeMealPhoto } from '@services/ai/mealCamera';
+import { supabase } from '../../../services/supabase';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -63,46 +65,24 @@ export default function MealCameraScreen() {
     setStage('analyzing');
 
     try {
-      await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8, base64: true });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      // Simulate AI analysis (replace with actual API call)
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      const analysis = await analyzeMealPhoto(photo.uri, user.id);
+      const results: DetectedFood[] = (analysis.foods ?? []).map((f, i) => ({
+        id: String(i + 1),
+        name: f.name,
+        confidence: f.confidence ?? 0.9,
+        calories: f.estimated_calories ?? 0,
+        protein: f.estimated_protein ?? 0,
+        carbs: f.estimated_carbs ?? 0,
+        fat: f.estimated_fat ?? 0,
+        quantity: 1,
+      }));
 
-      const mockResults: DetectedFood[] = [
-        {
-          id: '1',
-          name: 'Grilled Chicken Breast',
-          confidence: 0.94,
-          calories: 284,
-          protein: 53,
-          carbs: 0,
-          fat: 6,
-          quantity: 1,
-        },
-        {
-          id: '2',
-          name: 'Brown Rice',
-          confidence: 0.88,
-          calories: 216,
-          protein: 5,
-          carbs: 45,
-          fat: 1.8,
-          quantity: 1,
-        },
-        {
-          id: '3',
-          name: 'Steamed Broccoli',
-          confidence: 0.91,
-          calories: 55,
-          protein: 3.7,
-          carbs: 11,
-          fat: 0.6,
-          quantity: 1,
-        },
-      ];
-
-      setDetectedFoods(mockResults);
-      setSelectedItems(new Set(mockResults.map((f) => f.id)));
+      setDetectedFoods(results);
+      setSelectedItems(new Set(results.map((f) => f.id)));
       setStage('results');
     } catch {
       setStage('capture');

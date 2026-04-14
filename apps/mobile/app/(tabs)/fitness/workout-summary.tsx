@@ -7,7 +7,6 @@ import {
   View,
   Text,
   ScrollView,
-  Share,
   Alert,
   StyleSheet,
 } from 'react-native';
@@ -130,23 +129,6 @@ export default function WorkoutSummaryScreen() {
     loadSummary();
   }, [sessionId]);
 
-  const handleShare = useCallback(async () => {
-    if (!session) return;
-
-    const text = [
-      `Just crushed a ${session.name} workout!`,
-      `Duration: ${formatDuration(session.duration_minutes ?? 0)}`,
-      `Volume: ${formatVolume(session.total_volume ?? 0)}`,
-      `Sets: ${session.total_sets ?? 0}`,
-      prsAchieved.length > 0 ? `New PRs: ${prsAchieved.length}` : '',
-      '',
-      'Tracked with TRANSFORMR',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    await Share.share({ message: text });
-  }, [session, prsAchieved]);
 
   const handleSaveAsTemplate = useCallback(async () => {
     if (!session) return;
@@ -384,7 +366,7 @@ export default function WorkoutSummaryScreen() {
                   </Text>
                 </View>
                 <Ionicons
-                  name={moodChange >= 0 ? 'arrow-forward' : 'arrow-forward'}
+                  name={moodChange >= 0 ? 'arrow-up' : 'arrow-down'}
                   size={20}
                   color={moodChange >= 0 ? colors.accent.success : colors.accent.danger}
                 />
@@ -458,14 +440,6 @@ export default function WorkoutSummaryScreen() {
               subtitle: formatDate(session.started_at),
             }}
             label="Share Workout"
-          />
-          <Button
-            title="Share Workout"
-            variant="outline"
-            onPress={() => { hapticLight(); handleShare(); }}
-            fullWidth
-            accessibilityLabel="Share workout summary"
-            leftIcon={<Ionicons name="share-outline" size={20} color={colors.text.primary} />}
           />
           <Button
             title="Save as Template"

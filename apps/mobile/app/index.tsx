@@ -49,22 +49,27 @@ export default function Index() {
     }
 
     // User is authenticated -- check onboarding status
-    fetchProfile().then(() => {
-      const currentProfile = useProfileStore.getState().profile;
-      if (!currentProfile?.onboarding_completed) {
-        router.replace('/(auth)/onboarding/welcome');
-        return;
-      }
+    fetchProfile()
+      .then(() => {
+        const currentProfile = useProfileStore.getState().profile;
+        if (!currentProfile?.onboarding_completed) {
+          router.replace('/(auth)/onboarding/welcome');
+          return;
+        }
 
-      // Check if daily briefing should be shown
-      const { briefingEnabled, lastBriefingDate } = useSettingsStore.getState();
-      const today = new Date().toDateString();
-      if (briefingEnabled && lastBriefingDate !== today) {
-        router.replace('/daily-briefing');
-      } else {
-        router.replace('/(tabs)/dashboard');
-      }
-    });
+        // Check if daily briefing should be shown
+        const { briefingEnabled, lastBriefingDate } = useSettingsStore.getState();
+        const today = new Date().toDateString();
+        if (briefingEnabled && lastBriefingDate !== today) {
+          router.replace('/daily-briefing');
+        } else {
+          router.replace('/(tabs)/dashboard');
+        }
+      })
+      .catch(() => {
+        // Profile fetch failed — go to onboarding (profile will be created on first save)
+        router.replace('/(auth)/onboarding/welcome');
+      });
   }, [session, loading, router, fetchProfile]);
 
   return (

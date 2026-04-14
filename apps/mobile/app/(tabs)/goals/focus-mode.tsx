@@ -23,6 +23,7 @@ import { Slider } from '@components/ui/Slider';
 import { formatTimerDisplay } from '@utils/formatters';
 import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
+import { supabase } from '../../../services/supabase';
 
 type FocusCategory = NonNullable<FocusSession['category']>;
 
@@ -65,8 +66,34 @@ export default function FocusMode() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [productivityRating, setProductivityRating] = useState(7);
   const [sessionHistory, setSessionHistory] = useState<SessionRecord[]>([]);
+  const sessionStartRef = useRef<string>(new Date().toISOString());
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('focus_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('started_at', { ascending: false })
+        .limit(10);
+      if (data) {
+        const sessions = (data as FocusSession[]).map((s) => ({
+          task: s.task_description ?? 'Untitled session',
+          category: (s.category ?? 'other') as FocusCategory,
+          duration: (s.actual_duration_minutes ?? s.planned_duration_minutes ?? 25) * 60,
+          distractions: s.distractions_count ?? 0,
+          rating: s.productivity_rating ?? 0,
+          completedAt: s.completed_at ?? s.started_at,
+        }));
+        setSessionHistory(sessions);
+      }
+    };
+    void fetchHistory();
+  }, []);
 
   const totalDuration = POMODORO_DURATIONS[phase];
   const progress = 1 - timeRemaining / totalDuration;
@@ -98,25 +125,25 @@ export default function FocusMode() {
   handlePhaseCompleteRef.current = handlePhaseComplete;
 
   useEffect(() => {
-    if (isRunning && timeRemaining > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            void handlePhaseCompleteRef.current();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+    if (!isRunning) return;
+    intervalRef.current = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          void handlePhaseCompleteRef.current();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isRunning, timeRemaining]);
+  }, [isRunning]);
 
   const handleStart = useCallback(() => {
+    sessionStartRef.current = new Date().toISOString();
     setIsRunning(true);
     hapticMedium();
   }, []);
@@ -139,16 +166,35 @@ export default function FocusMode() {
     await hapticWarning();
   }, []);
 
-  const handleSaveRating = useCallback(() => {
+  const handleSaveRating = useCallback(async () => {
+    const completedAt = new Date().toISOString();
     const record: SessionRecord = {
       task: taskDescription || 'Untitled session',
       category,
       duration: POMODORO_DURATIONS.work,
       distractions,
       rating: productivityRating,
-      completedAt: new Date().toISOString(),
+      completedAt,
     };
     setSessionHistory((prev) => [record, ...prev]);
+
+    // Persist to Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('focus_sessions').insert({
+        user_id: user.id,
+        task_description: taskDescription || null,
+        category,
+        planned_duration_minutes: POMODORO_DURATIONS.work / 60,
+        actual_duration_minutes: POMODORO_DURATIONS.work / 60,
+        started_at: sessionStartRef.current,
+        completed_at: completedAt,
+        distractions_count: distractions,
+        productivity_rating: productivityRating,
+        created_at: completedAt,
+      });
+    }
+
     setDistractions(0);
     setShowRatingModal(false);
   }, [taskDescription, category, distractions, productivityRating]);

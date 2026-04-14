@@ -1,12 +1,41 @@
-// eslint-disable-next-line import/no-unresolved -- optional native module, installed at build time
-import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import { supabase } from './supabase';
+
+// react-native-nfc-manager is an optional native module.
+// Use dynamic imports so Metro doesn't crash when building on machines
+// where the native module is not linked (e.g. Expo Go, CI).
+
+type NfcManagerType = typeof import('react-native-nfc-manager').default;
+type NfcTechType = typeof import('react-native-nfc-manager').NfcTech;
+type NdefType = typeof import('react-native-nfc-manager').Ndef;
+
+let _NfcManager: NfcManagerType | null = null;
+let _NfcTech: NfcTechType | null = null;
+let _Ndef: NdefType | null = null;
+
+async function getNfcModule(): Promise<{
+  NfcManager: NfcManagerType;
+  NfcTech: NfcTechType;
+  Ndef: NdefType;
+} | null> {
+  if (_NfcManager) return { NfcManager: _NfcManager, NfcTech: _NfcTech!, Ndef: _Ndef! };
+  try {
+    const mod = await import('react-native-nfc-manager');
+    _NfcManager = mod.default;
+    _NfcTech = mod.NfcTech;
+    _Ndef = mod.Ndef;
+    return { NfcManager: _NfcManager, NfcTech: _NfcTech, Ndef: _Ndef };
+  } catch {
+    return null;
+  }
+}
 
 export async function initNfc(): Promise<boolean> {
   try {
-    const isSupported = await NfcManager.isSupported();
+    const nfc = await getNfcModule();
+    if (!nfc) return false;
+    const isSupported = await nfc.NfcManager.isSupported();
     if (isSupported) {
-      await NfcManager.start();
+      await nfc.NfcManager.start();
     }
     return isSupported;
   } catch {
@@ -16,39 +45,44 @@ export async function initNfc(): Promise<boolean> {
 
 export async function readNfcTag(): Promise<string | null> {
   try {
-    await NfcManager.requestTechnology(NfcTech.Ndef);
-    const tag = await NfcManager.getTag();
+    const nfc = await getNfcModule();
+    if (!nfc) return null;
+    await nfc.NfcManager.requestTechnology(nfc.NfcTech.Ndef);
+    const tag = await nfc.NfcManager.getTag();
 
     if (tag?.ndefMessage && tag.ndefMessage.length > 0) {
       const firstRecord = tag.ndefMessage[0];
       if (firstRecord) {
-        const text = Ndef.text.decodePayload(new Uint8Array(firstRecord.payload));
+        const text = nfc.Ndef.text.decodePayload(new Uint8Array(firstRecord.payload));
         return text;
       }
     }
 
-    // Fall back to tag ID
     return tag?.id ?? null;
   } catch {
     return null;
   } finally {
-    NfcManager.cancelTechnologyRequest().catch(() => {});
+    const nfc = await getNfcModule();
+    nfc?.NfcManager.cancelTechnologyRequest().catch(() => {});
   }
 }
 
 export async function writeNfcTag(text: string): Promise<boolean> {
   try {
-    await NfcManager.requestTechnology(NfcTech.Ndef);
-    const bytes = Ndef.encodeMessage([Ndef.textRecord(text)]);
+    const nfc = await getNfcModule();
+    if (!nfc) return false;
+    await nfc.NfcManager.requestTechnology(nfc.NfcTech.Ndef);
+    const bytes = nfc.Ndef.encodeMessage([nfc.Ndef.textRecord(text)]);
     if (bytes) {
-      await NfcManager.ndefHandler.writeNdefMessage(bytes);
+      await nfc.NfcManager.ndefHandler.writeNdefMessage(bytes);
       return true;
     }
     return false;
   } catch {
     return false;
   } finally {
-    NfcManager.cancelTechnologyRequest().catch(() => {});
+    const nfc = await getNfcModule();
+    nfc?.NfcManager.cancelTechnologyRequest().catch(() => {});
   }
 }
 
@@ -64,7 +98,6 @@ export async function fetchUserNfcTriggers(userId: string) {
 }
 
 export function executeNfcAction(action: string, _params?: Record<string, unknown>) {
-  // Action routing - will be connected to navigation and store actions
   switch (action) {
     case 'start_workout':
       return { route: '/(tabs)/fitness/workout-player', params: _params };
@@ -81,6 +114,7 @@ export function executeNfcAction(action: string, _params?: Record<string, unknow
   }
 }
 
-export function cleanupNfc() {
-  NfcManager.cancelTechnologyRequest().catch(() => {});
+export async function cleanupNfc() {
+  const nfc = await getNfcModule();
+  nfc?.NfcManager.cancelTechnologyRequest().catch(() => {});
 }

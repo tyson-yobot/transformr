@@ -9,9 +9,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import { ThemeProvider } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { useSettingsStore } from '@stores/settingsStore';
+
+const STRIPE_PUBLISHABLE_KEY = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -54,18 +57,16 @@ export default function RootLayout() {
     void onLayoutReady();
   }, [onLayoutReady]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
     <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider mode={themeMode}>
-          <StatusBar style="light" />
-          <Slot />
-        </ThemeProvider>
-      </QueryClientProvider>
+      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider mode={themeMode}>
+            <StatusBar style="light" />
+            <Slot />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </StripeProvider>
     </SafeAreaProvider>
   );
 }

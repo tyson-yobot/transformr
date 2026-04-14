@@ -24,7 +24,8 @@ import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { Skeleton } from '@components/ui/Skeleton';
-import type { SavedMeal } from '../../../types/database';
+import { supabase } from '../../../services/supabase';
+import type { SavedMeal } from '@app-types/database';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -42,56 +43,23 @@ export default function SavedMealsScreen() {
   const [newMealName, setNewMealName] = useState('');
   const [newMealType, setNewMealType] = useState<MealType>('lunch');
 
-  // Mock data load
   useEffect(() => {
-    const mockMeals: SavedMeal[] = [
-      {
-        id: '1',
-        name: 'Chicken & Rice Bowl',
-        description: 'Grilled chicken, brown rice, broccoli',
-        meal_type: 'lunch',
-        total_calories: 520,
-        total_protein: 48,
-        total_carbs: 52,
-        total_fat: 12,
-        prep_time_minutes: 25,
-      },
-      {
-        id: '2',
-        name: 'Protein Smoothie',
-        description: 'Whey, banana, peanut butter, oats, almond milk',
-        meal_type: 'shake',
-        total_calories: 450,
-        total_protein: 40,
-        total_carbs: 42,
-        total_fat: 14,
-        prep_time_minutes: 5,
-      },
-      {
-        id: '3',
-        name: 'Egg White Omelette',
-        description: 'Egg whites, spinach, peppers, feta',
-        meal_type: 'breakfast',
-        total_calories: 280,
-        total_protein: 32,
-        total_carbs: 8,
-        total_fat: 14,
-        prep_time_minutes: 10,
-      },
-      {
-        id: '4',
-        name: 'Salmon & Sweet Potato',
-        description: 'Baked salmon, sweet potato, asparagus',
-        meal_type: 'dinner',
-        total_calories: 620,
-        total_protein: 45,
-        total_carbs: 48,
-        total_fat: 26,
-        prep_time_minutes: 35,
-      },
-    ];
-    setSavedMeals(mockMeals);
-    setIsLoading(false);
+    const fetchSavedMeals = async () => {
+      setIsLoading(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+          .from('saved_meals')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (data) setSavedMeals(data as SavedMeal[]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void fetchSavedMeals();
   }, []);
 
   const filteredMeals = useMemo(() => {
@@ -128,21 +96,31 @@ export default function SavedMealsScreen() {
     Alert.alert('Logged!', `${meal.name} has been added to your log.`);
   }, [logFood]);
 
-  const handleCreateMeal = useCallback(() => {
+  const handleCreateMeal = useCallback(async () => {
     if (newMealName.trim().length === 0) return;
     hapticSuccess();
 
-    const newMeal: SavedMeal = {
-      id: Date.now().toString(),
-      name: newMealName.trim(),
-      meal_type: newMealType,
-      total_calories: 0,
-      total_protein: 0,
-      total_carbs: 0,
-      total_fat: 0,
-    };
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    setSavedMeals((prev) => [newMeal, ...prev]);
+    const { data, error } = await supabase
+      .from('saved_meals')
+      .insert({
+        user_id: user.id,
+        name: newMealName.trim(),
+        meal_type: newMealType,
+        total_calories: 0,
+        total_protein: 0,
+        total_carbs: 0,
+        total_fat: 0,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setSavedMeals((prev) => [data as SavedMeal, ...prev]);
+    }
     setCreateModalVisible(false);
     setNewMealName('');
   }, [newMealName, newMealType]);
@@ -154,7 +132,8 @@ export default function SavedMealsScreen() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => {
+        onPress: async () => {
+          await supabase.from('saved_meals').delete().eq('id', mealId);
           setSavedMeals((prev) => prev.filter((m) => m.id !== mealId));
         },
       },

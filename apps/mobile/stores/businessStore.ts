@@ -38,8 +38,16 @@ interface BusinessState {
   error: string | null;
 }
 
+interface BusinessInput {
+  name: string;
+  type?: Business['type'];
+  monthly_revenue?: number;
+  description?: string;
+}
+
 interface BusinessActions {
   fetchBusinesses: () => Promise<void>;
+  createBusiness: (data: BusinessInput) => Promise<void>;
   logRevenue: (data: RevenueInput) => Promise<void>;
   getMonthlyMetrics: () => MonthlyMetrics[];
   clearError: () => void;
@@ -106,6 +114,36 @@ export const useBusinessStore = create<BusinessStore>()((set, get) => ({
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch businesses';
+      set({ error: message, isLoading: false });
+    }
+  },
+
+  createBusiness: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: newBiz, error } = await supabase
+        .from('businesses')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          type: data.type,
+          monthly_revenue: data.monthly_revenue ?? 0,
+          description: data.description,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      set((state) => ({
+        businesses: [...state.businesses, newBiz as Business],
+        isLoading: false,
+      }));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create business';
       set({ error: message, isLoading: false });
     }
   },

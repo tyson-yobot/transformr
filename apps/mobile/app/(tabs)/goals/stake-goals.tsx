@@ -2,12 +2,13 @@
 // TRANSFORMR -- Stake Goals
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -20,6 +21,8 @@ import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
+import { supabase } from '../../../services/supabase';
+import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
 
 interface StakeGoalWithDetails extends StakeGoal {
@@ -31,6 +34,8 @@ export default function StakeGoalsScreen() {
   const { colors, typography, spacing } = useTheme();
 
   const [stakeGoals, setStakeGoals] = useState<StakeGoalWithDetails[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [stakeAmount, setStakeAmount] = useState('');
@@ -47,30 +52,126 @@ export default function StakeGoalsScreen() {
     [stakeGoals],
   );
 
-  const handleCreateStake = useCallback(() => {
+  const fetchStakeGoals = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: goals, error } = await supabase
+        .from('stake_goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      if (!goals || goals.length === 0) {
+        setStakeGoals([]);
+        return;
+      }
+
+      const goalIds = goals.map((g: StakeGoal) => g.id);
+      const { data: evaluations } = await supabase
+        .from('stake_evaluations')
+        .select('*')
+        .in('stake_goal_id', goalIds)
+        .order('created_at', { ascending: true });
+
+      const evalsByGoal = new Map<string, StakeEvaluation[]>();
+      for (const ev of (evaluations ?? []) as StakeEvaluation[]) {
+        if (!ev.stake_goal_id) continue;
+        const list = evalsByGoal.get(ev.stake_goal_id) ?? [];
+        list.push(ev);
+        evalsByGoal.set(ev.stake_goal_id, list);
+      }
+
+      const withDetails: StakeGoalWithDetails[] = (goals as StakeGoal[]).map((g) => ({
+        ...g,
+        goalTitle:
+          (g.evaluation_criteria as Record<string, string> | undefined)?.title ??
+          'Stake Goal',
+        evaluations: evalsByGoal.get(g.id) ?? [],
+      }));
+
+      setStakeGoals(withDetails);
+    } catch {
+      // Silently fail — empty state is shown
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchStakeGoals();
+  }, [fetchStakeGoals]);
+
+  const handleCreateStake = useCallback(async () => {
     if (!newGoalTitle.trim() || !stakeAmount.trim()) return;
     const amount = parseFloat(stakeAmount);
     if (isNaN(amount) || amount <= 0) return;
 
-    const newStake: StakeGoalWithDetails = {
-      id: Date.now().toString(),
-      goal_id: Date.now().toString(),
-      stake_amount: amount,
-      evaluation_frequency: evaluationFreq,
-      charity_name: charityName.trim() || undefined,
-      total_saved: 0,
-      total_lost: 0,
-      is_active: true,
-      goalTitle: newGoalTitle.trim(),
-      evaluations: [],
-    };
+    setIsCreating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-    setStakeGoals((prev) => [...prev, newStake]);
-    setShowCreateModal(false);
-    setNewGoalTitle('');
-    setStakeAmount('');
-    setCharityName('');
-    hapticSuccess();
+      // Insert stake goal into Supabase
+      const { data: created, error: insertError } = await supabase
+        .from('stake_goals')
+        .insert({
+          user_id: user.id,
+          stake_amount: amount,
+          evaluation_frequency: evaluationFreq,
+          charity_name: charityName.trim() || null,
+          total_saved: 0,
+          total_lost: 0,
+          is_active: true,
+          evaluation_criteria: { title: newGoalTitle.trim() },
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (insertError) throw insertError;
+
+      const newGoal = created as StakeGoal;
+
+      // Create Stripe payment intent to hold the stake
+      const paymentResult = await createStakePayment(
+        user.id,
+        amount,
+        newGoal.id,
+        `Stake: ${newGoalTitle.trim()}`,
+      );
+
+      if (paymentResult.success && paymentResult.paymentIntentId) {
+        // Persist payment intent ID back to the stake goal
+        await supabase
+          .from('stake_goals')
+          .update({ stripe_payment_intent_id: paymentResult.paymentIntentId })
+          .eq('id', newGoal.id);
+        newGoal.stripe_payment_intent_id = paymentResult.paymentIntentId;
+      }
+
+      setStakeGoals((prev) => [
+        {
+          ...newGoal,
+          goalTitle: newGoalTitle.trim(),
+          evaluations: [],
+        },
+        ...prev,
+      ]);
+
+      setShowCreateModal(false);
+      setNewGoalTitle('');
+      setStakeAmount('');
+      setCharityName('');
+      hapticSuccess();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create stake';
+      Alert.alert('Error', msg);
+    } finally {
+      setIsCreating(false);
+    }
   }, [newGoalTitle, stakeAmount, charityName, evaluationFreq]);
 
   return (
@@ -113,106 +214,116 @@ export default function StakeGoalsScreen() {
           </Text>
         </Animated.View>
 
-        {stakeGoals
-          .filter((sg) => sg.is_active)
-          .map((stakeGoal, index) => {
-            const passCount = stakeGoal.evaluations.filter((e) => e.passed).length;
-            const failCount = stakeGoal.evaluations.filter((e) => !e.passed).length;
-            const totalEvals = stakeGoal.evaluations.length;
-            const passRate = totalEvals > 0 ? passCount / totalEvals : 0;
-
-            return (
-              <Animated.View key={stakeGoal.id} entering={FadeInDown.delay(300 + index * 50)}>
-                <Card style={{ marginBottom: spacing.md }}>
-                  <View style={styles.stakeHeader}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
-                        {stakeGoal.goalTitle}
-                      </Text>
-                      <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                        {formatCurrency(stakeGoal.stake_amount)} per {stakeGoal.evaluation_frequency ?? 'week'}
-                      </Text>
-                    </View>
-                    <Badge
-                      label={stakeGoal.is_active ? 'Active' : 'Inactive'}
-                      variant={stakeGoal.is_active ? 'success' : 'default'}
-                      size="sm"
-                    />
-                  </View>
-
-                  {stakeGoal.charity_name && (
-                    <Text
-                      style={[
-                        typography.tiny,
-                        { color: colors.text.muted, marginTop: spacing.xs },
-                      ]}
-                    >
-                      Charity: {stakeGoal.charity_name}
-                    </Text>
-                  )}
-
-                  {totalEvals > 0 && (
-                    <View style={{ marginTop: spacing.md }}>
-                      <ProgressBar
-                        progress={passRate}
-                        label="Pass Rate"
-                        showPercentage
-                        color={passRate >= 0.8 ? colors.accent.success : colors.accent.warning}
-                      />
-                      <View style={[styles.evalRow, { marginTop: spacing.sm }]}>
-                        <Text style={[typography.tiny, { color: colors.accent.success }]}>
-                          {passCount} passed
-                        </Text>
-                        <Text style={[typography.tiny, { color: colors.accent.danger }]}>
-                          {failCount} failed
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-
-                  {/* Evaluation History */}
-                  {stakeGoal.evaluations.length > 0 && (
-                    <View style={{ marginTop: spacing.md }}>
-                      <View style={styles.evalHistoryRow}>
-                        {stakeGoal.evaluations.slice(-10).map((ev, i) => (
-                          <View
-                            key={ev.id ?? i}
-                            style={[
-                              styles.evalDot,
-                              {
-                                backgroundColor: ev.passed
-                                  ? colors.accent.success
-                                  : colors.accent.danger,
-                                borderRadius: 4,
-                              },
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  )}
-
-                  <View style={[styles.savedLostRow, { marginTop: spacing.md }]}>
-                    <Text style={[typography.monoBody, { color: colors.accent.success }]}>
-                      Saved: {formatCurrency(stakeGoal.total_saved ?? 0)}
-                    </Text>
-                    <Text style={[typography.monoBody, { color: colors.accent.danger }]}>
-                      Lost: {formatCurrency(stakeGoal.total_lost ?? 0)}
-                    </Text>
-                  </View>
-                </Card>
-              </Animated.View>
-            );
-          })}
-
-        {stakeGoals.filter((sg) => sg.is_active).length === 0 && (
+        {isLoading ? (
           <Card>
-            <Text
-              style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}
-            >
-              No active stakes. Put money on the line to stay accountable!
+            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
+              Loading stakes…
             </Text>
           </Card>
+        ) : (
+          <>
+            {stakeGoals
+              .filter((sg) => sg.is_active)
+              .map((stakeGoal, index) => {
+                const passCount = stakeGoal.evaluations.filter((e) => e.passed).length;
+                const failCount = stakeGoal.evaluations.filter((e) => !e.passed).length;
+                const totalEvals = stakeGoal.evaluations.length;
+                const passRate = totalEvals > 0 ? passCount / totalEvals : 0;
+
+                return (
+                  <Animated.View key={stakeGoal.id} entering={FadeInDown.delay(300 + index * 50)}>
+                    <Card style={{ marginBottom: spacing.md }}>
+                      <View style={styles.stakeHeader}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                            {stakeGoal.goalTitle}
+                          </Text>
+                          <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                            {formatCurrency(stakeGoal.stake_amount)} per {stakeGoal.evaluation_frequency ?? 'week'}
+                          </Text>
+                        </View>
+                        <Badge
+                          label={stakeGoal.is_active ? 'Active' : 'Inactive'}
+                          variant={stakeGoal.is_active ? 'success' : 'default'}
+                          size="sm"
+                        />
+                      </View>
+
+                      {stakeGoal.charity_name && (
+                        <Text
+                          style={[
+                            typography.tiny,
+                            { color: colors.text.muted, marginTop: spacing.xs },
+                          ]}
+                        >
+                          Charity: {stakeGoal.charity_name}
+                        </Text>
+                      )}
+
+                      {totalEvals > 0 && (
+                        <View style={{ marginTop: spacing.md }}>
+                          <ProgressBar
+                            progress={passRate}
+                            label="Pass Rate"
+                            showPercentage
+                            color={passRate >= 0.8 ? colors.accent.success : colors.accent.warning}
+                          />
+                          <View style={[styles.evalRow, { marginTop: spacing.sm }]}>
+                            <Text style={[typography.tiny, { color: colors.accent.success }]}>
+                              {passCount} passed
+                            </Text>
+                            <Text style={[typography.tiny, { color: colors.accent.danger }]}>
+                              {failCount} failed
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Evaluation History */}
+                      {stakeGoal.evaluations.length > 0 && (
+                        <View style={{ marginTop: spacing.md }}>
+                          <View style={styles.evalHistoryRow}>
+                            {stakeGoal.evaluations.slice(-10).map((ev, i) => (
+                              <View
+                                key={ev.id ?? i}
+                                style={[
+                                  styles.evalDot,
+                                  {
+                                    backgroundColor: ev.passed
+                                      ? colors.accent.success
+                                      : colors.accent.danger,
+                                    borderRadius: 4,
+                                  },
+                                ]}
+                              />
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      <View style={[styles.savedLostRow, { marginTop: spacing.md }]}>
+                        <Text style={[typography.monoBody, { color: colors.accent.success }]}>
+                          Saved: {formatCurrency(stakeGoal.total_saved ?? 0)}
+                        </Text>
+                        <Text style={[typography.monoBody, { color: colors.accent.danger }]}>
+                          Lost: {formatCurrency(stakeGoal.total_lost ?? 0)}
+                        </Text>
+                      </View>
+                    </Card>
+                  </Animated.View>
+                );
+              })}
+
+            {stakeGoals.filter((sg) => sg.is_active).length === 0 && (
+              <Card>
+                <Text
+                  style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}
+                >
+                  No active stakes. Put money on the line to stay accountable!
+                </Text>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Create Stake Button */}
@@ -282,10 +393,10 @@ export default function StakeGoalsScreen() {
         </View>
 
         <Button
-          title="Create Stake"
+          title={isCreating ? 'Creating…' : 'Create Stake'}
           onPress={handleCreateStake}
           fullWidth
-          disabled={!newGoalTitle.trim() || !stakeAmount.trim()}
+          disabled={!newGoalTitle.trim() || !stakeAmount.trim() || isCreating}
           style={{ marginTop: spacing.xl }}
         />
       </Modal>

@@ -180,6 +180,20 @@ export default function GoalsLayout() {
           headerBackTitle: 'Challenges',
         }}
       />
+      <Stack.Screen
+        name="insights"
+        options={{
+          title: 'Goal Insights',
+          headerBackTitle: 'Goals',
+        }}
+      />
+      <Stack.Screen
+        name="[id]"
+        options={{
+          title: 'Goal',
+          headerBackTitle: 'Goals',
+        }}
+      />
     </Stack>
   );
 }
