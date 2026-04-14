@@ -2,7 +2,7 @@
 // TRANSFORMR -- Registration Screen
 // =============================================================================
 
-import { useState, useCallback, useMemo, type ComponentType } from 'react';
+import { useState, useCallback, useMemo, useEffect, type ComponentType } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,14 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
@@ -20,14 +27,23 @@ import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-grad
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
-import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
 
 const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
+
+// Google branded "G" icon — Google blue
+function GoogleIcon({ size = 20 }: { size?: number }) {
+  return (
+    <Text style={{ fontSize: size, fontWeight: '700', color: '#4285F4', marginRight: 8, lineHeight: size + 2 }}>
+      G
+    </Text>
+  );
+}
 
 function getPasswordStrength(password: string): { level: number; label: string } {
   if (password.length === 0) return { level: 0, label: '' };
@@ -49,7 +65,6 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
@@ -65,26 +80,43 @@ export default function RegisterScreen() {
     }
   }, [passwordStrength.level, colors]);
 
+  // Entrance animations
+  const iconScale = useSharedValue(0.6);
+  const iconOpacity = useSharedValue(0);
+  const titleOpacity = useSharedValue(0);
+  const formOpacity = useSharedValue(0);
+  const formTranslateY = useSharedValue(24);
+  const socialOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    iconScale.value = withSpring(1, { damping: 12, stiffness: 120 });
+    iconOpacity.value = withTiming(1, { duration: 400 });
+    titleOpacity.value = withDelay(180, withTiming(1, { duration: 500 }));
+    formOpacity.value = withDelay(400, withTiming(1, { duration: 500 }));
+    formTranslateY.value = withDelay(400, withSpring(0, { damping: 16 }));
+    socialOpacity.value = withDelay(620, withTiming(1, { duration: 400 }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const iconAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+    opacity: iconOpacity.value,
+  }));
+  const titleAnimStyle = useAnimatedStyle(() => ({ opacity: titleOpacity.value }));
+  const formAnimStyle = useAnimatedStyle(() => ({
+    opacity: formOpacity.value,
+    transform: [{ translateY: formTranslateY.value }],
+  }));
+  const socialAnimStyle = useAnimatedStyle(() => ({ opacity: socialOpacity.value }));
+
   const validate = useCallback((): boolean => {
     const errs: Record<string, string> = {};
-
-    if (!isNotEmpty(displayName)) {
-      errs.displayName = 'Display name is required';
-    }
-    if (!isValidEmail(email)) {
-      errs.email = 'Please enter a valid email address';
-    }
+    if (!isNotEmpty(displayName)) errs.displayName = 'Display name is required';
+    if (!isValidEmail(email)) errs.email = 'Please enter a valid email address';
     const { valid, errors: pwErrors } = isValidPassword(password);
-    if (!valid && pwErrors[0]) {
-      errs.password = pwErrors[0];
-    }
-    if (password !== confirmPassword) {
-      errs.confirmPassword = 'Passwords do not match';
-    }
-    if (!agreedToTerms) {
-      errs.terms = 'You must agree to the Terms of Service';
-    }
-
+    if (!valid && pwErrors[0]) errs.password = pwErrors[0];
+    if (password !== confirmPassword) errs.confirmPassword = 'Passwords do not match';
+    if (!agreedToTerms) errs.terms = 'You must agree to the Terms of Service';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }, [displayName, email, password, confirmPassword, agreedToTerms]);
@@ -108,9 +140,15 @@ export default function RegisterScreen() {
         contentFit="cover"
         cachePolicy="memory-disk"
       />
-      {/* Dark gradient overlay */}
+      {/* Gradient: let image breathe at top, solid at bottom */}
       <LinearGradient
-        colors={['rgba(12,10,21,0.65)', 'rgba(12,10,21,0.92)']}
+        colors={[
+          'rgba(12,10,21,0.35)',
+          'rgba(12,10,21,0.60)',
+          'rgba(12,10,21,0.92)',
+          '#0C0A15',
+        ]}
+        locations={[0, 0.3, 0.55, 0.75]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -120,228 +158,216 @@ export default function RegisterScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
-            contentContainerStyle={[styles.scroll, { padding: spacing.xxl }]}
+            contentContainerStyle={styles.scroll}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
             {/* Logo / Brand */}
-            <Animated.View entering={FadeInDown.delay(100)} style={[styles.logoSection, { marginBottom: spacing.xxxl }]}>
+            <Animated.View style={[styles.logoSection, iconAnimStyle]}>
+              <View style={styles.iconGlow} />
               <Image
                 source={require('@assets/images/icon.png')}
-                style={[styles.icon, { marginBottom: spacing.md }]}
+                style={styles.icon}
                 contentFit="contain"
               />
-              <Text style={[typography.hero, { color: colors.accent.primary, letterSpacing: 4, textAlign: 'center' }]}>
-                TRANSFORMR
-              </Text>
-              <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm, textAlign: 'center' }]}>
-                Start your transformation journey
-              </Text>
             </Animated.View>
 
-            {/* Error Banner */}
-            {error && (
-              <View
-                style={[
-                  styles.errorBanner,
-                  {
-                    backgroundColor: colors.accent.danger + '18',
-                    borderRadius: borderRadius.md,
-                    padding: spacing.md,
-                    marginBottom: spacing.lg,
-                    borderWidth: 1,
-                    borderColor: colors.accent.danger + '40',
-                  },
-                ]}
-              >
-                <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
-              </View>
-            )}
+            <Animated.View style={[styles.brandBlock, titleAnimStyle]}>
+              <Text style={styles.heroTitle}>TRANSFORMR</Text>
+              <Text style={styles.tagline}>Start your transformation journey</Text>
+            </Animated.View>
 
-            {/* Display Name */}
-            <Input
-              label="Display Name"
-              placeholder="What should we call you?"
-              value={displayName}
-              onChangeText={(t: string) => {
-                setDisplayName(t);
-                setFieldErrors((prev) => ({ ...prev, displayName: '' }));
-              }}
-              error={fieldErrors.displayName}
-              autoCapitalize="words"
-              autoComplete="name"
-              containerStyle={{ marginBottom: spacing.lg }}
-            />
-
-            {/* Email */}
-            <Input
-              label="Email"
-              placeholder="you@example.com"
-              value={email}
-              onChangeText={(t: string) => {
-                setEmail(t);
-                setFieldErrors((prev) => ({ ...prev, email: '' }));
-              }}
-              error={fieldErrors.email}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              containerStyle={{ marginBottom: spacing.lg }}
-            />
-
-            {/* Password */}
-            <Input
-              label="Password"
-              placeholder="Create a strong password"
-              value={password}
-              onChangeText={(t: string) => {
-                setPassword(t);
-                setFieldErrors((prev) => ({ ...prev, password: '' }));
-              }}
-              error={fieldErrors.password}
-              secureTextEntry
-              autoCapitalize="none"
-              containerStyle={{ marginBottom: spacing.sm }}
-            />
-
-            {/* Password Strength Indicator */}
-            {password.length > 0 && (
-              <View style={[styles.strengthRow, { marginBottom: spacing.lg }]}>
-                <View style={styles.strengthBars}>
-                  {[1, 2, 3, 4].map((level) => (
-                    <View
-                      key={level}
-                      style={[
-                        styles.strengthBar,
-                        {
-                          backgroundColor:
-                            level <= passwordStrength.level
-                              ? strengthColor
-                              : colors.background.tertiary,
-                          borderRadius: 2,
-                        },
-                      ]}
-                    />
-                  ))}
-                </View>
-                <Text style={[typography.caption, { color: strengthColor, marginLeft: spacing.sm }]}>
-                  {passwordStrength.label}
-                </Text>
-              </View>
-            )}
-
-            {/* Confirm Password */}
-            <Input
-              label="Confirm Password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChangeText={(t: string) => {
-                setConfirmPassword(t);
-                setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
-              }}
-              error={fieldErrors.confirmPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              containerStyle={{ marginBottom: spacing.xl }}
-            />
-
-            {/* Terms Checkbox */}
-            <Pressable
-              onPress={() => {
-                hapticLight();
-                setAgreedToTerms(!agreedToTerms);
-                setFieldErrors((prev) => ({ ...prev, terms: '' }));
-              }}
-              accessibilityLabel="Agree to terms of service"
-              style={[styles.termsRow, { marginBottom: spacing.xxl }]}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  {
-                    borderColor: fieldErrors.terms ? colors.accent.danger : colors.border.default,
-                    borderRadius: borderRadius.sm / 2,
-                    backgroundColor: agreedToTerms ? colors.accent.primary : 'transparent',
-                  },
-                ]}
-              >
-                {agreedToTerms && (
-                  <Text style={{ color: colors.text.inverse, fontSize: 12, lineHeight: 14 }}>
-                    {'\u2713'}
+            <Animated.View style={formAnimStyle}>
+              {/* Error Banner */}
+              {error && (
+                <View
+                  style={[
+                    styles.errorBanner,
+                    {
+                      backgroundColor: colors.accent.danger + '18',
+                      borderRadius: borderRadius.md,
+                      borderColor: colors.accent.danger + '40',
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 13, color: colors.accent.danger, lineHeight: 18 }}>
+                    {error}
                   </Text>
-                )}
-              </View>
-              <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
-                I agree to the Terms of Service and Privacy Policy
-              </Text>
-            </Pressable>
-            {fieldErrors.terms && (
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.accent.danger, marginTop: -spacing.lg, marginBottom: spacing.lg },
+                </View>
+              )}
+
+              {/* Display Name */}
+              <Input
+                label="Display Name"
+                placeholder="What should we call you?"
+                value={displayName}
+                onChangeText={(t: string) => {
+                  setDisplayName(t);
+                  setFieldErrors((prev) => ({ ...prev, displayName: '' }));
+                }}
+                error={fieldErrors.displayName}
+                autoCapitalize="words"
+                autoComplete="name"
+                containerStyle={{ marginBottom: 20 }}
+              />
+
+              {/* Email */}
+              <Input
+                label="Email"
+                placeholder="you@example.com"
+                value={email}
+                onChangeText={(t: string) => {
+                  setEmail(t);
+                  setFieldErrors((prev) => ({ ...prev, email: '' }));
+                }}
+                error={fieldErrors.email}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                containerStyle={{ marginBottom: 20 }}
+              />
+
+              {/* Password */}
+              <Input
+                label="Password"
+                placeholder="Create a strong password"
+                value={password}
+                onChangeText={(t: string) => {
+                  setPassword(t);
+                  setFieldErrors((prev) => ({ ...prev, password: '' }));
+                }}
+                error={fieldErrors.password}
+                secureTextEntry
+                autoCapitalize="none"
+                containerStyle={{ marginBottom: 8 }}
+              />
+
+              {/* Password Strength */}
+              {password.length > 0 && (
+                <Animated.View entering={FadeInDown.duration(200)} style={[styles.strengthRow, { marginBottom: 20 }]}>
+                  <View style={styles.strengthBars}>
+                    {[1, 2, 3, 4].map((level) => (
+                      <View
+                        key={level}
+                        style={[
+                          styles.strengthBar,
+                          {
+                            backgroundColor:
+                              level <= passwordStrength.level
+                                ? strengthColor
+                                : colors.background.tertiary,
+                            borderRadius: 2,
+                          },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                  <Text style={[typography.caption, { color: strengthColor, marginLeft: spacing.sm }]}>
+                    {passwordStrength.label}
+                  </Text>
+                </Animated.View>
+              )}
+
+              {/* Confirm Password */}
+              <Input
+                label="Confirm Password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChangeText={(t: string) => {
+                  setConfirmPassword(t);
+                  setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
+                }}
+                error={fieldErrors.confirmPassword}
+                secureTextEntry
+                autoCapitalize="none"
+                containerStyle={{ marginBottom: 20 }}
+              />
+
+              {/* Terms Checkbox */}
+              <Pressable
+                onPress={() => {
+                  hapticLight();
+                  setAgreedToTerms(!agreedToTerms);
+                  setFieldErrors((prev) => ({ ...prev, terms: '' }));
+                }}
+                accessibilityLabel="Agree to terms of service"
+                style={styles.termsRow}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      borderColor: fieldErrors.terms ? colors.accent.danger : colors.border.default,
+                      borderRadius: borderRadius.sm / 2,
+                      backgroundColor: agreedToTerms ? colors.accent.primary : 'transparent',
+                    },
+                  ]}
+                >
+                  {agreedToTerms && (
+                    <Text style={{ color: colors.text.inverse, fontSize: 12, lineHeight: 14 }}>
+                      {'\u2713'}
+                    </Text>
+                  )}
+                </View>
+                <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
+                  I agree to the Terms of Service and Privacy Policy
+                </Text>
+              </Pressable>
+              {fieldErrors.terms && (
+                <Text style={{ fontSize: 12, color: colors.accent.danger, marginTop: 4, marginBottom: 16 }}>
+                  {fieldErrors.terms}
+                </Text>
+              )}
+
+              {/* Create Account Button */}
+              <Pressable
+                onPress={handleSignUp}
+                disabled={loading}
+                style={({ pressed }) => [
+                  styles.createBtn,
+                  pressed && styles.createBtnPressed,
+                  { marginTop: 24 },
                 ]}
               >
-                {fieldErrors.terms}
-              </Text>
-            )}
-
-            {/* Create Account Button */}
-            <Button
-              title="Create Account"
-              onPress={handleSignUp}
-              loading={loading}
-              fullWidth
-              size="lg"
-              style={{ marginBottom: spacing.xl }}
-            />
+                <Text style={styles.createBtnText}>
+                  {loading ? 'Creating account…' : 'Create Account'}
+                </Text>
+              </Pressable>
+            </Animated.View>
 
             {/* Divider */}
-            <View style={[styles.dividerRow, { marginBottom: spacing.xl }]}>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-              <Text style={[typography.caption, { color: colors.text.muted, marginHorizontal: spacing.md }]}>
-                OR
-              </Text>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-            </View>
+            <Animated.View style={[styles.dividerRow, socialAnimStyle]}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </Animated.View>
 
             {/* Social Auth Buttons */}
-            <Button
-              title="Continue with Apple"
-              onPress={() => { hapticLight(); signInWithApple(); }}
-              variant="outline"
-              fullWidth
-              size="lg"
-              leftIcon={
-                <Text style={{ fontSize: 18, color: colors.text.primary, marginRight: spacing.sm }}>
-                  {'\uF8FF'}
-                </Text>
-              }
-              style={{ marginBottom: spacing.md }}
-            />
-            <Button
-              title="Continue with Google"
-              onPress={() => { hapticLight(); signInWithGoogle(); }}
-              variant="outline"
-              fullWidth
-              size="lg"
-              leftIcon={
-                <Text style={{ fontSize: 16, color: colors.text.primary, marginRight: spacing.sm }}>
-                  G
-                </Text>
-              }
-              style={{ marginBottom: spacing.xxxl }}
-            />
-
-            {/* Sign In Link */}
-            <View style={styles.signInRow}>
-              <Text style={[typography.body, { color: colors.text.secondary }]}>
-                Already have an account?{' '}
-              </Text>
-              <Pressable onPress={() => { hapticLight(); handleSignIn(); }} accessibilityLabel="Go to sign in">
-                <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>Sign In</Text>
+            <Animated.View style={socialAnimStyle}>
+              <Pressable
+                onPress={() => { hapticLight(); signInWithApple(); }}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed]}
+              >
+                <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
+                <Text style={styles.socialBtnText}>Continue with Apple</Text>
               </Pressable>
-            </View>
+
+              <Pressable
+                onPress={() => { hapticLight(); signInWithGoogle(); }}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }]}
+              >
+                <GoogleIcon size={18} />
+                <Text style={styles.socialBtnText}>Continue with Google</Text>
+              </Pressable>
+
+              {/* Sign In Link */}
+              <View style={styles.signInRow}>
+                <Text style={styles.signInText}>Already have an account?{' '}</Text>
+                <Pressable onPress={() => { hapticLight(); handleSignIn(); }} accessibilityLabel="Go to sign in">
+                  <Text style={styles.signInLink}>Sign In</Text>
+                </Pressable>
+              </View>
+            </Animated.View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -353,14 +379,53 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1 },
   flex: { flex: 1 },
-  scroll: { flexGrow: 1 },
-  logoSection: { alignItems: 'center' },
-  icon: { width: 80, height: 80 },
-  errorBanner: {},
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingBottom: 40,
+  },
+  // Icon / brand
+  logoSection: { alignItems: 'center', marginBottom: 16 },
+  iconGlow: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(168,85,247,0.15)',
+    top: -20,
+  },
+  icon: { width: 100, height: 100 },
+  brandBlock: { alignItems: 'center', marginBottom: 40 },
+  heroTitle: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: '#A855F7',
+    letterSpacing: 8,
+    textAlign: 'center',
+    textShadowColor: 'rgba(168,85,247,0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+  },
+  tagline: {
+    fontSize: 14,
+    color: '#9B8FC0',
+    textAlign: 'center',
+    letterSpacing: 1.5,
+    marginTop: 8,
+  },
+  // Error
+  errorBanner: {
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  // Strength
   strengthRow: { flexDirection: 'row', alignItems: 'center' },
   strengthBars: { flexDirection: 'row', flex: 1, gap: 4 },
   strengthBar: { flex: 1, height: 4 },
-  termsRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  // Terms
+  termsRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
   checkbox: {
     width: 22,
     height: 22,
@@ -369,7 +434,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 1,
   },
-  dividerRow: { flexDirection: 'row', alignItems: 'center' },
-  dividerLine: { flex: 1, height: 1 },
-  signInRow: { flexDirection: 'row', justifyContent: 'center' },
+  // Create Account button
+  createBtn: {
+    backgroundColor: '#A855F7',
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  createBtnPressed: { opacity: 0.88 },
+  createBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', letterSpacing: 1 },
+  // Divider
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' },
+  dividerText: { fontSize: 12, color: '#6B5E8A', marginHorizontal: 16, fontWeight: '500', letterSpacing: 1 },
+  // Social buttons
+  socialBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(22,18,42,0.8)',
+    borderWidth: 1,
+    borderColor: '#2A2248',
+    borderRadius: 14,
+    paddingVertical: 16,
+    marginBottom: 12,
+    gap: 10,
+  },
+  socialBtnPressed: { borderColor: '#362C5E', backgroundColor: 'rgba(30,24,56,0.9)' },
+  socialBtnText: { fontSize: 16, color: '#F0F0FC', fontWeight: '500' },
+  // Sign in
+  signInRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+  signInText: { fontSize: 15, color: '#9B8FC0' },
+  signInLink: { fontSize: 15, fontWeight: '700', color: '#A855F7' },
 });

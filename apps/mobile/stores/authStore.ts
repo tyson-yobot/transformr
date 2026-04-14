@@ -123,15 +123,22 @@ export const useAuthStore = create<AuthStore>()(
             const refreshToken = url.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+              set({ loading: false });
+              return;
             }
           }
-          set({ loading: false });
+          // Browser closed without completing auth (cancelled or provider not configured)
+          if (result.type === 'cancel' || result.type === 'dismiss') {
+            set({
+              error: 'Google sign-in is being configured. Use email for now — you can link Google later in Settings.',
+              loading: false,
+            });
+          } else {
+            set({ loading: false });
+          }
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Google sign-in failed';
-          const message = raw.includes('provider') || raw.includes('not enabled')
-            ? 'Google sign-in is being configured. Use email to create your account — you can link Google later in Settings.'
-            : raw;
-          set({ error: message, loading: false });
+          set({ error: raw, loading: false });
         }
       },
 
@@ -156,15 +163,22 @@ export const useAuthStore = create<AuthStore>()(
             const refreshToken = url.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+              set({ loading: false });
+              return;
             }
           }
-          set({ loading: false });
+          // Browser closed without completing auth (cancelled or provider not configured)
+          if (result.type === 'cancel' || result.type === 'dismiss') {
+            set({
+              error: 'Apple sign-in is being configured. Use email for now — you can link Apple later in Settings.',
+              loading: false,
+            });
+          } else {
+            set({ loading: false });
+          }
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Apple sign-in failed';
-          const message = raw.includes('provider') || raw.includes('not enabled')
-            ? 'Apple sign-in is being configured. Use email to create your account — you can link Apple later in Settings.'
-            : raw;
-          set({ error: message, loading: false });
+          set({ error: raw, loading: false });
         }
       },
 
