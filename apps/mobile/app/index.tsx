@@ -2,7 +2,7 @@
 // TRANSFORMR -- Entry Redirect + Branded Splash
 // =============================================================================
 
-import { useEffect, type ComponentType } from 'react';
+import { useEffect, useCallback, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,19 +14,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
-// Cast needed: expo class components don't satisfy React 19's JSX class element interface
-const Image = ExpoImage as unknown as ComponentType<ImageProps>;
-const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@stores/authStore';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
+// Local asset — guaranteed resolvable by Metro within project root
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const ICON = require('../assets/images/transformr-icon.png') as number;
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1284&q=80';
-
-// Local asset — guaranteed resolvable by Metro within project root
-const ICON = require('../assets/images/transformr-icon.png');
 
 export default function Index() {
   const session = useAuthStore((s) => s.session);
@@ -42,8 +42,8 @@ export default function Index() {
   useEffect(() => {
     scale.value = withRepeat(
       withSequence(
-        withTiming(1.03, { duration: 1000, easing: Easing.inOut(Easing.sine) }),
-        withTiming(1.0, { duration: 1000, easing: Easing.inOut(Easing.sine) }),
+        withTiming(1.03, { duration: 1000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1.0, { duration: 1000, easing: Easing.inOut(Easing.sin) }),
       ),
       -1,
       false,
@@ -58,10 +58,10 @@ export default function Index() {
     opacity: opacity.value,
   }));
 
-  const navigate = (path: Parameters<typeof router.replace>[0]) => {
+  const navigate = useCallback((path: Parameters<typeof router.replace>[0]) => {
     opacity.value = withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) });
     setTimeout(() => router.replace(path), 320);
-  };
+  }, [router, opacity]);
 
   useEffect(() => {
     if (loading) return;
@@ -93,7 +93,7 @@ export default function Index() {
         // Profile fetch failed — go to onboarding (profile will be created on first save)
         navigate('/(auth)/onboarding/welcome');
       });
-  }, [session, loading, router, fetchProfile]);
+  }, [session, loading, fetchProfile, navigate]);
 
   return (
     <Animated.View style={[styles.root, containerStyle]}>

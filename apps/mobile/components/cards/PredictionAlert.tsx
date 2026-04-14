@@ -65,7 +65,7 @@ export function PredictionAlert({
     : severity === 'warning'
       ? colors.accent.warning
       : colors.accent.danger;
-  const severityIcon = SEVERITY_ICONS[severity];
+  const _severityIcon = SEVERITY_ICONS[severity];
   const categoryIcon = CATEGORY_ICONS[category] ?? 'sparkles';
 
   return (

@@ -17,7 +17,7 @@ async function getNfcModule(): Promise<{
   NfcTech: NfcTechType;
   Ndef: NdefType;
 } | null> {
-  if (_NfcManager) return { NfcManager: _NfcManager, NfcTech: _NfcTech!, Ndef: _Ndef! };
+  if (_NfcManager && _NfcTech && _Ndef) return { NfcManager: _NfcManager, NfcTech: _NfcTech, Ndef: _Ndef };
   try {
     const mod = await import('react-native-nfc-manager');
     _NfcManager = mod.default;

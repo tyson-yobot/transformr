@@ -1,0 +1,15 @@
+diff --git a/node_modules/@expo/metro-config/build/serializer/fork/js.js b/node_modules/@expo/metro-config/build/serializer/fork/js.js
+index 77268e3..27c086c 100644
+--- a/node_modules/@expo/metro-config/build/serializer/fork/js.js
++++ b/node_modules/@expo/metro-config/build/serializer/fork/js.js
+@@ -69,6 +69,10 @@ function getModuleParams(module, options) {
+                         searchParams.set('modulesOnly', 'true');
+                         searchParams.set('runModule', 'false');
+                     }
++                    if (dependency.absolutePath == null) {
++                        // Optional dependency that could not be resolved — skip path entry.
++                        return id;
++                    }
+                     const bundlePath = path_1.default.relative(options.serverRoot, dependency.absolutePath);
+                     paths[id] =
+                         '/' +

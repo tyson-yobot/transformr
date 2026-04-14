@@ -55,7 +55,7 @@ jest.mock('../../services/supabase', () => ({
 
 // Replace the mock implementation after we have the reference
 beforeAll(() => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
   const mod = require('../../services/supabase');
   Object.defineProperty(mod, 'supabase', { value: mockSupabase, writable: true });
 });

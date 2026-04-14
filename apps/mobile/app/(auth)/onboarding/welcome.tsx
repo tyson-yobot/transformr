@@ -17,7 +17,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
-const VIVID_PURPLE = '#A855F7';
+const _VIVID_PURPLE = '#A855F7';
 
 const VALUE_PROPS = [
   { icon: '\uD83D\uDCAA', text: 'AI-powered workout tracking with ghost sets and PR detection' },
@@ -47,7 +47,7 @@ export default function WelcomeScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const contentStyle = useAnimatedStyle(() => ({
+  const _contentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
     transform: [{ translateY: contentTranslateY.value }],
   }));

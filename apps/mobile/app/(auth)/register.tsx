@@ -18,15 +18,15 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
-// Cast needed: expo class components don't satisfy React 19's JSX class element interface
-const Image = ExpoImage as unknown as ComponentType<ImageProps>;
-const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
 

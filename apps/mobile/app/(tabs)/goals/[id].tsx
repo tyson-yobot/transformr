@@ -23,12 +23,12 @@ import { useGoalStore } from '@stores/goalStore';
 import { supabase } from '../../../services/supabase';
 import { hapticSuccess, hapticMedium } from '@utils/haptics';
 import { formatDate, formatNumber } from '@utils/formatters';
-import type { Goal, GoalMilestone } from '@app-types/database';
+import type { GoalMilestone } from '@app-types/database';
 
 export default function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const { goals, updateGoalProgress } = useGoalStore();
 
   const goal = goals.find((g) => g.id === id) ?? null;

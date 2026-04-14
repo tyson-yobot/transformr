@@ -70,7 +70,7 @@ export const useProfileStore = create<ProfileStore>()((set, get) => ({
   updateProfile: async (updates) => {
     set({ isLoading: true, error: null });
     try {
-      let profile = get().profile;
+      const profile = get().profile;
 
       // If no profile in memory, fetch the auth user and upsert
       if (!profile) {

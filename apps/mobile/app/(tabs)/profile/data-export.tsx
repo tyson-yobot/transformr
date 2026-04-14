@@ -127,7 +127,8 @@ export default function DataExportScreen() {
       const total = selectedCats.length;
 
       for (let i = 0; i < selectedCats.length; i++) {
-        const cat = selectedCats[i]!;
+        const cat = selectedCats[i];
+        if (!cat) continue;
         setExportProgress((i + 0.5) / total);
 
         let query;

@@ -126,7 +126,7 @@ describe('startWorkout', () => {
   });
 
   it('sets error when user is not authenticated', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const { supabase } = require('../../services/supabase');
     supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
 
@@ -662,7 +662,7 @@ describe('getGhostData', () => {
   });
 
   it('returns empty array when user is not authenticated', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const { supabase } = require('../../services/supabase');
     supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
 

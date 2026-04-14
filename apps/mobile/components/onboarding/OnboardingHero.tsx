@@ -8,10 +8,10 @@ import { type ComponentType } from 'react';
 import { View, Text, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
+import { useTheme } from '@theme/index';
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
-import { useTheme } from '@theme/index';
 
 const DEEP_SPACE = '#0C0A15';
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';

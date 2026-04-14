@@ -6,8 +6,6 @@ import { useState, useCallback, type ComponentType } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, KeyboardAvoidingView, Platform, useWindowDimensions } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
-const Image = ExpoImage as unknown as ComponentType<ImageProps>;
-const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
@@ -15,6 +13,9 @@ import { Input } from '@components/ui/Input';
 import { hapticLight } from '@utils/haptics';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 import { useBusinessStore } from '@stores/businessStore';
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const HERO_URI = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80';
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
