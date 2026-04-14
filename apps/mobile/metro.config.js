@@ -32,15 +32,19 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 
   // Metro's virtual entry emits `./node_modules/<pkg>/entry` relative to the
   // monorepo root (because watchFolders includes it). When the origin is
-  // outside apps/mobile, rewrite relative node_modules paths so they resolve
-  // from apps/mobile/node_modules instead of the (empty) monorepo root.
+  // outside apps/mobile, resolve the package from apps/mobile/node_modules
+  // using require.resolve so we get the real file path with extension.
   if (
     moduleName.startsWith('./node_modules/') &&
     !context.originModulePath.startsWith(projectRoot)
   ) {
     const pkgRelative = moduleName.slice('./node_modules/'.length); // e.g. "expo-router/entry"
-    const absolute = path.resolve(projectRoot, 'node_modules', pkgRelative);
-    return { filePath: absolute, type: 'sourceFile' };
+    try {
+      const resolved = require.resolve(pkgRelative, { paths: [projectRoot] });
+      return { filePath: resolved, type: 'sourceFile' };
+    } catch {
+      // fall through to default resolver
+    }
   }
 
   return context.resolveRequest(context, moduleName, platform);
