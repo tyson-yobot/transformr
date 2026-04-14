@@ -6,29 +6,43 @@ const monorepoRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// Watch all files in the monorepo
+// Watch source files in the monorepo root (but not node_modules)
 config.watchFolders = [monorepoRoot];
 
-// Let Metro know where to resolve packages from
+// All package resolution must start from apps/mobile/node_modules.
+// The monorepo root node_modules is only a fallback for non-expo tooling.
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-// expo-modules-core/index.js exports null (JSI stub for native builds).
-// For Expo Go (which can't use JSI-only modules), redirect to the full
-// TypeScript source so Metro bundles the actual JS implementation.
 const expoModulesCoreRoot = path.resolve(
   projectRoot,
   'node_modules/expo-modules-core',
 );
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // expo-modules-core: redirect to TS source so Metro bundles the JS impl
   if (moduleName === 'expo-modules-core') {
     return {
       filePath: path.join(expoModulesCoreRoot, 'src/index.ts'),
       type: 'sourceFile',
     };
   }
+
+  // Metro's virtual entry emits `./node_modules/<pkg>/entry` relative to the
+  // monorepo root (because watchFolders includes it). When the origin is
+  // outside apps/mobile, rewrite relative node_modules paths so they resolve
+  // from apps/mobile/node_modules instead of the (empty) monorepo root.
+  if (
+    moduleName.startsWith('./node_modules/') &&
+    !context.originModulePath.startsWith(projectRoot)
+  ) {
+    const pkgRelative = moduleName.slice('./node_modules/'.length); // e.g. "expo-router/entry"
+    const absolute = path.resolve(projectRoot, 'node_modules', pkgRelative);
+    return { filePath: absolute, type: 'sourceFile' };
+  }
+
   return context.resolveRequest(context, moduleName, platform);
 };
 
