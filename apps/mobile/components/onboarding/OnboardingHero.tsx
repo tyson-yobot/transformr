@@ -3,9 +3,13 @@
 // Hero image (top 240px) with a gradient fade into the dark background.
 // =============================================================================
 
+import { type ComponentType } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Image as ExpoImage, type ImageProps } from 'expo-image';
+import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { useTheme } from '@theme/index';
 
 interface OnboardingHeroProps {
