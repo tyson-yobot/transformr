@@ -2,7 +2,7 @@
 // TRANSFORMR -- Entry Redirect + Branded Splash
 // =============================================================================
 
-import { useEffect } from 'react';
+import { useEffect, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -12,8 +12,11 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Image as ExpoImage, type ImageProps } from 'expo-image';
+import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@stores/authStore';
 import { useProfileStore } from '@stores/profileStore';
@@ -21,6 +24,9 @@ import { useSettingsStore } from '@stores/settingsStore';
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1284&q=80';
+
+// Local asset — guaranteed resolvable by Metro within project root
+const ICON = require('../assets/images/transformr-icon.png');
 
 export default function Index() {
   const session = useAuthStore((s) => s.session);
@@ -53,10 +59,7 @@ export default function Index() {
   }));
 
   const navigate = (path: Parameters<typeof router.replace>[0]) => {
-    opacity.value = withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) }, () => {
-      // navigation happens after fade
-    });
-    // Slight delay so fade starts before route swap
+    opacity.value = withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) });
     setTimeout(() => router.replace(path), 320);
   };
 
@@ -112,12 +115,15 @@ export default function Index() {
 
       {/* Center content */}
       <View style={styles.center}>
-        {/* Prism icon with pulse */}
-        <Animated.Image
-          source={require('../../../assets/icons/source/transformr-icon-transparent-512x512.png')}
-          style={[styles.icon, iconStyle]}
-          accessibilityLabel="TRANSFORMR icon"
-        />
+        {/* Prism icon wrapped in Animated.View for scale pulse */}
+        <Animated.View style={[styles.iconWrap, iconStyle]}>
+          <Image
+            source={ICON}
+            style={styles.icon}
+            contentFit="contain"
+            accessibilityLabel="TRANSFORMR icon"
+          />
+        </Animated.View>
 
         {/* Brand name */}
         <Text style={styles.brandName} accessibilityRole="text" accessibilityLabel="TRANSFORMR">
@@ -149,10 +155,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 32,
   },
-  icon: {
+  iconWrap: {
     width: 120,
     height: 120,
     marginBottom: 24,
+  },
+  icon: {
+    width: '100%',
+    height: '100%',
   },
   brandName: {
     fontSize: 36,
@@ -160,7 +170,6 @@ const styles = StyleSheet.create({
     color: '#F0F0FC',
     letterSpacing: 8,
     textAlign: 'center',
-    // Purple glow via text shadow
     textShadowColor: 'rgba(138, 92, 246, 0.8)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 18,
