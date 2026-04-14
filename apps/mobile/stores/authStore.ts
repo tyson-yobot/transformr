@@ -116,6 +116,18 @@ export const useAuthStore = create<AuthStore>()(
           if (error) throw error;
           if (!data.url) throw new Error('No auth URL returned');
 
+          // Pre-flight: fetch the OAuth URL before opening the browser.
+          // If Supabase returns 400 (provider not enabled), bail immediately
+          // instead of opening a blank browser that triggers System UI ANR.
+          const preflight = await fetch(data.url, { redirect: 'manual' });
+          if (preflight.status >= 400) {
+            set({
+              error: 'Google sign-in is being configured. Use email for now — you can link Google later in Settings.',
+              loading: false,
+            });
+            return;
+          }
+
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
           if (result.type === 'success' && result.url) {
             const url = new URL(result.url);
@@ -127,15 +139,7 @@ export const useAuthStore = create<AuthStore>()(
               return;
             }
           }
-          // Browser closed without completing auth (cancelled or provider not configured)
-          if (result.type === 'cancel' || result.type === 'dismiss') {
-            set({
-              error: 'Google sign-in is being configured. Use email for now — you can link Google later in Settings.',
-              loading: false,
-            });
-          } else {
-            set({ loading: false });
-          }
+          set({ loading: false });
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Google sign-in failed';
           set({ error: raw, loading: false });
@@ -156,6 +160,16 @@ export const useAuthStore = create<AuthStore>()(
           if (error) throw error;
           if (!data.url) throw new Error('No auth URL returned');
 
+          // Pre-flight: catch 400 before opening browser to avoid System UI ANR
+          const preflight = await fetch(data.url, { redirect: 'manual' });
+          if (preflight.status >= 400) {
+            set({
+              error: 'Apple sign-in is being configured. Use email for now — you can link Apple later in Settings.',
+              loading: false,
+            });
+            return;
+          }
+
           const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
           if (result.type === 'success' && result.url) {
             const url = new URL(result.url);
@@ -167,15 +181,7 @@ export const useAuthStore = create<AuthStore>()(
               return;
             }
           }
-          // Browser closed without completing auth (cancelled or provider not configured)
-          if (result.type === 'cancel' || result.type === 'dismiss') {
-            set({
-              error: 'Apple sign-in is being configured. Use email for now — you can link Apple later in Settings.',
-              loading: false,
-            });
-          } else {
-            set({ loading: false });
-          }
+          set({ loading: false });
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Apple sign-in failed';
           set({ error: raw, loading: false });
