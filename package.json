@@ -8,6 +8,9 @@
   "engines": {
     "node": "20.19.4"
   },
+  "workspaces": [
+    "apps/mobile"
+  ],
   "scripts": {
     "mobile": "cd apps/mobile && npx expo start",
     "mobile:ios": "cd apps/mobile && npx expo run:ios",
