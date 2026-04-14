@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,12 +12,15 @@ import Animated, {
   withSpring,
   withSequence,
   withRepeat,
+  Easing,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
-import { Button } from '@components/ui/Button';
 import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+
+const VIVID_PURPLE = '#A855F7';
 
 // Confetti-style decorative orbs rendered behind the hero text
 function ConfettiOrb({ color, style }: { color: string; style: object }) {
@@ -53,33 +56,21 @@ export default function ReadyScreen() {
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
 
-  // Animations
-  const celebrationScale = useSharedValue(0);
-  const celebrationOpacity = useSharedValue(0);
+  // Spring press animation for CTA
+  const buttonScale = useSharedValue(1);
+  const buttonOpacity = useSharedValue(0);
   const contentOpacity = useSharedValue(0);
   const contentTranslateY = useSharedValue(30);
-  const buttonOpacity = useSharedValue(0);
-  const buttonScale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    // Celebration entrance
-    celebrationOpacity.value = withTiming(1, { duration: 400 });
-    celebrationScale.value = withSequence(
-      withSpring(1.3, { damping: 6, stiffness: 220 }),
-      withSpring(1, { damping: 12, stiffness: 300 }),
-    );
+    contentOpacity.value = withDelay(300, withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) }));
+    contentTranslateY.value = withDelay(300, withSpring(0, { damping: 15, stiffness: 200 }));
+    buttonOpacity.value = withDelay(700, withTiming(1, { duration: 400 }));
 
-    // Content fade in
-    contentOpacity.value = withDelay(500, withTiming(1, { duration: 500 }));
-    contentTranslateY.value = withDelay(500, withSpring(0, { damping: 15, stiffness: 200 }));
-
-    // Button
-    buttonOpacity.value = withDelay(900, withTiming(1, { duration: 400 }));
-
-    // Subtle pulsing glow on the button to draw attention
+    // Pulsing purple glow to draw attention
     glowOpacity.value = withDelay(
-      1100,
+      1000,
       withRepeat(
         withSequence(
           withTiming(1, { duration: 900 }),
@@ -89,22 +80,15 @@ export default function ReadyScreen() {
         true,
       ),
     );
-
-    // Reanimated shared values are stable refs — no re-run needed
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const celebrationStyle = useAnimatedStyle(() => ({
-    opacity: celebrationOpacity.value,
-    transform: [{ scale: celebrationScale.value }],
-  }));
 
   const contentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
     transform: [{ translateY: contentTranslateY.value }],
   }));
 
-  const buttonStyle = useAnimatedStyle(() => ({
+  const buttonAnimStyle = useAnimatedStyle(() => ({
     opacity: buttonOpacity.value,
     transform: [{ scale: buttonScale.value }],
   }));
@@ -121,10 +105,7 @@ export default function ReadyScreen() {
       items.push({ label: 'Goal', value: dirLabels[profile.goal_direction], icon: '\uD83C\uDFAF' });
     }
     if (profile?.daily_calorie_target) {
-      items.push({ label: 'Calories', value: `${profile.daily_calorie_target} cal/day`, icon: '\uD83D\uDD25' });
-    }
-    if (profile?.daily_protein_target) {
-      items.push({ label: 'Protein', value: `${profile.daily_protein_target}g/day`, icon: '\uD83E\uDD69' });
+      items.push({ label: 'Target', value: `${profile.daily_calorie_target} cal/day`, icon: '\uD83D\uDD25' });
     }
     if (profile?.activity_level) {
       const levelLabels: Record<string, string> = {
@@ -134,7 +115,7 @@ export default function ReadyScreen() {
         very_active: 'Very Active',
         extra_active: 'Extra Active',
       };
-      items.push({ label: 'Activity', value: levelLabels[profile.activity_level] ?? 'Moderate', icon: '\uD83C\uDFC3' });
+      items.push({ label: 'Coach style', value: levelLabels[profile.activity_level] ?? 'Adaptive', icon: '\uD83E\uDD16' });
     }
 
     return items;
@@ -142,121 +123,144 @@ export default function ReadyScreen() {
 
   const handleStart = async () => {
     await updateProfile({ onboarding_completed: true });
-    // Only navigate if the update succeeded (profile will be set in store)
     const { error } = useProfileStore.getState();
     if (!error) {
       router.replace('/(tabs)/dashboard');
     }
   };
 
+  const onPressIn = () => {
+    buttonScale.value = withSpring(0.95, { damping: 15, stiffness: 300 });
+  };
+  const onPressOut = () => {
+    buttonScale.value = withSpring(1, { damping: 10, stiffness: 200 });
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary, padding: spacing.xxl }]}>
-      {/* Decorative background orbs */}
-      <ConfettiOrb color={colors.accent.primary + '30'} style={styles.orbTopLeft} />
-      <ConfettiOrb color={colors.accent.secondary + '25'} style={styles.orbTopRight} />
-      <ConfettiOrb color={colors.accent.primary + '18'} style={styles.orbBottomLeft} />
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80"
+        heading="You're ready. Let's go."
+        subheading="Everything is set. Your AI coach is calibrated. Your plan is built. Today is Day 1 of your transformation."
+        style={{ marginBottom: spacing.xl }}
+      />
 
-      {/* Celebration */}
-      <Animated.View style={[styles.celebrationSection, celebrationStyle]}>
-        <Text style={styles.trophyEmoji}>{'\uD83C\uDF89'}</Text>
-        <Text
-          style={[
-            typography.hero,
-            {
-              color: colors.text.primary,
-              textAlign: 'center',
-              marginTop: spacing.lg,
-            },
-          ]}
-        >
-          You're All Set!
-        </Text>
-        <Text
-          style={[
-            typography.body,
-            {
-              color: colors.accent.primary,
-              textAlign: 'center',
-              marginTop: spacing.sm,
-              fontWeight: '600',
-            },
-          ]}
-        >
-          Your transformation starts now
-        </Text>
-      </Animated.View>
+      {/* Decorative celebration orbs */}
+      <ConfettiOrb color={VIVID_PURPLE + '30'} style={styles.orbTopLeft} />
+      <ConfettiOrb color={'#7C3AED25'} style={styles.orbTopRight} />
+      <ConfettiOrb color={VIVID_PURPLE + '18'} style={styles.orbBottomRight} />
 
-      {/* Summary */}
-      <Animated.View style={[styles.summarySection, contentStyle]}>
-        <Card style={{ marginBottom: spacing.xl }}>
-          <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.lg }]}>
-            Your Setup Summary
-          </Text>
-          {summaryItems.map((item, index) => (
-            <View
-              key={item.label}
-              style={[
-                styles.summaryRow,
-                {
-                  paddingVertical: spacing.md,
-                  borderTopWidth: index > 0 ? 1 : 0,
-                  borderTopColor: colors.border.subtle,
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 20, marginRight: spacing.md }}>{item.icon}</Text>
-              <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>
-                {item.label}
-              </Text>
-              <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
-                {item.value}
-              </Text>
-            </View>
-          ))}
-          {summaryItems.length === 0 && (
-            <Text style={[typography.body, { color: colors.text.muted, textAlign: 'center' }]}>
-              Your personalized plan is ready
+      <Animated.View style={[{ paddingHorizontal: spacing.xxl }, contentStyle]}>
+        {/* Summary card */}
+        {summaryItems.length > 0 && (
+          <Card style={{ marginBottom: spacing.xl }}>
+            <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.lg }]}>
+              Your Setup Summary
             </Text>
-          )}
-        </Card>
+            {summaryItems.map((item, index) => (
+              <View
+                key={item.label}
+                style={[
+                  styles.summaryRow,
+                  {
+                    paddingVertical: spacing.md,
+                    borderTopWidth: index > 0 ? 1 : 0,
+                    borderTopColor: colors.border.subtle,
+                  },
+                ]}
+              >
+                <Text style={{ fontSize: 20, marginRight: spacing.md }}>{item.icon}</Text>
+                <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>
+                  {item.label}
+                </Text>
+                <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>
+                  {item.value}
+                </Text>
+              </View>
+            ))}
+            {summaryItems.length === 0 && (
+              <Text style={[typography.body, { color: colors.text.muted, textAlign: 'center' }]}>
+                Your personalized plan is ready
+              </Text>
+            )}
+          </Card>
+        )}
+
+        {/* CTA — spring press + purple glow */}
+        <Animated.View style={[styles.ctaWrap, buttonAnimStyle]}>
+          {/* Pulsing glow layer behind button */}
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFillObject,
+              styles.ctaGlow,
+              { backgroundColor: VIVID_PURPLE + '40' },
+              glowStyle,
+            ]}
+          />
+          <Pressable
+            onPress={handleStart}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
+            accessibilityLabel="Start My Transformation"
+            accessibilityRole="button"
+            style={[
+              styles.ctaButton,
+              { backgroundColor: VIVID_PURPLE },
+            ]}
+          >
+            <Text style={styles.ctaText}>Start My Transformation</Text>
+          </Pressable>
+        </Animated.View>
       </Animated.View>
 
-      {/* Start Button with pulsing glow */}
-      <Animated.View style={[styles.buttonSection, buttonStyle]}>
-        {/* Glow layer behind the button */}
-        <Animated.View
-          style={[
-            StyleSheet.absoluteFillObject,
-            styles.buttonGlow,
-            { backgroundColor: colors.accent.primary + '40' },
-            glowStyle,
-          ]}
-        />
-        <Button
-          title="Let's Go — Start Transforming"
-          onPress={handleStart}
-          fullWidth
-          size="lg"
-        />
-      </Animated.View>
-    </View>
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>By Automate AI</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'space-between' },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   // Decorative orbs
-  orbTopLeft: { position: 'absolute', top: -20, left: -30, width: 160, height: 160, borderRadius: 80 },
-  orbTopRight: { position: 'absolute', top: 60, right: -50, width: 120, height: 120, borderRadius: 60 },
-  orbBottomLeft: { position: 'absolute', bottom: 120, left: -40, width: 100, height: 100, borderRadius: 50 },
+  orbTopLeft: { position: 'absolute', top: 0, left: -30, width: 140, height: 140, borderRadius: 70 },
+  orbTopRight: { position: 'absolute', top: 60, right: -50, width: 110, height: 110, borderRadius: 55 },
+  orbBottomRight: { position: 'absolute', bottom: 120, right: -40, width: 90, height: 90, borderRadius: 45 },
   orb: {},
-  // Hero
-  celebrationSection: { alignItems: 'center', marginTop: 20, zIndex: 1 },
-  trophyEmoji: { fontSize: 72, textAlign: 'center' },
-  // Summary
-  summarySection: { flex: 1, justifyContent: 'center', zIndex: 1 },
   summaryRow: { flexDirection: 'row', alignItems: 'center' },
   // CTA
-  buttonSection: { paddingBottom: 20, zIndex: 1 },
-  buttonGlow: { borderRadius: 16, top: -6, bottom: -6, left: -6, right: -6 },
+  ctaWrap: { position: 'relative', marginBottom: 8 },
+  ctaGlow: { borderRadius: 14, top: -6, bottom: -6, left: -6, right: -6 },
+  ctaButton: {
+    height: 56,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  ctaText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  footer: {
+    marginTop: 32,
+    paddingBottom: 24,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 11,
+    color: '#6B5E8A',
+    letterSpacing: 1,
+  },
 });

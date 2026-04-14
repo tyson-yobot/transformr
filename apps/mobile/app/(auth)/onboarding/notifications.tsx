@@ -269,7 +269,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   banner: {},
   groupCard: {},
   groupHeader: { flexDirection: 'row', alignItems: 'center' },

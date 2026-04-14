@@ -115,7 +115,7 @@ export default function NutritionScreen() {
       <OnboardingHero
         imageUri="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"
         heading="Fuel your transformation."
-        subheading="Tell us how you eat and we'll handle the tracking, recommendations, and meal planning."
+        subheading="Tell us about your eating style. We'll handle the calorie math, meal suggestions, and grocery lists."
         style={{ marginBottom: spacing.xl }}
       />
       <View style={{ paddingHorizontal: spacing.xxl }}>
@@ -336,7 +336,7 @@ export default function NutritionScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   calorieRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   adjustButton: { width: 52, height: 52, justifyContent: 'center', alignItems: 'center' },
   calorieCenter: { flex: 1, marginHorizontal: 16 },

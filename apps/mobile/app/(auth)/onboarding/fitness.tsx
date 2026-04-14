@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
@@ -67,6 +67,7 @@ export default function FitnessScreen() {
   }, [activityLevel, workoutDays, experience, equipment, updateProfile, setFitnessPrefs, router]);
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -75,7 +76,7 @@ export default function FitnessScreen() {
       <OnboardingHero
         imageUri="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80"
         heading="What does your strongest self look like?"
-        subheading="Set your targets. We'll build the plan. Your AI coach adapts as you grow."
+        subheading="Set your fitness targets. Your AI coach will build a progressive plan and adapt it as you grow."
         style={{ marginBottom: spacing.xl }}
       />
       <View style={{ paddingHorizontal: spacing.xxl }}>
@@ -250,11 +251,12 @@ export default function FitnessScreen() {
       />
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   optionRow: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
   freqRow: { flexDirection: 'row' },

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
@@ -111,6 +112,10 @@ export default function ProfileScreen() {
   }, [validate, dateOfBirth, gender, heightFeet, heightInches, currentWeight, goalWeight, goalDirection, updateProfile, router]);
 
   return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{ paddingBottom: 40 }}
@@ -120,7 +125,7 @@ export default function ProfileScreen() {
       <OnboardingHero
         imageUri="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80"
         heading="Let's get to know you."
-        subheading="The more we know, the more personalized your AI coach becomes. This takes 2 minutes."
+        subheading="The more we know, the better your AI coach becomes. This takes about 2 minutes."
         style={{ marginBottom: spacing.xl }}
       />
       <View style={{ paddingHorizontal: spacing.xxl }}>
@@ -306,11 +311,12 @@ export default function ProfileScreen() {
       />
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap' },
   chip: {},
   row: { flexDirection: 'row' },

@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,6 +15,9 @@ import Animated, {
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
+import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+
+const VIVID_PURPLE = '#A855F7';
 
 const VALUE_PROPS = [
   { icon: '\uD83D\uDCAA', text: 'AI-powered workout tracking with ghost sets and PR detection' },
@@ -24,36 +27,29 @@ const VALUE_PROPS = [
 ] as const;
 
 export default function WelcomeScreen() {
-  const { colors, typography, spacing } = useTheme();
+  const { typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
 
-  const titleOpacity = useSharedValue(0);
-  const titleTranslateY = useSharedValue(20);
-  const taglineOpacity = useSharedValue(0);
+  const contentOpacity = useSharedValue(0);
+  const contentTranslateY = useSharedValue(24);
   const propsOpacity = useSharedValue(0);
-  const propsTranslateY = useSharedValue(30);
+  const propsTranslateY = useSharedValue(20);
   const buttonOpacity = useSharedValue(0);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    titleOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    titleTranslateY.value = withSpring(0, { damping: 15, stiffness: 200 });
+    contentOpacity.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    contentTranslateY.value = withSpring(0, { damping: 15, stiffness: 200 });
 
-    taglineOpacity.value = withDelay(300, withTiming(1, { duration: 500 }));
-    propsOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
-    propsTranslateY.value = withDelay(600, withSpring(0, { damping: 15, stiffness: 200 }));
-    buttonOpacity.value = withDelay(900, withTiming(1, { duration: 500 }));
-    // Reanimated shared values are stable refs — no re-run needed
+    propsOpacity.value = withDelay(300, withTiming(1, { duration: 500 }));
+    propsTranslateY.value = withDelay(300, withSpring(0, { damping: 15, stiffness: 200 }));
+
+    buttonOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const titleStyle = useAnimatedStyle(() => ({
-    opacity: titleOpacity.value,
-    transform: [{ translateY: titleTranslateY.value }],
-  }));
-
-  const taglineStyle = useAnimatedStyle(() => ({
-    opacity: taglineOpacity.value,
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+    transform: [{ translateY: contentTranslateY.value }],
   }));
 
   const propsStyle = useAnimatedStyle(() => ({
@@ -66,85 +62,57 @@ export default function WelcomeScreen() {
   }));
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary, padding: spacing.xxl }]}>
-      <View style={styles.topSection}>
-        <Animated.View style={[styles.heroSection, titleStyle]}>
-          <Text
-            style={[
-              typography.hero,
-              {
-                color: colors.accent.primary,
-                letterSpacing: 6,
-                fontSize: 40,
-                textAlign: 'center',
-              },
-            ]}
-          >
-            TRANSFORMR
-          </Text>
-        </Animated.View>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <OnboardingHero
+        imageUri="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80"
+        heading="Your transformation starts here."
+        subheading="TRANSFORMR is your AI-powered partner for total life transformation. Fitness. Nutrition. Business. Mindset. All in one place, all personalized to you."
+        style={{ marginBottom: spacing.xl }}
+      />
 
-        <Animated.View style={taglineStyle}>
-          <Text
-            style={[
-              typography.body,
-              {
-                color: colors.text.secondary,
-                textAlign: 'center',
-                marginTop: spacing.md,
-                fontStyle: 'italic',
-              },
-            ]}
-          >
-            Every rep. Every meal. Every dollar. Every day.
-          </Text>
-        </Animated.View>
-      </View>
-
-      <Animated.View style={[styles.propsSection, propsStyle]}>
+      {/* Value props */}
+      <Animated.View style={[{ paddingHorizontal: spacing.xxl }, propsStyle]}>
         {VALUE_PROPS.map((prop, index) => (
           <View
             key={index}
             style={[
               styles.propRow,
               {
-                backgroundColor: colors.background.secondary,
-                borderRadius: 12,
+                backgroundColor: 'rgba(168,85,247,0.08)',
+                borderRadius: borderRadius.md,
                 padding: spacing.lg,
                 marginBottom: spacing.md,
+                borderWidth: 1,
+                borderColor: 'rgba(168,85,247,0.18)',
               },
             ]}
           >
-            <Text style={{ fontSize: 24, marginRight: spacing.md }}>{prop.icon}</Text>
-            <Text
-              style={[
-                typography.body,
-                { color: colors.text.primary, flex: 1 },
-              ]}
-            >
+            <Text style={{ fontSize: 22, marginRight: spacing.md }}>{prop.icon}</Text>
+            <Text style={[typography.body, { color: '#C4B8E0', flex: 1, lineHeight: 20 }]}>
               {prop.text}
             </Text>
           </View>
         ))}
       </Animated.View>
 
-      <Animated.View style={[styles.buttonSection, buttonStyle]}>
+      {/* CTA */}
+      <Animated.View style={[{ paddingHorizontal: spacing.xxl, marginTop: spacing.lg }, buttonStyle]}>
         <Button
-          title="Let's Go"
+          title="Let's Begin"
           onPress={() => router.push('/(auth)/onboarding/profile')}
           fullWidth
           size="lg"
         />
       </Animated.View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'space-between' },
-  topSection: { alignItems: 'center', marginTop: 40 },
-  heroSection: { alignItems: 'center' },
-  propsSection: { flex: 1, justifyContent: 'center' },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   propRow: { flexDirection: 'row', alignItems: 'center' },
-  buttonSection: { paddingBottom: 20 },
 });

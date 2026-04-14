@@ -88,7 +88,7 @@ export default function GoalsScreen() {
       <OnboardingHero
         imageUri="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&q=80"
         heading="Dream big. Then build a plan."
-        subheading="What does your life look like 12 months from now? Let's make it real."
+        subheading="What does your life look like 12 months from now if everything went right? We'll help you get there."
         style={{ marginBottom: spacing.xl }}
       />
       <View style={{ paddingHorizontal: spacing.xxl }}>
@@ -201,7 +201,7 @@ export default function GoalsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
   grid: {},
   goalCard: {},
   goalCardContent: { flexDirection: 'row', alignItems: 'center' },

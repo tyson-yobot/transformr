@@ -2,8 +2,12 @@
 // TRANSFORMR -- Onboarding: Partner Setup (Optional)
 // =============================================================================
 
-import { useState, useCallback, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, Switch } from 'react-native';
+import { useState, useCallback, useEffect, type ComponentType } from 'react';
+import { View, Text, ScrollView, StyleSheet, Switch, KeyboardAvoidingView, Platform, useWindowDimensions } from 'react-native';
+import { Image as ExpoImage, type ImageProps } from 'expo-image';
+import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
@@ -12,6 +16,10 @@ import { Card } from '@components/ui/Card';
 import { hapticLight } from '@utils/haptics';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 import { usePartnerStore } from '@stores/partnerStore';
+
+const HERO_URI = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80';
+const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
+const DEEP_SPACE = '#0C0A15';
 
 interface PrivacyToggle {
   key: string;
@@ -35,6 +43,8 @@ export default function PartnerScreen() {
   const router = useRouter();
   const createPartnershipInvite = usePartnerStore((s) => s.createPartnershipInvite);
   const linkPartner = usePartnerStore((s) => s.linkPartner);
+  const { height: screenHeight } = useWindowDimensions();
+  const imageHeight = screenHeight * 0.4;
 
   const [mode, setMode] = useState<'choice' | 'invite' | 'join'>('choice');
   const [inviteCode, setInviteCode] = useState('');
@@ -68,26 +78,38 @@ export default function PartnerScreen() {
     router.push('/(auth)/onboarding/notifications');
   }, [mode, inviteCode, linkPartner, router]);
 
-  // Choice screen
+  // Choice screen — hero image + action buttons
   if (mode === 'choice') {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary, padding: spacing.xxl }]}>
-        <View style={styles.centerContent}>
-          <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: spacing.xl }}>
-            {'\uD83D\uDC65'}
-          </Text>
-          <Text style={[typography.h1, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
-            Transform together.
-          </Text>
-          <Text
-            style={[
-              typography.body,
-              { color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xxxl },
-            ]}
-          >
-            Invite someone to share the journey. Couples who train together, grow together.
-          </Text>
+      <View style={styles.choiceRoot}>
+        {/* Hero image */}
+        <View style={[styles.choiceImageWrap, { height: imageHeight }]}>
+          <Image
+            source={{ uri: HERO_URI }}
+            style={styles.fill}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            placeholder={{ blurhash: BLUR_HASH }}
+            transition={300}
+          />
+          <LinearGradient
+            colors={['transparent', DEEP_SPACE]}
+            locations={[0.4, 1]}
+            style={styles.fill}
+          />
+          {/* Heading over gradient */}
+          <View style={[styles.choiceHeadingWrap, { paddingHorizontal: spacing.xxl }]}>
+            <Text style={[typography.h1, { color: '#F0F0FC', marginBottom: spacing.sm }]}>
+              Transform together.
+            </Text>
+            <Text style={[typography.body, { color: '#9B8FC0', lineHeight: 22 }]}>
+              Invite your partner, friend, or accountability buddy. Sync workouts, share progress, and challenge each other.
+            </Text>
+          </View>
+        </View>
 
+        {/* Action area */}
+        <View style={[styles.choiceActions, { paddingHorizontal: spacing.xxl }]}>
           <Button
             title="Invite a Partner"
             onPress={() => setMode('invite')}
@@ -104,7 +126,7 @@ export default function PartnerScreen() {
             style={{ marginBottom: spacing.md }}
           />
           <Button
-            title="Skip for Now"
+            title="I'll do this later"
             onPress={handleSkip}
             variant="ghost"
             fullWidth
@@ -116,107 +138,122 @@ export default function PartnerScreen() {
   }
 
   return (
-    <ScrollView
-      style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView
+      style={styles.kav}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80"
-        heading="Transform together."
-        subheading="Invite someone to share the journey. Couples who train together, grow together."
-        style={{ marginBottom: spacing.xl }}
-      />
-      <View style={{ paddingHorizontal: spacing.xxl }}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <OnboardingHero
+          imageUri={HERO_URI}
+          heading="Transform together."
+          subheading="Invite your partner, friend, or accountability buddy. Sync workouts, share progress, and challenge each other."
+          style={{ marginBottom: spacing.xl }}
+        />
+        <View style={{ paddingHorizontal: spacing.xxl }}>
 
-      {mode === 'invite' ? (
-        <Card style={{ marginBottom: spacing.xxl, alignItems: 'center' as const }}>
-          <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
-            Your Invite Code
-          </Text>
-          <Text
+        {mode === 'invite' ? (
+          <Card style={{ marginBottom: spacing.xxl, alignItems: 'center' as const }}>
+            <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
+              Your Invite Code
+            </Text>
+            <Text
+              style={[
+                typography.stat,
+                { color: colors.accent.primary, letterSpacing: 4 },
+              ]}
+            >
+              {generatedCode || 'Generating…'}
+            </Text>
+            <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
+              Share this code with your partner
+            </Text>
+          </Card>
+        ) : (
+          <Input
+            label="Partner Invite Code"
+            placeholder="TFR-XXXXXX"
+            value={inviteCode}
+            onChangeText={setInviteCode}
+            autoCapitalize="characters"
+            containerStyle={{ marginBottom: spacing.xxl }}
+          />
+        )}
+
+        {/* Privacy Toggles */}
+        <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+          What to Share
+        </Text>
+        <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: spacing.lg }]}>
+          Control what your partner can see. You can change these anytime.
+        </Text>
+
+        {privacy.map((item) => (
+          <View
+            key={item.key}
             style={[
-              typography.stat,
-              { color: colors.accent.primary, letterSpacing: 4 },
+              styles.toggleRow,
+              {
+                backgroundColor: colors.background.secondary,
+                borderRadius: borderRadius.md,
+                padding: spacing.lg,
+                marginBottom: spacing.sm,
+              },
             ]}
           >
-            {generatedCode || 'Generating…'}
-          </Text>
-          <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
-            Share this code with your partner
-          </Text>
-        </Card>
-      ) : (
-        <Input
-          label="Partner Invite Code"
-          placeholder="TFR-XXXXXX"
-          value={inviteCode}
-          onChangeText={setInviteCode}
-          autoCapitalize="characters"
-          containerStyle={{ marginBottom: spacing.xxl }}
+            <Text style={{ fontSize: 20, marginRight: spacing.md }}>{item.icon}</Text>
+            <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+              {item.label}
+            </Text>
+            <Switch
+              value={item.enabled}
+              onValueChange={() => togglePrivacy(item.key)}
+              trackColor={{ false: colors.background.tertiary, true: colors.accent.primary + '60' }}
+              thumbColor={item.enabled ? colors.accent.primary : colors.text.muted}
+              accessibilityLabel={`Share ${item.label}`}
+              accessibilityRole="switch"
+            />
+          </View>
+        ))}
+
+        {/* Continue */}
+        <Button
+          title="Continue"
+          onPress={handleContinue}
+          fullWidth
+          size="lg"
+          style={{ marginTop: spacing.xxl, marginBottom: spacing.md }}
         />
-      )}
-
-      {/* Privacy Toggles */}
-      <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
-        What to Share
-      </Text>
-      <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: spacing.lg }]}>
-        Control what your partner can see. You can change these anytime.
-      </Text>
-
-      {privacy.map((item) => (
-        <View
-          key={item.key}
-          style={[
-            styles.toggleRow,
-            {
-              backgroundColor: colors.background.secondary,
-              borderRadius: borderRadius.md,
-              padding: spacing.lg,
-              marginBottom: spacing.sm,
-            },
-          ]}
-        >
-          <Text style={{ fontSize: 20, marginRight: spacing.md }}>{item.icon}</Text>
-          <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
-            {item.label}
-          </Text>
-          <Switch
-            value={item.enabled}
-            onValueChange={() => togglePrivacy(item.key)}
-            trackColor={{ false: colors.background.tertiary, true: colors.accent.primary + '60' }}
-            thumbColor={item.enabled ? colors.accent.primary : colors.text.muted}
-            accessibilityLabel={`Share ${item.label}`}
-            accessibilityRole="switch"
-          />
+        <Button
+          title="I'll do this later"
+          onPress={handleSkip}
+          variant="ghost"
+          fullWidth
+          size="md"
+        />
         </View>
-      ))}
-
-      {/* Continue */}
-      <Button
-        title="Continue"
-        onPress={handleContinue}
-        fullWidth
-        size="lg"
-        style={{ marginTop: spacing.xxl, marginBottom: spacing.md }}
-      />
-      <Button
-        title="Skip for Now"
-        onPress={handleSkip}
-        variant="ghost"
-        fullWidth
-        size="md"
-      />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  container: { flex: 1, justifyContent: 'center' },
-  centerContent: { alignItems: 'center' },
+  kav: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  // Choice screen
+  choiceRoot: { flex: 1, backgroundColor: '#0C0A15' },
+  choiceImageWrap: { width: '100%', position: 'relative', overflow: 'hidden' },
+  choiceHeadingWrap: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+  },
+  choiceActions: { flex: 1, justifyContent: 'center' },
+  fill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   toggleRow: { flexDirection: 'row', alignItems: 'center' },
 });
