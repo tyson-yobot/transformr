@@ -32,7 +32,9 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "TRANSFORMR monitors location to auto-start workouts when you arrive at the gym.",
         "NSFaceIDUsageDescription": "TRANSFORMR uses Face ID to protect your personal data.",
         "NFCReaderUsageDescription": "TRANSFORMR uses NFC to trigger automations from physical tags.",
-        "NSMotionUsageDescription": "TRANSFORMR uses motion data for activity tracking."
+        "NSMotionUsageDescription": "TRANSFORMR uses motion data for activity tracking.",
+        "NSCalendarsUsageDescription": "TRANSFORMR uses your calendar to schedule workouts and reminders.",
+        "NSRemindersUsageDescription": "TRANSFORMR uses reminders to help you stay on track with your goals."
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -74,7 +76,6 @@
       "expo-local-authentication",
       "expo-secure-store",
       "expo-av",
-      "expo-calendar",
       "expo-file-system",
       ["expo-font", {
         "fonts": []
