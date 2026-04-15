@@ -156,7 +156,7 @@ export default function DashboardScreen() {
 
   // Calories today
   const caloriesToday = useMemo(() => {
-    return nutritionStore.todayLogs.reduce((sum, log) => sum + log.calories, 0);
+    return nutritionStore.todayLogs.reduce((sum, log) => sum + (log.calories ?? 0), 0);
   }, [nutritionStore.todayLogs]);
 
   // Computed readiness fallback (profile-based estimate until real score loads)

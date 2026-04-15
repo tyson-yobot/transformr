@@ -154,7 +154,7 @@ export default function DailyBriefingScreen() {
           Today's game plan
         </Text>
         <FlatList
-          data={gamePlan}
+          data={gamePlan ?? []}
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, index) => `gp-${index}`}
