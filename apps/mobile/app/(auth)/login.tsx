@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useState, useCallback, useEffect, type ComponentType } from 'react';
+import * as WebBrowser from 'expo-web-browser';
 import {
   View,
   Text,
@@ -48,9 +49,14 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Clear any stale error from previous auth attempts on mount
+  // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
+  // doesn't show Chrome's first-run wizard on the emulator / cold devices.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { clearError(); }, []);
+  useEffect(() => {
+    clearError();
+    void WebBrowser.warmUpAsync();
+    return () => { void WebBrowser.coolDownAsync(); };
+  }, []);
 
   const handleSignIn = useCallback(async () => {
     clearError();
@@ -195,10 +201,11 @@ export default function LoginScreen() {
               {/* Forgot Password */}
               <Pressable
                 onPress={() => { hapticLight(); handleForgotPassword(); }}
+                disabled={loading}
                 accessibilityLabel="Forgot password"
                 style={styles.forgotRow}
               >
-                <Text style={styles.forgotText}>Forgot Password?</Text>
+                <Text style={[styles.forgotText, loading && { opacity: 0.4 }]}>Forgot Password?</Text>
               </Pressable>
 
               {/* Sign In Button */}

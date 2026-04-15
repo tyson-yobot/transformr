@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useState, useCallback, useEffect, useMemo, type ComponentType } from 'react';
+import * as WebBrowser from 'expo-web-browser';
 import {
   View,
   Text,
@@ -61,9 +62,14 @@ export default function RegisterScreen() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Clear any stale error from previous auth attempts on mount
+  // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
+  // doesn't show Chrome's first-run wizard on the emulator / cold devices.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { clearError(); }, []);
+  useEffect(() => {
+    clearError();
+    void WebBrowser.warmUpAsync();
+    return () => { void WebBrowser.coolDownAsync(); };
+  }, []);
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
