@@ -290,7 +290,7 @@ export default function SleepTracker() {
                   Bedtime
                 </Text>
                 <Text style={[typography.monoBody, { color: colors.text.primary }]}>
-                  {lastSleep.bedtime.substring(11, 16)}
+                  {lastSleep.bedtime?.substring(11, 16) ?? '--:--'}
                 </Text>
               </View>
               <View style={[styles.detailRow, { marginBottom: spacing.sm }]}>
@@ -298,7 +298,7 @@ export default function SleepTracker() {
                   Wake Time
                 </Text>
                 <Text style={[typography.monoBody, { color: colors.text.primary }]}>
-                  {lastSleep.wake_time.substring(11, 16)}
+                  {lastSleep.wake_time?.substring(11, 16) ?? '--:--'}
                 </Text>
               </View>
               <View style={[styles.detailRow, { marginBottom: spacing.sm }]}>

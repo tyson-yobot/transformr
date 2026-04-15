@@ -109,7 +109,7 @@ export default function TransactionsScreen() {
   const groupedTransactions = useMemo(() => {
     const groups = new Map<string, FinanceTransaction[]>();
     for (const tx of filteredTransactions) {
-      const dateKey = tx.transaction_date.substring(0, 10);
+      const dateKey = tx.transaction_date?.substring(0, 10) ?? 'unknown';
       const existing = groups.get(dateKey) ?? [];
       existing.push(tx);
       groups.set(dateKey, existing);

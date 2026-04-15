@@ -94,7 +94,7 @@ export default function WorkoutPlayerScreen() {
   // Workout duration timer
   useEffect(() => {
     if (activeSession) {
-      const startTime = new Date(activeSession.started_at).getTime();
+      const startTime = activeSession.started_at ? new Date(activeSession.started_at).getTime() : Date.now();
       timerRef.current = setInterval(() => {
         setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);

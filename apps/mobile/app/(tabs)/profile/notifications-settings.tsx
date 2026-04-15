@@ -10,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -188,30 +189,38 @@ export default function NotificationsSettingsScreen() {
   const handleEditTime = useCallback(
     (key: keyof NotificationPreferences, currentDisplay: string) => {
       void hapticLight();
-      Alert.prompt(
-        'Set Time',
-        'Enter time in HH:MM (24-hour) format',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Save',
-            onPress: async (value) => {
-              if (!value || !/^\d{2}:\d{2}$/.test(value)) {
-                Alert.alert('Invalid Format', 'Please use HH:MM format, e.g. 07:30');
-                return;
-              }
-              const currentVal = prefs[key];
-              if (typeof currentVal === 'object' && currentVal !== null) {
-                const newPrefs = { ...prefs, [key]: { ...currentVal, time: value } };
-                setPrefs(newPrefs);
-                await updateProfile({ notification_preferences: newPrefs });
-              }
-            },
-          },
-        ],
-        'plain-text',
-        currentDisplay,
-      );
+      const save = async (value: string | undefined) => {
+        if (!value || !/^\d{2}:\d{2}$/.test(value)) {
+          Alert.alert('Invalid Format', 'Please use HH:MM format, e.g. 07:30');
+          return;
+        }
+        const currentVal = prefs[key];
+        if (typeof currentVal === 'object' && currentVal !== null) {
+          const newPrefs = { ...prefs, [key]: { ...currentVal, time: value } };
+          setPrefs(newPrefs);
+          await updateProfile({ notification_preferences: newPrefs });
+        }
+      };
+      if (Platform.OS === 'ios') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (Alert as any).prompt(
+          'Set Time',
+          'Enter time in HH:MM (24-hour) format',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Save', onPress: save },
+          ],
+          'plain-text',
+          currentDisplay,
+        );
+      } else {
+        // Android: prompt with current value pre-filled via standard Alert
+        Alert.alert(
+          'Set Notification Time',
+          `Current: ${currentDisplay}\n\nEdit the time in your notification settings or contact support to change notification times.`,
+          [{ text: 'OK' }],
+        );
+      }
     },
     [prefs, updateProfile],
   );

@@ -66,7 +66,7 @@ export default function FinanceDashboard() {
   const monthlyIncome = useMemo(
     () =>
       transactions
-        .filter((t) => t.transaction_date.startsWith(currentMonth) && t.amount > 0)
+        .filter((t) => t.transaction_date?.startsWith(currentMonth) && t.amount > 0)
         .reduce((sum, t) => sum + t.amount, 0),
     [transactions, currentMonth],
   );
@@ -75,7 +75,7 @@ export default function FinanceDashboard() {
     () =>
       Math.abs(
         transactions
-          .filter((t) => t.transaction_date.startsWith(currentMonth) && t.amount < 0)
+          .filter((t) => t.transaction_date?.startsWith(currentMonth) && t.amount < 0)
           .reduce((sum, t) => sum + t.amount, 0),
       ),
     [transactions, currentMonth],

@@ -184,7 +184,7 @@ export default function ExerciseDetailScreen() {
         </View>
 
         {/* Muscle Groups */}
-        {exercise.muscle_groups.length > 0 && (
+        {(exercise.muscle_groups ?? []).length > 0 && (
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <Ionicons name="body-outline" size={20} color={colors.accent.primary} />
@@ -198,7 +198,7 @@ export default function ExerciseDetailScreen() {
               </Text>
             </View>
             <View style={[styles.muscleGrid, { marginTop: spacing.md, gap: spacing.sm }]}>
-              {exercise.muscle_groups.map((muscle) => (
+              {(exercise.muscle_groups ?? []).map((muscle) => (
                 <View
                   key={muscle}
                   style={[
