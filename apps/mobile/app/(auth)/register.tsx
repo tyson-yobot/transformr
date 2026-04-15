@@ -54,6 +54,7 @@ export default function RegisterScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
   const { signUp, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
+  const session = useAuthStore((s) => s.session);
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,6 +62,13 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  // Navigate to onboarding when session is set (after successful sign-up or OAuth)
+  useEffect(() => {
+    if (session) {
+      router.replace('/(auth)/onboarding/welcome');
+    }
+  }, [session, router]);
 
   // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
   // doesn't show Chrome's first-run wizard on the emulator / cold devices.

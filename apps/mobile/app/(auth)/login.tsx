@@ -43,11 +43,19 @@ export default function LoginScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const { signIn, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
+  const session = useAuthStore((s) => s.session);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  // Navigate to dashboard when session is set (after successful sign-in or OAuth)
+  useEffect(() => {
+    if (session) {
+      router.replace('/(tabs)/dashboard');
+    }
+  }, [session, router]);
 
   // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
   // doesn't show Chrome's first-run wizard on the emulator / cold devices.
