@@ -2,7 +2,7 @@
 // TRANSFORMR -- Nutrition Home / Daily View
 // =============================================================================
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -74,13 +74,17 @@ export default function NutritionHomeScreen() {
   const router = useRouter();
 
   const { todayMacros } = useNutrition();
-  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog } =
+  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog, foodNameMap } =
     useNutritionStore();
   const { profile } = useProfileStore();
 
   const [dayOffset, setDayOffset] = useState(0);
   const [fabOpen, setFabOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    void fetchTodayNutrition(dayOffset);
+  }, [dayOffset, fetchTodayNutrition]);
 
   const targets = useMemo(() => ({
     calories: profile?.daily_calorie_target ?? 2200,
@@ -122,9 +126,9 @@ export default function NutritionHomeScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchTodayNutrition();
+    await fetchTodayNutrition(dayOffset);
     setRefreshing(false);
-  }, [fetchTodayNutrition]);
+  }, [dayOffset, fetchTodayNutrition]);
 
   const handlePrevDay = useCallback(() => {
     hapticLight();
@@ -428,7 +432,7 @@ export default function NutritionHomeScreen() {
                     <MealCard
                       key={log.id}
                       log={log}
-                      foodName={log.food_id ?? 'Custom Food'}
+                      foodName={log.food_id ? (foodNameMap[log.food_id] ?? 'Custom Food') : 'Custom Food'}
                       onEdit={handleEditLog}
                       onDelete={handleDeleteLog}
                     />

@@ -14,7 +14,7 @@ export function useWorkout() {
   const store = useWorkoutStore();
 
   const logSetWithPRDetection = useCallback(
-    async (exerciseId: string, setData: { weight: number; reps: number; durationSeconds?: number }) => {
+    async (exerciseId: string, setData: { weight: number; reps: number; durationSeconds?: number; rpe?: number }) => {
       // Get existing PRs for this exercise
       const { data: { user } } = await supabase.auth.getUser();
       let existingPRs: ExistingPR[] = [];

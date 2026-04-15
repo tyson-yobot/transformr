@@ -193,6 +193,7 @@ export default function WorkoutPlayerScreen() {
     const result = await logSetWithPRDetection(currentExercise.exercise.id, {
       weight,
       reps,
+      rpe: currentRpe,
     });
 
     const newSet: LoggedSet = {
@@ -224,21 +225,21 @@ export default function WorkoutPlayerScreen() {
     // Request AI coaching tip every 3rd set
     const newTotalSets = totalSets + 1;
     if (newTotalSets % 3 === 0 && newTotalSets > 0) {
-      const recentSets = currentExercise.loggedSets.slice(-3);
+      // Include the just-logged set in recentSets (loggedSets state updates after this callback)
+      const priorSets = currentExercise.loggedSets.slice(-2);
       getMidWorkoutCoachingTip({
         exerciseName: currentExercise.exercise.name,
         setsCompleted: newTotalSets,
         totalVolume: totalVolume + weight * reps,
         elapsedMinutes: Math.floor(elapsedSeconds / 60),
-        recentWeights: [...recentSets.map((s) => s.weight), weight],
-        recentReps: [...recentSets.map((s) => s.reps), reps],
+        recentWeights: [...priorSets.map((s) => s.weight), weight],
+        recentReps: [...priorSets.map((s) => s.reps), reps],
       })
         .then((response) => {
           setAiCoachTip(response.tip);
         })
-        .catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : 'Failed to get coaching tip';
-          console.warn('AI coaching tip request failed:', message);
+        .catch(() => {
+          // AI coaching tips are non-fatal — silently ignore
         });
     }
 
@@ -285,19 +286,27 @@ export default function WorkoutPlayerScreen() {
     // Capture ID before completeWorkout() clears activeSession
     const sessionId = activeSession?.id ?? '';
 
-    if (activeSession) {
-      await supabase
-        .from('workout_sessions')
-        .update({
-          mood_before: moodBefore,
-          mood_after: moodAfter,
-          total_volume: totalVolume,
-          total_sets: totalSets,
-        })
-        .eq('id', activeSession.id);
+    try {
+      if (activeSession) {
+        const { error: updateError } = await supabase
+          .from('workout_sessions')
+          .update({
+            mood_before: moodBefore,
+            mood_after: moodAfter,
+            total_volume: totalVolume,
+            total_sets: totalSets,
+          })
+          .eq('id', activeSession.id);
+        if (updateError) throw updateError;
+      }
+
+      await completeWorkout();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save workout';
+      Alert.alert('Save Failed', `${message}\n\nPlease try again.`);
+      return;
     }
 
-    await completeWorkout();
     router.replace(
       `/(tabs)/fitness/workout-summary?sessionId=${sessionId}` as never,
     );

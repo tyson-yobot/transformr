@@ -38,7 +38,7 @@ interface MoodActions {
 
 type MoodStore = MoodState & MoodActions;
 
-export const useMoodStore = create<MoodStore>()((set) => ({
+export const useMoodStore = create<MoodStore>()((set, get) => ({
   // --- State ---
   todayMood: null,
   moodHistory: [],
@@ -52,23 +52,54 @@ export const useMoodStore = create<MoodStore>()((set) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data: entry, error } = await supabase
-        .from('mood_logs')
-        .insert({
-          user_id: user.id,
-          mood: data.mood,
-          energy: data.energy,
-          stress: data.stress,
-          motivation: data.motivation,
-          context: data.context,
-          notes: data.notes,
-          logged_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      if (error) throw error;
+      const existingId = get().todayMood?.id;
 
-      set({ todayMood: entry as MoodLog, isLoading: false });
+      let entry: MoodLog;
+      if (existingId) {
+        // Update existing entry for today
+        const { data: updated, error } = await supabase
+          .from('mood_logs')
+          .update({
+            mood: data.mood,
+            energy: data.energy,
+            stress: data.stress,
+            motivation: data.motivation,
+            context: data.context,
+            notes: data.notes,
+            logged_at: new Date().toISOString(),
+          })
+          .eq('id', existingId)
+          .select()
+          .single();
+        if (error) throw error;
+        entry = updated as MoodLog;
+      } else {
+        // Insert new entry
+        const { data: inserted, error } = await supabase
+          .from('mood_logs')
+          .insert({
+            user_id: user.id,
+            mood: data.mood,
+            energy: data.energy,
+            stress: data.stress,
+            motivation: data.motivation,
+            context: data.context,
+            notes: data.notes,
+            logged_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+        if (error) throw error;
+        entry = inserted as MoodLog;
+      }
+
+      set((state) => ({
+        todayMood: entry,
+        moodHistory: existingId
+          ? state.moodHistory.map((m) => (m.id === existingId ? entry : m))
+          : [entry, ...state.moodHistory],
+        isLoading: false,
+      }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to log mood';
       set({ error: message, isLoading: false });

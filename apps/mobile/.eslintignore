@@ -1,0 +1,6 @@
+# Build / tooling config (CommonJS, not linted as app code)
+metro.config.js
+jest.config.js
+
+# Jest mock files (use jest globals, not app code)
+__mocks__/

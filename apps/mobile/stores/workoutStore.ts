@@ -234,14 +234,18 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
         .limit(20);
       if (error) throw error;
 
-      return (data ?? []).map((row: Record<string, unknown>) => ({
-        exercise_id: (row.exercise_id as string) ?? exerciseId,
-        set_number: row.set_number as number,
-        weight: row.weight as number,
-        reps: row.reps as number,
-        session_date: '',
-      }));
-    } catch {
+      return (data ?? []).map((row: Record<string, unknown>) => {
+        const sessions = row.workout_sessions as { completed_at?: string } | null;
+        return {
+          exercise_id: (row.exercise_id as string) ?? exerciseId,
+          set_number: row.set_number as number,
+          weight: row.weight as number,
+          reps: row.reps as number,
+          session_date: sessions?.completed_at?.split('T')[0] ?? '',
+        };
+      });
+    } catch (err: unknown) {
+      void err;
       return [];
     }
   },

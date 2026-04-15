@@ -11,6 +11,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -110,6 +111,7 @@ export default function AddFoodScreen() {
         carbs: Number(manualCarbs) || 0,
         fat: Number(manualFat) || 0,
         source: 'manual',
+        food_name: manualName.trim(),
       });
     } else if (selectedFood) {
       await logFood({
@@ -124,9 +126,14 @@ export default function AddFoodScreen() {
       });
     }
 
+    const storeError = useNutritionStore.getState().error;
     setIsLogging(false);
+    if (storeError) {
+      Alert.alert('Failed to Log', storeError);
+      return;
+    }
     router.back();
-  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router]);
+  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router]);
 
   const canLog = manualMode
     ? manualName.length > 0 && Number(manualCalories) > 0

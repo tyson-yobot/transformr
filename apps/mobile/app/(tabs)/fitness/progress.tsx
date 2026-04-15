@@ -50,10 +50,10 @@ export default function ProgressScreen() {
   const [newWeight, setNewWeight] = useState('');
   const [newBodyFat, setNewBodyFat] = useState('');
 
-  // Compare photos
+  // Compare photos — always compares first (oldest) vs last (most recent)
   const [compareMode, setCompareMode] = useState(false);
-  const [compareIndex1] = useState(0);
-  const [compareIndex2] = useState(1);
+  const compareIndex1 = 0;
+  const compareIndex2 = Math.max(1, progressPhotos.length - 1);
 
   const chartData = weightLogs.map((w) => ({
     date: w.logged_at ?? w.created_at ?? '',

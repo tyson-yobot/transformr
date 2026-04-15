@@ -16,6 +16,8 @@ import type {
 interface FoodLogInput {
   food_id?: string;
   saved_meal_id?: string;
+  /** Name used for manual entries — triggers auto-creation of a custom food record. */
+  food_name?: string;
   meal_type?: NutritionLog['meal_type'];
   quantity?: number;
   calories: number;
@@ -41,6 +43,8 @@ interface NutritionState {
   supplements: Supplement[];
   supplementLogs: SupplementLog[];
   searchResults: Food[];
+  /** Maps food_id → food name for display in MealCard. */
+  foodNameMap: Record<string, string>;
   isLoading: boolean;
   error: string | null;
 }
@@ -50,7 +54,7 @@ interface NutritionActions {
   deleteLog: (id: string) => Promise<void>;
   logWater: (oz: number) => Promise<void>;
   logSupplement: (supplementId: string) => Promise<void>;
-  fetchTodayNutrition: () => Promise<void>;
+  fetchTodayNutrition: (dayOffset?: number) => Promise<void>;
   searchFoods: (query: string) => Promise<void>;
   getTodayMacros: () => MacroTotals;
   clearError: () => void;
@@ -59,10 +63,10 @@ interface NutritionActions {
 
 type NutritionStore = NutritionState & NutritionActions;
 
-function getTodayRange(): { start: string; end: string } {
+function getTodayRange(dayOffset = 0): { start: string; end: string } {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset).toISOString();
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset + 1).toISOString();
   return { start, end };
 }
 
@@ -73,6 +77,7 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
   supplements: [],
   supplementLogs: [],
   searchResults: [],
+  foodNameMap: {},
   isLoading: false,
   error: null,
 
@@ -83,11 +88,36 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // If caller provided a manual food name but no food_id, create a custom food
+      // record so the name is stored and can be displayed in the meal list.
+      let resolvedFoodId = data.food_id;
+      if (!resolvedFoodId && data.food_name?.trim()) {
+        const { data: customFood, error: foodErr } = await supabase
+          .from('foods')
+          .insert({
+            name: data.food_name.trim(),
+            serving_size: 1,
+            serving_unit: 'serving',
+            calories: data.calories,
+            protein: data.protein,
+            carbs: data.carbs,
+            fat: data.fat,
+          })
+          .select('id')
+          .single();
+        if (foodErr) throw foodErr;
+        resolvedFoodId = (customFood as { id: string }).id;
+        // Cache the name immediately so UI updates without waiting for a re-fetch
+        set((state) => ({
+          foodNameMap: { ...state.foodNameMap, [resolvedFoodId as string]: data.food_name as string },
+        }));
+      }
+
       const { data: newLog, error } = await supabase
         .from('nutrition_logs')
         .insert({
           user_id: user.id,
-          food_id: data.food_id,
+          food_id: resolvedFoodId,
           saved_meal_id: data.saved_meal_id,
           meal_type: data.meal_type,
           quantity: data.quantity,
@@ -180,19 +210,19 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
     }
   },
 
-  fetchTodayNutrition: async () => {
+  fetchTodayNutrition: async (dayOffset = 0) => {
     set({ isLoading: true, error: null });
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { start, end } = getTodayRange();
+      const { start, end } = getTodayRange(dayOffset);
 
       const [nutritionResult, waterResult, supplementResult, supplementLogResult] =
         await Promise.all([
           supabase
             .from('nutrition_logs')
-            .select('*')
+            .select('*, food:food_id(name)')
             .eq('user_id', user.id)
             .gte('logged_at', start)
             .lt('logged_at', end)
@@ -222,11 +252,21 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
       if (supplementResult.error) throw supplementResult.error;
       if (supplementLogResult.error) throw supplementLogResult.error;
 
+      // Build food name map from joined food records
+      const nameMap: Record<string, string> = {};
+      for (const row of nutritionResult.data ?? []) {
+        const joined = row as unknown as { food_id?: string; food?: { name?: string } | null };
+        if (joined.food_id && joined.food?.name) {
+          nameMap[joined.food_id] = joined.food.name;
+        }
+      }
+
       set({
         todayLogs: (nutritionResult.data ?? []) as NutritionLog[],
         waterLogs: (waterResult.data ?? []) as WaterLog[],
         supplements: (supplementResult.data ?? []) as Supplement[],
         supplementLogs: (supplementLogResult.data ?? []) as SupplementLog[],
+        foodNameMap: nameMap,
         isLoading: false,
       });
     } catch (err: unknown) {
@@ -280,6 +320,7 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
       supplements: [],
       supplementLogs: [],
       searchResults: [],
+      foodNameMap: {},
       isLoading: false,
       error: null,
     }),

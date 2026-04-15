@@ -32,6 +32,7 @@ interface HabitStreak {
 interface HabitState {
   habits: Habit[];
   todayCompletions: HabitCompletion[];
+  allCompletions: HabitCompletion[];
   isLoading: boolean;
   error: string | null;
 }
@@ -58,6 +59,7 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
   // --- State ---
   habits: [],
   todayCompletions: [],
+  allCompletions: [],
   isLoading: false,
   error: null,
 
@@ -69,8 +71,10 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
       if (!user) throw new Error('Not authenticated');
 
       const { start, end } = getTodayRange();
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-      const [habitsResult, completionsResult] = await Promise.all([
+      const [habitsResult, completionsResult, historyResult] = await Promise.all([
         supabase
           .from('habits')
           .select('*')
@@ -83,14 +87,21 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
           .eq('user_id', user.id)
           .gte('completed_at', start)
           .lt('completed_at', end),
+        supabase
+          .from('habit_completions')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('completed_at', ninetyDaysAgo.toISOString()),
       ]);
 
       if (habitsResult.error) throw habitsResult.error;
       if (completionsResult.error) throw completionsResult.error;
+      if (historyResult.error) throw historyResult.error;
 
       set({
         habits: (habitsResult.data ?? []) as Habit[],
         todayCompletions: (completionsResult.data ?? []) as HabitCompletion[],
+        allCompletions: (historyResult.data ?? []) as HabitCompletion[],
         isLoading: false,
       });
     } catch (err: unknown) {
@@ -117,8 +128,25 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
         .single();
       if (error) throw error;
 
+      const completion = data as HabitCompletion;
+
+      // Increment streak on the habit record
+      const habit = get().habits.find((h) => h.id === habitId);
+      const newStreak = (habit?.current_streak ?? 0) + 1;
+      const newLongest = Math.max(habit?.longest_streak ?? 0, newStreak);
+      await supabase
+        .from('habits')
+        .update({ current_streak: newStreak, longest_streak: newLongest })
+        .eq('id', habitId);
+
       set((state) => ({
-        todayCompletions: [...state.todayCompletions, data as HabitCompletion],
+        todayCompletions: [...state.todayCompletions, completion],
+        allCompletions: [...state.allCompletions, completion],
+        habits: state.habits.map((h) =>
+          h.id === habitId
+            ? { ...h, current_streak: newStreak, longest_streak: newLongest }
+            : h,
+        ),
         isLoading: false,
       }));
     } catch (err: unknown) {
@@ -220,7 +248,8 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
           total_completions: completionsByHabit.get(habit.id)?.length ?? 0,
         };
       });
-    } catch {
+    } catch (err: unknown) {
+      void err;
       return [];
     }
   },
@@ -231,6 +260,7 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
     set({
       habits: [],
       todayCompletions: [],
+      allCompletions: [],
       isLoading: false,
       error: null,
     }),

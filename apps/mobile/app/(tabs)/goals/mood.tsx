@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -79,6 +80,11 @@ export default function MoodLogger() {
 
   const handleLog = useCallback(async () => {
     await logMood({ mood, energy, stress, motivation, context, notes: notes || undefined });
+    const storeError = useMoodStore.getState().error;
+    if (storeError) {
+      Alert.alert('Save Failed', storeError);
+      return;
+    }
     await hapticSuccess();
     setNotes('');
   }, [mood, energy, stress, motivation, context, notes, logMood]);

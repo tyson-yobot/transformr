@@ -10,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -27,6 +28,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
+const isValidTime = (t: string): boolean => /^\d{1,2}:\d{2}$/.test(t);
 
 export default function SleepTracker() {
   const { colors, typography, spacing } = useTheme();
@@ -76,6 +78,10 @@ export default function SleepTracker() {
   );
 
   const handleLogSleep = useCallback(async () => {
+    if (!isValidTime(bedtime) || !isValidTime(wakeTime)) {
+      Alert.alert('Invalid Time', 'Please enter times in HH:MM format (e.g. 22:30).');
+      return;
+    }
     const today = new Date().toISOString().substring(0, 10);
     const duration = calculateDuration(bedtime, wakeTime);
     await logSleep({
@@ -86,6 +92,11 @@ export default function SleepTracker() {
       caffeine_cutoff_time: caffeineCutoff,
       screen_cutoff_time: screenCutoff,
     });
+    const storeError = useSleepStore.getState().error;
+    if (storeError) {
+      Alert.alert('Save Failed', storeError);
+      return;
+    }
     await hapticSuccess();
     setShowLogModal(false);
   }, [bedtime, wakeTime, quality, caffeineCutoff, screenCutoff, logSleep, calculateDuration]);

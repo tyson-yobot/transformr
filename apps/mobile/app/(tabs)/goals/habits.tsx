@@ -10,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -47,6 +48,7 @@ export default function HabitTracker() {
   const {
     habits,
     todayCompletions,
+    allCompletions,
     isLoading,
     fetchHabits,
     completeHabit,
@@ -91,10 +93,13 @@ export default function HabitTracker() {
     async (habitId: string, currentStreak: number) => {
       if (completedIds.has(habitId)) return;
       await completeHabit(habitId);
+      const storeError = useHabitStore.getState().error;
+      if (storeError) {
+        Alert.alert('Error', storeError);
+        return;
+      }
       await hapticSuccess();
-
       setCompletedAnimations((prev) => new Set(prev).add(habitId));
-
       const newStreak = (currentStreak ?? 0) + 1;
       if (STREAK_MILESTONES.includes(newStreak)) {
         await hapticStreakMilestone();
@@ -109,6 +114,11 @@ export default function HabitTracker() {
       name: newHabitName.trim(),
       category: newHabitCategory,
     });
+    const storeError = useHabitStore.getState().error;
+    if (storeError) {
+      Alert.alert('Failed to Create', storeError);
+      return;
+    }
     await hapticSuccess();
     setShowAddModal(false);
     setNewHabitName('');
@@ -118,10 +128,10 @@ export default function HabitTracker() {
     return STREAK_MILESTONES.find((m) => m > streak) ?? null;
   };
 
-  // Build streak calendar data from today completions
+  // Build streak calendar data from 90-day completion history
   const streakCalendarData = useMemo(() => {
     const dataMap = new Map<string, number>();
-    for (const completion of todayCompletions) {
+    for (const completion of allCompletions) {
       if (completion.completed_at) {
         const dateKey = completion.completed_at.substring(0, 10);
         dataMap.set(dateKey, (dataMap.get(dateKey) ?? 0) + 1);
@@ -132,7 +142,7 @@ export default function HabitTracker() {
       completed: count > 0,
       count,
     }));
-  }, [todayCompletions]);
+  }, [allCompletions]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

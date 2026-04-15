@@ -10,6 +10,7 @@ import {
   TextInput,
   StyleSheet,
   Alert,
+  Share,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -804,8 +805,10 @@ export default function ChallengeDetailScreen() {
         </Text>
         <Button
           title="Copy Invite Link"
-          onPress={() => {
+          onPress={async () => {
+            const inviteLink = `https://transformr.app/challenge/${id}`;
             hapticSuccess();
+            await Share.share({ message: inviteLink });
             setShowPartnerModal(false);
           }}
           fullWidth
@@ -813,7 +816,14 @@ export default function ChallengeDetailScreen() {
         />
         <Button
           title="Share via Message"
-          onPress={() => setShowPartnerModal(false)}
+          onPress={async () => {
+            const inviteLink = `https://transformr.app/challenge/${id}`;
+            await Share.share({
+              message: `Join my challenge on TRANSFORMR! ${inviteLink}`,
+              url: inviteLink,
+            });
+            setShowPartnerModal(false);
+          }}
           fullWidth
           style={{ marginTop: spacing.md }}
         />
