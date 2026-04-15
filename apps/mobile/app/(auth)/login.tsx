@@ -49,9 +49,8 @@ export default function LoginScreen() {
   const [passwordError, setPasswordError] = useState('');
 
   // Clear any stale error from previous auth attempts on mount
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { clearError(); }, []);
 
   const handleSignIn = useCallback(async () => {
     clearError();

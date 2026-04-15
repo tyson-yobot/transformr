@@ -62,9 +62,8 @@ export default function RegisterScreen() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Clear any stale error from previous auth attempts on mount
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { clearError(); }, []);
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
