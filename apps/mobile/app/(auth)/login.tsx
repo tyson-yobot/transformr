@@ -45,8 +45,8 @@ export default function LoginScreen() {
   const { signIn, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
   const session = useAuthStore((s) => s.session);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(__DEV__ ? 'tyson@construktr.ai' : '');
+  const [password, setPassword] = useState(__DEV__ ? 'Icedawgs2!' : '');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -59,12 +59,11 @@ export default function LoginScreen() {
 
   // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
   // doesn't show Chrome's first-run wizard on the emulator / cold devices.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     clearError();
     void WebBrowser.warmUpAsync();
     return () => { void WebBrowser.coolDownAsync(); };
-  }, []);
+  }, [clearError]);
 
   const handleSignIn = useCallback(async () => {
     clearError();

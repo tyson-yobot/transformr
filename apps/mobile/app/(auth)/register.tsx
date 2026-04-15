@@ -72,12 +72,11 @@ export default function RegisterScreen() {
 
   // Clear stale error on mount; warm up Chrome Custom Tabs so first OAuth tap
   // doesn't show Chrome's first-run wizard on the emulator / cold devices.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     clearError();
     void WebBrowser.warmUpAsync();
     return () => { void WebBrowser.coolDownAsync(); };
-  }, []);
+  }, [clearError]);
 
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
