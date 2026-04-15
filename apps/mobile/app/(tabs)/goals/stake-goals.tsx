@@ -35,6 +35,7 @@ export default function StakeGoalsScreen() {
 
   const [stakeGoals, setStakeGoals] = useState<StakeGoalWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGoalTitle, setNewGoalTitle] = useState('');
@@ -94,8 +95,8 @@ export default function StakeGoalsScreen() {
       }));
 
       setStakeGoals(withDetails);
-    } catch {
-      // Silently fail — empty state is shown
+    } catch (err: unknown) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load stake goals');
     } finally {
       setIsLoading(false);
     }
@@ -218,6 +219,12 @@ export default function StakeGoalsScreen() {
           <Card>
             <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
               Loading stakes…
+            </Text>
+          </Card>
+        ) : loadError ? (
+          <Card>
+            <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>
+              {loadError}
             </Text>
           </Card>
         ) : (

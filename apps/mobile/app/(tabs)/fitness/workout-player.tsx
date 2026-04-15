@@ -79,6 +79,7 @@ export default function WorkoutPlayerScreen() {
   const [prMessage, setPrMessage] = useState('');
   const [showGhostOverlay, setShowGhostOverlay] = useState(true);
   const [loadingExercises, setLoadingExercises] = useState(true);
+  const [exerciseLoadError, setExerciseLoadError] = useState<string | null>(null);
   const [aiCoachTip, setAiCoachTip] = useState<string | null>(null);
 
   // Set logger state per exercise
@@ -165,8 +166,8 @@ export default function WorkoutPlayerScreen() {
             setExercisesWithSets(exerciseItems);
           }
         }
-      } catch {
-        // Exercises will be empty; user can add exercises manually
+      } catch (err: unknown) {
+        setExerciseLoadError(err instanceof Error ? err.message : 'Failed to load exercises');
       } finally {
         setLoadingExercises(false);
       }
@@ -401,9 +402,15 @@ export default function WorkoutPlayerScreen() {
           </View>
         ) : exercisesWithSets.length === 0 ? (
           <Card style={{ marginBottom: spacing.lg }}>
-            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-              No exercises loaded. This is an empty workout session.
-            </Text>
+            {exerciseLoadError ? (
+              <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>
+                {exerciseLoadError}
+              </Text>
+            ) : (
+              <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
+                No exercises loaded. This is an empty workout session.
+              </Text>
+            )}
             <Button
               title="Browse Exercises"
               variant="outline"

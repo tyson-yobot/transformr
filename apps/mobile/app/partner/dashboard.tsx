@@ -37,6 +37,7 @@ export default function PartnerDashboard() {
   const myProfile = useProfileStore((s) => s.profile);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [myStats, setMyStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
   const [partnerStats, setPartnerStats] = useState<PartnerStats>({ workoutsThisWeek: 0, currentStreak: 0, habitsCompletedToday: 0, habitsTotal: 0 });
   const [recentActivity, setRecentActivity] = useState<{ id: string; text: string; time: string }[]>([]);
@@ -116,8 +117,8 @@ export default function PartnerDashboard() {
             })),
           );
         }
-      } catch {
-        // Stats load silently — UI shows zero values as fallback
+      } catch (err: unknown) {
+        setStatsError(err instanceof Error ? err.message : 'Failed to load partner stats');
       }
     };
     if (partnership) void loadStats();
@@ -166,6 +167,15 @@ export default function PartnerDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />
         }
       >
+        {/* Stats error banner */}
+        {statsError && (
+          <Card style={{ marginBottom: spacing.md, backgroundColor: `${colors.accent.danger}15` }}>
+            <Text style={[typography.caption, { color: colors.accent.danger }]}>
+              Could not load partner stats: {statsError}
+            </Text>
+          </Card>
+        )}
+
         {/* Joint Streak */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.streakSection}>
           <ProgressRing progress={Math.min(jointStreak / 30, 1)} size={100} strokeWidth={10}>

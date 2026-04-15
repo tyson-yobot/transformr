@@ -88,8 +88,8 @@ export default function GroceryListScreen() {
     try {
       const budget = await getWeeklyGroceryBudget();
       setWeeklyBudget(budget);
-    } catch {
-      // Budget not set
+    } catch (err: unknown) {
+      console.error('Failed to load weekly grocery budget:', err instanceof Error ? err.message : err);
     }
   }
 

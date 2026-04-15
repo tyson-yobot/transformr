@@ -81,8 +81,9 @@ export default function MealPrepScreen() {
     try {
       const budget = await getWeeklyGroceryBudget();
       setWeeklyBudget(budget);
-    } catch {
-      // Budget not set — that's OK
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not load your grocery budget.';
+      setError(msg);
     } finally {
       setIsLoadingBudget(false);
     }

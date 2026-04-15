@@ -45,6 +45,8 @@ export default function PartnerChallengesScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   // Form
   const [formTitle, setFormTitle] = useState('');
@@ -56,6 +58,7 @@ export default function PartnerChallengesScreen() {
   const fetchChallenges = useCallback(async () => {
     if (!partnership) return;
     try {
+      setFetchError(null);
       const { data, error } = await supabase
         .from('partner_challenges')
         .select('*')
@@ -63,8 +66,8 @@ export default function PartnerChallengesScreen() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       setChallenges((data ?? []) as PartnerChallenge[]);
-    } catch {
-      // Silent
+    } catch (err: unknown) {
+      setFetchError(err instanceof Error ? err.message : 'Failed to load challenges');
     } finally {
       setIsLoading(false);
     }
@@ -111,12 +114,13 @@ export default function PartnerChallengesScreen() {
 
       setChallenges((prev) => [data as PartnerChallenge, ...prev]);
       await hapticSuccess();
+      setCreateError(null);
       setShowCreateModal(false);
       setFormTitle('');
       setFormDescription('');
       setFormTarget('');
-    } catch {
-      // Silent
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create challenge');
     }
   }, [formTitle, formDescription, formType, formTarget, formDuration, partnership]);
 
@@ -167,6 +171,15 @@ export default function PartnerChallengesScreen() {
           fullWidth
           style={{ marginBottom: spacing.lg }}
         />
+
+        {/* Fetch error banner */}
+        {fetchError && (
+          <Card style={{ marginBottom: spacing.md, backgroundColor: `${colors.accent.danger}15` }}>
+            <Text style={[typography.caption, { color: colors.accent.danger }]}>
+              {fetchError}
+            </Text>
+          </Card>
+        )}
 
         {/* Active Challenges */}
         <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
@@ -289,7 +302,12 @@ export default function PartnerChallengesScreen() {
         <Input label="Target Value (optional)" value={formTarget} onChangeText={setFormTarget} placeholder="e.g. 7" keyboardType="decimal-pad" containerStyle={{ marginTop: spacing.md }} />
         <Input label="Duration (days)" value={formDuration} onChangeText={setFormDuration} placeholder="7" keyboardType="number-pad" containerStyle={{ marginTop: spacing.md }} />
 
-        <Button title="Create Challenge" onPress={handleCreate} fullWidth disabled={!formTitle.trim()} style={{ marginTop: spacing.xl }} />
+        {createError && (
+          <Text style={[typography.caption, { color: colors.accent.danger, marginTop: spacing.md, textAlign: 'center' }]}>
+            {createError}
+          </Text>
+        )}
+        <Button title="Create Challenge" onPress={handleCreate} fullWidth disabled={!formTitle.trim()} style={{ marginTop: spacing.lg }} />
       </Modal>
     </View>
   );

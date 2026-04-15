@@ -99,8 +99,9 @@ export default function FormCheckScreen() {
       try {
         const video = await recordingPromiseRef.current;
         if (video?.uri) setVideoUri(video.uri);
-      } catch {
-        // Recording may have been cancelled
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Recording could not be saved.';
+        Alert.alert('Recording Error', msg);
       } finally {
         recordingPromiseRef.current = null;
       }

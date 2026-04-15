@@ -103,7 +103,9 @@ export const usePartnerStore = create<PartnerStore>()((set, get) => ({
 
       set({ partnership: data as Partnership });
       return code;
-    } catch {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create invite';
+      set({ error: message });
       return null;
     }
   },

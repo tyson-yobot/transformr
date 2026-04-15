@@ -9,6 +9,7 @@ import {
   FlatList,
   ScrollView,
   Pressable,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -23,6 +24,7 @@ import { Modal } from '@components/ui/Modal';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { hapticLight } from '@utils/haptics';
+import { supabase } from '@services/supabase';
 import type { Exercise } from '@app-types/database';
 
 type CategoryFilter = Exercise['category'] | 'all';
@@ -91,10 +93,25 @@ export default function ExercisesScreen() {
 
   const handleAddCustomExercise = useCallback(async () => {
     if (!newExerciseName.trim()) return;
-    // In a real implementation, this would create the exercise in supabase
-    setShowAddModal(false);
-    setNewExerciseName('');
-    await fetchExercises();
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase.from('exercises').insert({
+        name: newExerciseName.trim(),
+        muscle_groups: [],
+        is_custom: true,
+        created_by: user.id,
+        created_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+
+      setShowAddModal(false);
+      setNewExerciseName('');
+      await fetchExercises();
+    } catch (err: unknown) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to add exercise');
+    }
   }, [newExerciseName, fetchExercises]);
 
   const renderExerciseItem = useCallback(

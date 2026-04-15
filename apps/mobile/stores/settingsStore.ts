@@ -5,6 +5,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../services/supabase';
+import type { Profile } from '../types/database';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -39,6 +41,10 @@ type SettingValue<K extends SettingKey> = SettingsState[K];
 interface SettingsActions {
   updateSetting: <K extends SettingKey>(key: K, value: SettingValue<K>) => void;
   setFitnessPrefs: (prefs: Partial<FitnessPreferences>) => void;
+  /** Sync theme/voice/narrator from a freshly-fetched profile (called on sign-in). */
+  loadFromProfile: (profile: Profile) => void;
+  /** Push theme/voice/narrator to Supabase profiles row. */
+  syncToProfile: () => Promise<void>;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -52,9 +58,16 @@ const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   weeklyReport: true,
 };
 
+// Fields that have a direct 1-to-1 mapping in the profiles table
+const SYNCED_KEYS: ReadonlySet<SettingKey> = new Set<SettingKey>([
+  'theme',
+  'voiceEnabled',
+  'narratorEnabled',
+]);
+
 export const useSettingsStore = create<SettingsStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // --- State ---
       theme: 'system',
       notifications: DEFAULT_NOTIFICATIONS,
@@ -71,11 +84,43 @@ export const useSettingsStore = create<SettingsStore>()(
       // --- Actions ---
       updateSetting: (key, value) => {
         set((state) => ({ ...state, [key]: value }));
+        // Sync profile-backed fields to Supabase in the background
+        if (SYNCED_KEYS.has(key)) {
+          void get().syncToProfile();
+        }
       },
+
       setFitnessPrefs: (prefs) => {
         set((state) => ({
           fitnessPreferences: { ...state.fitnessPreferences, ...prefs },
         }));
+      },
+
+      loadFromProfile: (profile) => {
+        set({
+          theme: (profile.theme as ThemeMode | undefined) ?? get().theme,
+          voiceEnabled: profile.voice_commands_enabled ?? get().voiceEnabled,
+          narratorEnabled: profile.narrator_enabled ?? get().narratorEnabled,
+        });
+      },
+
+      syncToProfile: async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          const { theme, voiceEnabled, narratorEnabled } = get();
+          await supabase
+            .from('profiles')
+            .update({
+              theme: theme as Profile['theme'],
+              voice_commands_enabled: voiceEnabled,
+              narrator_enabled: narratorEnabled,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', user.id);
+        } catch {
+          // Non-critical — local preferences remain intact
+        }
       },
     }),
     {

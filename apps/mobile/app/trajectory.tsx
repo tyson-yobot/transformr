@@ -7,6 +7,7 @@ import {
   View,
   Text,
   ScrollView,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -21,7 +22,7 @@ import { TrajectoryChart } from '@components/charts/TrajectoryChart';
 import { useProfileStore } from '@stores/profileStore';
 import { formatNumber, formatCurrency } from '@utils/formatters';
 import { generateTrajectory } from '@services/ai/trajectory';
-import { supabase } from '../services/supabase';
+import { supabase } from '@services/supabase';
 
 type TrajectoryDomain = 'weight' | 'revenue' | 'fitness';
 
@@ -157,8 +158,9 @@ export default function TrajectoryScreen() {
         currentStreak: 0,
         habitsCompletionRate: 0.75,
       });
-    } catch {
-      // Trajectory service may not be deployed yet; fail silently
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Trajectory simulation unavailable';
+      Alert.alert('Simulation Error', message);
     } finally {
       setIsSimulating(false);
     }

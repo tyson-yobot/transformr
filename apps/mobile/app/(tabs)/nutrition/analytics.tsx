@@ -126,6 +126,7 @@ export default function NutritionAnalyticsScreen() {
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [dailyData, setDailyData] = useState<DailySnapshot[]>([]);
   const [mealTypeCounts, setMealTypeCounts] = useState<Record<string, { count: number; totalCalories: number }>>({});
 
@@ -140,6 +141,7 @@ export default function NutritionAnalyticsScreen() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      setLoadError(null);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -190,8 +192,8 @@ export default function NutritionAnalyticsScreen() {
         }
 
         setDailyData(snapshots);
-      } catch {
-        // Keep existing data on error
+      } catch (err: unknown) {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load nutrition data');
       } finally {
         setIsLoading(false);
       }
@@ -300,6 +302,11 @@ export default function NutritionAnalyticsScreen() {
           </View>
         ) : (
           <>
+            {loadError && (
+              <Card style={{ marginBottom: spacing.md, borderWidth: 1, borderColor: colors.accent.danger }}>
+                <Text style={[typography.body, { color: colors.accent.danger }]}>{loadError}</Text>
+              </Card>
+            )}
             <AIInsightCard screenKey="nutrition/analytics" style={{ marginBottom: spacing.md }} />
 
             {/* Time Range */}

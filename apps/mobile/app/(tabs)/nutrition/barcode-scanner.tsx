@@ -9,6 +9,7 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -110,7 +111,9 @@ export default function BarcodeScannerScreen() {
         setStage('not_found');
         hapticWarning();
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to look up product. Please try again.';
+      Alert.alert('Lookup Error', msg);
       setStage('not_found');
       hapticWarning();
     }

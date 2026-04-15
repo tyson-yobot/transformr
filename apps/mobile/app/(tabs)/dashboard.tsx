@@ -246,8 +246,8 @@ export default function DashboardScreen() {
             }),
           );
         }
-      } catch {
-        // Non-critical — dashboard still renders with fallback values
+      } catch (err: unknown) {
+        console.error('Dashboard data load failed:', err instanceof Error ? err.message : err);
       }
     };
     void loadDashboardData();

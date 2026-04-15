@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -115,8 +116,8 @@ export default function BudgetsScreen() {
       setShowAddModal(false);
       resetForm();
       await fetchBudgets();
-    } catch {
-      // Error handled silently; store will surface via error state
+    } catch (err: unknown) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to save budget');
     }
   }, [formCategory, formLimit, editingBudget, currentMonth, fetchBudgets, resetForm]);
 

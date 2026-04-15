@@ -9,6 +9,7 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -58,8 +59,8 @@ export default function NudgeScreen() {
       await hapticSuccess();
       setSentMessage(nudge.message);
       setTimeout(() => setSentMessage(null), 3000);
-    } catch {
-      // Error in store
+    } catch (err: unknown) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to send nudge');
     } finally {
       setIsSending(false);
     }
@@ -74,8 +75,8 @@ export default function NudgeScreen() {
       setSentMessage(customMessage.trim());
       setCustomMessage('');
       setTimeout(() => setSentMessage(null), 3000);
-    } catch {
-      // Error in store
+    } catch (err: unknown) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to send nudge');
     } finally {
       setIsSending(false);
     }

@@ -22,7 +22,7 @@ import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Skill, Book, Course } from '@app-types/database';
-import { supabase } from '../../../services/supabase';
+import { supabase } from '@services/supabase';
 
 type ActiveTab = 'skills' | 'books' | 'courses';
 
@@ -44,14 +44,43 @@ export default function SkillsScreen() {
     const fetchAll = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const [skillsRes, booksRes, coursesRes] = await Promise.all([
+      const [skillsRes, booksRes, coursesRes, goalsRes] = await Promise.all([
         supabase.from('skills').select('*').eq('user_id', user.id).order('created_at'),
         supabase.from('books').select('*').eq('user_id', user.id).order('created_at'),
         supabase.from('courses').select('*').eq('user_id', user.id).order('created_at'),
+        supabase.from('goals').select('title, category').eq('user_id', user.id).eq('status', 'active').limit(5),
       ]);
       if (skillsRes.data) setSkills(skillsRes.data as Skill[]);
       if (booksRes.data) setBooks(booksRes.data as Book[]);
       if (coursesRes.data) setCourses(coursesRes.data as Course[]);
+
+      // Build a recommendation from active goal categories
+      const categoryMap: Record<string, string> = {
+        business: 'business strategy, sales, and leadership',
+        financial: 'financial modeling, investing, and budgeting',
+        fitness: 'advanced training techniques and sports nutrition',
+        nutrition: 'macro optimization and meal planning',
+        personal: 'mindset, communication, and habit formation',
+        education: 'learning strategies and knowledge retention',
+        mindset: 'emotional intelligence, focus, and resilience',
+        health: 'preventive health, sleep optimization, and recovery',
+        relationship: 'communication, empathy, and conflict resolution',
+      };
+      const goals = (goalsRes.data ?? []) as { title: string; category?: string | null }[];
+      const categories = [...new Set(goals.map((g) => g.category).filter(Boolean))] as string[];
+      const relevantAreas = categories
+        .map((cat) => categoryMap[cat] ?? null)
+        .filter(Boolean)
+        .slice(0, 3)
+        .join('; ');
+
+      if (relevantAreas) {
+        setAiRecommendation(`Based on your active goals, focus on: ${relevantAreas}.`);
+      } else if (goals.length > 0) {
+        setAiRecommendation('Keep working toward your goals — explore books, courses, and skills that align with each one.');
+      } else {
+        setAiRecommendation('Add goals to unlock personalized skill and learning recommendations.');
+      }
     };
     void fetchAll();
   }, []);
@@ -75,6 +104,7 @@ export default function SkillsScreen() {
   const [newCourseUrl, setNewCourseUrl] = useState('');
 
   const [bookFilter, setBookFilter] = useState<Book['status'] | null>(null);
+  const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
 
   const filteredBooks = useMemo(
     () => (bookFilter ? books.filter((b) => b.status === bookFilter) : books),
@@ -394,7 +424,7 @@ export default function SkillsScreen() {
             </Text>
           </View>
           <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
-            Based on your goals, consider learning about financial modeling, advanced TypeScript patterns, or leadership principles.
+            {aiRecommendation ?? 'Loading your personalized recommendations…'}
           </Text>
         </Card>
 

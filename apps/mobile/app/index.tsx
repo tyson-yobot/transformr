@@ -18,6 +18,7 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '@stores/authStore';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
+import { useGamificationStore } from '@stores/gamificationStore';
 // Local asset — guaranteed resolvable by Metro within project root
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const ICON = require('../assets/images/transformr-icon.png') as number;
@@ -75,6 +76,15 @@ export default function Index() {
     fetchProfile()
       .then(() => {
         const currentProfile = useProfileStore.getState().profile;
+
+        // Hydrate local stores from profile so settings follow the user across devices
+        if (currentProfile) {
+          useSettingsStore.getState().loadFromProfile(currentProfile);
+          if (currentProfile.coaching_tone) {
+            useGamificationStore.getState().setTone(currentProfile.coaching_tone);
+          }
+        }
+
         if (!currentProfile?.onboarding_completed) {
           navigate('/(auth)/onboarding/welcome');
           return;

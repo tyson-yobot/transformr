@@ -8,6 +8,7 @@ import {
   Text,
   ScrollView,
   Pressable,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -22,8 +23,8 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
-import { supabase } from '../../../services/supabase';
-import { getJournalResponse } from '../../../services/ai/journaling';
+import { supabase } from '@services/supabase';
+import { getJournalResponse } from '@services/ai/journaling';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -95,19 +96,20 @@ export default function JournalScreen() {
       const strugglesArr = struggles.trim() ? [struggles.trim()] : [];
       const gratitudeArr = gratitude.trim() ? [gratitude.trim()] : [];
 
-      // Call real AI service
-      let aiText: string;
+      // Call real AI service — failure here is non-fatal, entry still saves
+      let aiText: string | null = null;
       try {
         const response = await getJournalResponse(user.id, entryText, winsArr, strugglesArr, gratitudeArr);
         aiText = response.reflection + (response.encouragement ? `\n\n${response.encouragement}` : '');
       } catch {
-        aiText = 'Thank you for sharing your reflection. Keep building on this momentum.';
+        // AI unavailable — entry still saves, no fake response shown
+        aiText = null;
       }
 
       const todayStr = new Date().toISOString().split('T')[0];
 
       // Persist journal entry to Supabase
-      const { data: saved } = await supabase
+      const { data: saved, error: saveError } = await supabase
         .from('journal_entries')
         .insert({
           user_id: user.id,
@@ -125,14 +127,21 @@ export default function JournalScreen() {
         .select()
         .single();
 
+      if (saveError) throw saveError;
+
       if (saved) {
         setPastEntries((prev) => [saved as JournalEntry, ...prev]);
       }
 
-      setAiResponse(aiText);
+      if (aiText) {
+        setAiResponse(aiText);
+      } else {
+        setAiResponse('Entry saved. AI reflection is currently unavailable — check back later.');
+      }
       await hapticSuccess();
-    } catch {
-      setAiResponse('Entry saved. Keep reflecting and building on this momentum.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save journal entry';
+      Alert.alert('Save Failed', message);
     } finally {
       setIsSubmitting(false);
     }

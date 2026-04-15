@@ -56,6 +56,7 @@ export default function GoalCinemaScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Pulsing animation for the progress ring
@@ -89,8 +90,9 @@ export default function GoalCinemaScreen() {
           .order('logged_at', { ascending: false })
           .limit(10);
         setWeightLogs((data ?? []) as WeightLog[]);
-      } catch {
-        // Silent
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Could not load progress photos.';
+        setPhotoError(msg);
       }
     };
     loadPhotos();
@@ -292,6 +294,11 @@ export default function GoalCinemaScreen() {
 
       {/* Controls */}
       <View style={[styles.controls, { paddingBottom: insets.bottom + spacing.lg }]}>
+        {photoError && (
+          <Text style={[typography.tiny, { color: colors.accent.danger, textAlign: 'center', marginBottom: spacing.sm }]}>
+            {photoError}
+          </Text>
+        )}
         {/* Progress Dots */}
         <View style={styles.dotsRow}>
           {slides.map((_, idx) => (

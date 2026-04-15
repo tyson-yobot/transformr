@@ -1,13 +1,14 @@
 // =============================================================================
 // TRANSFORMR -- Gamification Store (Module 13)
-// Persists the user's coaching tone preference using MMKV via Zustand persist
-// middleware — same pattern as settingsStore.
+// Persists the user's coaching tone preference locally via AsyncStorage and
+// syncs it to the profiles table so it survives device changes.
 // v2: Expanded from 2 modes (competitive/supportive) to 4 coaching tones.
 // =============================================================================
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../services/supabase';
 
 export type CoachingTone = 'drill_sergeant' | 'motivational' | 'balanced' | 'calm';
 
@@ -39,7 +40,22 @@ export const useGamificationStore = create<GamificationStore>()(
       tone: 'motivational',
 
       // --- Actions ---
-      setTone: (tone) => set({ tone }),
+      setTone: (tone) => {
+        set({ tone });
+        // Sync to Supabase in background — non-blocking, local value is authoritative
+        void (async () => {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            await supabase
+              .from('profiles')
+              .update({ coaching_tone: tone, updated_at: new Date().toISOString() })
+              .eq('id', user.id);
+          } catch {
+            // Non-critical — tone already saved locally via AsyncStorage
+          }
+        })();
+      },
     }),
     {
       name: 'transformr-gamification',

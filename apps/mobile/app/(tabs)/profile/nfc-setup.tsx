@@ -53,6 +53,7 @@ export default function NfcSetupScreen() {
 
   const [triggers, setTriggers] = useState<NfcTrigger[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newLabel, setNewLabel] = useState('');
@@ -63,6 +64,7 @@ export default function NfcSetupScreen() {
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
+      setLoadError(null);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -75,6 +77,9 @@ export default function NfcSetupScreen() {
 
         if (error) throw error;
         if (data) setTriggers(data as NfcTrigger[]);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to load NFC triggers.';
+        setLoadError(msg);
       } finally {
         setIsLoading(false);
       }
@@ -257,7 +262,15 @@ export default function NfcSetupScreen() {
           Configured Triggers ({triggers.length})
         </Text>
 
-        {triggers.length === 0 && !isLoading && (
+        {loadError && (
+          <Card style={{ marginBottom: spacing.md, backgroundColor: `${colors.accent.danger}15` }}>
+            <Text style={[typography.caption, { color: colors.accent.danger }]}>
+              {loadError}
+            </Text>
+          </Card>
+        )}
+
+        {triggers.length === 0 && !isLoading && !loadError && (
           <View style={styles.emptyState}>
             <Text
               style={[

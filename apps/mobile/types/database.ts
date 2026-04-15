@@ -47,6 +47,7 @@ export interface Profile {
   supplement_budget_monthly?: number;
   weekly_grocery_budget_usd?: number;
   onboarding_completed?: boolean;
+  coaching_tone?: 'drill_sergeant' | 'motivational' | 'balanced' | 'calm';
   created_at?: string;
   updated_at?: string;
 }

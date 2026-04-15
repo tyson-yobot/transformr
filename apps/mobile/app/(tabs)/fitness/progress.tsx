@@ -159,13 +159,67 @@ export default function ProgressScreen() {
       mediaTypes: ['images'],
       quality: 0.8,
       allowsEditing: true,
+      aspect: [3, 4],
     });
 
-    if (!result.canceled && result.assets.length > 0) {
-      // In a full implementation, upload to storage and save URL to weight_log
-      Alert.alert('Photo Captured', 'Photo upload will be implemented with storage integration.');
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0];
+    if (!asset?.uri) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Fetch image blob from local URI
+      const response = await fetch(asset.uri);
+      const blob = await response.blob();
+      const timestamp = Date.now();
+      const storagePath = `${user.id}/${timestamp}.jpg`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('progress-photos')
+        .upload(storagePath, blob, { contentType: 'image/jpeg', upsert: false });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('progress-photos')
+        .getPublicUrl(storagePath);
+
+      // Associate with today's weight log if one exists, otherwise create one
+      const today = new Date().toISOString().split('T')[0] as string;
+      const todayLog = weightLogs.find((w) => (w.logged_at ?? '').startsWith(today));
+
+      if (todayLog) {
+        const { error: updateError } = await supabase
+          .from('weight_logs')
+          .update({ photo_front_url: publicUrl, updated_at: new Date().toISOString() })
+          .eq('id', todayLog.id);
+        if (updateError) throw updateError;
+      } else {
+        const currentWeight = weightLogs[weightLogs.length - 1]?.weight ?? null;
+        if (!currentWeight) {
+          // No weight logged yet — prompt the user to log weight first
+          Alert.alert(
+            'Log Weight First',
+            'Please log your current weight before adding a progress photo.',
+          );
+          return;
+        }
+        const { error: insertError } = await supabase.from('weight_logs').insert({
+          user_id: user.id,
+          weight: currentWeight,
+          photo_front_url: publicUrl,
+          logged_at: new Date().toISOString(),
+        });
+        if (insertError) throw insertError;
+      }
+
+      await hapticSuccess();
+      await loadData();
+    } catch (err: unknown) {
+      Alert.alert('Upload Failed', err instanceof Error ? err.message : 'Failed to upload photo');
     }
-  }, []);
+  }, [weightLogs, loadData]);
 
   const latestWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1] : null;
   const latestMeasurement = measurements.length > 0 ? measurements[0] : null;

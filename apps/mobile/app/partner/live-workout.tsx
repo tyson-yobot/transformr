@@ -2,12 +2,13 @@
 // TRANSFORMR -- Partner Live Workout
 // =============================================================================
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Pressable,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -39,8 +40,12 @@ export default function LiveWorkoutScreen() {
   const [mySets, setMySets] = useState<LiveWorkoutSync[]>([]);
   const [partnerSets, setPartnerSets] = useState<LiveWorkoutSync[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lastReaction, setLastReaction] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(false);
+
+  // Stable ref so the real-time callback can classify events without stale closure
+  const currentUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const loadSyncData = async () => {
@@ -48,6 +53,7 @@ export default function LiveWorkoutScreen() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !partnership) { setIsLoading(false); return; }
 
+        currentUserIdRef.current = user.id;
         const partnerId = partnership.user_a === user.id ? partnership.user_b : partnership.user_a;
 
         const [myResult, partnerResult] = await Promise.all([
@@ -65,10 +71,13 @@ export default function LiveWorkoutScreen() {
             .limit(20),
         ]);
 
+        if (myResult.error) throw myResult.error;
+        if (partnerResult.error) throw partnerResult.error;
+
         setMySets((myResult.data ?? []) as LiveWorkoutSync[]);
         setPartnerSets((partnerResult.data ?? []) as LiveWorkoutSync[]);
-      } catch {
-        // Silent failure
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load workout data');
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +85,7 @@ export default function LiveWorkoutScreen() {
     loadSyncData();
   }, [partnership]);
 
-  // Real-time subscription
+  // Real-time subscription — route events to the correct side based on user_id
   useEffect(() => {
     if (!partnership) return;
 
@@ -88,9 +97,11 @@ export default function LiveWorkoutScreen() {
         table: 'live_workout_sync',
       }, (payload) => {
         const record = payload.new as LiveWorkoutSync;
-        // Placeholder for real-time user detection
-        // In production, check if record.user_id matches current user or partner
-        setPartnerSets((prev) => [record, ...prev]);
+        if (record.user_id === currentUserIdRef.current) {
+          setMySets((prev) => [record, ...prev]);
+        } else {
+          setPartnerSets((prev) => [record, ...prev]);
+        }
       })
       .subscribe();
 
@@ -107,15 +118,16 @@ export default function LiveWorkoutScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const partnerId = partnership.user_a === user.id ? partnership.user_b : partnership.user_a;
-      await supabase.from('partner_nudges').insert({
+      const { error } = await supabase.from('partner_nudges').insert({
         from_user_id: user.id,
         to_user_id: partnerId,
         type: 'reaction' as const,
         emoji,
         message: `${emoji} during live workout`,
       });
-    } catch {
-      // Silent
+      if (error) throw error;
+    } catch (err: unknown) {
+      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to send reaction');
     }
     setTimeout(() => setLastReaction(null), 2000);
   }, [partnership]);
@@ -132,6 +144,19 @@ export default function LiveWorkoutScreen() {
           <Skeleton variant="card" height={200} />
           <Skeleton variant="card" height={200} />
         </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <Text style={[typography.h2, { color: colors.accent.danger, textAlign: 'center' }]}>
+          Failed to Load
+        </Text>
+        <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
+          {error}
+        </Text>
       </View>
     );
   }

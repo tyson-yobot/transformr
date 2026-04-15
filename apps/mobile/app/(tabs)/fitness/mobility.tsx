@@ -71,6 +71,7 @@ export default function MobilityScreen() {
   const [completedCount, setCompletedCount] = useState(0);
   const [recentSessions, setRecentSessions] = useState<MobilitySession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -137,8 +138,47 @@ export default function MobilityScreen() {
         };
 
         setRoutines([pushDayRoutine, legDayRoutine, fullBodyRoutine]);
-      } catch {
-        // Silently fail; routines will use defaults
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load session history');
+        // Still populate default routines so the screen is functional
+        const pushDayRoutineFallback: MobilityRoutine = {
+          id: 'r1',
+          name: 'Post-Push Day Recovery',
+          description: 'Stretches targeting chest, shoulders, and triceps',
+          exercises: [
+            { ...getStretch(3), isCompleted: false },
+            { ...getStretch(5), isCompleted: false },
+            { ...getStretch(4), isCompleted: false },
+            { ...getStretch(6), isCompleted: false },
+            { ...getStretch(9), isCompleted: false },
+          ],
+          totalDurationMinutes: 8,
+          isAiGenerated: true,
+        };
+        const legDayRoutineFallback: MobilityRoutine = {
+          id: 'r2',
+          name: 'Post-Leg Day Recovery',
+          description: 'Stretches targeting quads, hamstrings, hips, and glutes',
+          exercises: [
+            { ...getStretch(0), isCompleted: false },
+            { ...getStretch(1), isCompleted: false },
+            { ...getStretch(2), isCompleted: false },
+            { ...getStretch(7), isCompleted: false },
+            { ...getStretch(8), isCompleted: false },
+            { ...getStretch(9), isCompleted: false },
+          ],
+          totalDurationMinutes: 10,
+          isAiGenerated: true,
+        };
+        const fullBodyRoutineFallback: MobilityRoutine = {
+          id: 'r3',
+          name: 'Full Body Mobility',
+          description: 'Complete stretching routine for all major muscle groups',
+          exercises: STRETCH_LIBRARY.map((s) => ({ ...s, isCompleted: false })),
+          totalDurationMinutes: 15,
+          isAiGenerated: false,
+        };
+        setRoutines([pushDayRoutineFallback, legDayRoutineFallback, fullBodyRoutineFallback]);
       } finally {
         setLoading(false);
       }
@@ -503,6 +543,15 @@ export default function MobilityScreen() {
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Session load error — routines still functional */}
+        {error && (
+          <View style={[{ backgroundColor: `${colors.accent.warning}20`, borderRadius: 8, padding: spacing.sm, marginBottom: spacing.md }]}>
+            <Text style={[typography.tiny, { color: colors.accent.warning }]}>
+              Session history unavailable: {error}
+            </Text>
+          </View>
+        )}
+
         {/* Recommended Routines */}
         <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
           Recommended Routines
