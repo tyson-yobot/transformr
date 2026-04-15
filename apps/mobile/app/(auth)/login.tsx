@@ -40,7 +40,7 @@ function GoogleIcon({ size = 20 }: { size?: number }) {
 }
 
 export default function LoginScreen() {
-  const { colors, borderRadius } = useTheme();
+  const { colors } = useTheme();
   const router = useRouter();
   const { signIn, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
 
@@ -148,25 +148,13 @@ export default function LoginScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              {/* Welcome text */}
-              <Text style={styles.welcomeText}>Welcome back. Let's keep building.</Text>
-
-              {/* Error Banner — only shown after an action, cleared on mount */}
-              {error && (
-                <View
-                  style={[
-                    styles.errorBanner,
-                    {
-                      backgroundColor: colors.accent.danger + '18',
-                      borderRadius: borderRadius.md,
-                      borderColor: colors.accent.danger + '40',
-                    },
-                  ]}
-                >
-                  <Text style={{ fontSize: 13, color: colors.accent.danger, lineHeight: 18 }}>
-                    {error}
-                  </Text>
-                </View>
+              {/* Welcome / error slot — error replaces welcome text, no layout shift */}
+              {error ? (
+                <Text style={[styles.welcomeText, { color: colors.accent.danger, fontSize: 13 }]} numberOfLines={2}>
+                  {error}
+                </Text>
+              ) : (
+                <Text style={styles.welcomeText}>Welcome back. Let's keep building.</Text>
               )}
 
               {/* Email Input */}
@@ -346,12 +334,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     fontWeight: '500',
-  },
-  // Error
-  errorBanner: {
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
   },
   // Forgot
   forgotRow: {
