@@ -2,7 +2,7 @@
 // TRANSFORMR -- Login Screen
 // =============================================================================
 
-import { useState, useCallback, type ComponentType } from 'react';
+import { useState, useCallback, useEffect, type ComponentType } from 'react';
 import {
   View,
   Text,
@@ -29,10 +29,10 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
 
-// Google branded "G" icon — Google blue
+// Google "G" icon — white to match dark theme
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
-    <Text style={{ fontSize: size, fontWeight: '700', color: '#4285F4', marginRight: 8, lineHeight: size + 2 }}>
+    <Text style={{ fontSize: size, fontWeight: '700', color: '#F0F0FC', lineHeight: size + 2 }}>
       G
     </Text>
   );
@@ -47,6 +47,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  // Clear any stale error from previous auth attempts on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const handleSignIn = useCallback(async () => {
     clearError();
@@ -80,15 +85,16 @@ export default function LoginScreen() {
         contentFit="cover"
         cachePolicy="memory-disk"
       />
-      {/* Gradient: let image breathe at top, solid at bottom */}
+      {/* Gradient: atmosphere at top, solid form zone at bottom */}
       <LinearGradient
         colors={[
+          'rgba(12,10,21,0.10)',
           'rgba(12,10,21,0.35)',
-          'rgba(12,10,21,0.60)',
-          'rgba(12,10,21,0.92)',
+          'rgba(12,10,21,0.80)',
+          'rgba(12,10,21,0.95)',
           '#0C0A15',
         ]}
-        locations={[0, 0.3, 0.55, 0.75]}
+        locations={[0, 0.25, 0.45, 0.65, 0.80]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -103,8 +109,10 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             {/* Logo / Brand */}
-            <Animated.View entering={FadeIn.duration(400)} style={styles.logoSection}>
-              {/* Purple glow behind icon */}
+            <Animated.View entering={FadeIn.duration(350)} style={styles.logoSection}>
+              {/* Outer glow — very soft, wide */}
+              <View style={styles.iconGlowOuter} />
+              {/* Inner glow — brighter, tighter */}
               <View style={styles.iconGlow} />
               <Image
                 source={require('@assets/images/icon.png')}
@@ -113,15 +121,32 @@ export default function LoginScreen() {
               />
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(180).duration(500)} style={styles.brandBlock}>
-              <Text style={styles.heroTitle}>TRANSFORMR</Text>
+            {/* Accent gradient line between icon and title */}
+            <View style={styles.gradientLine}>
+              <LinearGradient
+                colors={['#7E22CE', '#A855F7', '#C084FC', '#A855F7', '#7E22CE']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </View>
+
+            <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.brandBlock}>
+              {/* Double-glow title */}
+              <View style={{ alignItems: 'center' }}>
+                <Text style={[styles.heroTitle, styles.heroTitleGlow]}>TRANSFORMR</Text>
+                <Text style={styles.heroTitle}>TRANSFORMR</Text>
+              </View>
               <Text style={styles.tagline}>
                 Every rep. Every meal. Every dollar. Every day.
               </Text>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(350).duration(500)}>
-              {/* Error Banner */}
+            <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+              {/* Welcome text */}
+              <Text style={styles.welcomeText}>Welcome back. Let's keep building.</Text>
+
+              {/* Error Banner — only shown after an action, cleared on mount */}
               {error && (
                 <View
                   style={[
@@ -193,14 +218,14 @@ export default function LoginScreen() {
             </Animated.View>
 
             {/* Divider */}
-            <Animated.View entering={FadeInDown.delay(500).duration(400)} style={styles.dividerRow}>
+            <Animated.View entering={FadeInDown.delay(450).duration(300)} style={styles.dividerRow}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.dividerLine} />
             </Animated.View>
 
             {/* Social Auth Buttons */}
-            <Animated.View entering={FadeInDown.delay(550).duration(400)}>
+            <Animated.View entering={FadeInDown.delay(500).duration(300)}>
               <Pressable
                 onPress={() => { hapticLight(); signInWithApple(); }}
                 disabled={loading}
@@ -213,11 +238,17 @@ export default function LoginScreen() {
               <Pressable
                 onPress={() => { hapticLight(); signInWithGoogle(); }}
                 disabled={loading}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, { marginBottom: 24 }, loading && { opacity: 0.5 }]}
+                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
               >
                 <GoogleIcon size={18} />
                 <Text style={styles.socialBtnText}>Continue with Google</Text>
               </Pressable>
+
+              {/* Trust Indicator */}
+              <View style={styles.trustRow}>
+                <Ionicons name="lock-closed" size={12} color="#6B5E8A" />
+                <Text style={styles.trustText}>256-bit encrypted · Your data stays yours</Text>
+              </View>
 
               {/* Sign Up Link */}
               <View style={styles.signUpRow}>
@@ -225,6 +256,7 @@ export default function LoginScreen() {
                 <Pressable
                   onPress={() => { hapticLight(); handleSignUp(); }}
                   accessibilityLabel="Sign up for an account"
+                  style={{ paddingVertical: 2 }}
                 >
                   <Text style={styles.signUpLink}>Sign Up</Text>
                 </Pressable>
@@ -248,33 +280,66 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   // Icon / brand
-  logoSection: { alignItems: 'center', marginBottom: 16 },
+  logoSection: { alignItems: 'center', marginBottom: 8 },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
   iconGlow: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(168,85,247,0.15)',
-    top: -20,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
   },
   icon: { width: 100, height: 100 },
-  brandBlock: { alignItems: 'center', marginBottom: 40 },
+  gradientLine: {
+    width: 60,
+    height: 2,
+    borderRadius: 1,
+    alignSelf: 'center',
+    marginBottom: 14,
+    overflow: 'hidden',
+  },
+  brandBlock: { alignItems: 'center', marginBottom: 16 },
   heroTitle: {
-    fontSize: 34,
+    fontSize: 38,
     fontWeight: '800',
-    color: '#A855F7',
-    letterSpacing: 8,
+    color: '#E2CBFF',
+    letterSpacing: 10,
     textAlign: 'center',
-    textShadowColor: 'rgba(168,85,247,0.4)',
+    textShadowColor: 'rgba(168,85,247,0.8)',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 30,
+  },
+  heroTitleGlow: {
+    position: 'absolute',
+    color: 'rgba(168,85,247,0.3)',
+    textShadowRadius: 50,
+    textShadowColor: 'rgba(168,85,247,0.6)',
   },
   tagline: {
     fontSize: 14,
-    color: '#9B8FC0',
+    color: '#B8A8D8',
     textAlign: 'center',
     letterSpacing: 1.5,
     marginTop: 8,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  // Welcome
+  welcomeText: {
+    fontSize: 16,
+    color: '#F0F0FC',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: '500',
   },
   // Error
   errorBanner: {
@@ -283,8 +348,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   // Forgot
-  forgotRow: { alignSelf: 'flex-end', marginBottom: 28, paddingVertical: 4 },
-  forgotText: { fontSize: 13, color: '#A855F7', fontWeight: '500' },
+  forgotRow: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    marginBottom: 28,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  forgotText: { fontSize: 13, color: '#C084FC', fontWeight: '500' },
   // Sign In button
   signInBtn: {
     backgroundColor: '#A855F7',
@@ -293,34 +364,56 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     shadowColor: '#A855F7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(192,132,252,0.3)',
   },
-  signInBtnPressed: { opacity: 0.88 },
-  signInBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', letterSpacing: 1 },
+  signInBtnPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
+  signInBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', letterSpacing: 1.5 },
   // Divider
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 20 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 28 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' },
-  dividerText: { fontSize: 12, color: '#6B5E8A', marginHorizontal: 16, fontWeight: '500', letterSpacing: 1 },
+  dividerText: { fontSize: 12, color: '#6B5E8A', marginHorizontal: 20, fontWeight: '600', letterSpacing: 2 },
   // Social buttons
   socialBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(22,18,42,0.8)',
+    backgroundColor: 'rgba(22,18,42,0.7)',
     borderWidth: 1,
     borderColor: '#2A2248',
     borderRadius: 14,
     paddingVertical: 16,
     marginBottom: 12,
-    gap: 10,
+    gap: 12,
   },
   socialBtnPressed: { borderColor: '#362C5E', backgroundColor: 'rgba(30,24,56,0.9)' },
   socialBtnText: { fontSize: 16, color: '#F0F0FC', fontWeight: '500' },
+  // Trust indicator
+  trustRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    gap: 6,
+  },
+  trustText: { fontSize: 11, color: '#6B5E8A', letterSpacing: 0.5 },
   // Sign up
-  signUpRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
+  signUpRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 24,
+    paddingBottom: 40,
+  },
   signUpText: { fontSize: 15, color: '#9B8FC0' },
-  signUpLink: { fontSize: 15, fontWeight: '700', color: '#A855F7' },
+  signUpLink: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#C084FC',
+    textDecorationLine: 'underline',
+    textDecorationColor: 'rgba(192,132,252,0.3)',
+  },
 });
