@@ -11,10 +11,20 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { ThemeProvider } from '@theme/index';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
 import { useSettingsStore } from '@stores/settingsStore';
 
 const STRIPE_PUBLISHABLE_KEY = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
+
+// Configure native Google Sign-In once at module load.
+// webClientId must match the OAuth 2.0 Web Client ID in Google Cloud Console
+// (the same one registered in Supabase Auth > Google provider).
+GoogleSignin.configure({
+  webClientId: process.env['EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID'] ?? '',
+  scopes: ['email', 'profile'],
+  offlineAccess: true,
+});
 
 SplashScreen.preventAutoHideAsync();
 

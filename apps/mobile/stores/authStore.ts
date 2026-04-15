@@ -7,6 +7,11 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import {
+  GoogleSignin,
+  statusCodes,
+  isErrorWithCode,
+} from '@react-native-google-signin/google-signin';
 import type { Session, User, Subscription } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
@@ -39,7 +44,7 @@ export const useAuthStore = create<AuthStore>()(
       // --- State ---
       session: null,
       user: null,
-      loading: false,
+      loading: true, // true until AsyncStorage rehydration completes
       error: null,
       rateLimitSeconds: 0,
 
@@ -104,41 +109,31 @@ export const useAuthStore = create<AuthStore>()(
       signInWithGoogle: async () => {
         set({ loading: true, error: null });
         try {
-          const redirectUrl = Linking.createURL('callback');
-          const { data, error } = await supabase.auth.signInWithOAuth({
+          await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+          const response = await GoogleSignin.signIn();
+
+          if (response.type !== 'success') {
+            // User cancelled or no saved credentials
+            set({ loading: false });
+            return;
+          }
+
+          const idToken = response.data.idToken;
+          if (!idToken) throw new Error('No ID token received from Google');
+
+          const { data, error } = await supabase.auth.signInWithIdToken({
             provider: 'google',
-            options: {
-              redirectTo: redirectUrl,
-              queryParams: { access_type: 'offline', prompt: 'consent' },
-              skipBrowserRedirect: true,
-            },
+            token: idToken,
           });
           if (error) throw error;
-          if (!data.url) throw new Error('No auth URL returned');
-
-          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
-          if (result.type === 'success' && result.url) {
-            const url = new URL(result.url);
-            // PKCE flow: exchange code for session
-            const code = url.searchParams.get('code');
-            if (code) {
-              await supabase.auth.exchangeCodeForSession(code);
-              set({ loading: false });
-              return;
-            }
-            // Implicit flow: tokens may be in hash fragment
-            const hash = url.hash.startsWith('#') ? url.hash.substring(1) : '';
-            const hashParams = new URLSearchParams(hash);
-            const accessToken = hashParams.get('access_token') ?? url.searchParams.get('access_token');
-            const refreshToken = hashParams.get('refresh_token') ?? url.searchParams.get('refresh_token');
-            if (accessToken && refreshToken) {
-              await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          set({ session: data.session, user: data.user, loading: false });
+        } catch (err: unknown) {
+          if (isErrorWithCode(err)) {
+            if (err.code === statusCodes.SIGN_IN_CANCELLED || err.code === statusCodes.IN_PROGRESS) {
               set({ loading: false });
               return;
             }
           }
-          set({ loading: false });
-        } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Google sign-in failed';
           set({ error: raw, loading: false });
         }
@@ -235,6 +230,11 @@ export const useAuthStore = create<AuthStore>()(
         session: state.session,
         user: state.user,
       }),
+      onRehydrateStorage: () => () => {
+        // Once AsyncStorage has been read, clear the loading gate so
+        // index.tsx can make an informed routing decision.
+        useAuthStore.setState({ loading: false });
+      },
     },
   ),
 );
