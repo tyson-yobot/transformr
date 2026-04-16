@@ -44,29 +44,11 @@ interface DayPlan {
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-function generateMockPlan(): DayPlan[] {
-  const mealTemplates: Omit<PlannedMeal, 'id'>[] = [
-    { name: 'Egg White Omelette', mealType: 'breakfast', calories: 280, protein: 32, carbs: 8, fat: 14 },
-    { name: 'Oatmeal & Berries', mealType: 'breakfast', calories: 350, protein: 12, carbs: 58, fat: 8 },
-    { name: 'Chicken & Rice', mealType: 'lunch', calories: 520, protein: 48, carbs: 52, fat: 12 },
-    { name: 'Turkey Wrap', mealType: 'lunch', calories: 440, protein: 38, carbs: 42, fat: 14 },
-    { name: 'Salmon & Veggies', mealType: 'dinner', calories: 580, protein: 45, carbs: 28, fat: 30 },
-    { name: 'Steak & Sweet Potato', mealType: 'dinner', calories: 650, protein: 52, carbs: 42, fat: 24 },
-    { name: 'Greek Yogurt & Nuts', mealType: 'snack', calories: 250, protein: 20, carbs: 18, fat: 12 },
-    { name: 'Protein Shake', mealType: 'snack', calories: 200, protein: 30, carbs: 10, fat: 4 },
-  ];
-
-  const fallback: Omit<PlannedMeal, 'id'> = mealTemplates[0] ?? { name: '', mealType: 'snack', calories: 0, protein: 0, carbs: 0, fat: 0 };
-
+function createEmptyWeekPlan(): DayPlan[] {
   return DAYS_OF_WEEK.map((day, i) => ({
     day,
     dayShort: DAYS_SHORT[i] ?? day.slice(0, 3),
-    meals: [
-      { ...(mealTemplates[i % 2 === 0 ? 0 : 1] ?? fallback), id: `${i}-b` },
-      { ...(mealTemplates[i % 2 === 0 ? 2 : 3] ?? fallback), id: `${i}-l` },
-      { ...(mealTemplates[i % 2 === 0 ? 4 : 5] ?? fallback), id: `${i}-d` },
-      { ...(mealTemplates[i % 2 === 0 ? 6 : 7] ?? fallback), id: `${i}-s` },
-    ],
+    meals: [],
   }));
 }
 
@@ -75,7 +57,7 @@ export default function MealPlansScreen() {
   const { profile } = useProfileStore();
   const router = useRouter();
 
-  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(generateMockPlan);
+  const [weekPlan, setWeekPlan] = useState<DayPlan[]>(createEmptyWeekPlan);
   const [selectedDay, setSelectedDay] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -137,7 +119,7 @@ export default function MealPlansScreen() {
         }));
         setWeekPlan(mapped);
       } else {
-        setWeekPlan(generateMockPlan());
+        Alert.alert('No Results', 'The AI plan returned no meals. Please try again.');
       }
 
       hapticSuccess();
