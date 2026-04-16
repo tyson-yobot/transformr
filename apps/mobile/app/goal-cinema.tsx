@@ -11,6 +11,9 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -49,6 +52,7 @@ export default function GoalCinemaScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const gate = useFeatureGate('goal_cinema');
   const profile = useProfileStore((s) => s.profile);
   const { goals, milestones } = useGoalStore();
 
@@ -197,6 +201,14 @@ export default function GoalCinemaScreen() {
   const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="goal_cinema" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   if (slides.length === 0) {
     return (

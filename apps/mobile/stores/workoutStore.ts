@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
+import { addToSyncQueue } from '@utils/storage';
 import type {
   WorkoutSession,
   WorkoutTemplate,
@@ -79,17 +80,19 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const sessionPayload = {
+        user_id: user.id,
+        template_id: templateId,
+        name: 'Workout',
+        started_at: new Date().toISOString(),
+      };
       const { data, error } = await supabase
         .from('workout_sessions')
-        .insert({
-          user_id: user.id,
-          template_id: templateId,
-          name: 'Workout',
-          started_at: new Date().toISOString(),
-        })
+        .insert(sessionPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'workout_sessions', operation: 'insert', data: sessionPayload });
 
       set({ activeSession: data as WorkoutSession, isLoading: false });
     } catch (err: unknown) {
@@ -133,6 +136,7 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
         .from('workout_sets')
         .insert(insertData);
       if (error) throw error;
+      addToSyncQueue({ table: 'workout_sets', operation: 'insert', data: insertData as unknown as Record<string, unknown> });
 
       set({ isLoading: false });
     } catch (err: unknown) {
@@ -151,14 +155,16 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       const startedAt = new Date(session.started_at).getTime();
       const durationMinutes = Math.round((Date.now() - startedAt) / 60_000);
 
+      const updatePayload = {
+        completed_at: completedAt,
+        duration_minutes: durationMinutes,
+      };
       const { error } = await supabase
         .from('workout_sessions')
-        .update({
-          completed_at: completedAt,
-          duration_minutes: durationMinutes,
-        })
+        .update(updatePayload)
         .eq('id', session.id);
       if (error) throw error;
+      addToSyncQueue({ table: 'workout_sessions', operation: 'update', data: { id: session.id, ...updatePayload } });
 
       set({ activeSession: null, isLoading: false });
     } catch (err: unknown) {

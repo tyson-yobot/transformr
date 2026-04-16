@@ -30,6 +30,7 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { HelpIcon } from '@components/ui/HelpIcon';
+import { EmptyState } from '@components/ui/EmptyState';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
 import { SCREEN_HELP } from '../../../../constants/screenHelp';
@@ -139,6 +140,17 @@ export default function BusinessDashboard() {
         }
       >
         <AIInsightCard screenKey="goals/business/index" style={{ marginBottom: spacing.md }} />
+
+        {businesses.length === 0 ? (
+          <EmptyState
+            icon="💰"
+            title="Track every dollar"
+            subtitle="Add your business to start tracking MRR, ARR, and revenue trends with AI-powered insights."
+            actionLabel="Add Revenue Entry"
+            onAction={() => { hapticLight(); router.push('/(tabs)/goals/business/revenue'); }}
+          />
+        ) : (
+        <>
 
         {/* Business Selector */}
         {businesses.length > 1 && (
@@ -297,6 +309,8 @@ export default function BusinessDashboard() {
         </Animated.View>
 
         <View style={{ height: 24 }} />
+        </>
+        )}
       </ScrollView>
     </View>
   );

@@ -14,6 +14,9 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -50,6 +53,7 @@ const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
 export default function MealPrepScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const navigation = useNavigation();
+  const gate = useFeatureGate('ai_meal_prep');
 
   useEffect(() => {
     navigation.setOptions({
@@ -173,6 +177,14 @@ export default function MealPrepScreen() {
   React.useEffect(() => {
     void handleLoadBudget();
   }, [handleLoadBudget]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="ai_meal_prep" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   // ---------- Empty / Loading / Error States ----------
 

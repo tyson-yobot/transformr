@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -55,6 +56,7 @@ export default function BarcodeScannerScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const gate = useFeatureGate('barcode_scanner');
 
   useEffect(() => {
     navigation.setOptions({
@@ -117,6 +119,7 @@ export default function BarcodeScannerScreen() {
           imageUrl: product.image_front_small_url ?? null,
           barcode,
         });
+        gate.trackUsage();
         setStage('result');
         hapticSuccess();
       } else {
@@ -129,7 +132,7 @@ export default function BarcodeScannerScreen() {
       setStage('not_found');
       hapticWarning();
     }
-  }, []);
+  }, [gate]);
 
   const handleBarcodeScanned = useCallback(({ data }: { data: string }) => {
     if (stage !== 'scanning') return;

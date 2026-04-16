@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
+import { addToSyncQueue } from '@utils/storage';
 import type { MoodLog } from '../types/database';
 
 /** Date range for querying history. */
@@ -57,39 +58,43 @@ export const useMoodStore = create<MoodStore>()((set, get) => ({
       let entry: MoodLog;
       if (existingId) {
         // Update existing entry for today
+        const moodUpdatePayload = {
+          mood: data.mood,
+          energy: data.energy,
+          stress: data.stress,
+          motivation: data.motivation,
+          context: data.context,
+          notes: data.notes,
+          logged_at: new Date().toISOString(),
+        };
         const { data: updated, error } = await supabase
           .from('mood_logs')
-          .update({
-            mood: data.mood,
-            energy: data.energy,
-            stress: data.stress,
-            motivation: data.motivation,
-            context: data.context,
-            notes: data.notes,
-            logged_at: new Date().toISOString(),
-          })
+          .update(moodUpdatePayload)
           .eq('id', existingId)
           .select()
           .single();
         if (error) throw error;
+        addToSyncQueue({ table: 'mood_logs', operation: 'update', data: { id: existingId, ...moodUpdatePayload } });
         entry = updated as MoodLog;
       } else {
         // Insert new entry
+        const moodInsertPayload = {
+          user_id: user.id,
+          mood: data.mood,
+          energy: data.energy,
+          stress: data.stress,
+          motivation: data.motivation,
+          context: data.context,
+          notes: data.notes,
+          logged_at: new Date().toISOString(),
+        };
         const { data: inserted, error } = await supabase
           .from('mood_logs')
-          .insert({
-            user_id: user.id,
-            mood: data.mood,
-            energy: data.energy,
-            stress: data.stress,
-            motivation: data.motivation,
-            context: data.context,
-            notes: data.notes,
-            logged_at: new Date().toISOString(),
-          })
+          .insert(moodInsertPayload)
           .select()
           .single();
         if (error) throw error;
+        addToSyncQueue({ table: 'mood_logs', operation: 'insert', data: moodInsertPayload });
         entry = inserted as MoodLog;
       }
 

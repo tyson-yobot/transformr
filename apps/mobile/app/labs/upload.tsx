@@ -17,7 +17,9 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -48,6 +50,7 @@ export default function LabUploadScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const gate = useFeatureGate('lab_scanner');
 
   const userId = useAuthStore((s) => s.user?.id ?? null);
   const uploadAndInterpret = useLabsStore((s) => s.uploadAndInterpret);
@@ -177,6 +180,14 @@ export default function LabUploadScreen() {
     : isInterpreting
     ? 'Interpreting with AI…'
     : null;
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="lab_scanner" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View

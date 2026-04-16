@@ -10,11 +10,14 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../../constants/screenHelp';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -29,6 +32,7 @@ export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
+  const gate = useFeatureGate('finance_tracking');
   const { accounts, transactions, netWorthHistory, isLoading, error, fetchAccounts } =
     useFinanceStore();
 
@@ -92,6 +96,14 @@ export default function FinanceDashboard() {
   );
 
   const recentTransactions = useMemo(() => transactions.slice(0, 8), [transactions]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="finance_tracking" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading && accounts.length === 0) {
     return (

@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { create } from 'zustand';
+import { addToSyncQueue } from '@utils/storage';
 import {
   createUserSupplement,
   deleteUserSupplement,
@@ -213,6 +214,7 @@ export const useSupplementsStore = create<SupplementsStore>()((set, get) => ({
   logTaken: async (supplementId) => {
     try {
       const log = await logSupplementTaken(supplementId);
+      addToSyncQueue({ table: 'user_supplement_logs', operation: 'insert', data: { supplement_id: supplementId } });
       set((s) => ({
         todayLogs: [log, ...s.todayLogs],
       }));

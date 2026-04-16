@@ -11,7 +11,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -66,6 +68,7 @@ function generateProjection(
 export default function TrajectoryScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const gate = useFeatureGate('ai_trajectory_simulator');
   const profile = useProfileStore((s) => s.profile);
   const [selectedDomain, setSelectedDomain] = useState<TrajectoryDomain>('weight');
   const [isSimulating, setIsSimulating] = useState(false);
@@ -165,6 +168,14 @@ export default function TrajectoryScreen() {
       setIsSimulating(false);
     }
   }, [profile]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="ai_trajectory_simulator" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

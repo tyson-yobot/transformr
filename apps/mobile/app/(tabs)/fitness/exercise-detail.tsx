@@ -35,7 +35,7 @@ interface RecentPerformance {
 }
 
 export default function ExerciseDetailScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();

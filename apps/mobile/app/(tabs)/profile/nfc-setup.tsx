@@ -11,8 +11,10 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -54,6 +56,7 @@ export default function NfcSetupScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const gate = useFeatureGate('nfc_triggers');
 
   useEffect(() => {
     navigation.setOptions({
@@ -207,6 +210,14 @@ export default function NfcSetupScreen() {
       icon: '📱',
     };
   };
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="nfc_triggers" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>

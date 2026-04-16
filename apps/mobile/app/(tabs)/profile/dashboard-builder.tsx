@@ -11,8 +11,10 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -51,6 +53,7 @@ export default function DashboardBuilderScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const gate = useFeatureGate('dashboard_builder');
 
   useEffect(() => {
     navigation.setOptions({
@@ -170,6 +173,14 @@ export default function DashboardBuilderScreen() {
     () => widgets.filter((w) => !w.visible),
     [widgets],
   );
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="dashboard_builder" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>

@@ -12,10 +12,13 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Chip } from '@components/ui/Chip';
@@ -46,6 +49,7 @@ const TILE_SIZE = (SCREEN_WIDTH - 32 - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
 export default function VisionBoard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const navigation = useNavigation();
+  const gate = useFeatureGate('vision_board');
 
   useEffect(() => {
     navigation.setOptions({
@@ -127,6 +131,14 @@ export default function VisionBoard() {
     setInspirationIndex((prev) => (prev + 1) % filteredItems.length);
     hapticLight();
   }, [filteredItems.length]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="vision_board" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   if (inspirationMode && filteredItems.length > 0) {
     const currentItem = filteredItems[inspirationIndex];

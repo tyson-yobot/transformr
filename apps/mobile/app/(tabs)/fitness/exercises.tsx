@@ -20,9 +20,7 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
-import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
-import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
@@ -35,23 +33,6 @@ import { ExerciseThumbnail } from '@components/workout/ExerciseThumbnail';
 
 type CategoryFilter = Exercise['category'] | 'all';
 type EquipmentFilter = Exercise['equipment'] | 'all';
-
-const CATEGORIES: { value: CategoryFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'chest', label: 'Chest' },
-  { value: 'back', label: 'Back' },
-  { value: 'shoulders', label: 'Shoulders' },
-  { value: 'biceps', label: 'Biceps' },
-  { value: 'triceps', label: 'Triceps' },
-  { value: 'legs', label: 'Legs' },
-  { value: 'glutes', label: 'Glutes' },
-  { value: 'abs', label: 'Abs' },
-  { value: 'cardio', label: 'Cardio' },
-  { value: 'compound', label: 'Compound' },
-  { value: 'olympic', label: 'Olympic' },
-  { value: 'stretching', label: 'Stretching' },
-  { value: 'mobility', label: 'Mobility' },
-];
 
 const MUSCLE_GROUPS = [
   { value: 'chest',     label: 'Chest' },

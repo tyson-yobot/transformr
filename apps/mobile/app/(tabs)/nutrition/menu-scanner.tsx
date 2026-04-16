@@ -11,8 +11,11 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -54,6 +57,14 @@ export default function MenuScannerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
+  const gate = useFeatureGate('ai_meal_camera');
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="ai_meal_camera" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   useEffect(() => {
     navigation.setOptions({

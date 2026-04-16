@@ -10,8 +10,11 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -33,6 +36,7 @@ interface PartnerStats {
 export default function PartnerDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const gate = useFeatureGate('partner_features');
   const { partnership, partnerProfile, isLoading, fetchPartnership } = usePartnerStore();
   const myProfile = useProfileStore((s) => s.profile);
 
@@ -131,6 +135,14 @@ export default function PartnerDashboard() {
   }, [fetchPartnership]);
 
   const jointStreak = partnership?.joint_streak ?? 0;
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="partner_features" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading && !partnership) {
     return (

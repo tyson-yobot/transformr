@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
+import { addToSyncQueue } from '@utils/storage';
 import type { SleepLog } from '../types/database';
 
 /** Date range for querying history. */
@@ -53,21 +54,23 @@ export const useSleepStore = create<SleepStore>()((set) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const sleepPayload = {
+        user_id: user.id,
+        bedtime: data.bedtime,
+        wake_time: data.wake_time,
+        duration_minutes: data.duration_minutes,
+        quality: data.quality,
+        caffeine_cutoff_time: data.caffeine_cutoff_time,
+        screen_cutoff_time: data.screen_cutoff_time,
+        notes: data.notes,
+      };
       const { data: entry, error } = await supabase
         .from('sleep_logs')
-        .insert({
-          user_id: user.id,
-          bedtime: data.bedtime,
-          wake_time: data.wake_time,
-          duration_minutes: data.duration_minutes,
-          quality: data.quality,
-          caffeine_cutoff_time: data.caffeine_cutoff_time,
-          screen_cutoff_time: data.screen_cutoff_time,
-          notes: data.notes,
-        })
+        .insert(sleepPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'sleep_logs', operation: 'insert', data: sleepPayload });
 
       const newEntry = entry as SleepLog;
       set((state) => ({

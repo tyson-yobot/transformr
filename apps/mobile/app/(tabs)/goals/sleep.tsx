@@ -29,6 +29,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { EmptyState } from '@components/ui/EmptyState';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
@@ -181,6 +182,17 @@ export default function SleepTracker() {
         }
       >
         <AIInsightCard screenKey="goals/sleep" style={{ marginBottom: spacing.md }} />
+
+        {sleepHistory.length === 0 && !isLoading ? (
+          <EmptyState
+            icon="🌙"
+            title="Sleep is where you grow"
+            subtitle="Log your sleep to unlock AI-powered recovery insights and optimize your performance."
+            actionLabel="Log Last Night's Sleep"
+            onAction={() => { hapticLight(); setShowLogModal(true); }}
+          />
+        ) : (
+        <>
 
         {/* Sleep Score */}
         <Animated.View entering={FadeInDown.delay(100)}>
@@ -383,6 +395,8 @@ export default function SleepTracker() {
         />
 
         <View style={{ height: 24 }} />
+        </>
+        )}
       </ScrollView>
 
       {/* Log Sleep Modal */}

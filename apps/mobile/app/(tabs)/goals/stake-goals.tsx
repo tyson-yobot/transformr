@@ -10,10 +10,13 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -37,6 +40,7 @@ interface StakeGoalWithDetails extends StakeGoal {
 export default function StakeGoalsScreen() {
   const { colors, typography, spacing } = useTheme();
   const navigation = useNavigation();
+  const gate = useFeatureGate('stake_goals');
 
   useEffect(() => {
     navigation.setOptions({
@@ -185,6 +189,14 @@ export default function StakeGoalsScreen() {
       setIsCreating(false);
     }
   }, [newGoalTitle, stakeAmount, charityName, evaluationFreq]);
+
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="stake_goals" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

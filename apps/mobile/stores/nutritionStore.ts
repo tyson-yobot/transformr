@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
+import { addToSyncQueue } from '@utils/storage';
 import type {
   NutritionLog,
   Food,
@@ -114,25 +115,27 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
         }));
       }
 
+      const nutritionPayload = {
+        user_id: user.id,
+        food_id: resolvedFoodId,
+        saved_meal_id: data.saved_meal_id,
+        meal_type: data.meal_type,
+        quantity: data.quantity,
+        calories: data.calories,
+        protein: data.protein,
+        carbs: data.carbs,
+        fat: data.fat,
+        source: data.source ?? 'manual',
+        photo_url: data.photo_url,
+        logged_at: new Date().toISOString(),
+      };
       const { data: newLog, error } = await supabase
         .from('nutrition_logs')
-        .insert({
-          user_id: user.id,
-          food_id: resolvedFoodId,
-          saved_meal_id: data.saved_meal_id,
-          meal_type: data.meal_type,
-          quantity: data.quantity,
-          calories: data.calories,
-          protein: data.protein,
-          carbs: data.carbs,
-          fat: data.fat,
-          source: data.source ?? 'manual',
-          photo_url: data.photo_url,
-          logged_at: new Date().toISOString(),
-        })
+        .insert(nutritionPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'nutrition_logs', operation: 'insert', data: nutritionPayload });
 
       set((state) => ({
         todayLogs: [...state.todayLogs, newLog as NutritionLog],
@@ -163,16 +166,18 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const waterPayload = {
+        user_id: user.id,
+        amount_oz: oz,
+        logged_at: new Date().toISOString(),
+      };
       const { data: newLog, error } = await supabase
         .from('water_logs')
-        .insert({
-          user_id: user.id,
-          amount_oz: oz,
-          logged_at: new Date().toISOString(),
-        })
+        .insert(waterPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'water_logs', operation: 'insert', data: waterPayload });
 
       set((state) => ({
         waterLogs: [...state.waterLogs, newLog as WaterLog],
@@ -190,16 +195,18 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const suppLogPayload = {
+        user_id: user.id,
+        supplement_id: supplementId,
+        taken_at: new Date().toISOString(),
+      };
       const { data: newLog, error } = await supabase
         .from('supplement_logs')
-        .insert({
-          user_id: user.id,
-          supplement_id: supplementId,
-          taken_at: new Date().toISOString(),
-        })
+        .insert(suppLogPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'supplement_logs', operation: 'insert', data: suppLogPayload });
 
       set((state) => ({
         supplementLogs: [...state.supplementLogs, newLog as SupplementLog],

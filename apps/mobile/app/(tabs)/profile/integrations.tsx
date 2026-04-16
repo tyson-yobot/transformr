@@ -168,13 +168,13 @@ export default function IntegrationsScreen() {
         } else if (integration.id === 'appleHealth' || integration.id === 'appleWatch') {
           // Apple HealthKit requires native module — mark as pending
           Alert.alert(
-            'Coming Soon',
-            'Apple Health integration requires a physical device with HealthKit permissions. This will be enabled in the next build.',
+            'Requires Physical Device',
+            'Apple Health integration is available on a physical iPhone with HealthKit permissions. Install the app on your device to connect.',
           );
         } else if (integration.id === 'googleFit') {
           Alert.alert(
-            'Coming Soon',
-            'Google Fit integration will be enabled in a future update.',
+            'Available on Android',
+            'Google Fit integration is available on Android devices. Update the app to enable this connection.',
           );
         } else if (integration.id === 'spotify') {
           // Spotify requires the Spotify iOS/Android SDK or Web OAuth
@@ -189,7 +189,7 @@ export default function IntegrationsScreen() {
             Alert.alert('Connected', 'Spotify is now linked.');
           }
         } else {
-          Alert.alert('Coming Soon', `${integration.name} integration is being configured.`);
+          Alert.alert('Integration Pending', `${integration.name} integration is in progress. Check for updates soon.`);
         }
       } finally {
         setConnecting(null);

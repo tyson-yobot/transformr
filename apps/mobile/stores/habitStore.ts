@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
+import { addToSyncQueue } from '@utils/storage';
 import type { Habit, HabitCompletion } from '../types/database';
 
 /** Input data for creating a new habit. */
@@ -164,17 +165,19 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const completionPayload = {
+        habit_id: habitId,
+        user_id: user.id,
+        completed_count: 1,
+        completed_at: new Date().toISOString(),
+      };
       const { data, error } = await supabase
         .from('habit_completions')
-        .insert({
-          habit_id: habitId,
-          user_id: user.id,
-          completed_count: 1,
-          completed_at: new Date().toISOString(),
-        })
+        .insert(completionPayload)
         .select()
         .single();
       if (error) throw error;
+      addToSyncQueue({ table: 'habit_completions', operation: 'insert', data: completionPayload });
 
       const completion = data as HabitCompletion;
 
