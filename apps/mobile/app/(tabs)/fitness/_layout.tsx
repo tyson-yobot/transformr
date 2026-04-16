@@ -4,9 +4,11 @@
 
 import { Stack } from 'expo-router';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function FitnessLayout() {
   const { colors, typography } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Stack
@@ -14,6 +16,7 @@ export default function FitnessLayout() {
         headerStyle: {
           backgroundColor: colors.background.primary,
         },
+        headerStatusBarHeight: insets.top,
         headerTintColor: colors.text.primary,
         headerTitleStyle: {
           ...typography.h3,
