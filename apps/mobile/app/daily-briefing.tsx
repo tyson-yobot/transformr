@@ -89,6 +89,7 @@ export default function DailyBriefingScreen() {
       <Animated.View
         entering={FadeInDown.delay(ANIMATION_BASE_DELAY).duration(500)}
         style={styles.section}
+        pointerEvents="auto"
       >
         <Text style={[typography.caption, { color: colors.text.secondary }]}>
           {todayDate}
@@ -144,6 +145,7 @@ export default function DailyBriefingScreen() {
       <Animated.View
         entering={FadeInDown.delay(ANIMATION_BASE_DELAY + ANIMATION_STAGGER).duration(500)}
         style={styles.section}
+        pointerEvents="auto"
       >
         <Text
           style={[
@@ -200,6 +202,7 @@ export default function DailyBriefingScreen() {
       <Animated.View
         entering={FadeInDown.delay(ANIMATION_BASE_DELAY + ANIMATION_STAGGER * 2).duration(500)}
         style={[styles.section, styles.centered]}
+        pointerEvents="auto"
       >
         <ProgressRing
           progress={readinessScore / 100}
@@ -242,6 +245,7 @@ export default function DailyBriefingScreen() {
       <Animated.View
         entering={FadeInDown.delay(ANIMATION_BASE_DELAY + ANIMATION_STAGGER * 3).duration(500)}
         style={styles.section}
+        pointerEvents="auto"
       >
         <Card variant="ai">
           <View style={{ padding: spacing.lg }}>
@@ -283,6 +287,7 @@ export default function DailyBriefingScreen() {
       <Animated.View
         entering={FadeInDown.delay(ANIMATION_BASE_DELAY + ANIMATION_STAGGER * 4).duration(500)}
         style={[styles.section, { gap: spacing.md }]}
+        pointerEvents="auto"
       >
         <Button
           title="Start your day"

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Fitness Home Screen
 // =============================================================================
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,6 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
-import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
@@ -28,7 +27,6 @@ import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatt
 import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
-import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '@services/supabase';
 
 interface RecentWorkout {
@@ -45,6 +43,13 @@ interface WeightDataPoint {
   weight: number;
 }
 
+const QUICK_ACTIONS = [
+  { label: 'Exercises', iconName: 'search-outline' as const, colorKey: 'primary' as const, route: '/(tabs)/fitness/exercises', a11y: 'Browse exercises' },
+  { label: 'Programs',  iconName: 'calendar-outline' as const, colorKey: 'info' as const,    route: '/(tabs)/fitness/programs',  a11y: 'View programs' },
+  { label: 'Progress',  iconName: 'trending-up-outline' as const, colorKey: 'success' as const, route: '/(tabs)/fitness/progress', a11y: 'View progress' },
+  { label: 'Form Check', iconName: 'videocam-outline' as const, colorKey: 'warning' as const, route: '/(tabs)/fitness/form-check', a11y: 'Form check' },
+] as const;
+
 export default function FitnessHomeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
@@ -60,10 +65,10 @@ export default function FitnessHomeScreen() {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const todayTemplate = useMemo(() => {
+  const todayTemplate = (() => {
     const dayOfWeek = new Date().getDay();
     return templates.find((t) => t.day_of_week === dayOfWeek) ?? null;
-  }, [templates]);
+  })();
 
   const loadData = useCallback(async () => {
     try {
@@ -195,26 +200,14 @@ export default function FitnessHomeScreen() {
     [router],
   );
 
-  const quickStats = useMemo(
-    () => [
-      {
-        icon: <Ionicons name="barbell-outline" size={20} color={colors.accent.primary} />,
-        label: 'Weekly Volume',
-        value: formatVolume(weeklyVolume),
-      },
-      {
-        icon: <Ionicons name="fitness-outline" size={20} color={colors.accent.success} />,
-        label: 'This Week',
-        value: `${workoutsThisWeek}`,
-      },
-      {
-        icon: <Ionicons name="flame-outline" size={20} color={colors.accent.fire} />,
-        label: 'Streak',
-        value: `${currentStreak}d`,
-      },
-    ],
-    [weeklyVolume, workoutsThisWeek, currentStreak, colors],
-  );
+  const accentForKey = (key: typeof QUICK_ACTIONS[number]['colorKey']) => {
+    switch (key) {
+      case 'primary': return colors.accent.primary;
+      case 'info':    return colors.accent.info;
+      case 'success': return colors.accent.success;
+      case 'warning': return colors.accent.warning;
+    }
+  };
 
   const renderRecentWorkout = useCallback(
     ({ item }: { item: RecentWorkout }) => (
@@ -278,118 +271,197 @@ export default function FitnessHomeScreen() {
 
         {/* Today's Workout */}
         <Animated.View entering={FadeInDown.delay(0).duration(400)}>
-        <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
-            <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
-              Today's Workout
-            </Text>
-          </View>
-          {todayTemplate ? (
-            <View style={{ marginTop: spacing.md }}>
-              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
-                {todayTemplate.name}
+          <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
+              <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
+                Today's Workout
               </Text>
-              {todayTemplate.description ? (
-                <Text
+            </View>
+            {todayTemplate ? (
+              <View style={{ marginTop: spacing.md }}>
+                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                  {todayTemplate.name}
+                </Text>
+                {todayTemplate.description ? (
+                  <Text
+                    style={[
+                      typography.caption,
+                      { color: colors.text.secondary, marginTop: spacing.xs },
+                    ]}
+                  >
+                    {todayTemplate.description}
+                  </Text>
+                ) : null}
+                {todayTemplate.estimated_duration_minutes ? (
+                  <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
+                    ~{formatDuration(todayTemplate.estimated_duration_minutes)}
+                  </Text>
+                ) : null}
+                <Button
+                  title="Start Workout"
+                  onPress={() => handleStartWorkout(todayTemplate.id)}
+                  loading={isLoading}
+                  fullWidth
+                  style={{ marginTop: spacing.md }}
+                />
+              </View>
+            ) : (
+              <View style={{ marginTop: spacing.md }}>
+                <Text style={[typography.body, { color: colors.text.secondary, marginBottom: spacing.lg }]}>
+                  Start a program to get guided workouts, or jump into a custom session.
+                </Text>
+                <Pressable
                   style={[
-                    typography.caption,
-                    { color: colors.text.secondary, marginTop: spacing.xs },
+                    styles.primaryButton,
+                    { backgroundColor: colors.accent.primary, borderRadius: borderRadius.md },
                   ]}
+                  onPress={() => handleNavigate('/(tabs)/fitness/programs')}
+                  accessibilityLabel="Browse workout programs"
                 >
-                  {todayTemplate.description}
-                </Text>
-              ) : null}
-              {todayTemplate.estimated_duration_minutes ? (
-                <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
-                  ~{formatDuration(todayTemplate.estimated_duration_minutes)}
-                </Text>
-              ) : null}
-              <Button
-                title="Start Workout"
-                onPress={() => handleStartWorkout(todayTemplate.id)}
-                loading={isLoading}
-                fullWidth
-                style={{ marginTop: spacing.md }}
-              />
-            </View>
-          ) : (
-            <View style={{ marginTop: spacing.md }}>
-              <Text style={[typography.body, { color: colors.text.secondary }]}>
-                No workout scheduled for today
-              </Text>
-              <Button
-                title="Start Empty Workout"
-                variant="outline"
-                onPress={() => handleStartWorkout(null)}
-                loading={isLoading}
-                fullWidth
-                style={{ marginTop: spacing.md }}
-              />
-            </View>
-          )}
-        </Card>
+                  <Text style={[typography.bodyBold, { color: colors.text.inverse }]}>
+                    Browse Programs
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.secondaryButton,
+                    { borderColor: colors.accent.primary, borderRadius: borderRadius.md },
+                  ]}
+                  onPress={() => handleStartWorkout(null)}
+                  accessibilityLabel="Start empty workout"
+                >
+                  <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>
+                    Start Empty Workout
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </Card>
         </Animated.View>
 
         {/* Quick Stats */}
         <Animated.View entering={FadeInDown.delay(50).duration(400)}>
-        <QuickStatsRow stats={quickStats} style={{ marginBottom: spacing.lg }} />
+          <View style={[styles.statsRow, { gap: spacing.sm, marginBottom: spacing.lg }]}>
+            {/* Weekly Volume */}
+            <Pressable
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.md,
+                  borderColor: colors.background.tertiary,
+                },
+              ]}
+              onPress={() => handleNavigate('/(tabs)/fitness/progress')}
+              accessibilityLabel={`Weekly volume: ${formatVolume(weeklyVolume)}`}
+            >
+              <Ionicons name="barbell-outline" size={18} color={colors.accent.primary} />
+              <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                {weeklyVolume > 0 ? formatVolume(weeklyVolume) : '—'}
+              </Text>
+              <Text style={[typography.tiny, { color: colors.text.muted, textAlign: 'center' }]}>
+                Weekly Volume
+              </Text>
+              {weeklyVolume === 0 && (
+                <Text style={[typography.tiny, { color: colors.accent.primary, marginTop: 2 }]}>
+                  Log a workout
+                </Text>
+              )}
+            </Pressable>
+
+            {/* This Week */}
+            <Pressable
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.md,
+                  borderColor: colors.background.tertiary,
+                },
+              ]}
+              onPress={() => handleNavigate('/(tabs)/fitness/progress')}
+              accessibilityLabel={`Workouts this week: ${workoutsThisWeek}`}
+            >
+              <Ionicons name="fitness-outline" size={18} color={colors.accent.success} />
+              <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                {workoutsThisWeek > 0 ? String(workoutsThisWeek) : '—'}
+              </Text>
+              <Text style={[typography.tiny, { color: colors.text.muted, textAlign: 'center' }]}>
+                This Week
+              </Text>
+              {workoutsThisWeek === 0 && (
+                <Text style={[typography.tiny, { color: colors.accent.primary, marginTop: 2 }]}>
+                  Log a workout
+                </Text>
+              )}
+            </Pressable>
+
+            {/* Streak */}
+            <Pressable
+              style={[
+                styles.statCard,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.md,
+                  borderColor: colors.background.tertiary,
+                },
+              ]}
+              onPress={() => handleNavigate('/(tabs)/fitness/progress')}
+              accessibilityLabel={`Current streak: ${currentStreak} days`}
+            >
+              <Ionicons name="flame-outline" size={18} color={colors.accent.fire} />
+              <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                {currentStreak > 0 ? `${currentStreak}d` : '—'}
+              </Text>
+              <Text style={[typography.tiny, { color: colors.text.muted, textAlign: 'center' }]}>
+                Streak
+              </Text>
+              {currentStreak === 0 && (
+                <Text style={[typography.tiny, { color: colors.accent.primary, marginTop: 2 }]}>
+                  Build one
+                </Text>
+              )}
+            </Pressable>
+          </View>
         </Animated.View>
 
         {/* Quick Actions */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={[styles.quickActions, { gap: spacing.sm, marginBottom: spacing.lg }]}>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/exercises')}
-            accessibilityLabel="Browse exercises"
-            style={[
-              styles.quickActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
-            ]}
-          >
-            <Ionicons name="search-outline" size={22} color={colors.accent.primary} />
-            <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]}>
-              Exercises
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/programs')}
-            accessibilityLabel="View programs"
-            style={[
-              styles.quickActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
-            ]}
-          >
-            <Ionicons name="calendar-outline" size={22} color={colors.accent.info} />
-            <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]}>
-              Programs
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/progress')}
-            accessibilityLabel="View progress"
-            style={[
-              styles.quickActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
-            ]}
-          >
-            <Ionicons name="trending-up-outline" size={22} color={colors.accent.success} />
-            <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]}>
-              Progress
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/form-check')}
-            accessibilityLabel="Form check"
-            style={[
-              styles.quickActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
-            ]}
-          >
-            <Ionicons name="videocam-outline" size={22} color={colors.accent.warning} />
-            <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]}>
-              Form Check
-            </Text>
-          </Pressable>
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(400)}
+          style={[styles.quickActions, { gap: spacing.sm, marginBottom: spacing.lg }]}
+        >
+          {QUICK_ACTIONS.map((action) => {
+            const color = accentForKey(action.colorKey);
+            return (
+              <Pressable
+                key={action.label}
+                onPress={() => handleNavigate(action.route)}
+                accessibilityLabel={action.a11y}
+                style={[
+                  styles.quickActionBtn,
+                  {
+                    backgroundColor: colors.background.secondary,
+                    borderRadius: borderRadius.md,
+                    borderColor: colors.background.tertiary,
+                    padding: spacing.md,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.quickActionIconWrap,
+                    { backgroundColor: `${color}20`, borderRadius: 10 },
+                  ]}
+                >
+                  <Ionicons name={action.iconName} size={20} color={color} />
+                </View>
+                <Text style={[typography.tiny, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs }]}>
+                  {action.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </Animated.View>
         <HelpBubble id="fitness_programs" message="Follow a program for structured training" position="below" />
 
@@ -460,9 +532,18 @@ export default function FitnessHomeScreen() {
 
         {/* Recent Workout History */}
         <View style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
-            Recent Workouts
-          </Text>
+          <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
+            <Text style={[typography.h3, { color: colors.text.primary, flex: 1 }]}>
+              Recent Workouts
+            </Text>
+            {recentWorkouts.length > 0 && (
+              <Pressable onPress={() => handleNavigate('/(tabs)/fitness/progress')}>
+                <Text style={[typography.captionBold, { color: colors.accent.primary }]}>
+                  See all →
+                </Text>
+              </Pressable>
+            )}
+          </View>
           {recentWorkouts.length > 0 ? (
             <FlatList<RecentWorkout>
               data={recentWorkouts}
@@ -471,13 +552,42 @@ export default function FitnessHomeScreen() {
               scrollEnabled={false}
             />
           ) : (
-            <EmptyState
-              icon={'\u{1F3CB}\uFE0F'}
-              title="No workouts yet"
-              subtitle="Every legend started with a first rep. Log your first workout and let's see what you're made of."
-              actionLabel="Start a Workout"
-              onAction={() => router.push('/(tabs)/fitness/exercises')}
-            />
+            <View style={styles.emptyState}>
+              <View
+                style={[
+                  styles.emptyStateIcon,
+                  { backgroundColor: `${colors.accent.primary}15`, borderRadius: 40 },
+                ]}
+              >
+                <Text style={{ fontSize: 40 }}>🏆</Text>
+              </View>
+              <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
+                Your journey starts here
+              </Text>
+              <Text
+                style={[
+                  typography.body,
+                  { color: colors.text.secondary, textAlign: 'center', lineHeight: 22, marginBottom: spacing.xl },
+                ]}
+              >
+                Every rep you log becomes your baseline. Your first workout is the most important one.
+              </Text>
+              <Pressable
+                style={[
+                  styles.emptyStateCTA,
+                  {
+                    backgroundColor: colors.accent.primary,
+                    borderRadius: borderRadius.md,
+                  },
+                ]}
+                onPress={() => handleStartWorkout(null)}
+                accessibilityLabel="Log your first workout"
+              >
+                <Text style={[typography.bodyBold, { color: colors.text.inverse }]}>
+                  Log Your First Workout →
+                </Text>
+              </Pressable>
+            </View>
           )}
         </View>
 
@@ -534,11 +644,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -554,20 +659,78 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginRight: 8,
   },
+  // Stats row
+  statsRow: {
+    flexDirection: 'row',
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    minHeight: 84,
+    borderWidth: 1,
+    gap: 2,
+  },
+  // Quick actions
   quickActions: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
   },
   quickActionBtn: {
     flex: 1,
-    minWidth: '22%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    minHeight: 76,
+  },
+  quickActionIconWrap: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Today's workout buttons
+  primaryButton: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+    marginBottom: 8,
+  },
+  secondaryButton: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+    borderWidth: 1,
+  },
+  // PR card
   prCard: {
     minWidth: 120,
     alignItems: 'center',
   },
+  // Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+  },
+  emptyStateIcon: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyStateCTA: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // More actions
   moreActions: {
     flexDirection: 'row',
   },
@@ -575,6 +738,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  // FAB
   fab: {
     position: 'absolute',
     bottom: 24,

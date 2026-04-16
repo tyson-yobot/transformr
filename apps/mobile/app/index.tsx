@@ -2,7 +2,7 @@
 // TRANSFORMR -- Entry Redirect + Branded Splash
 // =============================================================================
 
-import { useEffect, useCallback, type ComponentType } from 'react';
+import { useEffect, useCallback, useRef, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -34,6 +34,7 @@ export default function Index() {
   const loading = useAuthStore((s) => s.loading);
   const fetchProfile = useProfileStore((s) => s.fetchProfile);
   const router = useRouter();
+  const hasNavigated = useRef(false);
 
   // Icon pulse: scale 1.0 → 1.03 → 1.0, 2s loop
   const scale = useSharedValue(1);
@@ -66,8 +67,10 @@ export default function Index() {
 
   useEffect(() => {
     if (loading) return;
+    if (hasNavigated.current) return;
 
     if (!session) {
+      hasNavigated.current = true;
       navigate('/(auth)/login');
       return;
     }
@@ -86,6 +89,7 @@ export default function Index() {
         }
 
         if (!currentProfile?.onboarding_completed) {
+          hasNavigated.current = true;
           navigate('/(auth)/onboarding/welcome');
           return;
         }
@@ -93,6 +97,7 @@ export default function Index() {
         // Check if daily briefing should be shown
         const { briefingEnabled, lastBriefingDate } = useSettingsStore.getState();
         const today = new Date().toDateString();
+        hasNavigated.current = true;
         if (briefingEnabled && lastBriefingDate !== today) {
           navigate('/daily-briefing');
         } else {
@@ -101,6 +106,7 @@ export default function Index() {
       })
       .catch(() => {
         // Profile fetch failed — go to onboarding (profile will be created on first save)
+        hasNavigated.current = true;
         navigate('/(auth)/onboarding/welcome');
       });
   }, [session, loading, fetchProfile, navigate]);

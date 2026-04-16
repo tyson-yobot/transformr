@@ -69,7 +69,7 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
           <Text
             style={[
               typography.caption,
-              { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm },
+              { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm, paddingRight: spacing.xs },
             ]}
             numberOfLines={3}
           >
@@ -81,6 +81,7 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
             accessibilityLabel="Refresh AI insight"
             accessibilityRole="button"
             disabled={isLoading}
+            style={{ marginLeft: spacing.xs, flexShrink: 0 }}
           >
             {isLoading ? (
               <ActivityIndicator size="small" color={colors.accent.cyan} />
