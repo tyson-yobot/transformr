@@ -7,6 +7,7 @@ import { Tabs } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatFAB } from '@components/ui/ChatFAB';
+import { UpgradeModal } from '@components/ui/UpgradeModal';
 
 interface TabIconProps {
   icon: string;
@@ -110,6 +111,7 @@ export default function TabsLayout() {
         />
       </Tabs>
       <ChatFAB bottom={tabBarHeight + 16} right={20} />
+      <UpgradeModal />
     </View>
   );
 }
