@@ -14,6 +14,7 @@ import { ThemeProvider } from '@theme/index';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
 import { useSettingsStore } from '@stores/settingsStore';
+import { useOfflineSync } from '@hooks/useOfflineSync';
 
 const STRIPE_PUBLISHABLE_KEY = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
 
@@ -40,6 +41,7 @@ const queryClient = new QueryClient({
 export default function RootLayout() {
   const listenToAuthChanges = useAuthStore((s) => s.listenToAuthChanges);
   const themeMode = useSettingsStore((s) => s.theme);
+  useOfflineSync();
 
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('@assets/fonts/Inter-Regular.ttf'),
