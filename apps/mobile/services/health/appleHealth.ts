@@ -6,6 +6,7 @@
 // =============================================================================
 
 import { Platform } from 'react-native';
+import type { AppleHealthKitStatic, HealthConstants, HealthValue } from 'react-native-health';
 
 // Types for health data
 export interface HealthSample {
@@ -41,16 +42,21 @@ export interface DailySummary {
   weight: number | null;
 }
 
-let AppleHealthKit: typeof import('react-native-health') | null = null;
+interface HealthModule {
+  default: AppleHealthKitStatic;
+  Constants: HealthConstants;
+}
 
-async function getHealthKit(): Promise<typeof import('react-native-health')> {
+let healthModule: HealthModule | null = null;
+
+async function getHealthKit(): Promise<HealthModule> {
   if (Platform.OS !== 'ios') {
     throw new Error('Apple HealthKit is only available on iOS');
   }
-  if (!AppleHealthKit) {
-    AppleHealthKit = await import('react-native-health');
+  if (!healthModule) {
+    healthModule = await import('react-native-health') as unknown as HealthModule;
   }
-  return AppleHealthKit;
+  return healthModule;
 }
 
 export async function isAvailable(): Promise<boolean> {
@@ -58,7 +64,7 @@ export async function isAvailable(): Promise<boolean> {
   try {
     const hk = await getHealthKit();
     return new Promise((resolve) => {
-      hk.default.isAvailable((err: Error | null, available: boolean) => {
+      hk.default.isAvailable((err: string | null, available: boolean) => {
         resolve(!err && available);
       });
     });
@@ -70,22 +76,25 @@ export async function isAvailable(): Promise<boolean> {
 export async function requestPermissions(): Promise<boolean> {
   try {
     const hk = await getHealthKit();
+    const { Permissions } = hk.Constants;
+    const readPerms = [
+      Permissions['StepCount'],
+      Permissions['HeartRate'],
+      Permissions['ActiveEnergyBurned'],
+      Permissions['SleepAnalysis'],
+      Permissions['Weight'],
+      Permissions['Workout'],
+    ].filter((p): p is string => p !== undefined);
+    const writePerms = [Permissions['Workout']].filter((p): p is string => p !== undefined);
     const permissions = {
       permissions: {
-        read: [
-          hk.default.Constants.Permissions.StepCount,
-          hk.default.Constants.Permissions.HeartRate,
-          hk.default.Constants.Permissions.ActiveEnergyBurned,
-          hk.default.Constants.Permissions.SleepAnalysis,
-          hk.default.Constants.Permissions.Weight,
-          hk.default.Constants.Permissions.Workout,
-        ],
-        write: [hk.default.Constants.Permissions.Workout],
+        read: readPerms,
+        write: writePerms,
       },
     };
 
     return new Promise((resolve) => {
-      hk.default.initHealthKit(permissions, (err: string) => {
+      hk.default.initHealthKit(permissions, (err: string | null) => {
         resolve(!err);
       });
     });
@@ -102,7 +111,7 @@ export async function getSteps(
   return new Promise((resolve, reject) => {
     hk.default.getStepCount(
       { date: endDate, startDate },
-      (err: string, result: { value: number }) => {
+      (err: string | null, result: HealthValue) => {
         if (err) return reject(new Error(err));
         resolve(result.value);
       },
@@ -118,9 +127,15 @@ export async function getHeartRateSamples(
   return new Promise((resolve, reject) => {
     hk.default.getHeartRateSamples(
       { startDate, endDate, ascending: false, limit: 100 },
-      (err: string, results: HealthSample[]) => {
+      (err: string | null, results: HealthValue[]) => {
         if (err) return reject(new Error(err));
-        resolve(results);
+        resolve(results.map((r) => ({
+          startDate: r.startDate,
+          endDate: r.endDate,
+          value: r.value,
+          unit: 'bpm',
+          sourceName: 'HealthKit',
+        })));
       },
     );
   });
@@ -134,9 +149,19 @@ export async function getSleepSamples(
   return new Promise((resolve, reject) => {
     hk.default.getSleepSamples(
       { startDate, endDate, ascending: false, limit: 50 },
-      (err: string, results: HealthSleepSample[]) => {
+      (err: string | null, results: HealthValue[]) => {
         if (err) return reject(new Error(err));
-        resolve(results);
+        const typed = results as unknown as Array<{
+          startDate: string;
+          endDate: string;
+          value: HealthSleepSample['value'];
+        }>;
+        resolve(typed.map((r) => ({
+          startDate: r.startDate,
+          endDate: r.endDate,
+          value: r.value,
+          sourceName: 'HealthKit',
+        })));
       },
     );
   });
@@ -147,7 +172,7 @@ export async function getLatestWeight(): Promise<number | null> {
   return new Promise((resolve) => {
     hk.default.getLatestWeight(
       { unit: 'pound' },
-      (err: string, result: { value: number }) => {
+      (err: string | null, result: HealthValue) => {
         if (err) return resolve(null);
         resolve(result.value);
       },
@@ -163,7 +188,7 @@ export async function getActiveCalories(
   return new Promise((resolve, reject) => {
     hk.default.getActiveEnergyBurned(
       { startDate, endDate },
-      (err: string, results: { value: number }[]) => {
+      (err: string | null, results: HealthValue[]) => {
         if (err) return reject(new Error(err));
         const total = results.reduce((sum, r) => sum + r.value, 0);
         resolve(total);

@@ -4,20 +4,20 @@
 // =============================================================================
 
 declare module 'react-native-health' {
-  interface HealthKitOptions {
+  export interface HealthKitOptions {
     permissions: {
       read: string[];
       write: string[];
     };
   }
 
-  interface HealthValue {
+  export interface HealthValue {
     value: number;
     startDate: string;
     endDate: string;
   }
 
-  interface HealthInputOptions {
+  export interface HealthInputOptions {
     startDate?: string;
     endDate?: string;
     limit?: number;
@@ -28,9 +28,9 @@ declare module 'react-native-health' {
     value?: number;
   }
 
-  type HealthCallback<T> = (error: string | null, result: T) => void;
+  export type HealthCallback<T> = (error: string | null, result: T) => void;
 
-  interface AppleHealthKitStatic {
+  export interface AppleHealthKitStatic {
     initHealthKit(options: HealthKitOptions, callback: HealthCallback<boolean>): void;
     isAvailable(callback: HealthCallback<boolean>): void;
     getStepCount(options: HealthInputOptions, callback: HealthCallback<HealthValue>): void;
@@ -40,11 +40,12 @@ declare module 'react-native-health' {
     getActiveEnergyBurned(options: HealthInputOptions, callback: HealthCallback<HealthValue[]>): void;
     getRestingHeartRate(options: HealthInputOptions, callback: HealthCallback<HealthValue>): void;
     getBodyMassSamples(options: HealthInputOptions, callback: HealthCallback<HealthValue[]>): void;
+    getLatestWeight(options: HealthInputOptions, callback: HealthCallback<HealthValue>): void;
     saveSteps(value: number, options: HealthInputOptions, callback: HealthCallback<boolean>): void;
     saveBodyMassSample(options: HealthInputOptions, callback: HealthCallback<boolean>): void;
   }
 
-  interface HealthConstants {
+  export interface HealthConstants {
     Permissions: Record<string, string>;
     Units: Record<string, string>;
     Activities: Record<string, string>;
@@ -149,7 +150,7 @@ declare module 'react-native-nfc-manager' {
 }
 
 declare module 'react-native-watch-connectivity' {
-  interface WatchMessage {
+  export interface WatchMessage {
     [key: string]: string | number | boolean | null;
   }
 

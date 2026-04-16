@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-unresolved -- optional native module, installed at build time
 import { sendMessage, watchEvents, getReachability } from 'react-native-watch-connectivity';
+import type { WatchMessage } from 'react-native-watch-connectivity';
 
 interface WatchWorkoutData {
   exerciseName: string;
@@ -36,7 +37,19 @@ export function sendWorkoutDataToWatch(data: WatchWorkoutData): void {
 
 export function sendMacroDataToWatch(data: WatchMacroData): void {
   sendMessage(
-    { type: 'macro_update', ...data },
+    {
+      type: 'macro_update',
+      caloriesConsumed: data.calories.consumed,
+      caloriesTarget: data.calories.target,
+      proteinConsumed: data.protein.consumed,
+      proteinTarget: data.protein.target,
+      carbsConsumed: data.carbs.consumed,
+      carbsTarget: data.carbs.target,
+      fatConsumed: data.fat.consumed,
+      fatTarget: data.fat.target,
+      waterConsumed: data.water.consumed,
+      waterTarget: data.water.target,
+    },
     () => {},
     () => {},
   );
@@ -66,7 +79,7 @@ export function sendReadinessToWatch(score: number, recommendation: string): voi
   );
 }
 
-type WatchMessageHandler = (message: Record<string, unknown>) => void;
+type WatchMessageHandler = (message: WatchMessage) => void;
 
 export function listenForWatchMessages(handler: WatchMessageHandler): () => void {
   const unsubscribe = watchEvents.on('message', handler);
@@ -78,7 +91,7 @@ export function listenForWatchMessages(handler: WatchMessageHandler): () => void
 // - Rest timer completed
 // - Water logged from watch
 // - Workout completed from watch
-export function handleWatchMessage(message: Record<string, unknown>) {
+export function handleWatchMessage(message: WatchMessage) {
   const type = message.type as string;
 
   switch (type) {

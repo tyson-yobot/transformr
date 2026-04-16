@@ -53,8 +53,9 @@ export async function readNfcTag(): Promise<string | null> {
     if (tag?.ndefMessage && tag.ndefMessage.length > 0) {
       const firstRecord = tag.ndefMessage[0];
       if (firstRecord) {
-        const text = nfc.Ndef.text.decodePayload(new Uint8Array(firstRecord.payload));
-        return text;
+        const decoded = nfc.Ndef.decodeMessage(firstRecord.payload);
+        const first = decoded[0];
+        return first ? nfc.Ndef.stringify(first) : null;
       }
     }
 
@@ -72,11 +73,9 @@ export async function writeNfcTag(text: string): Promise<boolean> {
     const nfc = await getNfcModule();
     if (!nfc) return false;
     await nfc.NfcManager.requestTechnology(nfc.NfcTech.Ndef);
-    const bytes = nfc.Ndef.encodeMessage([nfc.Ndef.textRecord(text)]);
-    if (bytes) {
-      await nfc.NfcManager.ndefHandler.writeNdefMessage(bytes);
-      return true;
-    }
+    const records = [nfc.Ndef.textRecord(text)];
+    await nfc.NfcManager.writeNdefMessage(records);
+    return true;
     return false;
   } catch {
     return false;

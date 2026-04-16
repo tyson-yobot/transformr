@@ -44,7 +44,7 @@ export function GatePromptCard({ featureKey, height = 120 }: GatePromptCardProps
       {/* Benefit text */}
       <Text
         style={[
-          typography.bodySmall,
+          typography.caption,
           { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs, paddingHorizontal: spacing.lg },
         ]}
         numberOfLines={2}

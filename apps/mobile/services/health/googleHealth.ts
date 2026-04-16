@@ -132,7 +132,7 @@ export async function getLatestWeight(): Promise<number | null> {
       endTime: new Date().toISOString(),
     },
   });
-  const records = result.records as {
+  const records = (result.records as unknown) as {
     weight: { inPounds: number };
   }[];
   if (records.length === 0) return null;
@@ -153,7 +153,7 @@ export async function getActiveCalories(
     },
   });
   return (
-    result.records as { energy: { inKilocalories: number } }[]
+    (result.records as unknown) as { energy: { inKilocalories: number } }[]
   ).reduce((sum, r) => sum + r.energy.inKilocalories, 0);
 }
 
