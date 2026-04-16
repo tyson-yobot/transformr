@@ -17,7 +17,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  FadeInDown,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -270,7 +269,7 @@ export default function NutritionHomeScreen() {
         <AIInsightCard screenKey="nutrition/index" style={{ marginBottom: spacing.md }} />
 
         {/* Macro Rings */}
-        <Animated.View entering={FadeInDown.duration(300)}>
+        <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.macroRingsRow}>
               <ProgressRing
@@ -364,9 +363,9 @@ export default function NutritionHomeScreen() {
               </View>
             </View>
           </Card>
-        </Animated.View>
+        </View>
         {/* Calorie Progress Bar */}
-        <Animated.View entering={FadeInDown.duration(300).delay(50)}>
+        <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <ProgressBar
               progress={todayMacros.calories / targets.calories}
@@ -382,12 +381,12 @@ export default function NutritionHomeScreen() {
               height={12}
             />
           </Card>
-        </Animated.View>
+        </View>
 
         <HelpBubble id="nutrition_macros" message="Tap any ring to see your full macro breakdown" position="below" />
 
         {/* Quick Links */}
-        <Animated.View entering={FadeInDown.duration(300).delay(80)}>
+        <View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -427,11 +426,11 @@ export default function NutritionHomeScreen() {
               <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Supplements</Text>
             </Pressable>
           </ScrollView>
-        </Animated.View>
+        </View>
 
         {/* Global empty food log state */}
         {todayLogs.length === 0 && dayOffset === 0 && (
-          <Animated.View entering={FadeInDown.duration(300).delay(100)}>
+          <View>
             <EmptyState
               icon={'\u{1F957}'}
               title="Nothing logged yet"
@@ -440,7 +439,7 @@ export default function NutritionHomeScreen() {
               onAction={() => handleQuickAdd('snack')}
               style={{ marginBottom: spacing.lg }}
             />
-          </Animated.View>
+          </View>
         )}
 
         {/* Meal Sections */}
@@ -449,9 +448,8 @@ export default function NutritionHomeScreen() {
           const sectionCalories = logs.reduce((sum, l) => sum + l.calories, 0);
 
           return (
-            <Animated.View
+            <View
               key={section.type}
-              entering={FadeInDown.duration(250).delay(index * 30)}
               style={{ marginBottom: spacing.lg }}
             >
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
@@ -506,12 +504,12 @@ export default function NutritionHomeScreen() {
                   </Text>
                 </Pressable>
               )}
-            </Animated.View>
+            </View>
           );
         })}
 
         {/* Water Tracker */}
-        <Animated.View entering={FadeInDown.duration(250).delay(80)}>
+        <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -569,10 +567,10 @@ export default function NutritionHomeScreen() {
               ))}
             </View>
           </Card>
-        </Animated.View>
+        </View>
 
         {/* Supplement Checklist */}
-        <Animated.View entering={FadeInDown.duration(250).delay(120)}>
+        <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -639,7 +637,7 @@ export default function NutritionHomeScreen() {
               </Pressable>
             )}
           </Card>
-        </Animated.View>
+        </View>
       </ScrollView>
 
       <HelpBubble id="nutrition_add" message="Log meals with camera, barcode, or search" position="above" />

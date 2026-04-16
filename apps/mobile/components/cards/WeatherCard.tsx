@@ -53,6 +53,17 @@ export function WeatherCard({ style }: WeatherCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Dismiss the loading card if weather takes too long (e.g. no location permission)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading((prev) => {
+        if (prev) setError('timeout');
+        return false;
+      });
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const fetchWeather = useCallback(async () => {
     setIsLoading(true);
     setError(null);

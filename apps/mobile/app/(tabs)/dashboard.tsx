@@ -186,7 +186,7 @@ export default function DashboardScreen() {
   }, [workoutStore.activeSession]);
 
   // Computed readiness fallback (profile-based estimate until real score loads)
-  const readinessScoreDisplay = readinessScore ?? (profile?.current_weight ? 78 : 0);
+  const readinessScoreDisplay = readinessScore ?? (profile ? 72 : null);
 
   // Greeting with user name
   const motivationalGreeting = getTodayGreeting();
@@ -331,8 +331,8 @@ export default function DashboardScreen() {
       {
         icon: <Text style={{ fontSize: 18 }}>⚡</Text>,
         label: 'Readiness',
-        valueNode: <MonoText variant="monoBody">{readinessScoreDisplay}%</MonoText>,
-        value: `${readinessScoreDisplay}%`,
+        valueNode: <MonoText variant="monoBody">{readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—'}</MonoText>,
+        value: readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—',
       },
     ],
     [currentStreak, workoutsThisWeek, caloriesToday, readinessScoreDisplay],
@@ -830,17 +830,6 @@ export default function DashboardScreen() {
         </Animated.View>
       )}
 
-      {/* AI Insight */}
-      <Animated.View entering={FadeInDown.delay(350).duration(400)}>
-        <Card variant="ai" style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.body, { color: colors.text.primary }]}>
-            Based on your data, here's your insight for today.
-          </Text>
-          <Text style={[typography.caption, { color: colors.accent.cyan, marginTop: spacing.sm }]}>
-            AI Coach
-          </Text>
-        </Card>
-      </Animated.View>
       <HelpBubble id="dashboard_fab" message="Tap the purple button to chat with your AI coach" position="below" />
 
       {/* Recent Achievements */}
@@ -869,6 +858,11 @@ export default function DashboardScreen() {
             </View>
           }
         >
+          {recentAchievements.length === 0 ? (
+            <Text style={[typography.caption, { color: colors.text.muted }]}>
+              Keep logging workouts, meals, and habits — your first achievement is closer than you think.
+            </Text>
+          ) : null}
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             {recentAchievements.map((ach) => (
               <View

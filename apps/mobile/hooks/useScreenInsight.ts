@@ -18,25 +18,30 @@ const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 /**
  * Edge functions occasionally return insight wrapped in a markdown JSON fence.
- * Strip it and extract the plain string.
+ * Strip it and extract the plain insight string.
  */
 function stripJsonFence(raw: string): string {
   const trimmed = raw.trim();
-  // Remove ```json ... ``` or ``` ... ``` blocks
-  const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
-  const inner = fenceMatch ? fenceMatch[1]!.trim() : trimmed;
-  // If the result looks like JSON, try to extract .insight from it
-  if (inner.startsWith('{')) {
-    try {
-      const parsed = JSON.parse(inner) as Record<string, unknown>;
-      if (typeof parsed['insight'] === 'string') {
-        return parsed['insight'];
+  // Strip ```json ... ``` or ``` ... ``` using replace (more robust than anchor regex)
+  const stripped = trimmed
+    .replace(/^```(?:json)?\s*/s, '')
+    .replace(/\s*```\s*$/s, '')
+    .trim();
+
+  // Try to parse as JSON and extract .insight
+  for (const candidate of [stripped, trimmed]) {
+    if (candidate.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(candidate) as Record<string, unknown>;
+        if (typeof parsed['insight'] === 'string') {
+          return parsed['insight'];
+        }
+      } catch {
+        // not valid JSON
       }
-    } catch {
-      // not valid JSON — return as-is
     }
   }
-  return inner;
+  return stripped || trimmed;
 }
 
 // In-memory cache to avoid duplicate requests within the same session
@@ -85,6 +90,12 @@ export function useScreenInsight(screenKey: string): ScreenInsightState {
         const rawInsight = (data as { insight?: string })?.insight ?? null;
         const insightText = rawInsight ? stripJsonFence(rawInsight) : null;
         const cat = (data as { category?: string })?.category ?? 'general';
+
+        // If the DB had poisoned (fence-wrapped) cache, force a fresh fetch once
+        if (insightText && insightText.includes('```') && !forceRefresh) {
+          void fetchInsight(true);
+          return;
+        }
 
         setInsight(insightText);
         setCategory(cat);

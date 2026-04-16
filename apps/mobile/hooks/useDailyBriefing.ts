@@ -8,6 +8,8 @@ import { useGoalStore } from '@stores/goalStore';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useHabitStore } from '@stores/habitStore';
+import { useSleepStore } from '@stores/sleepStore';
+import { useMoodStore } from '@stores/moodStore';
 import { useCountdown } from './useCountdown';
 
 interface GamePlanItem {
@@ -171,17 +173,41 @@ export function useDailyBriefing(): DailyBriefingData {
     return items;
   }, [templates, getTodayMacros, profile, habits, todayCompletions, primaryGoal, countdown]);
 
+  const lastSleep = useSleepStore((s) => s.lastSleep);
+  const todayMood = useMoodStore((s) => s.todayMood);
+
   const readinessScore = useMemo(() => {
-    // Derive a simple readiness estimate from available data
-    // Full readiness requires sleep/mood/stress data which may not be loaded yet
-    // Return a baseline score; the briefing screen can enhance this
-    return 72;
-  }, []);
+    // Weighted readiness: sleep quality 50%, mood 25%, energy 25%
+    // Each input is 1-5 scale → normalise to 0-100
+    let score = 72; // baseline when no data yet
+    let weightSum = 0;
+    let weightedScore = 0;
+
+    if (lastSleep?.quality != null) {
+      weightedScore += (lastSleep.quality / 5) * 100 * 0.5;
+      weightSum += 0.5;
+    }
+    if (todayMood?.mood != null) {
+      weightedScore += (todayMood.mood / 5) * 100 * 0.25;
+      weightSum += 0.25;
+    }
+    if (todayMood?.energy != null) {
+      weightedScore += (todayMood.energy / 5) * 100 * 0.25;
+      weightSum += 0.25;
+    }
+
+    if (weightSum > 0) {
+      // Scale to full weight; if only partial data exists, blend with baseline
+      score = Math.round(weightedScore / weightSum);
+    }
+    return Math.min(100, Math.max(0, score));
+  }, [lastSleep, todayMood]);
 
   const motivationMessage = useMemo(() => {
     const completedIds = new Set(todayCompletions.map((c) => c.habit_id));
+    const maxStreak = habits.reduce((max, h) => Math.max(max, h.current_streak ?? 0), 0);
     return buildMotivationMessage({
-      streakDays: 0, // Would come from useStreaks if completion dates were available
+      streakDays: maxStreak,
       habitsTotal: habits.length,
       habitsCompleted: completedIds.size,
       goalsCount: goals.length,

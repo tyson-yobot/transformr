@@ -236,17 +236,34 @@ Generate one micro-insight for this screen.`;
     });
 
     const aiData = await response.json();
-    const rawText = aiData.content[0].text;
+    const rawText: string = aiData.content[0].text ?? "";
 
-    let insight = rawText;
-    let category = "general";
-    try {
-      const parsed = JSON.parse(rawText);
-      insight = parsed.insight ?? rawText;
-      category = parsed.category ?? "general";
-    } catch {
-      // Use raw text as insight
+    // Strip markdown code fences that Claude sometimes wraps JSON in
+    function extractInsight(text: string): { insight: string; category: string } {
+      const attempts = [
+        text.trim(),
+        // Strip ```json ... ``` or ``` ... ```
+        text.trim().replace(/^```(?:json)?\s*/s, "").replace(/\s*```\s*$/s, "").trim(),
+      ];
+      for (const attempt of attempts) {
+        if (attempt.startsWith("{")) {
+          try {
+            const parsed = JSON.parse(attempt);
+            if (typeof parsed.insight === "string") {
+              return {
+                insight: parsed.insight,
+                category: typeof parsed.category === "string" ? parsed.category : "general",
+              };
+            }
+          } catch { /* not valid JSON */ }
+        }
+      }
+      // No JSON found — use stripped plain text as insight
+      const plain = text.trim().replace(/^```(?:json)?\s*/s, "").replace(/\s*```\s*$/s, "").trim();
+      return { insight: plain || text.trim(), category: "general" };
     }
+
+    const { insight, category } = extractInsight(rawText);
 
     // Upsert cache
     await supabase.from("ai_screen_insights").upsert(
