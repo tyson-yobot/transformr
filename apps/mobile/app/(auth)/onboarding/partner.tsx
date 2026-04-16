@@ -18,7 +18,8 @@ import { usePartnerStore } from '@stores/partnerStore';
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const HERO_URI = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const HERO_URI = require('@assets/images/hero-partner.jpg') as number;
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
 
 interface PrivacyToggle {
@@ -86,7 +87,7 @@ export default function PartnerScreen() {
         {/* Hero image */}
         <View style={[styles.choiceImageWrap, { height: imageHeight }]}>
           <Image
-            source={{ uri: HERO_URI }}
+            source={HERO_URI}
             style={styles.fill}
             contentFit="cover"
             cachePolicy="memory-disk"

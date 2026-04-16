@@ -160,7 +160,7 @@ export default function NotificationsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80"
+        imageUri={require('@assets/images/hero-notifications.jpg') as number}
         heading="Your AI coach has your back."
         subheading="We'll nudge you when you need it, celebrate when you earn it, and stay quiet when you don't."
         style={{ marginBottom: spacing.xl }}

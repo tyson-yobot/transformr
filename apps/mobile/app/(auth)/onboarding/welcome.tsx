@@ -68,7 +68,7 @@ export default function WelcomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80"
+        imageUri={require('@assets/images/gym-hero.jpg') as number}
         heading="Your transformation starts here."
         subheading="TRANSFORMR is your AI-powered partner for total life transformation. Fitness. Nutrition. Business. Mindset. All in one place, all personalized to you."
         style={{ marginBottom: spacing.xl }}

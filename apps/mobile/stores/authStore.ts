@@ -59,12 +59,11 @@ export const useAuthStore = create<AuthStore>()(
             },
           });
           if (error) {
-            // Parse Supabase rate limit errors
-            if (error.message.includes('after') || error.message.includes('seconds') || error.status === 429) {
+            const raw = error.message?.toLowerCase() ?? '';
+            if (raw.includes('after') || raw.includes('seconds') || error.status === 429) {
               const match = error.message.match(/(\d+)/);
               const secs = match ? parseInt(match[1] ?? '60', 10) : 60;
               set({ error: `Please wait ${secs} seconds before trying again.`, loading: false, rateLimitSeconds: secs });
-              // Countdown
               const interval = setInterval(() => {
                 const remaining = get().rateLimitSeconds - 1;
                 if (remaining <= 0) {
@@ -74,8 +73,12 @@ export const useAuthStore = create<AuthStore>()(
                   set({ rateLimitSeconds: remaining });
                 }
               }, 1000);
+            } else if (raw.includes('already registered') || raw.includes('already exists') || raw.includes('user_already_exists')) {
+              set({ error: 'An account with this email already exists. Try signing in.', loading: false });
+            } else if (raw.includes('password') && raw.includes('6')) {
+              set({ error: 'Password must be at least 8 characters.', loading: false });
             } else {
-              throw error;
+              set({ error: error.message ?? 'Registration failed. Please try again.', loading: false });
             }
             return;
           }
@@ -93,11 +96,33 @@ export const useAuthStore = create<AuthStore>()(
             email,
             password,
           });
-          if (error) throw error;
+          if (error) {
+            const msg = (() => {
+              const raw = error.message?.toLowerCase() ?? '';
+              if (raw.includes('invalid login') || raw.includes('invalid_credentials') || raw.includes('invalid credentials')) {
+                return 'Incorrect email or password. Please try again.';
+              }
+              if (raw.includes('email not confirmed') || raw.includes('not confirmed')) {
+                return 'Please confirm your email before signing in. Check your inbox.';
+              }
+              if (raw.includes('too many') || error.status === 429) {
+                return 'Too many attempts. Please wait a few minutes and try again.';
+              }
+              if (raw.includes('network') || raw.includes('fetch') || raw.includes('connect')) {
+                return 'Unable to connect. Check your internet connection.';
+              }
+              return error.message ?? 'Sign in failed. Please try again.';
+            })();
+            set({ error: msg, loading: false });
+            return;
+          }
           set({ session: data.session, user: data.user, loading: false });
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : 'Sign in failed';
-          set({ error: message, loading: false });
+          const raw = err instanceof Error ? err.message : '';
+          const msg = raw.includes('network') || raw.includes('fetch')
+            ? 'Unable to connect. Check your internet connection.'
+            : raw || 'Sign in failed. Please try again.';
+          set({ error: msg, loading: false });
         }
       },
 
@@ -199,7 +224,8 @@ export const useAuthStore = create<AuthStore>()(
       resetPassword: async (email) => {
         set({ loading: true, error: null });
         try {
-          const { error } = await supabase.auth.resetPasswordForEmail(email);
+          const redirectTo = Linking.createURL('auth/callback');
+          const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
           if (error) throw error;
           set({ loading: false });
         } catch (err: unknown) {

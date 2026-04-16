@@ -86,7 +86,7 @@ export default function GoalsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&q=80"
+        imageUri={require('@assets/images/hero-goals.jpg') as number}
         heading="Dream big. Then build a plan."
         subheading="What does your life look like 12 months from now if everything went right? We'll help you get there."
         style={{ marginBottom: spacing.xl }}

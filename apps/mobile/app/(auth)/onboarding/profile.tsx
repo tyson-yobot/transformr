@@ -123,7 +123,7 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80"
+        imageUri={require('@assets/images/hero-profile.jpg') as number}
         heading="Let's get to know you."
         subheading="The more we know, the better your AI coach becomes. This takes about 2 minutes."
         style={{ marginBottom: spacing.xl }}

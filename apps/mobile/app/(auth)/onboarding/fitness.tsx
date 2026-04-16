@@ -74,7 +74,7 @@ export default function FitnessScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80"
+        imageUri={require('@assets/images/hero-fitness.jpg') as number}
         heading="What does your strongest self look like?"
         subheading="Set your fitness targets. Your AI coach will build a progressive plan and adapt it as you grow."
         style={{ marginBottom: spacing.xl }}

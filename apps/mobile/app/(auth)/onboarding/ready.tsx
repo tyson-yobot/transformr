@@ -142,7 +142,7 @@ export default function ReadyScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80"
+        imageUri={require('@assets/images/hero-ready.jpg') as number}
         heading="You're ready. Let's go."
         subheading="Everything is set. Your AI coach is calibrated. Your plan is built. Today is Day 1 of your transformation."
         style={{ marginBottom: spacing.xl }}

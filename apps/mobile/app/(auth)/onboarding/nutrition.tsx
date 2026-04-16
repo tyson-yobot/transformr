@@ -113,7 +113,7 @@ export default function NutritionScreen() {
       showsVerticalScrollIndicator={false}
     >
       <OnboardingHero
-        imageUri="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80"
+        imageUri={require('@assets/images/hero-nutrition.jpg') as number}
         heading="Fuel your transformation."
         subheading="Tell us about your eating style. We'll handle the calorie math, meal suggestions, and grocery lists."
         style={{ marginBottom: spacing.xl }}

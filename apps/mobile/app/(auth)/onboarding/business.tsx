@@ -17,7 +17,8 @@ import { useBusinessStore } from '@stores/businessStore';
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const HERO_URI = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const HERO_URI = require('@assets/images/hero-business.jpg') as number;
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';
@@ -67,7 +68,7 @@ export default function BusinessScreen() {
         {/* Hero image */}
         <View style={[styles.decisionImageWrap, { height: imageHeight }]}>
           <Image
-            source={{ uri: HERO_URI }}
+            source={HERO_URI}
             style={styles.fill}
             contentFit="cover"
             cachePolicy="memory-disk"

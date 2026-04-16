@@ -26,8 +26,8 @@ const ICON = require('../assets/images/transformr-icon.png') as number;
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1284&q=80';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const HERO_IMAGE = require('../assets/images/gym-hero.jpg') as number;
 
 export default function Index() {
   const session = useAuthStore((s) => s.session);
@@ -109,7 +109,7 @@ export default function Index() {
     <Animated.View style={[styles.root, containerStyle]}>
       {/* Hero background photo */}
       <Image
-        source={{ uri: HERO_IMAGE }}
+        source={HERO_IMAGE}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
         cachePolicy="memory-disk"

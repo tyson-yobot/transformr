@@ -17,7 +17,7 @@ const DEEP_SPACE = '#0C0A15';
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
 
 interface OnboardingHeroProps {
-  imageUri: string;
+  imageUri: string | number;
   heading: string;
   subheading: string;
   style?: ViewStyle;
@@ -33,7 +33,7 @@ export function OnboardingHero({ imageUri, heading, subheading, style }: Onboard
       {/* Hero image — edge-to-edge, top 40% */}
       <View style={[styles.imageWrap, { height: imageHeight }]}>
         <Image
-          source={{ uri: imageUri }}
+          source={typeof imageUri === 'string' ? { uri: imageUri } : imageUri}
           style={styles.image}
           contentFit="cover"
           cachePolicy="memory-disk"

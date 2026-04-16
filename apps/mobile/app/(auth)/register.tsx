@@ -29,7 +29,8 @@ import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const GYM_IMAGE = require('@assets/images/gym-hero.jpg') as number;
 
 // Google "G" icon — white to match dark theme
 function GoogleIcon({ size = 20 }: { size?: number }) {
@@ -117,7 +118,7 @@ export default function RegisterScreen() {
     <View style={[styles.root, { backgroundColor: colors.background.primary }]}>
       {/* Warm gym background */}
       <Image
-        source={{ uri: GYM_IMAGE }}
+        source={GYM_IMAGE}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
         cachePolicy="memory-disk"
@@ -362,14 +363,16 @@ export default function RegisterScreen() {
 
             {/* Social Auth Buttons */}
             <Animated.View entering={FadeInDown.delay(500).duration(300)}>
-              <Pressable
-                onPress={() => { hapticLight(); signInWithApple(); }}
-                disabled={loading}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
-              >
-                <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
-                <Text style={styles.socialBtnText}>Continue with Apple</Text>
-              </Pressable>
+              {Platform.OS === 'ios' && (
+                <Pressable
+                  onPress={() => { hapticLight(); signInWithApple(); }}
+                  disabled={loading}
+                  style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
+                >
+                  <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
+                  <Text style={styles.socialBtnText}>Continue with Apple</Text>
+                </Pressable>
+              )}
 
               <Pressable
                 onPress={() => { hapticLight(); signInWithGoogle(); }}

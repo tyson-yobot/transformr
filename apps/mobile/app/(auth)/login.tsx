@@ -12,6 +12,7 @@ import {
   Platform,
   StyleSheet,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
@@ -156,14 +157,13 @@ export default function LoginScreen() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              {/* Welcome / error slot — error replaces welcome text, no layout shift */}
+              <Text style={styles.welcomeText}>Welcome back. Let's keep building.</Text>
+              {/* Error banner — appears above form when auth fails */}
               {error ? (
-                <Text style={[styles.welcomeText, { color: colors.accent.danger, fontSize: 13 }]} numberOfLines={2}>
-                  {error}
-                </Text>
-              ) : (
-                <Text style={styles.welcomeText}>Welcome back. Let's keep building.</Text>
-              )}
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorBannerText}>{error}</Text>
+                </View>
+              ) : null}
 
               {/* Email Input */}
               <Input
@@ -213,11 +213,14 @@ export default function LoginScreen() {
                 style={({ pressed }) => [
                   styles.signInBtn,
                   pressed && styles.signInBtnPressed,
+                  loading && { opacity: 0.8 },
                 ]}
               >
-                <Text style={styles.signInBtnText}>
-                  {loading ? 'Signing in…' : 'Sign In'}
-                </Text>
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.signInBtnText}>Sign In</Text>
+                )}
               </Pressable>
             </Animated.View>
 
@@ -230,14 +233,16 @@ export default function LoginScreen() {
 
             {/* Social Auth Buttons */}
             <Animated.View entering={FadeInDown.delay(500).duration(300)}>
-              <Pressable
-                onPress={() => { hapticLight(); signInWithApple(); }}
-                disabled={loading}
-                style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
-              >
-                <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
-                <Text style={styles.socialBtnText}>Continue with Apple</Text>
-              </Pressable>
+              {Platform.OS === 'ios' && (
+                <Pressable
+                  onPress={() => { hapticLight(); signInWithApple(); }}
+                  disabled={loading}
+                  style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
+                >
+                  <Ionicons name="logo-apple" size={20} color="#F0F0FC" />
+                  <Text style={styles.socialBtnText}>Continue with Apple</Text>
+                </Pressable>
+              )}
 
               <Pressable
                 onPress={() => { hapticLight(); signInWithGoogle(); }}
@@ -342,7 +347,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#F0F0FC',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  // Error banner
+  errorBanner: {
+    backgroundColor: 'rgba(239,68,68,0.15)',
+    borderColor: '#EF4444',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorBannerText: {
+    color: '#EF4444',
+    fontSize: 14,
+    textAlign: 'center',
     fontWeight: '500',
   },
   // Forgot
