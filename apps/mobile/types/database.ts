@@ -42,6 +42,9 @@ export interface Profile {
   spotify_access_token?: string;
   spotify_refresh_token?: string;
   stripe_customer_id?: string;
+  stripe_subscription_id?: string;
+  subscription_tier?: 'free' | 'pro' | 'elite' | 'partners';
+  subscription_expires_at?: string;
   watch_paired?: boolean;
   expo_push_token?: string;
   supplement_budget_monthly?: number;
