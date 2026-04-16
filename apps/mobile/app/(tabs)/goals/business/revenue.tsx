@@ -22,6 +22,8 @@ import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/forma
 import { hapticSuccess } from '@utils/haptics';
 import type { RevenueLog } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 
 type RevenueType = NonNullable<RevenueLog['type']>;
 
@@ -35,6 +37,7 @@ const REVENUE_TYPES: { key: RevenueType; label: string }[] = [
 
 export default function RevenueScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
   const { businesses, revenueData, isLoading, logRevenue, getMonthlyMetrics } =
     useBusinessStore();
 
@@ -76,6 +79,14 @@ export default function RevenueScreen() {
     () => revenueData.slice(0, 20),
     [revenueData],
   );
+
+  if (!hasBusinessTracking) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <GatePromptCard featureKey="business_tracking" height={200} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

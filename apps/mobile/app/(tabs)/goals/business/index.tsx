@@ -25,10 +25,13 @@ import {
 } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
   const { businesses, fetchBusinesses, getMonthlyMetrics } =
     useBusinessStore();
 
@@ -77,6 +80,14 @@ export default function BusinessDashboard() {
     [monthlyMetrics],
   );
 
+  if (!hasBusinessTracking) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <GatePromptCard featureKey="business_tracking" height={200} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
@@ -124,7 +135,7 @@ export default function BusinessDashboard() {
                       {
                         color:
                           idx === selectedBusinessIndex
-                            ? '#FFFFFF'
+                            ? colors.text.inverse
                             : colors.text.secondary,
                       },
                     ]}

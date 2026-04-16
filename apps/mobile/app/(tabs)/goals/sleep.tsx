@@ -356,7 +356,8 @@ export default function SleepTracker() {
         <HelpBubble id="sleep_log" message="Log sleep to unlock AI recovery insights" position="above" />
         <Button
           title="Log Sleep"
-          onPress={() => setShowLogModal(true)}
+          onPress={() => { hapticLight(); setShowLogModal(true); }}
+          accessibilityLabel="Log last night's sleep"
           fullWidth
           style={{ marginTop: spacing.xl }}
         />

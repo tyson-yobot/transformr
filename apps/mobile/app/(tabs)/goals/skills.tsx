@@ -20,7 +20,8 @@ import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
 import { Slider } from '@components/ui/Slider';
-import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { EmptyState } from '@components/ui/EmptyState';
 import type { Skill, Book, Course } from '@app-types/database';
 import { supabase } from '@services/supabase';
 
@@ -223,13 +224,17 @@ export default function SkillsScreen() {
         );
       })}
       {skills.length === 0 && (
-        <Card>
-          <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-            No skills tracked yet. Add your first skill!
-          </Text>
-        </Card>
+        <EmptyState
+          icon="💡"
+          title="No skills tracked yet"
+          subtitle="Track your mastery in any skill. Add proficiency levels and watch your expertise grow over time."
+          actionLabel="Add First Skill"
+          onAction={() => { hapticMedium(); setShowSkillModal(true); }}
+        />
       )}
-      <Button title="Add Skill" onPress={() => setShowSkillModal(true)} fullWidth />
+      {skills.length > 0 && (
+        <Button title="Add Skill" onPress={() => { hapticMedium(); setShowSkillModal(true); }} fullWidth accessibilityLabel="Add a new skill" />
+      )}
     </View>
   );
 
@@ -301,13 +306,17 @@ export default function SkillsScreen() {
         );
       })}
       {filteredBooks.length === 0 && (
-        <Card>
-          <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-            No books yet. Start building your reading list!
-          </Text>
-        </Card>
+        <EmptyState
+          icon="📚"
+          title="No books yet"
+          subtitle="Start building your reading list. Leaders are readers — every book is a mentor."
+          actionLabel="Add First Book"
+          onAction={() => { hapticMedium(); setShowBookModal(true); }}
+        />
       )}
-      <Button title="Add Book" onPress={() => setShowBookModal(true)} fullWidth />
+      {filteredBooks.length > 0 && (
+        <Button title="Add Book" onPress={() => { hapticMedium(); setShowBookModal(true); }} fullWidth accessibilityLabel="Add a new book" />
+      )}
     </View>
   );
 
@@ -354,13 +363,17 @@ export default function SkillsScreen() {
         </Animated.View>
       ))}
       {courses.length === 0 && (
-        <Card>
-          <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-            No courses yet. Start learning!
-          </Text>
-        </Card>
+        <EmptyState
+          icon="🎓"
+          title="No courses yet"
+          subtitle="Invest in yourself. Add courses you're taking or planning to track your learning journey."
+          actionLabel="Add First Course"
+          onAction={() => { hapticMedium(); setShowCourseModal(true); }}
+        />
       )}
-      <Button title="Add Course" onPress={() => setShowCourseModal(true)} fullWidth />
+      {courses.length > 0 && (
+        <Button title="Add Course" onPress={() => { hapticMedium(); setShowCourseModal(true); }} fullWidth accessibilityLabel="Add a new course" />
+      )}
     </View>
   );
 
@@ -394,7 +407,7 @@ export default function SkillsScreen() {
                 style={[
                   typography.captionBold,
                   {
-                    color: activeTab === tab ? '#FFFFFF' : colors.text.secondary,
+                    color: activeTab === tab ? colors.text.inverse : colors.text.secondary,
                     textAlign: 'center',
                   },
                 ]}

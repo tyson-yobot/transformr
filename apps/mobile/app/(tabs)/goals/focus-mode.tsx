@@ -151,6 +151,7 @@ export default function FocusMode() {
   const handlePause = useCallback(() => {
     setIsRunning(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
+    hapticMedium();
   }, []);
 
   const handleReset = useCallback(() => {
@@ -274,12 +275,14 @@ export default function FocusMode() {
               <Button
                 title="Start"
                 onPress={handleStart}
+                accessibilityLabel="Start focus timer"
                 style={{ flex: 1 }}
               />
             ) : (
               <Button
                 title="Pause"
                 onPress={handlePause}
+                accessibilityLabel="Pause focus timer"
                 variant="secondary"
                 style={{ flex: 1 }}
               />
@@ -287,6 +290,7 @@ export default function FocusMode() {
             <Button
               title="Reset"
               onPress={handleReset}
+              accessibilityLabel="Reset focus timer"
               variant="outline"
               style={{ flex: 1 }}
             />
@@ -353,7 +357,7 @@ export default function FocusMode() {
                   },
                 ]}
               >
-                <Text style={[typography.statSmall, { color: '#FFFFFF' }]}>
+                <Text style={[typography.statSmall, { color: colors.text.inverse }]}>
                   {distractions}
                 </Text>
               </Pressable>

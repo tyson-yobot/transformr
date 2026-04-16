@@ -23,7 +23,10 @@ import { StreakCalendar } from '@components/charts/StreakCalendar';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useHabitStore } from '@stores/habitStore';
 import { useGamificationStyle } from '@hooks/useGamificationStyle';
-import { hapticSuccess, hapticStreakMilestone } from '@utils/haptics';
+import { hapticSuccess, hapticStreakMilestone, hapticMedium } from '@utils/haptics';
+import { MonoText } from '@components/ui/MonoText';
+import { EmptyState } from '@components/ui/EmptyState';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { Habit } from '@app-types/database';
 
 type HabitCategory = NonNullable<Habit['category']>;
@@ -54,6 +57,8 @@ export default function HabitTracker() {
     completeHabit,
     createHabit,
   } = useHabitStore();
+
+  const { isAvailable: canAddHabit, showUpgradeModal } = useFeatureGate('unlimited_habits');
 
   const [refreshing, setRefreshing] = useState(false);
   const [filterCategory, setFilterCategory] = useState<HabitCategory | null>(null);
@@ -232,6 +237,22 @@ export default function HabitTracker() {
 
         {/* Habits Checklist */}
         <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
+          {habits.length === 0 && (
+            <EmptyState
+              icon="✅"
+              title="Build your daily foundation"
+              subtitle="Small habits, compounded over time, create extraordinary results. Add your first habit to get started."
+              actionLabel="Add First Habit"
+              onAction={() => {
+                hapticMedium();
+                if (!canAddHabit && habits.length >= 5) {
+                  showUpgradeModal();
+                } else {
+                  setShowAddModal(true);
+                }
+              }}
+            />
+          )}
           {filteredHabits.map((habit, index) => {
             const isCompleted = completedIds.has(habit.id);
             const streak = habit.current_streak ?? 0;
@@ -310,23 +331,29 @@ export default function HabitTracker() {
                         )}
                       </View>
 
-                      {/* Streak */}
+                      {/* Streak Badge */}
                       <View style={styles.streakBadge}>
-                        <Text
-                          style={[
-                            typography.monoBody,
-                            { color: isIntense ? colors.accent.fire : gamStyle.primaryColor },
-                          ]}
+                        <MonoText
+                          variant="monoCaption"
+                          color={
+                            streak >= 30
+                              ? colors.accent.gold
+                              : streak >= 7
+                                ? colors.accent.warning
+                                : colors.accent.success
+                          }
                         >
-                          {isIntense ? `${streak} 🔥` : `${streak}`}
-                        </Text>
+                          {'🔥'}{streak}
+                        </MonoText>
                         <Text
                           style={[
                             typography.tiny,
                             { color: colors.text.muted },
                           ]}
                         >
-                          {gamStyle.streakLabel.replace('{count}', String(streak))}
+                          {isIntense
+                            ? gamStyle.streakLabel.replace('{count}', String(streak))
+                            : 'day streak'}
                         </Text>
                       </View>
                     </View>
@@ -398,7 +425,15 @@ export default function HabitTracker() {
         {/* Add Habit Button */}
         <Button
           title="Add Habit"
-          onPress={() => setShowAddModal(true)}
+          onPress={() => {
+            hapticMedium();
+            if (!canAddHabit && habits.length >= 5) {
+              showUpgradeModal();
+            } else {
+              setShowAddModal(true);
+            }
+          }}
+          accessibilityLabel="Add a new habit"
           fullWidth
           style={{ marginTop: spacing.xl }}
         />
@@ -473,7 +508,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkmark: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  checkmark: { color: 'white', fontSize: 16, fontWeight: '700' },
   streakBadge: { alignItems: 'center', marginLeft: 8 },
   milestoneTrack: { width: '100%', overflow: 'hidden' },
 });

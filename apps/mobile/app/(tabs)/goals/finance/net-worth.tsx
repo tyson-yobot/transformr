@@ -110,7 +110,7 @@ export default function NetWorthScreen() {
               Net Worth Over Time
             </Text>
             <Card>
-              <Sparkline data={chartData} height={160} color="#6366F1" />
+              <Sparkline data={chartData} height={160} color={colors.accent.primary} />
             </Card>
           </Animated.View>
         )}

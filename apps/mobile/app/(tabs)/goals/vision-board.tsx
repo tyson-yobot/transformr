@@ -19,6 +19,7 @@ import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { hapticSuccess, hapticLight } from '@utils/haptics';
+import { EmptyState } from '@components/ui/EmptyState';
 import type { VisionBoardItem } from '@app-types/database';
 import { supabase } from '../../../services/supabase';
 
@@ -217,6 +218,17 @@ export default function VisionBoard() {
             variant="secondary"
             fullWidth
             style={{ marginBottom: spacing.lg }}
+          />
+        )}
+
+        {/* Empty State */}
+        {filteredItems.length === 0 && items.length === 0 && (
+          <EmptyState
+            icon="🌟"
+            title="Your vision board is empty"
+            subtitle="Add images that represent your dreams and goals. See them daily to stay motivated."
+            actionLabel="Add First Image"
+            onAction={handlePickFromLibrary}
           />
         )}
 

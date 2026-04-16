@@ -19,8 +19,9 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
-import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
+import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '../../../services/supabase';
 import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
@@ -322,13 +323,13 @@ export default function StakeGoalsScreen() {
               })}
 
             {stakeGoals.filter((sg) => sg.is_active).length === 0 && (
-              <Card>
-                <Text
-                  style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}
-                >
-                  No active stakes. Put money on the line to stay accountable!
-                </Text>
-              </Card>
+              <EmptyState
+                icon="🔥"
+                title="No active stakes"
+                subtitle="Put money on the line to stay accountable. When real stakes are involved, you show up."
+                actionLabel="Create First Stake"
+                onAction={() => { hapticMedium(); setShowCreateModal(true); }}
+              />
             )}
           </>
         )}
@@ -336,7 +337,7 @@ export default function StakeGoalsScreen() {
         {/* Create Stake Button */}
         <Button
           title="Create New Stake"
-          onPress={() => { hapticLight(); setShowCreateModal(true); }}
+          onPress={() => { hapticMedium(); setShowCreateModal(true); }}
           accessibilityLabel="Create a new stake goal"
           fullWidth
           style={{ marginTop: spacing.xl }}
