@@ -13,6 +13,7 @@ interface PartnerState {
   partnerProfile: Profile | null;
   isLoading: boolean;
   error: string | null;
+  pendingInviteCode: string | null;
 }
 
 interface PartnerActions {
@@ -20,6 +21,7 @@ interface PartnerActions {
   createPartnershipInvite: () => Promise<string | null>;
   sendNudge: (type: NudgeType, message: string) => Promise<void>;
   linkPartner: (inviteCode: string) => Promise<void>;
+  setPendingInviteCode: (code: string | null) => void;
   clearError: () => void;
   reset: () => void;
 }
@@ -32,6 +34,7 @@ export const usePartnerStore = create<PartnerStore>()((set, get) => ({
   partnerProfile: null,
   isLoading: false,
   error: null,
+  pendingInviteCode: null,
 
   // --- Actions ---
   fetchPartnership: async () => {
@@ -195,6 +198,8 @@ export const usePartnerStore = create<PartnerStore>()((set, get) => ({
     }
   },
 
+  setPendingInviteCode: (code) => set({ pendingInviteCode: code }),
+
   clearError: () => set({ error: null }),
 
   reset: () =>
@@ -203,5 +208,6 @@ export const usePartnerStore = create<PartnerStore>()((set, get) => ({
       partnerProfile: null,
       isLoading: false,
       error: null,
+      pendingInviteCode: null,
     }),
 }));

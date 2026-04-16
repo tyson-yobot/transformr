@@ -15,6 +15,7 @@ import { ThemeProvider } from '@theme/index';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
 import { useSettingsStore } from '@stores/settingsStore';
+import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
 
@@ -62,7 +63,22 @@ export default function RootLayout() {
   }, [listenToAuthChanges]);
 
   // Handle OAuth deep link callbacks (PKCE code exchange on cold start or resume)
+  // Also handles partner invite deep links: scheme://partner/join?code=TRFM-XXXXX
   const handleOAuthUrl = useCallback(async (url: string) => {
+    // Partner invite link
+    if (url.includes('partner/join')) {
+      try {
+        const parsed = new URL(url);
+        const code = parsed.searchParams.get('code');
+        if (code) {
+          usePartnerStore.getState().setPendingInviteCode(code);
+        }
+      } catch {
+        // ignore malformed URL
+      }
+      return;
+    }
+
     if (!url.includes('auth/callback')) return;
     try {
       const parsed = new URL(url);

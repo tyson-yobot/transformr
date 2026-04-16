@@ -2,7 +2,7 @@
 // TRANSFORMR -- Partner Management Screen
 // =============================================================================
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Share,
 } from 'react-native';
+import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -56,11 +57,21 @@ export default function PartnerScreen() {
     isLoading,
     linkPartner,
     fetchPartnership,
+    pendingInviteCode,
+    setPendingInviteCode,
   } = usePartnerStore();
 
   const [inviteCode, setInviteCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Pre-fill invite code when opened via a partner deep link
+  useEffect(() => {
+    if (pendingInviteCode) {
+      setInviteCode(pendingInviteCode);
+      setPendingInviteCode(null);
+    }
+  }, [pendingInviteCode, setPendingInviteCode]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -97,8 +108,9 @@ export default function PartnerScreen() {
   // Share invite code
   const handleShareCode = useCallback(async () => {
     if (!generatedCode) return;
+    const deepLink = Linking.createURL('partner/join', { queryParams: { code: generatedCode } });
     await Share.share({
-      message: `Join me on TRANSFORMR! Use my partner code: ${generatedCode}`,
+      message: `Let's transform together! 💪\n\nI'm using TRANSFORMR to track fitness, goals, and stay accountable. Be my partner!\n\nYour invite code: ${generatedCode}\n\nTap this link to connect instantly:\n${deepLink}`,
     });
   }, [generatedCode]);
 
