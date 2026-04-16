@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR — ActionToast + useActionToast
 // Lightweight per-screen confirmation toast for write operations.
 // Appears at the top of the screen, auto-dismisses after 2.2 s.
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,

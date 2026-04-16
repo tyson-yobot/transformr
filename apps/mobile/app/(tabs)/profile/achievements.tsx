@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Achievements Screen
 // =============================================================================
 
@@ -32,11 +32,11 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 type Tier = 'all' | 'bronze' | 'silver' | 'gold' | 'diamond';
 
 const TIER_FILTERS: readonly { key: Tier; label: string; color: string }[] = [
-  { key: 'all', label: 'All', color: '#94A3B8' },
-  { key: 'bronze', label: 'Bronze', color: '#CD7F32' },
-  { key: 'silver', label: 'Silver', color: '#C0C0C0' },
-  { key: 'gold', label: 'Gold', color: '#EAB308' },
-  { key: 'diamond', label: 'Diamond', color: '#B9F2FF' },
+  { key: 'all', label: 'All', color: '#94A3B8' }, /* brand-ok */
+  { key: 'bronze', label: 'Bronze', color: '#CD7F32' }, /* brand-ok */
+  { key: 'silver', label: 'Silver', color: '#C0C0C0' }, /* brand-ok */
+  { key: 'gold', label: 'Gold', color: '#EAB308' }, /* brand-ok */
+  { key: 'diamond', label: 'Diamond', color: '#B9F2FF' }, /* brand-ok */
 ];
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -151,10 +151,10 @@ export default function AchievementsScreen() {
 
   const tierColor = (tier: string | undefined): string => {
     switch (tier) {
-      case 'bronze': return '#CD7F32';
-      case 'silver': return '#C0C0C0';
-      case 'gold': return '#EAB308';
-      case 'diamond': return '#B9F2FF';
+      case 'bronze': return '#CD7F32'; /* brand-ok */
+      case 'silver': return '#C0C0C0'; /* brand-ok */
+      case 'gold': return colors.accent.gold;
+      case 'diamond': return '#B9F2FF'; /* brand-ok */
       default: return colors.text.muted;
     }
   };

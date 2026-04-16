@@ -411,6 +411,7 @@ export default function GoalsDashboard() {
             return (
               <Animated.View key={goal.id} entering={FadeInDown.delay(400 + index * 50)}>
                 <Card
+                  variant="elevated"
                   onPress={() => router.push(`/(tabs)/goals/${goal.id}` as Href)}
                 >
                   <View style={styles.goalHeader}>
@@ -475,7 +476,7 @@ export default function GoalsDashboard() {
                           { backgroundColor: colors.accent.primary, borderRadius: borderRadius.sm },
                         ]}
                       >
-                        <Text style={[typography.captionBold, { color: '#fff' }]}>Save</Text>
+                        <Text style={[typography.captionBold, { color: colors.text.inverse }]}>Save</Text>
                       </Pressable>
                       <Pressable
                         onPress={() => { setEditingDeadline(null); setDeadlineDraft(''); }}
@@ -601,7 +602,7 @@ export default function GoalsDashboard() {
           { backgroundColor: colors.accent.primary, borderRadius: 28, shadowColor: colors.accent.primary },
         ]}
       >
-        <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
+        <Text style={[typography.h2, { color: colors.text.inverse }]}>+</Text>
       </Pressable>
 
       <ActionToast

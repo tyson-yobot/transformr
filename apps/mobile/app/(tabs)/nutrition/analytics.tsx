@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Nutrition Analytics
 // =============================================================================
 
@@ -340,7 +340,7 @@ export default function NutritionAnalyticsScreen() {
                   <Text
                     style={[
                       typography.captionBold,
-                      { color: timeRange === range.value ? '#FFFFFF' : colors.text.secondary },
+                      { color: timeRange === range.value ? '#FFFFFF' : colors.text.secondary }, /* brand-ok */
                     ]}
                   >
                     {range.label}

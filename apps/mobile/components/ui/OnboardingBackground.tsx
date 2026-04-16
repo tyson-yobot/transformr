@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- OnboardingBackground
 // Full-screen photography background with deep-space overlay.
 // Used across all onboarding screens.
@@ -48,7 +48,7 @@ export function OnboardingBackground({ imageUrl, blurHash, children }: Onboardin
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0C0A15',
+    backgroundColor: '#0C0A15' /* brand-ok */
   },
   content: {
     flex: 1,

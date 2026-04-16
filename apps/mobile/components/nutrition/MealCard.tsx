@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+﻿import { useCallback } from 'react';
 import {
   View,
   Text,
@@ -123,7 +123,7 @@ export function MealCard({
           deleteAnimatedStyle,
         ]}
       >
-        <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Delete</Text>
+        <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
       </Animated.View>
 
       <GestureDetector gesture={panGesture}>

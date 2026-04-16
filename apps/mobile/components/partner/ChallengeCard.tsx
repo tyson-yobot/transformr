@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+﻿import { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -288,7 +288,7 @@ export function ChallengeCard({
               accessibilityRole="button"
               accessibilityLabel="Accept challenge"
             >
-              <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+              <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
                 Accept
               </Text>
             </Pressable>

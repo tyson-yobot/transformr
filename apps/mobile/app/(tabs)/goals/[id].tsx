@@ -50,11 +50,17 @@ interface AICoachResponse {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getMomentumLabel(updates: number): { label: string; color: string } {
-  if (updates >= 5) return { label: 'High Momentum', color: '#22c55e' };
-  if (updates >= 2) return { label: 'Building', color: '#f59e0b' };
-  if (updates >= 1) return { label: 'Just Started', color: '#a78bfa' };
-  return { label: 'Stalled', color: '#ef4444' };
+function getMomentumLabel(
+  updates: number,
+  successColor: string,
+  warningColor: string,
+  primaryLightColor: string,
+  dangerColor: string,
+): { label: string; color: string } {
+  if (updates >= 5) return { label: 'High Momentum', color: successColor };
+  if (updates >= 2) return { label: 'Building', color: warningColor };
+  if (updates >= 1) return { label: 'Just Started', color: primaryLightColor };
+  return { label: 'Stalled', color: dangerColor };
 }
 
 function predictCompletionDate(
@@ -185,7 +191,13 @@ export default function GoalDetailScreen() {
     return progressLogs.filter((l) => new Date(l.logged_at).getTime() >= cutoff);
   }, [progressLogs]);
 
-  const momentum = getMomentumLabel(updatesLast7.length);
+  const momentum = getMomentumLabel(
+    updatesLast7.length,
+    colors.accent.success,
+    colors.accent.warning,
+    colors.accent.primaryLight,
+    colors.accent.danger,
+  );
 
   const predictedDate = useMemo(
     () =>

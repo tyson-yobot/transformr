@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Supplement Management (Budget-Aware + Evidence)
 // Real data from user_supplements table. AI recommendations with evidence
 // badges, budget tracking, tier grouping, and daily logging.
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

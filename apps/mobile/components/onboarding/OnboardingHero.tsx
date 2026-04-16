@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- OnboardingHero
 // Hero image (top 40% of screen) with gradient fade into Deep Space (#0C0A15).
 // Dots progress overlay sits on top (rendered by _layout.tsx).
@@ -13,7 +13,7 @@ import { useTheme } from '@theme/index';
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const DEEP_SPACE = '#0C0A15';
+const DEEP_SPACE = '#0C0A15'; /* brand-ok */
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
 
 interface OnboardingHeroProps {
@@ -50,10 +50,10 @@ export function OnboardingHero({ imageUri, heading, subheading, style }: Onboard
 
       {/* Heading block */}
       <View style={{ paddingHorizontal: spacing.xxl, paddingTop: spacing.lg }}>
-        <Text style={[typography.h1, { color: '#F0F0FC', marginBottom: spacing.sm }]}>
+        <Text style={[typography.h1, { color: '#F0F0FC', marginBottom: spacing.sm }]}>{/* brand-ok — near-white on always-dark onboarding */}
           {heading}
         </Text>
-        <Text style={[typography.body, { color: '#9B8FC0', lineHeight: 22 }]}>
+        <Text style={[typography.body, { color: '#9B8FC0', lineHeight: 22 }]}>{/* brand-ok — muted lavender on always-dark onboarding */}
           {subheading}
         </Text>
       </View>

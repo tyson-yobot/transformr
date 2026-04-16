@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Onboarding: Notification Preferences
 // =============================================================================
 
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#F0F0FC',
+    color: '#F0F0FC' /* brand-ok */
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: 34,

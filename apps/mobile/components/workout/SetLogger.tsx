@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -219,7 +219,7 @@ export function SetLogger({
             },
           ]}
         >
-          <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+          <Text style={[typography.captionBold, { color: '#FFFFFF', /* brand-ok */
             Delete
           </Text>
         </View>

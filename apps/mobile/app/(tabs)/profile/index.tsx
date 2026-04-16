@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Profile & Settings Screen
 // =============================================================================
 
@@ -54,8 +54,11 @@ function AppearancePicker() {
         flexDirection: 'row',
         backgroundColor: colors.background.secondary,
         borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border.default,
         padding: 4,
         marginBottom: spacing.xs,
+        ...colors.shadow.card,
       }}
     >
       {THEME_OPTIONS.map((opt) => {
@@ -84,7 +87,7 @@ function AppearancePicker() {
             <Text
               style={[
                 typography.captionBold,
-                { color: active ? '#FFFFFF' : colors.text.secondary },
+                { color: active ? '#FFFFFF' : colors.text.secondary }, /* brand-ok */
               ]}
             >
               {opt.label}
@@ -480,7 +483,7 @@ export default function ProfileScreen() {
 
       {/* Stats Row */}
       <Animated.View entering={FadeInDown.delay(50).duration(400)}>
-        <Card variant="default" style={{ marginBottom: spacing.lg }}>
+        <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
           <View style={styles.statsGrid}>
             <StatBlock
               label="Workouts"
@@ -516,10 +519,11 @@ export default function ProfileScreen() {
               style={[
                 styles.toneOption,
                 {
-                  backgroundColor: colors.background.secondary,
-                  borderColor: isSelected ? colors.accent.primary : 'transparent',
+                  backgroundColor: isSelected ? colors.accent.primarySubtle : colors.background.secondary,
+                  borderColor: isSelected ? colors.accent.primary : colors.border.default,
                   borderRadius: 12,
                   marginBottom: spacing.xs,
+                  ...(isSelected ? colors.shadow.card : colors.shadow.cardSubtle),
                 },
               ]}
             >

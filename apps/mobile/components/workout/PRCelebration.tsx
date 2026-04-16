@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+﻿import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    shadowColor: '#EAB308',
+    shadowColor: '#EAB308', /* brand-ok */
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 60,

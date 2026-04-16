@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Entry Redirect + Branded Splash
 // =============================================================================
 
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#F0F0FC',
+    color: '#F0F0FC' /* brand-ok */
     letterSpacing: 8,
     textAlign: 'center',
     textShadowColor: 'rgba(138, 92, 246, 0.8)',
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 13,
-    color: '#9B8FC0',
+    color: '#9B8FC0' /* brand-ok */
     letterSpacing: 1.5,
     textAlign: 'center',
     lineHeight: 20,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 11,
-    color: '#6B5E8A',
+    color: '#6B5E8A' /* brand-ok */
     letterSpacing: 1,
   },
 });

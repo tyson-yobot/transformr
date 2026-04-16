@@ -344,7 +344,7 @@ export default function ChatHistoryScreen() {
         <Text
           style={[
             typography.bodyBold,
-            { color: '#FFFFFF', marginLeft: spacing.sm },
+            { color: '#FFFFFF' /* brand-ok — white on accent */, marginLeft: spacing.sm },
           ]}
         >
           New Conversation

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Dashboard Screen
 // =============================================================================
 
@@ -399,10 +399,10 @@ export default function DashboardScreen() {
   );
 
   const tierColors: Record<string, string> = {
-    bronze: '#CD7F32',
-    silver: '#C0C0C0',
+    bronze: '#CD7F32', /* brand-ok */
+    silver: '#C0C0C0', /* brand-ok */
     gold: colors.accent.gold,
-    diamond: '#B9F2FF',
+    diamond: '#B9F2FF', /* brand-ok */
   };
 
   if (initialLoading) {

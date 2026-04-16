@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Add Food Screen
 // =============================================================================
 
@@ -217,7 +217,7 @@ export default function AddFoodScreen() {
                   style={[
                     typography.caption,
                     {
-                      color: mealType === option.value ? '#FFFFFF' : colors.text.secondary,
+                      color: mealType === option.value ? '#FFFFFF' : colors.text.secondary, /* brand-ok */
                     },
                   ]}
                 >

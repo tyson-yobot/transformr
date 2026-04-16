@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR — Global Error Boundary (Expo Router)
 // =============================================================================
 
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
-    backgroundColor: '#0C0A15', // Deep Space brand background
+    backgroundColor: '#0C0A15', /* brand-ok */
   },
   emoji: {
     fontSize: 48,
@@ -47,25 +47,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#F0F0FC', // text.primary
+    color: '#F0F0FC', /* brand-ok */
     marginBottom: 12,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: '#6B5E8A', // text.muted
+    color: '#6B5E8A', /* brand-ok */
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
   },
   button: {
-    backgroundColor: '#A855F7', // accent.primary
+    backgroundColor: '#A855F7', /* brand-ok */
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
   },
   buttonText: {
-    color: '#F0F0FC', // text.primary
+    color: '#F0F0FC', /* brand-ok */
     fontWeight: '600',
     fontSize: 16,
   },

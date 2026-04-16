@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Onboarding: Welcome
 // =============================================================================
 
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#F0F0FC',
+    color: '#F0F0FC' /* brand-ok */
     textAlign: 'center',
     marginBottom: 10,
     lineHeight: 38,

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+﻿import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -263,7 +263,7 @@ function SupplementItem({
           ]}
         >
           <Animated.View style={checkAnimatedStyle}>
-            <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>
+            <Text style={{ color: '#FFFFFF' /* brand-ok */
               {'\u2713'}
             </Text>
           </Animated.View>

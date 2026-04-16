@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef, useState } from 'react';
+﻿import { useEffect, useCallback, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   toastItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,

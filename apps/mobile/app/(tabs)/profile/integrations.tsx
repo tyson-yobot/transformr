@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Integrations Screen
 // =============================================================================
 
@@ -51,7 +51,7 @@ const INTEGRATIONS: Integration[] = [
     icon: '🎵',
     description: 'Play workout playlists and auto-generate gym mixes',
     connectedKey: 'spotify',
-    color: '#1DB954',
+    color: '#1DB954', /* brand-ok */
   },
   {
     id: 'stripe',
@@ -59,7 +59,7 @@ const INTEGRATIONS: Integration[] = [
     icon: '💳',
     description: 'Track revenue automatically and power stake goals',
     connectedKey: 'stripe',
-    color: '#635BFF',
+    color: '#635BFF', /* brand-ok */
   },
   {
     id: 'appleWatch',
@@ -67,7 +67,7 @@ const INTEGRATIONS: Integration[] = [
     icon: '⌚',
     description: 'Heart rate, activity rings, and workout tracking',
     connectedKey: 'appleWatch',
-    color: '#FF375F',
+    color: '#FF375F', /* brand-ok */
   },
   {
     id: 'appleHealth',
@@ -75,7 +75,7 @@ const INTEGRATIONS: Integration[] = [
     icon: '❤️',
     description: 'Sync steps, sleep, heart rate, and workouts',
     connectedKey: 'appleHealth',
-    color: '#FF2D55',
+    color: '#FF2D55', /* brand-ok */
   },
   {
     id: 'googleFit',
@@ -83,7 +83,7 @@ const INTEGRATIONS: Integration[] = [
     icon: '🏃',
     description: 'Activity tracking and health metrics sync',
     connectedKey: 'googleFit',
-    color: '#4285F4',
+    color: '#4285F4', /* brand-ok */
   },
 ];
 

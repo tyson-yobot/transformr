@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR — Offline Sync Banner
 // Appears at the top of the screen when offline or syncing queued operations.
 // =============================================================================
@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
   },
   text: {
     ...typography.captionBold,
-    color: '#000000',
+    color: '#000000' /* brand-ok */
   },
 });

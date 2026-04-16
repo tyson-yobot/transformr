@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+﻿import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -212,7 +212,7 @@ export function FormCheckRecorder({
             },
           ]}
         >
-          <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+          <Text style={[typography.bodyBold, { color: '#FFFFFF', /* brand-ok */
             Grant Permission
           </Text>
         </Pressable>
@@ -267,7 +267,7 @@ export function FormCheckRecorder({
               },
             ]}
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF', /* brand-ok */
               Submit for Analysis
             </Text>
           </Pressable>
@@ -321,7 +321,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+              <Text style={[typography.captionBold, { color: '#FFFFFF', /* brand-ok */
                 {recordingSeconds}s / {maxDurationSeconds}s
               </Text>
             </View>
@@ -340,7 +340,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+              <Text style={[typography.captionBold, { color: '#FFFFFF', /* brand-ok */
                 {'\u2715'}
               </Text>
             </Pressable>
@@ -354,7 +354,7 @@ export function FormCheckRecorder({
               style={{
                 fontSize: 72,
                 fontWeight: '900',
-                color: '#FFFFFF',
+                color: '#FFFFFF', /* brand-ok */
                 textShadowColor: 'rgba(0,0,0,0.5)',
                 textShadowOffset: { width: 0, height: 2 },
                 textShadowRadius: 8,

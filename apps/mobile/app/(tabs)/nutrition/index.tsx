@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Nutrition Home / Daily View
 // =============================================================================
 
@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

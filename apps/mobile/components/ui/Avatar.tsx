@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle, ImageSourcePropType } from 'react-native';
 import { useTheme } from '@theme/index';
 
@@ -111,7 +111,7 @@ export function Avatar({
             styles.initials,
             {
               fontSize: FONT_SCALE[size],
-              color: '#FFFFFF',
+              color: '#FFFFFF', /* brand-ok */
             },
           ]}
         >

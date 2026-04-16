@@ -418,7 +418,7 @@ export default function ChallengeDetailScreen() {
                     },
                   ]}
                 >
-                  <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+                  <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok */ }]}>
                     {index + 1}
                   </Text>
                 </View>

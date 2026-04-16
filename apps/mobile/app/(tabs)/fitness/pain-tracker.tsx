@@ -38,33 +38,36 @@ interface BodyPart {
   y: number; // percent from top
 }
 
+// x,y are % of the body map container.
+// Icon (300dp) centered at left=50%, top=3% of 440dp container → icon bottom ~71%.
+// Dot coordinates scaled so body fills icon bounds (y: 5%→71%).
 const BODY_PARTS: BodyPart[] = [
-  { id: 'head', label: 'Head', x: 50, y: 5 },
-  { id: 'neck', label: 'Neck', x: 50, y: 12 },
-  { id: 'left_shoulder', label: 'Left Shoulder', x: 30, y: 18 },
-  { id: 'right_shoulder', label: 'Right Shoulder', x: 70, y: 18 },
+  { id: 'head', label: 'Head', x: 50, y: 6 },
+  { id: 'neck', label: 'Neck', x: 50, y: 13 },
+  { id: 'left_shoulder', label: 'Left Shoulder', x: 33, y: 18 },
+  { id: 'right_shoulder', label: 'Right Shoulder', x: 67, y: 18 },
   { id: 'chest', label: 'Chest', x: 50, y: 24 },
   { id: 'upper_back', label: 'Upper Back', x: 50, y: 22 },
-  { id: 'left_bicep', label: 'Left Bicep', x: 22, y: 28 },
-  { id: 'right_bicep', label: 'Right Bicep', x: 78, y: 28 },
-  { id: 'core', label: 'Core/Abs', x: 50, y: 34 },
-  { id: 'lower_back', label: 'Lower Back', x: 50, y: 38 },
-  { id: 'left_hip', label: 'Left Hip', x: 35, y: 44 },
-  { id: 'right_hip', label: 'Right Hip', x: 65, y: 44 },
-  { id: 'left_quad', label: 'Left Quad', x: 38, y: 56 },
-  { id: 'right_quad', label: 'Right Quad', x: 62, y: 56 },
-  { id: 'left_hamstring', label: 'Left Hamstring', x: 38, y: 62 },
-  { id: 'right_hamstring', label: 'Right Hamstring', x: 62, y: 62 },
-  { id: 'left_knee', label: 'Left Knee', x: 38, y: 68 },
-  { id: 'right_knee', label: 'Right Knee', x: 62, y: 68 },
-  { id: 'left_calf', label: 'Left Calf', x: 38, y: 78 },
-  { id: 'right_calf', label: 'Right Calf', x: 62, y: 78 },
-  { id: 'left_ankle', label: 'Left Ankle', x: 38, y: 88 },
-  { id: 'right_ankle', label: 'Right Ankle', x: 62, y: 88 },
-  { id: 'left_wrist', label: 'Left Wrist', x: 16, y: 40 },
-  { id: 'right_wrist', label: 'Right Wrist', x: 84, y: 40 },
-  { id: 'left_elbow', label: 'Left Elbow', x: 18, y: 34 },
-  { id: 'right_elbow', label: 'Right Elbow', x: 82, y: 34 },
+  { id: 'left_bicep', label: 'Left Bicep', x: 24, y: 27 },
+  { id: 'right_bicep', label: 'Right Bicep', x: 76, y: 27 },
+  { id: 'core', label: 'Core/Abs', x: 50, y: 33 },
+  { id: 'lower_back', label: 'Lower Back', x: 50, y: 36 },
+  { id: 'left_hip', label: 'Left Hip', x: 37, y: 42 },
+  { id: 'right_hip', label: 'Right Hip', x: 63, y: 42 },
+  { id: 'left_quad', label: 'Left Quad', x: 40, y: 51 },
+  { id: 'right_quad', label: 'Right Quad', x: 60, y: 51 },
+  { id: 'left_hamstring', label: 'Left Hamstring', x: 40, y: 56 },
+  { id: 'right_hamstring', label: 'Right Hamstring', x: 60, y: 56 },
+  { id: 'left_knee', label: 'Left Knee', x: 40, y: 61 },
+  { id: 'right_knee', label: 'Right Knee', x: 60, y: 61 },
+  { id: 'left_calf', label: 'Left Calf', x: 40, y: 66 },
+  { id: 'right_calf', label: 'Right Calf', x: 60, y: 66 },
+  { id: 'left_ankle', label: 'Left Ankle', x: 40, y: 71 },
+  { id: 'right_ankle', label: 'Right Ankle', x: 60, y: 71 },
+  { id: 'left_wrist', label: 'Left Wrist', x: 17, y: 38 },
+  { id: 'right_wrist', label: 'Right Wrist', x: 83, y: 38 },
+  { id: 'left_elbow', label: 'Left Elbow', x: 19, y: 32 },
+  { id: 'right_elbow', label: 'Right Elbow', x: 81, y: 32 },
 ];
 
 const PAIN_TYPES: { value: PainType; label: string; icon: string }[] = [
@@ -258,7 +261,7 @@ export default function PainTrackerScreen() {
               },
             ]}
           >
-            {/* Body silhouette outline */}
+            {/* Body silhouette outline — centered horizontally */}
             <View style={styles.bodyOutline}>
               <Ionicons name="body" size={300} color={`${colors.text.muted}30`} />
             </View>
@@ -566,8 +569,9 @@ const styles = StyleSheet.create({
   },
   bodyOutline: {
     position: 'absolute',
-    top: '5%',
-    left: '25%',
+    top: '3%',
+    left: '50%',
+    marginLeft: -150,
     opacity: 0.5,
   },
   bodyPartDot: {

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR — Coachmark (First-Run Spotlight Tour)
 // Shows a spotlight highlight with tooltip on the first visit to complex screens.
 // Dismissed state persisted to MMKV — never shown again on that screen.
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     right: 20,
     borderWidth: 1,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,

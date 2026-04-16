@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
@@ -148,7 +148,7 @@ export function Timer({
             accessibilityRole="button"
             accessibilityLabel="Start timer"
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Start</Text>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
           </Pressable>
         )}
         {timerState === 'running' && (
@@ -166,7 +166,7 @@ export function Timer({
             accessibilityRole="button"
             accessibilityLabel="Pause timer"
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Pause</Text>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
           </Pressable>
         )}
         {timerState === 'paused' && (
@@ -185,7 +185,7 @@ export function Timer({
               accessibilityRole="button"
               accessibilityLabel="Resume timer"
             >
-              <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Resume</Text>
+              <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
             </Pressable>
             <Pressable
               onPress={reset}

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // TRANSFORMR -- Mobility & Recovery Screen
 // =============================================================================
 
@@ -519,7 +519,7 @@ export default function MobilityScreen() {
                             typography.tiny,
                             {
                               color:
-                                idx === activeExerciseIndex ? '#FFFFFF' : colors.text.muted,
+                                idx === activeExerciseIndex ? '#FFFFFF' : colors.text.muted, /* brand-ok */
                             },
                           ]}
                         >

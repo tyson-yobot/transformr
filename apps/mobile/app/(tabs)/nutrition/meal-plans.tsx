@@ -212,7 +212,7 @@ export default function MealPlansScreen() {
                   },
                 ]}
               >
-                <Text style={[typography.captionBold, { color: isSelected ? '#FFFFFF' : colors.text.primary }]}>
+                <Text style={[typography.captionBold, { color: isSelected ? '#FFFFFF' : colors.text.primary }]}>{/* brand-ok — white on accent */}
                   {day.dayShort}
                 </Text>
                 <Text style={[typography.monoCaption, { color: isSelected ? 'rgba(255,255,255,0.7)' : colors.text.muted, marginTop: 4, fontSize: 10 }]}>

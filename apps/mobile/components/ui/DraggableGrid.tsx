@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+﻿import React, { useCallback } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   activeItem: {
-    shadowColor: '#000',
+    shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,

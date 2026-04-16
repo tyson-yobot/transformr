@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+﻿import { useCallback } from 'react';
 import { View, Text, Image, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -79,7 +79,7 @@ export function PartnerCard({
               style={[styles.avatarImage, { borderRadius: borderRadius.full }]}
             />
           ) : (
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
               {initials}
             </Text>
           )}
