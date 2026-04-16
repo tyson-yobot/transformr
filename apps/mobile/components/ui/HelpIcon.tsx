@@ -129,12 +129,12 @@ export function HelpIcon({ content, size = 16, color, style }: HelpIconProps) {
                   },
                 ]}
               >
-                {content.learnMoreItems.map((item, i) => (
+                {content.learnMoreItems.map((item, i, arr) => (
                   <View
                     key={i}
                     style={[
                       styles.factRow,
-                      i < content.learnMoreItems.length - 1 && {
+                      i < arr.length - 1 && {
                         borderBottomWidth: StyleSheet.hairlineWidth,
                         borderBottomColor: colors.border.default,
                       },
