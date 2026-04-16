@@ -290,9 +290,10 @@ export default function HabitTracker() {
                   accessibilityLabel={`${isCompleted ? 'Completed' : 'Complete'} habit ${habit.name}`}
                 >
                   <Card
+                    variant={isCompleted ? 'success' : streak >= 7 ? 'fire' : 'default'}
                     style={
                       isCompleted
-                        ? { borderWidth: 1, borderColor: colors.accent.success }
+                        ? { backgroundColor: colors.accent.successSubtle }
                         : undefined
                     }
                   >

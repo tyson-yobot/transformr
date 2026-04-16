@@ -1,20 +1,37 @@
+// =============================================================================
+// TRANSFORMR -- Card Component
+// Purple Ambient Glow System — variant-aware card with shadow tokens
+// =============================================================================
+
 import React, { useCallback } from 'react';
 import {
   View,
-  Text,
-  Pressable,
   StyleSheet,
   ViewStyle,
+  StyleProp,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
-type CardVariant = 'default' | 'elevated' | 'outlined' | 'featured' | 'ai';
+export type CardVariant =
+  | 'default'   // Subtle purple glow — standard content cards
+  | 'elevated'  // Strong glow — hero / featured cards
+  | 'ai'        // Cyan accent — AI-generated content
+  | 'success'   // Green accent — completion / achievement cards
+  | 'fire'      // Orange accent — streak cards
+  | 'gold'      // Amber accent — PR / milestone cards
+  | 'partner'   // Pink accent — partner feature cards
+  | 'danger'    // Red accent — warning / missed cards
+  | 'flat'      // No glow — nested / inline cards only
+  // Legacy variants kept for backwards compatibility:
+  | 'outlined'
+  | 'featured';
 
 interface CardProps {
   children: React.ReactNode;
@@ -22,7 +39,10 @@ interface CardProps {
   header?: React.ReactNode;
   footer?: React.ReactNode;
   onPress?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  padding?: number;
+  borderAccent?: boolean;
+  headerGradient?: boolean;
   accessibilityLabel?: string;
   accessibilityRole?: string;
 }
@@ -36,6 +56,9 @@ export function Card({
   footer,
   onPress,
   style,
+  padding,
+  borderAccent = false,
+  headerGradient = false,
   accessibilityLabel,
   accessibilityRole: _accessibilityRole,
 }: CardProps) {
@@ -58,75 +81,69 @@ export function Card({
 
   const handlePress = useCallback(() => {
     if (!onPress) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   }, [onPress]);
 
-  const getVariantStyle = (): ViewStyle => {
-    const base: ViewStyle = {
-      backgroundColor: colors.background.secondary,
-      borderRadius: borderRadius.lg,
-      padding: spacing.lg,
-    };
+  const effectivePadding = padding ?? spacing.lg;
 
-    switch (variant) {
-      case 'default':
-        return base;
-      case 'elevated':
-        return {
-          ...base,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 6,
-        };
-      case 'outlined':
-        return {
-          ...base,
-          backgroundColor: 'transparent',
-          borderWidth: 1,
-          borderColor: colors.border.default,
-        };
-      case 'featured':
-        return {
-          ...base,
-          borderWidth: 1.5,
-          borderColor: colors.border.glow,
-          shadowColor: colors.accent.purpleGlow,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.6,
-          shadowRadius: 16,
-          elevation: 8,
-        };
-      case 'ai':
-        return {
-          ...base,
-          borderWidth: 1,
-          borderColor: 'rgba(168,85,247,0.15)',
-          borderLeftWidth: 3,
-          borderLeftColor: colors.accent.cyan,
-        };
-    }
+  const variantStyle = getVariantStyle(variant, colors);
+  const borderAccentStyle: ViewStyle = borderAccent
+    ? { borderLeftWidth: 3, borderLeftColor: variantStyle.accentColor }
+    : {};
+
+  const containerStyle: ViewStyle = {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.lg,
+    padding: effectivePadding,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    ...variantStyle.shadow,
+    ...borderAccentStyle,
   };
-
-  const variantStyle = getVariantStyle();
 
   const content = (
     <>
-      {variant === 'ai' && (
-        <View style={[styles.aiBadge, { backgroundColor: colors.accent.cyanDim, borderRadius: borderRadius.sm }]}>
-          <Text style={{ fontSize: 10, fontWeight: '700', color: colors.accent.cyan, letterSpacing: 0.5 }}>AI</Text>
-        </View>
+      {headerGradient && (
+        <View
+          style={[
+            styles.headerGradient,
+            {
+              backgroundColor: variantStyle.glowColor,
+              borderTopLeftRadius: borderRadius.lg,
+              borderTopRightRadius: borderRadius.lg,
+            },
+          ]}
+        />
       )}
       {header && (
-        <View style={[styles.section, { marginBottom: spacing.md, paddingBottom: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border.subtle }]}>
+        <View
+          style={[
+            styles.section,
+            {
+              marginBottom: spacing.md,
+              paddingBottom: spacing.md,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border.subtle,
+            },
+          ]}
+        >
           {header}
         </View>
       )}
       <View style={styles.body}>{children}</View>
       {footer && (
-        <View style={[styles.section, { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border.subtle }]}>
+        <View
+          style={[
+            styles.section,
+            {
+              marginTop: spacing.md,
+              paddingTop: spacing.md,
+              borderTopWidth: 1,
+              borderTopColor: colors.border.subtle,
+            },
+          ]}
+        >
           {footer}
         </View>
       )}
@@ -139,7 +156,7 @@ export function Card({
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={[variantStyle, animatedStyle, style]}
+        style={[containerStyle, animatedStyle, style]}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
       >
@@ -149,21 +166,146 @@ export function Card({
   }
 
   return (
-    <View style={[variantStyle, style]}>
+    <View style={[containerStyle, style]}>
       {content}
     </View>
   );
 }
 
+// -----------------------------------------------------------------------------
+// Variant resolver — returns shadow + accent color + glow overlay color
+// -----------------------------------------------------------------------------
+
+interface VariantStyle {
+  shadow:      ViewStyle;
+  accentColor: string;
+  glowColor:   string;
+}
+
+function getVariantStyle(
+  variant: CardVariant,
+  colors: ReturnType<typeof useTheme>['colors'],
+): VariantStyle {
+  switch (variant) {
+    case 'elevated':
+    case 'featured':
+      return {
+        shadow:      colors.shadow.cardStrong,
+        accentColor: colors.accent.primary,
+        glowColor:   colors.glow.purple,
+      };
+
+    case 'ai':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.cyan,
+          shadowOffset:   { width: 0, height: 4 },
+          shadowOpacity:  0.18,
+          shadowRadius:   16,
+          elevation:      8,
+        },
+        accentColor: colors.accent.cyan,
+        glowColor:   colors.glow.cyan,
+      };
+
+    case 'success':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.success,
+          shadowOffset:   { width: 0, height: 2 },
+          shadowOpacity:  0.14,
+          shadowRadius:   8,
+          elevation:      4,
+        },
+        accentColor: colors.accent.success,
+        glowColor:   colors.glow.success,
+      };
+
+    case 'fire':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.fire,
+          shadowOffset:   { width: 0, height: 2 },
+          shadowOpacity:  0.14,
+          shadowRadius:   8,
+          elevation:      4,
+        },
+        accentColor: colors.accent.fire,
+        glowColor:   colors.glow.fire,
+      };
+
+    case 'gold':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.gold,
+          shadowOffset:   { width: 0, height: 4 },
+          shadowOpacity:  0.18,
+          shadowRadius:   16,
+          elevation:      8,
+        },
+        accentColor: colors.accent.gold,
+        glowColor:   colors.glow.gold,
+      };
+
+    case 'partner':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.pink,
+          shadowOffset:   { width: 0, height: 4 },
+          shadowOpacity:  0.18,
+          shadowRadius:   16,
+          elevation:      8,
+        },
+        accentColor: colors.accent.pink,
+        glowColor:   colors.glow.pink,
+      };
+
+    case 'danger':
+      return {
+        shadow: {
+          shadowColor:    colors.accent.danger,
+          shadowOffset:   { width: 0, height: 2 },
+          shadowOpacity:  0.12,
+          shadowRadius:   8,
+          elevation:      4,
+        },
+        accentColor: colors.accent.danger,
+        glowColor:   colors.glow.danger,
+      };
+
+    case 'flat':
+      return {
+        shadow:      {},
+        accentColor: colors.border.default,
+        glowColor:   'transparent',
+      };
+
+    case 'outlined':
+      return {
+        shadow:      {},
+        accentColor: colors.border.default,
+        glowColor:   'transparent',
+      };
+
+    // default — subtle purple glow
+    default:
+      return {
+        shadow:      colors.shadow.cardSubtle,
+        accentColor: colors.accent.primary,
+        glowColor:   colors.glow.purpleSoft,
+      };
+  }
+}
+
 const styles = StyleSheet.create({
-  section: {},
-  body: {},
-  aiBadge: {
+  section:        {},
+  body:           {},
+  headerGradient: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    zIndex: 1,
+    top:      0,
+    left:     0,
+    right:    0,
+    height:   60,
+    opacity:  0.6,
   },
 });

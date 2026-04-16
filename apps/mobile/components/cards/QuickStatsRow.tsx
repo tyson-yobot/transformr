@@ -8,8 +8,11 @@ interface StatItem {
   icon: React.ReactNode;
   label: string;
   value: string;
+  valueNode?: React.ReactNode;
   trend?: TrendDirection;
   trendValue?: string;
+  glowColor?: string;
+  accentColor?: string;
 }
 
 interface QuickStatsRowProps {
@@ -47,6 +50,9 @@ function TrendIndicator({
 function StatCell({ item }: { item: StatItem }) {
   const { colors, typography, spacing, borderRadius } = useTheme();
 
+  const shadowColor = item.glowColor ?? colors.accent.primary;
+  const valueColor  = item.accentColor ?? colors.text.primary;
+
   return (
     <View
       style={[
@@ -56,6 +62,11 @@ function StatCell({ item }: { item: StatItem }) {
           borderRadius: borderRadius.md,
           paddingVertical: spacing.md,
           paddingHorizontal: spacing.sm,
+          shadowColor,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.20,
+          shadowRadius: 10,
+          elevation: 5,
         },
       ]}
       accessibilityLabel={`${item.label}: ${item.value}`}
@@ -63,20 +74,16 @@ function StatCell({ item }: { item: StatItem }) {
       <View style={[styles.iconWrap, { marginBottom: spacing.xs }]}>
         {item.icon}
       </View>
+      {item.valueNode ?? (
+        <Text
+          style={[typography.monoBody, { color: valueColor }]}
+          numberOfLines={1}
+        >
+          {item.value}
+        </Text>
+      )}
       <Text
-        style={[
-          typography.monoBody,
-          { color: colors.text.primary },
-        ]}
-        numberOfLines={1}
-      >
-        {item.value}
-      </Text>
-      <Text
-        style={[
-          typography.tiny,
-          { color: colors.text.muted, marginTop: 2 },
-        ]}
+        style={[typography.tiny, { color: colors.text.muted, marginTop: 2 }]}
         numberOfLines={1}
       >
         {item.label}

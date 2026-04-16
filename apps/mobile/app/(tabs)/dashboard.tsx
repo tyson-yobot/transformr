@@ -351,34 +351,51 @@ export default function DashboardScreen() {
   }, []);
 
   // Quick stats
+  const readinessColor = readinessScoreDisplay == null
+    ? colors.text.muted
+    : readinessScoreDisplay >= 75
+      ? colors.accent.success
+      : readinessScoreDisplay >= 50
+        ? colors.accent.warning
+        : colors.accent.danger;
+
   const quickStats = useMemo(
     () => [
       {
         icon: <Text style={{ fontSize: 18 }}>🔥</Text>,
         label: 'Streak',
-        valueNode: <MonoText variant="monoBody">{currentStreak !== null ? `${currentStreak}d` : '—'}</MonoText>,
+        valueNode: <MonoText variant="monoBody" color={colors.accent.fire}>{currentStreak !== null ? `${currentStreak}d` : '—'}</MonoText>,
         value: currentStreak !== null ? `${currentStreak}d` : '—',
+        glowColor: colors.accent.fire,
+        accentColor: colors.accent.fire,
       },
       {
         icon: <Text style={{ fontSize: 18 }}>💪</Text>,
         label: 'Workouts',
-        valueNode: <MonoText variant="monoBody">{workoutsThisWeek}</MonoText>,
+        valueNode: <MonoText variant="monoBody" color={colors.accent.primary}>{String(workoutsThisWeek)}</MonoText>,
         value: String(workoutsThisWeek),
+        glowColor: colors.accent.primary,
+        accentColor: colors.accent.primary,
       },
       {
         icon: <Text style={{ fontSize: 18 }}>🍎</Text>,
         label: 'Calories',
-        valueNode: <MonoText variant="monoBody">{formatNumber(caloriesToday)}</MonoText>,
+        valueNode: <MonoText variant="monoBody" color={colors.accent.success}>{formatNumber(caloriesToday)}</MonoText>,
         value: formatNumber(caloriesToday),
+        glowColor: colors.accent.success,
+        accentColor: colors.accent.success,
       },
       {
         icon: <Text style={{ fontSize: 18 }}>⚡</Text>,
         label: 'Readiness',
-        valueNode: <MonoText variant="monoBody">{readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—'}</MonoText>,
+        valueNode: <MonoText variant="monoBody" color={readinessColor}>{readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—'}</MonoText>,
         value: readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—',
+        glowColor: readinessColor,
+        accentColor: readinessColor,
       },
     ],
-    [currentStreak, workoutsThisWeek, caloriesToday, readinessScoreDisplay],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentStreak, workoutsThisWeek, caloriesToday, readinessScoreDisplay, readinessColor],
   );
 
   const tierColors: Record<string, string> = {
@@ -456,14 +473,25 @@ export default function DashboardScreen() {
 
       {/* Quick Actions — placed here so they're always above the ChatFAB */}
       <Animated.View entering={FadeInDown.delay(30).duration(400)}>
-        <Card variant="default" style={{ marginBottom: spacing.lg }}>
+        <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
           <View ref={quickActionsRef} style={styles.quickActionsRow}>
             <Pressable
               onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
               accessibilityLabel="Log Workout"
               accessibilityRole="button"
               hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.primary + '15', borderColor: colors.accent.primary + '40' }]}
+              style={[
+                styles.quickActionBtn,
+                {
+                  backgroundColor: colors.accent.primarySubtle,
+                  borderColor: colors.accent.primary,
+                  shadowColor: colors.accent.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 12,
+                  elevation: 6,
+                },
+              ]}
             >
               <Text style={{ fontSize: 22 }}>💪</Text>
               <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs }]}>
@@ -475,7 +503,18 @@ export default function DashboardScreen() {
               accessibilityLabel="Log Meal"
               accessibilityRole="button"
               hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.success + '15', borderColor: colors.accent.success + '40' }]}
+              style={[
+                styles.quickActionBtn,
+                {
+                  backgroundColor: colors.accent.successSubtle,
+                  borderColor: colors.accent.success,
+                  shadowColor: colors.accent.success,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 12,
+                  elevation: 6,
+                },
+              ]}
             >
               <Text style={{ fontSize: 22 }}>🍽️</Text>
               <Text style={[typography.tiny, { color: colors.accent.success, textAlign: 'center', marginTop: spacing.xs }]}>
@@ -487,10 +526,21 @@ export default function DashboardScreen() {
               accessibilityLabel="Log Weight"
               accessibilityRole="button"
               hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.info + '15', borderColor: colors.accent.info + '40' }]}
+              style={[
+                styles.quickActionBtn,
+                {
+                  backgroundColor: colors.accent.cyanSubtle,
+                  borderColor: colors.accent.cyan,
+                  shadowColor: colors.accent.cyan,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 12,
+                  elevation: 6,
+                },
+              ]}
             >
               <Text style={{ fontSize: 22 }}>⚖️</Text>
-              <Text style={[typography.tiny, { color: colors.accent.info, textAlign: 'center', marginTop: spacing.xs }]}>
+              <Text style={[typography.tiny, { color: colors.accent.cyan, textAlign: 'center', marginTop: spacing.xs }]}>
                 Log Weight
               </Text>
             </Pressable>
@@ -505,9 +555,14 @@ export default function DashboardScreen() {
           style={{ marginBottom: spacing.md }}
         >
           <Card
+            variant="ai"
+            borderAccent
             style={{
-              borderLeftWidth: 3,
-              borderLeftColor: colors.accent.cyan,
+              shadowColor: colors.accent.cyan,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.20,
+              shadowRadius: 20,
+              elevation: 10,
             }}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -799,7 +854,7 @@ export default function DashboardScreen() {
       {partnerStore.partnerProfile && (
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <Card
-            variant="elevated"
+            variant="partner"
             style={{ marginBottom: spacing.lg }}
             onPress={() => {
               void hapticLight();

@@ -314,7 +314,7 @@ export default function NutritionHomeScreen() {
 
         {/* Macro Rings */}
         <View ref={macroRingsRef} onLayout={measureCoachmarks}>
-          <Card style={{ marginBottom: spacing.lg }}>
+          <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
             <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Macros</Text>
               <HelpIcon content={HELP.macroRings} size={13} />

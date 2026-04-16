@@ -27,7 +27,7 @@ interface ChatFABProps {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const SIZE = 60;
+const SIZE = 58;
 
 export function ChatFAB({ bottom = 96, right = 20, style, onPress }: ChatFABProps) {
   const { colors } = useTheme();
@@ -77,8 +77,8 @@ export function ChatFAB({ bottom = 96, right = 20, style, onPress }: ChatFABProp
         style={[
           styles.glow,
           {
-            backgroundColor: colors.accent.cyan,
-            shadowColor: colors.accent.cyan,
+            backgroundColor: colors.accent.primary,
+            shadowColor: colors.accent.primary,
           },
           glowStyle,
         ]}

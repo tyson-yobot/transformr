@@ -98,16 +98,15 @@ function AppearancePicker() {
 // ---------------------------------------------------------------------------
 // Section Header
 // ---------------------------------------------------------------------------
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title, danger = false }: { title: string; danger?: boolean }) {
   const { colors, typography, spacing } = useTheme();
   return (
     <Text
       style={[
-        typography.captionBold,
+        typography.sectionTitle,
         {
-          color: colors.text.muted,
+          color: danger ? colors.accent.danger : colors.accent.primary,
           textTransform: 'uppercase',
-          letterSpacing: 1.2,
           marginTop: spacing.xl,
           marginBottom: spacing.sm,
           marginLeft: spacing.xs,
@@ -129,6 +128,7 @@ interface SettingsRowProps {
   onPress?: () => void;
   rightElement?: React.ReactNode;
   danger?: boolean;
+  iconBg?: string;
   accessibilityLabel?: string;
 }
 
@@ -139,9 +139,12 @@ function SettingsRow({
   onPress,
   rightElement,
   danger = false,
+  iconBg,
   accessibilityLabel: a11yLabel,
 }: SettingsRowProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
+
+  const iconBackground = iconBg ?? (danger ? colors.accent.dangerSubtle : colors.accent.primarySubtle);
 
   const content = (
     <View
@@ -153,10 +156,23 @@ function SettingsRow({
           paddingVertical: spacing.md,
           paddingHorizontal: spacing.lg,
           marginBottom: spacing.xs,
+          ...colors.shadow.cardSubtle,
         },
       ]}
     >
-      <Text style={{ fontSize: 18, marginRight: spacing.md }}>{icon}</Text>
+      <View
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          backgroundColor: iconBackground,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: spacing.md,
+        }}
+      >
+        <Text style={{ fontSize: 16 }}>{icon}</Text>
+      </View>
       <Text
         style={[
           typography.body,
@@ -548,11 +564,13 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="🔔"
           label="Notification Settings"
+          iconBg={colors.accent.warningSubtle}
           onPress={() => router.push('/(tabs)/profile/notifications-settings')}
         />
         <SettingsRow
           icon="🎙️"
           label="Voice Commands"
+          iconBg={colors.accent.cyanSubtle}
           accessibilityLabel="Toggle voice commands"
           rightElement={
             <Toggle
@@ -564,6 +582,7 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="📖"
           label="Narrator"
+          iconBg={colors.accent.primarySubtle}
           accessibilityLabel="Toggle narrator"
           rightElement={
             <Toggle
@@ -590,31 +609,36 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="👫"
           label="Partner"
+          iconBg={colors.accent.pinkSubtle}
           onPress={() => router.push('/(tabs)/profile/partner')}
         />
         <SettingsRow
           icon="🏆"
           label="Achievements"
+          iconBg={colors.accent.goldSubtle}
           onPress={() => router.push('/(tabs)/profile/achievements')}
         />
         <SettingsRow
           icon="📊"
           label="Customize Dashboard"
+          iconBg={colors.accent.primarySubtle}
           onPress={() => router.push('/(tabs)/profile/dashboard-builder')}
         />
         <SettingsRow
           icon="📱"
           label="NFC Triggers"
+          iconBg={colors.accent.cyanSubtle}
           onPress={() => router.push('/(tabs)/profile/nfc-setup')}
         />
         <SettingsRow
           icon="🔗"
           label="Integrations"
+          iconBg={colors.accent.successSubtle}
           onPress={() => router.push('/(tabs)/profile/integrations')}
         />
       </Animated.View>
 
-      <SectionHeader title="Account" />
+      <SectionHeader title="Account" danger />
       <Animated.View entering={FadeInDown.delay(200).duration(400)}>
         <SettingsRow
           icon="✏️"
@@ -627,6 +651,7 @@ export default function ProfileScreen() {
         <SettingsRow
           icon="🔑"
           label="Change Password"
+          iconBg={colors.accent.warningSubtle}
           onPress={() => {
             hapticLight();
             const email = useAuthStore.getState().user?.email;

@@ -164,7 +164,10 @@ export function CountdownCard({
         {
           backgroundColor: colors.background.secondary,
           borderRadius: borderRadius.lg,
+          borderWidth: 1,
+          borderColor: colors.border.default,
           padding: spacing.lg,
+          ...colors.shadow.cardStrong,
           overflow: 'hidden',
         },
         style,

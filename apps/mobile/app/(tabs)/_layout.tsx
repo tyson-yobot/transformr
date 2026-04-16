@@ -2,7 +2,7 @@
 // TRANSFORMR -- Tab Navigator Layout
 // =============================================================================
 
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,12 +57,21 @@ export default function TabsLayout() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: colors.background.secondary,
-            borderTopColor: colors.border.subtle,
+            backgroundColor: colors.tab.bar,
+            borderTopColor: colors.tab.border,
             borderTopWidth: 1,
             height: tabBarHeight,
             paddingTop: spacing.sm,
             paddingBottom: insets.bottom,
+            ...Platform.select({
+              ios: {
+                shadowColor:   colors.accent.primary,
+                shadowOffset:  { width: 0, height: -4 },
+                shadowOpacity: 0.08,
+                shadowRadius:  12,
+              },
+              android: { elevation: 8 },
+            }),
           },
           tabBarShowLabel: false,
           tabBarActiveTintColor: colors.accent.primary,

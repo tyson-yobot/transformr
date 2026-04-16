@@ -25,6 +25,8 @@ export const typography = {
   monoBody: { fontSize: 15, fontWeight: '400' as const, lineHeight: 22, fontFamily: fontFamilies.mono },
   monoCaption: { fontSize: 13, fontWeight: '400' as const, lineHeight: 18, fontFamily: fontFamilies.mono },
   tiny: { fontSize: 11, fontWeight: '500' as const, lineHeight: 14, fontFamily: fontFamilies.body },
+  pageTitle: { fontSize: 28, fontWeight: '800' as const, letterSpacing: -0.8, lineHeight: 34, fontFamily: fontFamilies.heading },
+  sectionTitle: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 1.4, lineHeight: 16, fontFamily: fontFamilies.headingSemiBold },
 } as const satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
