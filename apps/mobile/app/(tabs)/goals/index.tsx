@@ -302,6 +302,58 @@ export default function GoalsDashboard() {
           </ScrollView>
         </Animated.View>
 
+        {/* Urgent deadline alert */}
+        {urgentGoals.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(350)}>
+            <View
+              style={[
+                styles.urgentBanner,
+                {
+                  backgroundColor: colors.accent.danger + '18',
+                  borderColor: colors.accent.danger + '60',
+                  borderRadius: borderRadius.md,
+                  padding: spacing.md,
+                  marginTop: spacing.lg,
+                },
+              ]}
+            >
+              <Text style={[typography.captionBold, { color: colors.accent.danger, marginBottom: spacing.xs }]}>
+                {urgentGoals.length === 1 ? '🔥 1 goal due in 3 days or less!' : `🔥 ${urgentGoals.length} goals due in 3 days or less!`}
+              </Text>
+              {urgentGoals.map((g) => (
+                <Text key={g.id} style={[typography.caption, { color: colors.text.primary }]} numberOfLines={1}>
+                  · {g.title} — {formatDate(g.target_date ?? '')}
+                </Text>
+              ))}
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Nudge for goals without deadlines */}
+        {goalsWithoutDate.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(370)}>
+            <View
+              style={[
+                styles.urgentBanner,
+                {
+                  backgroundColor: colors.accent.warning + '14',
+                  borderColor: colors.accent.warning + '50',
+                  borderRadius: borderRadius.md,
+                  padding: spacing.md,
+                  marginTop: spacing.sm,
+                },
+              ]}
+            >
+              <Text style={[typography.captionBold, { color: colors.accent.warning }]}>
+                {goalsWithoutDate.length} goal{goalsWithoutDate.length !== 1 ? 's have' : ' has'} no deadline set
+              </Text>
+              <Text style={[typography.tiny, { color: colors.text.secondary, marginTop: 2 }]}>
+                Tap "Set deadline" on each goal to hold yourself accountable.
+              </Text>
+            </View>
+          </Animated.View>
+        )}
+
         {/* Active Goals List */}
         <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
           {filteredGoals.map((goal, index) => {
@@ -355,15 +407,71 @@ export default function GoalsDashboard() {
                     </MonoText>
                   )}
 
-                  {goal.target_date && (
-                    <View style={[styles.deadlineRow, { marginTop: spacing.sm }]}>
-                      <MonoText variant="monoCaption" color={colors.text.muted}>
-                        {formatCountdown(goal.target_date).days}
-                      </MonoText>
-                      <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
-                        {formatCountdown(goal.target_date).label}
-                      </Text>
+                  {/* Deadline section — tap to edit, or set if missing */}
+                  {editingDeadline === goal.id ? (
+                    <View style={[styles.deadlineRow, { marginTop: spacing.sm, gap: spacing.sm }]}>
+                      <Input
+                        value={deadlineDraft}
+                        onChangeText={(t) => setDeadlineDraft(formatDateInput(t))}
+                        placeholder="MM/DD/YYYY"
+                        keyboardType="number-pad"
+                        maxLength={10}
+                        containerStyle={{ flex: 1 }}
+                        autoFocus
+                      />
+                      <Pressable
+                        onPress={() => handleSaveDeadline(goal.id)}
+                        style={[
+                          styles.deadlineSaveBtn,
+                          { backgroundColor: colors.accent.primary, borderRadius: borderRadius.sm },
+                        ]}
+                      >
+                        <Text style={[typography.captionBold, { color: '#fff' }]}>Save</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => { setEditingDeadline(null); setDeadlineDraft(''); }}
+                        style={[
+                          styles.deadlineSaveBtn,
+                          { backgroundColor: colors.background.tertiary, borderRadius: borderRadius.sm },
+                        ]}
+                      >
+                        <Text style={[typography.captionBold, { color: colors.text.secondary }]}>Cancel</Text>
+                      </Pressable>
                     </View>
+                  ) : goal.target_date ? (
+                    <Pressable
+                      onPress={() => handleStartEditDeadline(goal)}
+                      style={[styles.deadlineRow, { marginTop: spacing.sm }]}
+                      accessibilityLabel={`Edit deadline for ${goal.title}`}
+                    >
+                      <MonoText
+                        variant="monoCaption"
+                        color={
+                          formatCountdown(goal.target_date).days <= 3
+                            ? colors.accent.danger
+                            : formatCountdown(goal.target_date).days <= 7
+                              ? colors.accent.warning
+                              : colors.text.muted
+                        }
+                      >
+                        {formatCountdown(goal.target_date).days === 0
+                          ? 'Due today'
+                          : `${formatCountdown(goal.target_date).days} ${formatCountdown(goal.target_date).label}`}
+                      </MonoText>
+                      <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 6 }]}>
+                        · tap to edit
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      onPress={() => handleStartEditDeadline(goal)}
+                      style={[styles.deadlineRow, { marginTop: spacing.sm }]}
+                      accessibilityLabel={`Set deadline for ${goal.title}`}
+                    >
+                      <Text style={[typography.tiny, { color: colors.accent.primary }]}>
+                        + Set deadline
+                      </Text>
+                    </Pressable>
                   )}
                 </Card>
               </Animated.View>
@@ -524,6 +632,8 @@ const styles = StyleSheet.create({
   },
   deadlineRow: { flexDirection: 'row', alignItems: 'center' },
   deadlineItem: { flexDirection: 'row', alignItems: 'center' },
+  deadlineSaveBtn: { paddingHorizontal: 10, paddingVertical: 6 },
+  urgentBanner: { borderWidth: 1 },
   fab: {
     position: 'absolute',
     bottom: 24,
