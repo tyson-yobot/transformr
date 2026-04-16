@@ -4,18 +4,15 @@
 
 import { Stack } from 'expo-router';
 import { useTheme } from '@theme/index';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function NutritionLayout() {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <Stack
       screenOptions={{
         headerShown: true,
         headerStyle: { backgroundColor: colors.background.primary },
-        headerStatusBarHeight: insets.top,
         headerTintColor: colors.text.primary,
         headerTitleStyle: { fontWeight: '600', fontSize: 17 },
         headerShadowVisible: false,

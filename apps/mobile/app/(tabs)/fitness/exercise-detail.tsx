@@ -397,7 +397,6 @@ export default function ExerciseDetailScreen() {
           {
             backgroundColor: colors.background.primary,
             padding: spacing.lg,
-            paddingRight: 84,
             borderTopWidth: 1,
             borderTopColor: colors.border.subtle,
           },

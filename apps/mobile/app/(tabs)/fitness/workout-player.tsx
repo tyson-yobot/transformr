@@ -12,7 +12,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +26,7 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { MonoText } from '@components/ui/MonoText';
 import { NarratorCard } from '@components/workout/NarratorCard';
 import { useWorkout } from '@hooks/useWorkout';
+import { useNutritionStore } from '@stores/nutritionStore';
 import {
   formatTimerDisplay,
   formatRestTimer,
@@ -69,6 +70,7 @@ export default function WorkoutPlayerScreen() {
   const navigation = useNavigation();
   const { activeSession, logSetWithPRDetection, completeWorkout, getGhostData, isLoading } =
     useWorkout();
+  const logCaloriesBurned = useNutritionStore((s) => s.logCaloriesBurned);
 
   // Hide the tab bar while the workout player is focused
   useFocusEffect(
@@ -104,22 +106,24 @@ export default function WorkoutPlayerScreen() {
   const [currentReps, setCurrentReps] = useState('');
   const [currentRpe, setCurrentRpe] = useState(7);
   const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+
+  const { exerciseId: incomingExerciseId } = useLocalSearchParams<{ exerciseId?: string }>();
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Workout duration timer
+  // Workout duration timer — only runs when user taps the play button
   useEffect(() => {
-    if (activeSession) {
-      const startTime = activeSession.started_at ? new Date(activeSession.started_at).getTime() : Date.now();
+    if (activeSession && timerRunning) {
       timerRef.current = setInterval(() => {
-        setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+        setElapsedSeconds((prev) => prev + 1);
       }, 1000);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [activeSession]);
+  }, [activeSession, timerRunning]);
 
   // Rest timer
   useEffect(() => {
@@ -192,6 +196,47 @@ export default function WorkoutPlayerScreen() {
 
     loadExercises();
   }, [activeSession, getGhostData]);
+
+  // Handle exercise added from the library via "Add to Workout"
+  useEffect(() => {
+    if (!incomingExerciseId || loadingExercises) return;
+
+    const alreadyAdded = exercisesWithSets.some(
+      (e) => e.exercise.id === incomingExerciseId,
+    );
+    if (alreadyAdded) return;
+
+    const addExercise = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('exercises')
+          .select('*')
+          .eq('id', incomingExerciseId)
+          .single();
+        if (error || !data) return;
+
+        const ghostData = await getGhostData(data.id);
+        setExercisesWithSets((prev) => {
+          const newList = [
+            ...prev,
+            {
+              exercise: data as Exercise,
+              templateExercise: null,
+              loggedSets: [],
+              ghostSets: ghostData,
+            },
+          ];
+          setActiveExerciseIndex(newList.length - 1);
+          return newList;
+        });
+      } catch {
+        // Non-fatal — user can try adding again
+      }
+    };
+
+    void addExercise();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingExerciseId, loadingExercises]);
 
   const handleLogSet = useCallback(async () => {
     const weight = parseFloat(currentWeight);
@@ -328,6 +373,13 @@ export default function WorkoutPlayerScreen() {
       }
 
       await completeWorkout();
+
+      // Calculate and log estimated calories burned to nutrition
+      const durationMinutes = Math.round(elapsedSeconds / 60);
+      const estimatedCalories = Math.round(totalVolume * 0.05 + durationMinutes * 5);
+      if (estimatedCalories > 0) {
+        await logCaloriesBurned(estimatedCalories, activeSession?.name ?? 'Workout');
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save workout';
       Alert.alert('Save Failed', `${message}\n\nPlease try again.`);
@@ -382,6 +434,40 @@ export default function WorkoutPlayerScreen() {
             {totalSets} sets
           </Text>
         </View>
+        <Pressable
+          onPress={() => { setTimerRunning((prev) => !prev); hapticLight(); }}
+          accessibilityLabel={timerRunning ? 'Pause workout timer' : 'Start workout timer'}
+          accessibilityRole="button"
+          style={[
+            styles.topBarItem,
+            {
+              backgroundColor: timerRunning
+                ? `${colors.accent.danger}25`
+                : `${colors.accent.success}25`,
+              borderRadius: borderRadius.sm,
+              paddingHorizontal: spacing.sm,
+              paddingVertical: 4,
+            },
+          ]}
+        >
+          <Ionicons
+            name={timerRunning ? 'pause-circle' : 'play-circle'}
+            size={24}
+            color={timerRunning ? colors.accent.danger : colors.accent.success}
+          />
+          <Text
+            style={[
+              typography.tiny,
+              {
+                color: timerRunning ? colors.accent.danger : colors.accent.success,
+                marginLeft: 4,
+                fontWeight: '600',
+              },
+            ]}
+          >
+            {timerRunning ? 'Pause' : 'Start'}
+          </Text>
+        </Pressable>
       </View>
 
       {/* Rest Timer Overlay */}
@@ -512,6 +598,34 @@ export default function WorkoutPlayerScreen() {
                   )}
                 </Pressable>
               ))}
+              {/* Always-visible Add Exercise button */}
+              <Pressable
+                onPress={() => { router.push('/(tabs)/fitness/exercises' as never); hapticLight(); }}
+                accessibilityLabel="Add another exercise to workout"
+                accessibilityRole="button"
+                style={[
+                  styles.exerciseTab,
+                  {
+                    backgroundColor: `${colors.accent.primary}15`,
+                    borderRadius: borderRadius.md,
+                    paddingHorizontal: spacing.md,
+                    paddingVertical: spacing.sm,
+                    marginRight: spacing.sm,
+                    borderWidth: 1,
+                    borderColor: `${colors.accent.primary}60`,
+                  },
+                ]}
+              >
+                <Ionicons name="add" size={16} color={colors.accent.primary} />
+                <Text
+                  style={[
+                    typography.captionBold,
+                    { color: colors.accent.primary, marginLeft: 4 },
+                  ]}
+                >
+                  Add
+                </Text>
+              </Pressable>
             </ScrollView>
 
             {/* AI Coach Tip */}

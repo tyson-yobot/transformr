@@ -57,6 +57,7 @@ interface NutritionActions {
   fetchTodayNutrition: (dayOffset?: number) => Promise<void>;
   searchFoods: (query: string) => Promise<void>;
   getTodayMacros: () => MacroTotals;
+  logCaloriesBurned: (calories: number, workoutName: string) => Promise<void>;
   clearError: () => void;
   reset: () => void;
 }
@@ -309,6 +310,28 @@ export const useNutritionStore = create<NutritionStore>()((set, get) => ({
     totals.water_oz = waterLogs.reduce((sum, log) => sum + log.amount_oz, 0);
 
     return totals;
+  },
+
+  logCaloriesBurned: async (calories, workoutName) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('nutrition_logs').insert({
+        user_id: user.id,
+        food_name: `Workout: ${workoutName}`,
+        meal_type: 'exercise',
+        calories: -Math.abs(calories),
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        quantity: 1,
+        source: 'manual',
+        logged_at: new Date().toISOString(),
+      });
+    } catch {
+      // Non-fatal — calorie burn logging should never block workout completion
+    }
   },
 
   clearError: () => set({ error: null }),

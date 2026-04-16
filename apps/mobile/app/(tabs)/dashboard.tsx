@@ -654,11 +654,19 @@ export default function DashboardScreen() {
               unit="oz"
             />
             <View style={styles.statsCell}>
-              <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+              <Text
+                style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 Workout
               </Text>
               <Text style={{ fontSize: 20 }}>{workoutDoneToday ? '✅' : '⏳'}</Text>
-              <Text style={[typography.caption, { color: workoutDoneToday ? colors.accent.success : colors.text.muted }]}>
+              <Text
+                style={[typography.caption, { color: workoutDoneToday ? colors.accent.success : colors.text.muted }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
                 {workoutDoneToday ? 'Done' : 'Pending'}
               </Text>
             </View>
@@ -917,13 +925,21 @@ function StatsCell({
   const { colors, typography, spacing } = useTheme();
   return (
     <View style={styles.statsCell}>
-      <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+      <Text
+        style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {label}
       </Text>
-      <MonoText variant="monoBody" color={colors.text.primary}>
+      <MonoText variant="monoBody" color={colors.text.primary} numberOfLines={1} adjustsFontSizeToFit>
         {formatNumber(logged)}
       </MonoText>
-      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+      <Text
+        style={[typography.tiny, { color: colors.text.muted }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
         {`/ ${formatNumber(target)} ${unit}`}
       </Text>
     </View>
