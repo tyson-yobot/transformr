@@ -31,6 +31,7 @@ import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 
 interface RecentWorkout {
   id: string;
@@ -260,6 +261,7 @@ export default function FitnessHomeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
         refreshControl={

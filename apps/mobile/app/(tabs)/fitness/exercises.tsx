@@ -30,6 +30,8 @@ import { useWorkoutStore } from '@stores/workoutStore';
 import { hapticLight } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { Exercise } from '@app-types/database';
+import { MuscleGroupTile } from '@components/workout/MuscleGroupTile';
+import { ExerciseThumbnail } from '@components/workout/ExerciseThumbnail';
 
 type CategoryFilter = Exercise['category'] | 'all';
 type EquipmentFilter = Exercise['equipment'] | 'all';
@@ -50,6 +52,18 @@ const CATEGORIES: { value: CategoryFilter; label: string }[] = [
   { value: 'stretching', label: 'Stretching' },
   { value: 'mobility', label: 'Mobility' },
 ];
+
+const MUSCLE_GROUPS = [
+  { value: 'chest',     label: 'Chest' },
+  { value: 'back',      label: 'Back' },
+  { value: 'shoulders', label: 'Shoulders' },
+  { value: 'biceps',    label: 'Biceps' },
+  { value: 'triceps',   label: 'Triceps' },
+  { value: 'abs',       label: 'Abs' },
+  { value: 'legs',      label: 'Legs' },
+  { value: 'glutes',    label: 'Glutes' },
+  { value: 'cardio',    label: 'Cardio' },
+] as const;
 
 const EQUIPMENT: { value: EquipmentFilter; label: string }[] = [
   { value: 'all', label: 'All Equipment' },
@@ -138,66 +152,38 @@ export default function ExercisesScreen() {
   const renderExerciseItem = useCallback(
     ({ item, index }: { item: Exercise; index: number }) => (
       <Animated.View entering={FadeInDown.duration(300).delay(index * 50)}>
-      <Card
-        style={{ marginBottom: spacing.sm }}
-        onPress={() => handleExercisePress(item)}
-        accessibilityLabel={`${item.name}, ${item.category ?? ''} exercise`}
-        accessibilityRole="button"
-      >
-        <View style={styles.exerciseRow}>
-          <View
-            style={[
-              styles.exerciseIcon,
-              {
-                backgroundColor: `${colors.accent.primary}15`,
-                borderRadius: borderRadius.sm,
-                width: 44,
-                height: 44,
-              },
-            ]}
-          >
-            <Ionicons name="barbell-outline" size={22} color={colors.accent.primary} />
-          </View>
-          <View style={[styles.exerciseInfo, { marginLeft: spacing.md }]}>
+        <Pressable
+          onPress={() => handleExercisePress(item)}
+          style={{
+            backgroundColor: colors.background.secondary,
+            borderRadius: borderRadius.lg,
+            marginBottom: spacing.sm,
+            padding: spacing.md,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={`${item.name}, ${item.category ?? ''} exercise`}
+        >
+          <ExerciseThumbnail muscleGroups={item.muscle_groups ?? []} category={item.category ?? undefined} size={44} />
+          <View style={{ flex: 1 }}>
             <Text style={[typography.bodyBold, { color: colors.text.primary }]} numberOfLines={1}>
               {item.name}
             </Text>
-            <View style={[styles.tagRow, { marginTop: spacing.xs, gap: spacing.xs }]}>
-              {item.category && (
-                <Badge label={item.category} size="sm" variant="info" />
-              )}
-              {item.equipment && (
-                <Badge label={item.equipment.replace(/_/g, ' ')} size="sm" />
-              )}
-              {item.difficulty && (
-                <Badge
-                  label={item.difficulty}
-                  size="sm"
-                  variant={
-                    item.difficulty === 'beginner'
-                      ? 'success'
-                      : item.difficulty === 'intermediate'
-                        ? 'warning'
-                        : 'danger'
-                  }
-                />
-              )}
-            </View>
             {(item.muscle_groups ?? []).length > 0 && (
-              <Text
-                style={[
-                  typography.tiny,
-                  { color: colors.text.muted, marginTop: spacing.xs },
-                ]}
-                numberOfLines={1}
-              >
-                {item.muscle_groups.join(', ')}
+              <Text style={[typography.caption, { color: colors.text.secondary, marginTop: 2 }]} numberOfLines={1}>
+                {item.muscle_groups.slice(0, 3).join(', ')}
               </Text>
             )}
+            <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, alignItems: 'center' }}>
+              {item.equipment && <Text style={[typography.tiny, { color: colors.text.muted }]}>{item.equipment}</Text>}
+              {item.equipment && item.difficulty && <Text style={[typography.tiny, { color: colors.text.muted }]}>·</Text>}
+              {item.difficulty && <Text style={[typography.tiny, { color: colors.text.muted }]}>{item.difficulty}</Text>}
+            </View>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
-        </View>
-      </Card>
+          <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+        </Pressable>
       </Animated.View>
     ),
     [colors, typography, spacing, borderRadius, handleExercisePress],
@@ -223,48 +209,19 @@ export default function ExercisesScreen() {
       </View>
 
       {/* Category Filter Chips */}
-      <View style={{ paddingTop: spacing.md }}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: spacing.lg }}
-        >
-          {CATEGORIES.map((item) => {
-            const isActive = item.value === selectedCategory;
-            return (
-              <Pressable
-                key={item.value ?? 'all'}
-                accessibilityLabel={`Filter by ${item.label}`}
-                accessibilityRole="button"
-                onPress={() => {
-                  setSelectedCategory(item.value);
-                  hapticLight();
-                }}
-                style={[
-                  styles.filterChip,
-                  {
-                    backgroundColor: isActive
-                      ? colors.accent.primary
-                      : colors.background.secondary,
-                    borderRadius: borderRadius.full,
-                    paddingHorizontal: spacing.md,
-                    paddingVertical: spacing.sm,
-                    marginRight: spacing.sm,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    typography.captionBold,
-                    { color: isActive ? colors.text.inverse : colors.text.secondary },
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      <View style={[styles.muscleGrid, { marginHorizontal: spacing.lg, marginBottom: spacing.sm }]}>
+        {MUSCLE_GROUPS.map((mg) => (
+          <MuscleGroupTile
+            key={mg.value}
+            muscleGroup={mg.value}
+            label={mg.label}
+            isSelected={selectedCategory === mg.value}
+            onPress={() => setSelectedCategory(
+              selectedCategory === mg.value ? 'all' : mg.value as CategoryFilter
+            )}
+            size={72}
+          />
+        ))}
       </View>
 
       {/* Equipment Filter */}
@@ -419,6 +376,12 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     alignItems: 'center',
+  },
+  muscleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
   },
   fab: {
     position: 'absolute',

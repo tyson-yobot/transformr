@@ -25,6 +25,8 @@ import { PredictionAlert } from '@components/cards/PredictionAlert';
 import { CountdownCard } from '@components/cards/CountdownCard';
 import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
+import { SkiaSparkline } from '@components/charts/SkiaSparkline';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { useProfileStore } from '@stores/profileStore';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { useNutritionStore } from '@stores/nutritionStore';
@@ -53,54 +55,11 @@ interface SparklinePoint {
   value: number;
 }
 
-function MiniSparkline({
-  data,
-  color,
-  width = 120,
-  height = 40,
-}: {
-  data: SparklinePoint[];
-  color: string;
-  width?: number;
-  height?: number;
+function MiniSparkline({ data, color, width = 120, height = 40 }: {
+  data: SparklinePoint[]; color: string; width?: number; height?: number;
 }) {
   if (data.length < 2) return null;
-
-  const values = data.map((d) => d.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-
-  // Render as simple text-based representation since we are keeping it lightweight
-  return (
-    <View style={{ width, height, justifyContent: 'center', alignItems: 'center' }}>
-      <View
-        style={{
-          width,
-          height,
-          flexDirection: 'row',
-          alignItems: 'flex-end',
-          gap: 2,
-        }}
-      >
-        {data.map((d, i) => {
-          const barHeight = Math.max(4, ((d.value - min) / range) * height);
-          return (
-            <View
-              key={i}
-              style={{
-                flex: 1,
-                height: barHeight,
-                backgroundColor: color,
-                borderRadius: 2,
-                opacity: 0.6 + (i / data.length) * 0.4,
-              }}
-            />
-          );
-        })}
-      </View>
-    </View>
-  );
+  return <SkiaSparkline data={data} color={color} width={width} height={height} strokeWidth={2} showFill animated />;
 }
 
 // ---------------------------------------------------------------------------
@@ -410,23 +369,25 @@ export default function DashboardScreen() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{
-        paddingTop: insets.top + spacing.md,
-        paddingBottom: insets.bottom + 100,
-        paddingHorizontal: spacing.lg,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.accent.primary}
-          colors={[colors.accent.primary]}
-        />
-      }
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <PurpleRadialBackground />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{
+          paddingTop: insets.top + spacing.md,
+          paddingBottom: insets.bottom + 100,
+          paddingHorizontal: spacing.lg,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.accent.primary}
+            colors={[colors.accent.primary]}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
       {/* Dashboard error banner */}
       {dashboardError && (
         <Pressable
@@ -1017,6 +978,7 @@ export default function DashboardScreen() {
       </Animated.View>
       <Coachmark screenKey={COACHMARK_KEYS.dashboard} steps={coachmarkSteps} />
     </ScrollView>
+    </View>
   );
 }
 

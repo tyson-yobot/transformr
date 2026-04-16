@@ -41,6 +41,7 @@ import { ProgressBar } from '@components/ui/ProgressBar';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { NutritionLog } from '@app-types/database';
 import { HelpIcon } from '@components/ui/HelpIcon';
+import { GlowCard } from '@components/ui/GlowCard';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
@@ -314,7 +315,7 @@ export default function NutritionHomeScreen() {
 
         {/* Macro Rings */}
         <View ref={macroRingsRef} onLayout={measureCoachmarks}>
-          <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+          <GlowCard intensity="subtle" animated style={{ marginBottom: spacing.lg }}>
             <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Macros</Text>
               <HelpIcon content={HELP.macroRings} size={13} />
@@ -410,7 +411,7 @@ export default function NutritionHomeScreen() {
                 </MonoText>
               </View>
             </View>
-          </Card>
+          </GlowCard>
         </View>
         {/* Calorie Progress Bar */}
         <View>

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Exercise Detail Screen
 // =============================================================================
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,9 @@ import { formatWeight, formatDate, formatSetDisplay } from '@utils/formatters';
 import { supabase } from '@services/supabase';
 import { useWorkoutStore } from '@stores/workoutStore';
 import type { Exercise, PersonalRecord, WorkoutSet } from '@app-types/database';
+import { BodyMap } from '@components/ui/BodyMap';
+import { musclesToBodyParts } from '@utils/muscleMapping';
+import type { BodyPart } from '@components/ui/BodyMap';
 
 interface RecentPerformance {
   date: string;
@@ -45,6 +48,11 @@ export default function ExerciseDetailScreen() {
   const [recentPerformance, setRecentPerformance] = useState<RecentPerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const primaryParts: BodyPart[] = useMemo(
+    () => (exercise ? musclesToBodyParts(exercise.muscle_groups ?? []) : []),
+    [exercise],
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -207,35 +215,21 @@ export default function ExerciseDetailScreen() {
         {/* Muscle Groups */}
         {(exercise.muscle_groups ?? []).length > 0 && (
           <Card style={{ marginBottom: spacing.lg }}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="body-outline" size={20} color={colors.accent.primary} />
-              <Text
-                style={[
-                  typography.h3,
-                  { color: colors.text.primary, marginLeft: spacing.sm },
-                ]}
-              >
-                Muscle Groups
-              </Text>
+            <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
+              Muscle Activation
+            </Text>
+            <View style={{ alignItems: 'center', marginBottom: spacing.lg }}>
+              <BodyMap mode="muscle" highlightPrimary={primaryParts} showBack size="md" />
             </View>
-            <View style={[styles.muscleGrid, { marginTop: spacing.md, gap: spacing.sm }]}>
-              {(exercise.muscle_groups ?? []).map((muscle) => (
-                <View
-                  key={muscle}
-                  style={[
-                    styles.muscleChip,
-                    {
-                      backgroundColor: `${colors.accent.primary}15`,
-                      borderRadius: borderRadius.full,
-                      paddingHorizontal: spacing.md,
-                      paddingVertical: spacing.sm,
-                    },
-                  ]}
-                >
-                  <Text style={[typography.captionBold, { color: colors.accent.primary }]}>
-                    {muscle}
-                  </Text>
-                </View>
+            <View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xs }}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.accent.primary }} />
+                <Text style={[typography.captionBold, { color: colors.text.secondary }]}>PRIMARY MUSCLES</Text>
+              </View>
+              {exercise.muscle_groups.map((m) => (
+                <Text key={m} style={[typography.body, { color: colors.text.primary, marginLeft: spacing.lg, marginBottom: 2 }]}>
+                  {m.replace(/_/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase())}
+                </Text>
               ))}
             </View>
           </Card>
