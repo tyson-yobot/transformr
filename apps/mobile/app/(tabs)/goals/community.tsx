@@ -14,6 +14,9 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -73,6 +76,13 @@ function getChallengeTypeLabel(type: string): string {
 
 export default function CommunityScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.communityScreen} />,
+    });
+  }, [navigation]);
 
   const [challenges, setChallenges] = useState<CommunityChallenge[]>([]);
   const [isLoading, setIsLoading] = useState(true);

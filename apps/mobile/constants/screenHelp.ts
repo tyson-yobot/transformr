@@ -193,4 +193,230 @@ export const SCREEN_HELP = {
     proTip: 'Export monthly and save to cloud storage. A year of transformation data is something worth keeping forever.',
   },
 
+  // ─── FITNESS SCREENS ───────────────────────────────────────────────────────
+
+  exercisesLibrary: {
+    title: 'Exercise Library',
+    body: 'Browse and search over 500 exercises with instructions, muscle group targets, and difficulty ratings. Tap any exercise to see form cues and add it to your workout.',
+    learnMoreItems: [
+      { label: 'Filter by muscle', value: 'Target specific muscle groups' },
+      { label: 'Filter by equipment', value: 'Bodyweight, barbell, dumbbell, machine' },
+      { label: 'Add to workout', value: 'Tap + to add directly to your active session' },
+    ],
+    proTip: 'Save your favorites by tapping the bookmark icon. They\'ll appear at the top of search results.',
+  },
+
+  exerciseDetail: {
+    title: 'Exercise Detail',
+    body: 'Full instructions, target muscles, difficulty rating, and your personal history for this exercise — including your all-time PRs and recent performance trend.',
+    learnMoreItems: [
+      { label: 'PR history', value: 'Your best weight, reps, and estimated 1RM ever logged' },
+      { label: 'Muscle diagram', value: 'Primary and secondary muscles worked' },
+      { label: 'Form cues', value: 'Key technique points to watch during the set' },
+    ],
+    proTip: 'Review your history before attempting a PR. Knowing your trend helps you set a realistic target.',
+  },
+
+  progressScreen: {
+    title: 'Progress Tracking',
+    body: 'Your full transformation history — body measurements, strength trends, and visual progress over time. Charts update automatically as you log.',
+    learnMoreItems: [
+      { label: 'Weight chart', value: 'Bodyweight over time vs your goal weight' },
+      { label: 'Strength curves', value: 'Best lifts per exercise over time' },
+      { label: 'Measurements', value: 'Chest, waist, arms, and more' },
+    ],
+    proTip: 'Track measurements every 4 weeks. Daily weight fluctuates too much to be meaningful.',
+  },
+
+  programsScreen: {
+    title: 'Training Programs',
+    body: 'Structured multi-week training plans with progressive overload built in. Follow a program instead of random workouts — it produces 3x better results.',
+    learnMoreItems: [
+      { label: 'Beginner programs', value: '3-day full body — builds foundation' },
+      { label: 'Intermediate', value: '4-day upper/lower splits' },
+      { label: 'Advanced', value: '5-6 day PPL and specialization programs' },
+    ],
+    proTip: 'Run a full 8–12 week program before switching. Results compound in the last 4 weeks.',
+  },
+
+  formCheckScreen: {
+    title: 'AI Form Check',
+    body: 'Record a set and your AI coach analyzes your technique — identifying form breakdowns, compensations, and injury risks before they become problems.',
+    proTip: 'Film from the side for deadlifts and squats. Front angle works best for pressing movements.',
+  },
+
+  painTrackerScreen: {
+    title: 'Pain & Soreness Tracker',
+    body: 'Log any pain or soreness so your AI coach can adjust your training load and flag patterns that predict injury. Tap the body map to mark the location.',
+    learnMoreItems: [
+      { label: 'Pain 1–3', value: 'Normal training soreness — adjust volume' },
+      { label: 'Pain 4–6', value: 'Monitor closely — reduce load on affected area' },
+      { label: 'Pain 7–10', value: 'Rest and consult a professional' },
+    ],
+    proTip: 'Log pain the day after hard sessions. DOMS peaks 24–48 hours after training.',
+  },
+
+  mobilityScreen: {
+    title: 'Mobility & Flexibility',
+    body: 'Guided mobility routines targeting your tightest areas. Mobility work improves performance, reduces injury risk, and accelerates recovery between sessions.',
+    proTip: 'Even 10 minutes of mobility work after every session compounds into significant gains over a year.',
+  },
+
+  // ─── GOALS SCREENS ─────────────────────────────────────────────────────────
+
+  challengesScreen: {
+    title: 'Challenges',
+    body: 'Time-bound fitness and habit challenges to push you beyond your comfort zone. Complete challenges to earn bonus XP, badges, and streak shields.',
+    learnMoreItems: [
+      { label: 'Solo challenges', value: 'Personal bests and streak targets' },
+      { label: 'Partner challenges', value: 'Head-to-head with your linked partner' },
+      { label: 'Community challenges', value: 'Compete with the TRANSFORMR community' },
+    ],
+    proTip: 'Stack a challenge on top of your current program — don\'t replace the program with it.',
+  },
+
+  challengeDetailScreen: {
+    title: 'Challenge Details',
+    body: 'The full rules, scoring, and leaderboard for this challenge. Check your progress daily and make sure you\'re logging the required activities.',
+    proTip: 'Log the challenge activity at the same time every day. Consistency in timing builds the habit faster.',
+  },
+
+  challengeActiveScreen: {
+    title: 'Active Challenge',
+    body: 'You\'re in the middle of a challenge. Log today\'s required activity to keep your streak alive and climb the leaderboard.',
+    proTip: 'Never skip a challenge day — partial completion still counts toward your streak and leaderboard position.',
+  },
+
+  skillsScreen: {
+    title: 'Skills Development',
+    body: 'Track non-physical skills you\'re developing — languages, instruments, coding, business skills. Skills log to your transformation record and feed the AI\'s holistic coaching.',
+    proTip: 'Pair skill practice with a physical habit — same time, same location. Habit stacking locks them in faster.',
+  },
+
+  stakeGoalsScreen: {
+    title: 'Stake Goals',
+    body: 'Put real money on the line for your goals. Set a target, a deadline, and a stake amount. If you hit the goal, your money is returned. If you miss it, the funds go to charity.',
+    learnMoreItems: [
+      { label: 'Minimum stake', value: '$5 — enough to feel it' },
+      { label: 'Verification', value: 'Photo proof or logged data confirms completion' },
+      { label: 'Charity selection', value: 'Choose any verified charity on the platform' },
+    ],
+    proTip: 'Start small — a $20 stake creates the psychological weight without financial risk.',
+  },
+
+  goalDetailScreen: {
+    title: 'Goal Detail',
+    body: 'Full view of this goal — progress toward target, activity log, milestone history, and AI coaching recommendations specific to this goal.',
+    proTip: 'Review goal progress weekly, not daily. Daily variance is noise — weekly trends are signal.',
+  },
+
+  insightsScreen: {
+    title: 'AI Insights',
+    body: 'Deep analysis of your performance patterns across all domains. Your AI coach identifies what\'s working, what\'s not, and where your biggest leverage is.',
+    proTip: 'Read your weekly insight report every Sunday night. It sets your intention for the week ahead.',
+  },
+
+  communityScreen: {
+    title: 'Community',
+    body: 'Connect with other TRANSFORMR members on the same journey. Share wins, accountability check-ins, and transformation milestones.',
+    proTip: 'Posting a public commitment to your goal dramatically increases follow-through. Share it.',
+  },
+
+  // ─── NUTRITION SCREENS ─────────────────────────────────────────────────────
+
+  analyticsScreen: {
+    title: 'Nutrition Analytics',
+    body: 'Deep-dive into your eating patterns — macro trends over time, meal timing, most-logged foods, and adherence to your calorie target.',
+    learnMoreItems: [
+      { label: 'Macro trend', value: 'Weekly average protein, carbs, fat vs targets' },
+      { label: 'Calorie adherence', value: 'Days you hit your calorie target this month' },
+      { label: 'Meal timing', value: 'Distribution of calories across the day' },
+    ],
+    proTip: 'Aim for calorie adherence above 80%. 80% of days on-target produces 95% of the results.',
+  },
+
+  barcodeScannerScreen: {
+    title: 'Barcode Scanner',
+    body: 'Scan any food barcode to instantly pull up the nutrition facts from our database of 3M+ products. Select your serving size and add to your meal log.',
+    proTip: 'Scan before you eat, not after. Pre-logging prevents over-eating and takes 5 seconds.',
+  },
+
+  groceryListScreen: {
+    title: 'Grocery List',
+    body: 'A smart shopping list that generates automatically from your meal plan. Check off items as you shop and add extras for the week.',
+    proTip: 'Shop from your grocery list weekly. Having the right food at home eliminates 90% of bad eating decisions.',
+  },
+
+  mealPlansScreen: {
+    title: 'Meal Plans',
+    body: 'AI-generated weekly meal plans calibrated to your macro targets. Each plan is built around foods you\'ve logged before, so it fits your actual preferences.',
+    proTip: 'Run the same meal plan for 2 weeks before switching — repetition makes logging faster and eating automatic.',
+  },
+
+  mealPrepScreen: {
+    title: 'Meal Prep',
+    body: 'Your weekly prep checklist and schedule. Batch cooking on Sunday reduces decision fatigue and ensures you hit your macro targets Monday–Friday.',
+    proTip: 'Prep protein first — it\'s the hardest macro to hit on the fly. Having cooked chicken or beef ready fixes most days.',
+  },
+
+  menuScannerScreen: {
+    title: 'Menu Scanner',
+    body: 'Point at any restaurant menu and your AI will estimate the calories and macros for the dishes. Great for tracking when eating out.',
+    proTip: 'For restaurant meals, estimate slightly high on calories. Hidden oils and butter add 20–30% to what you\'d expect.',
+  },
+
+  savedMealsScreen: {
+    title: 'Saved Meals',
+    body: 'Your most-logged meal combinations saved as one-tap entries. Add any meal here to avoid re-logging the same foods every day.',
+    proTip: 'Save your top 5 go-to meals. Consistent meal rotation makes hitting your macros automatic.',
+  },
+
+  // ─── PROFILE SCREENS ───────────────────────────────────────────────────────
+
+  editProfileScreen: {
+    title: 'Edit Profile',
+    body: 'Update your name, photo, body stats, and fitness goals. Keeping your profile current improves the accuracy of your macro targets and AI coaching.',
+    proTip: 'Update your weight every 4 weeks. Macro and calorie targets recalculate automatically when you do.',
+  },
+
+  partnerScreen: {
+    title: 'Partner Link',
+    body: 'Link your TRANSFORMR account with your partner\'s to enable joint streaks, shared accountability, and couples-specific insights.',
+    learnMoreItems: [
+      { label: 'Joint streak', value: 'Consecutive days you both completed a habit' },
+      { label: 'Partner dashboard', value: 'See their key metrics (with permission)' },
+      { label: 'Partner challenges', value: 'Head-to-head accountability bets' },
+    ],
+    proTip: 'Share your countdown date with your partner. Shared deadlines create shared accountability.',
+  },
+
+  integrationsScreen: {
+    title: 'Integrations',
+    body: 'Connect TRANSFORMR to your wearables, health apps, and calendar. The more data that flows in automatically, the smarter your AI coaching becomes.',
+    learnMoreItems: [
+      { label: 'Apple Health', value: 'Auto-import steps, sleep, and heart rate' },
+      { label: 'Google Fit', value: 'Sync workouts and activity data' },
+      { label: 'Garmin / Oura', value: 'Import HRV and recovery scores' },
+    ],
+    proTip: 'Connect your wearable first — it dramatically improves your readiness score accuracy.',
+  },
+
+  notificationsSettingsScreen: {
+    title: 'Notification Settings',
+    body: 'Control exactly what TRANSFORMR notifies you about and when. Keep the alerts that drive action and mute the ones that just add noise.',
+    proTip: 'Enable the daily 8am coaching card notification. It sets the right mindset before the day gets away from you.',
+  },
+
+  nfcSetupScreen: {
+    title: 'NFC Quick Log',
+    body: 'Program NFC tags to trigger instant logging actions — tap your gym bag to start a workout, tap the kitchen counter to open the meal logger.',
+    proTip: 'Place an NFC tag on your bathroom scale. One tap → weight log screen. 10 seconds to track every morning.',
+  },
+
+  aboutScreen: {
+    title: 'About TRANSFORMR',
+    body: 'App version, legal information, support links, and the TRANSFORMR mission — building the most comprehensive personal transformation system for entrepreneurs.',
+    proTip: 'Follow us on social media for transformation stories, feature announcements, and weekly challenges.',
+  },
+
 } satisfies Record<string, HelpContent>;

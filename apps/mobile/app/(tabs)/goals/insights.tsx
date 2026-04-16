@@ -14,6 +14,9 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
@@ -23,6 +26,7 @@ import { useInsightStore } from '@stores/insightStore';
 
 export default function InsightsScreen() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
   const {
     predictions,
     proactiveMessages,
@@ -32,6 +36,12 @@ export default function InsightsScreen() {
     acknowledgePrediction,
     dismissMessage,
   } = useInsightStore();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.insightsScreen} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     void fetchAll();

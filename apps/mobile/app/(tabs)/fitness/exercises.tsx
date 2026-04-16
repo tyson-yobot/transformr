@@ -14,6 +14,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -63,6 +66,7 @@ const EQUIPMENT: { value: EquipmentFilter; label: string }[] = [
 export default function ExercisesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { exercises, fetchExercises, isLoading } = useWorkoutStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,6 +75,12 @@ export default function ExercisesScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.exercisesLibrary} />,
+    });
+  }, [navigation]);
 
   const doFetch = useCallback(() => {
     const category = selectedCategory !== 'all' ? selectedCategory : undefined;

@@ -14,6 +14,9 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -119,6 +122,7 @@ function formatMinutes(minutes: number): string {
 export default function ChallengeDetailScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const {
@@ -127,6 +131,12 @@ export default function ChallengeDetailScreen() {
     fetchChallengeDefinitions,
     isLoading,
   } = useChallengeStore();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.challengeDetailScreen} />,
+    });
+  }, [navigation]);
 
   // Fetch definitions if store is empty
   useEffect(() => {

@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Screen
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -38,6 +38,12 @@ import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatt
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { HelpIcon } from '@components/ui/HelpIcon';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { HELP } from '../../constants/helpContent';
+import { SCREEN_HELP } from '../../constants/screenHelp';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../constants/coachmarkSteps';
 import { supabase } from '../../services/supabase';
 
 // ---------------------------------------------------------------------------
@@ -108,6 +114,35 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [coachmarkSteps, setCoachmarkSteps] = React.useState<CoachmarkStep[]>([]);
+  const greetingRef = React.useRef<View>(null);
+  const aiCardRef = React.useRef<View>(null);
+  const quickActionsRef = React.useRef<View>(null);
+  const statsCardRef = React.useRef<View>(null);
+
+  const measureCoachmarks = React.useCallback(() => {
+    const content = COACHMARK_CONTENT.dashboard;
+    if (!content) return;
+    const refs = [greetingRef, statsCardRef, aiCardRef, quickActionsRef];
+    const steps: CoachmarkStep[] = [];
+    let pending = refs.length;
+    refs.forEach((ref, i) => {
+      ref.current?.measure((x, y, width, height, pageX, pageY) => {
+        if (width > 0 && height > 0 && content[i]) {
+          steps[i] = {
+            targetX: pageX,
+            targetY: pageY,
+            targetWidth: width,
+            targetHeight: height,
+            title: content[i]!.title,
+            body: content[i]!.body,
+            position: content[i]!.position,
+          };
+        }
+        if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+      });
+    });
+  }, []);
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
@@ -395,14 +430,17 @@ export default function DashboardScreen() {
         entering={FadeInDown.delay(0).duration(800)}
         style={{ marginBottom: spacing.xl }}
       >
-        <Text
-          style={[
-            typography.h2,
-            { color: colors.text.primary, lineHeight: 32, marginBottom: spacing.sm },
-          ]}
-        >
-          {greetingWithName}
-        </Text>
+        <View ref={greetingRef} onLayout={measureCoachmarks} style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <Text
+            style={[
+              typography.h2,
+              { color: colors.text.primary, lineHeight: 32, marginBottom: spacing.sm, flex: 1, paddingRight: 8 },
+            ]}
+          >
+            {greetingWithName}
+          </Text>
+          <HelpIcon content={SCREEN_HELP.dashboard} size={20} style={{ marginTop: 4 }} />
+        </View>
         <Text style={[typography.caption, { color: colors.text.secondary }]}>
           {motivationalGreeting.timeLabel}
           {' — '}
@@ -418,7 +456,7 @@ export default function DashboardScreen() {
       {/* Quick Actions — placed here so they're always above the ChatFAB */}
       <Animated.View entering={FadeInDown.delay(30).duration(400)}>
         <Card variant="default" style={{ marginBottom: spacing.lg }}>
-          <View style={styles.quickActionsRow}>
+          <View ref={quickActionsRef} style={styles.quickActionsRow}>
             <Pressable
               onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
               accessibilityLabel="Log Workout"
@@ -566,7 +604,9 @@ export default function DashboardScreen() {
       <WeatherCard style={{ marginBottom: spacing.md }} />
 
       {/* AI Insight */}
-      <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
+      <View ref={aiCardRef}>
+        <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
+      </View>
 
       {/* Top Prediction Alert */}
       {topPrediction && (
@@ -632,11 +672,15 @@ export default function DashboardScreen() {
 
       {/* Stats Grid — calories, protein, water, workout */}
       <Animated.View entering={FadeInDown.delay(110).duration(400)}>
+        <View ref={statsCardRef}>
         <Card
           variant="default"
           style={{ marginBottom: spacing.lg }}
           header={
-            <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Stats</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Stats</Text>
+              <HelpIcon content={HELP.readinessScore} size={14} />
+            </View>
           }
         >
           <View style={styles.statsGrid}>
@@ -677,6 +721,7 @@ export default function DashboardScreen() {
             </View>
           </View>
         </Card>
+        </View>
       </Animated.View>
 
       {/* Top 3 Streaks */}
@@ -686,7 +731,10 @@ export default function DashboardScreen() {
             variant="default"
             style={{ marginBottom: spacing.lg }}
             header={
-              <Text style={[typography.h3, { color: colors.text.primary }]}>Top Streaks 🔥</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={[typography.h3, { color: colors.text.primary }]}>Top Streaks 🔥</Text>
+                <HelpIcon content={HELP.streakCounter} size={14} />
+              </View>
             }
           >
             {top3Streaks.map((habit) => (
@@ -819,9 +867,12 @@ export default function DashboardScreen() {
             }}
             header={
               <View style={styles.cardHeaderRow}>
-                <Text style={[typography.h3, { color: colors.text.primary }]}>
-                  Revenue
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={[typography.h3, { color: colors.text.primary }]}>
+                    Revenue
+                  </Text>
+                  <HelpIcon content={HELP.revenueLog} size={14} />
+                </View>
                 <Text
                   style={[
                     typography.statSmall,
@@ -846,6 +897,7 @@ export default function DashboardScreen() {
       )}
 
       <HelpBubble id="dashboard_fab" message="Tap the purple button to chat with your AI coach" position="below" />
+      <Coachmark screenKey={COACHMARK_KEYS.dashboard} steps={coachmarkSteps} />
 
       {/* Recent Achievements */}
       <Animated.View entering={FadeInDown.delay(400).duration(400)}>

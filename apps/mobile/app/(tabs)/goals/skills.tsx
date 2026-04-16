@@ -11,6 +11,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -35,6 +38,13 @@ const BOOK_STATUSES: { key: NonNullable<Book['status']>; label: string }[] = [
 
 export default function SkillsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.skillsScreen} />,
+    });
+  }, [navigation]);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('skills');
   const [skills, setSkills] = useState<Skill[]>([]);

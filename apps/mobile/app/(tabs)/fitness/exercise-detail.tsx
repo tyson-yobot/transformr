@@ -10,6 +10,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -31,6 +34,7 @@ interface RecentPerformance {
 export default function ExerciseDetailScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
 
   const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
@@ -41,6 +45,12 @@ export default function ExerciseDetailScreen() {
   const [recentPerformance, setRecentPerformance] = useState<RecentPerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.exerciseDetail} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const loadExercise = async () => {

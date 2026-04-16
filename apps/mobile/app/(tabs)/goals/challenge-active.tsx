@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Challenge Dashboard
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import type { ColorScheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -84,6 +87,13 @@ function getDayStatusColor(status: DayStatus, themeColors: ColorScheme): string 
 export default function ChallengeActiveScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.challengeActiveScreen} />,
+    });
+  }, [navigation]);
 
   // Store -----------------------------------------------------------------
   const {
