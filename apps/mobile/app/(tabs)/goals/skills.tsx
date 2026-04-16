@@ -43,6 +43,7 @@ export default function SkillsScreen() {
 
   useEffect(() => {
     const fetchAll = async () => {
+      try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const [skillsRes, booksRes, coursesRes, goalsRes] = await Promise.all([
@@ -81,6 +82,9 @@ export default function SkillsScreen() {
         setAiRecommendation('Keep working toward your goals — explore books, courses, and skills that align with each one.');
       } else {
         setAiRecommendation('Add goals to unlock personalized skill and learning recommendations.');
+      }
+      } catch {
+        // Non-critical screen — data stays empty, user can pull-to-refresh
       }
     };
     void fetchAll();

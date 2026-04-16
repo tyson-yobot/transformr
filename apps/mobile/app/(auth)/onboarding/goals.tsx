@@ -73,17 +73,22 @@ export default function GoalsScreen() {
       return;
     }
     // Persist each selected goal — primary goal first with priority 10
-    await Promise.all(
-      selectedGoals.map((category) =>
-        createGoal({
-          title: GOAL_OPTIONS.find((g) => g.category === category)?.label ?? category,
-          category,
-          goal_type: 'habit',
-          priority: category === primaryGoal ? 10 : 5,
-          target_date: dateInputToISO(targetDate) || undefined,
-        }),
-      ),
-    );
+    try {
+      await Promise.allSettled(
+        selectedGoals.map((category) =>
+          createGoal({
+            title: GOAL_OPTIONS.find((g) => g.category === category)?.label ?? category,
+            category,
+            goal_type: 'habit',
+            priority: category === primaryGoal ? 10 : 5,
+            target_date: dateInputToISO(targetDate) || undefined,
+          }),
+        ),
+      );
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save goals. Please try again.');
+      return;
+    }
     router.push('/(auth)/onboarding/fitness');
   }, [selectedGoals, primaryGoal, targetDate, createGoal, router]);
 
