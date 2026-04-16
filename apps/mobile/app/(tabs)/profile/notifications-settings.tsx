@@ -16,9 +16,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
+import { Button } from '@components/ui/Button';
 import { Toggle } from '@components/ui/Toggle';
 import { useProfileStore } from '@stores/profileStore';
-import { hapticLight } from '@utils/haptics';
+import { hapticLight, hapticMedium } from '@utils/haptics';
+import * as Notifications from 'expo-notifications';
 import type { NotificationPreferences } from '@app-types/database';
 
 // ---------------------------------------------------------------------------
@@ -236,6 +238,33 @@ export default function NotificationsSettingsScreen() {
     [],
   );
 
+  // Send a test push notification immediately
+  const handleTestNotification = useCallback(async () => {
+    await hapticMedium();
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          Alert.alert('Permission Required', 'Enable notifications in your device settings to test.');
+          return;
+        }
+      }
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'TRANSFORMR Test',
+          body: "Your notifications are working! You're all set.",
+          sound: true,
+        },
+        trigger: null,
+      });
+      Alert.alert('Test Sent', 'Check your notification tray!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Could not send test notification';
+      Alert.alert('Error', msg);
+    }
+  }, []);
+
   const isGroupEnabled = (key: keyof NotificationPreferences): boolean => {
     const val = prefs[key];
     if (typeof val === 'object' && val !== null && 'enabled' in val) {
@@ -280,6 +309,50 @@ export default function NotificationsSettingsScreen() {
               onValueChange={handleToggleGlobal}
             />
           </View>
+        </Card>
+      </Animated.View>
+
+      {/* Priority Slots */}
+      <Animated.View entering={FadeInDown.delay(40).duration(400)}>
+        <Card
+          variant="default"
+          style={{ marginBottom: spacing.xl }}
+          header={
+            <Text style={[typography.h3, { color: colors.text.primary }]}>
+              Priority Slots
+            </Text>
+          }
+        >
+          {([
+            { key: 'wake_up' as const, label: 'Morning Briefing', icon: '🌅' },
+            { key: 'meals' as const, label: 'Meal Reminder', icon: '🍽️' },
+            { key: 'gym' as const, label: 'Streak at Risk', icon: '🔥' },
+            { key: 'daily_checkin' as const, label: 'Evening Check-In', icon: '📋' },
+          ] as const).map((slot) => {
+            const enabled = isGroupEnabled(slot.key) && globalEnabled;
+            return (
+              <View
+                key={slot.key}
+                style={[
+                  styles.priorityRow,
+                  {
+                    paddingVertical: spacing.sm,
+                    borderBottomColor: colors.border.subtle,
+                  },
+                ]}
+              >
+                <Text style={{ fontSize: 18, marginRight: spacing.sm }}>{slot.icon}</Text>
+                <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                  {slot.label}
+                </Text>
+                <Toggle
+                  value={enabled}
+                  onValueChange={(v) => void handleToggleGroup(slot.key, v)}
+                  disabled={!globalEnabled}
+                />
+              </View>
+            );
+          })}
         </Card>
       </Animated.View>
 
@@ -347,6 +420,43 @@ export default function NotificationsSettingsScreen() {
           </Animated.View>
         );
       })}
+      {/* Quiet Hours Info */}
+      <Animated.View entering={FadeInDown.delay(350).duration(400)}>
+        <Card
+          variant="outlined"
+          style={{ marginTop: spacing.lg, marginBottom: spacing.lg }}
+        >
+          <View style={styles.quietRow}>
+            <Text style={{ fontSize: 18, marginRight: spacing.md }}>🌙</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                Quiet Hours
+              </Text>
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.text.secondary, marginTop: spacing.xs },
+                ]}
+              >
+                Notifications are automatically silenced between 10 PM and 6 AM.
+                Adjust in your device's Focus / Do Not Disturb settings.
+              </Text>
+            </View>
+          </View>
+        </Card>
+      </Animated.View>
+
+      {/* Test Notification */}
+      <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+        <Button
+          title="Send Test Notification"
+          variant="outline"
+          fullWidth
+          onPress={handleTestNotification}
+          accessibilityLabel="Send a test push notification"
+          style={{ marginBottom: spacing.xl }}
+        />
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -362,5 +472,14 @@ const styles = StyleSheet.create({
   groupRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  priorityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  quietRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
 });

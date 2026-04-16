@@ -2,7 +2,7 @@
 // TRANSFORMR -- Profile & Settings Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -19,11 +19,16 @@ import type { ThemeMode } from '@theme/colors';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
 import { MonoText } from '@components/ui/MonoText';
+import { Avatar } from '@components/ui/Avatar';
+import { ProgressBar } from '@components/ui/ProgressBar';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
+import { useHabitStore } from '@stores/habitStore';
+import { useSubscriptionStore } from '@stores/subscriptionStore';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle';
+import { upgradeModalEvents } from '@hooks/useFeatureGate';
 import { formatDate, formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
@@ -143,6 +148,94 @@ function SettingsRow({
 }
 
 // ---------------------------------------------------------------------------
+// Tier Badge
+// ---------------------------------------------------------------------------
+const TIER_LABELS: Record<string, string> = {
+  free: 'Free',
+  pro: 'Pro',
+  elite: 'Elite',
+  partners: 'Partners',
+};
+
+const TIER_NEXT_FEATURE: Record<string, Parameters<typeof upgradeModalEvents.emit>[0]> = {
+  free: 'ai_insights',
+  pro: 'business_tracking',
+  elite: 'partner_features',
+  partners: 'partner_features',
+};
+
+function TierBadge({ tier }: { tier: string }) {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+
+  const handlePress = useCallback(() => {
+    void hapticMedium();
+    const featureKey = TIER_NEXT_FEATURE[tier] ?? 'ai_insights';
+    upgradeModalEvents.emit(featureKey);
+  }, [tier]);
+
+  const badgeColor =
+    tier === 'partners'
+      ? colors.accent.fire
+      : tier === 'elite'
+        ? colors.accent.secondary
+        : tier === 'pro'
+          ? colors.accent.primary
+          : colors.text.muted;
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={`Subscription tier: ${TIER_LABELS[tier] ?? tier}. Tap to upgrade.`}
+      style={[
+        styles.tierBadge,
+        {
+          backgroundColor: `${badgeColor}20`,
+          borderColor: badgeColor,
+          borderRadius: borderRadius.full,
+          paddingHorizontal: spacing.md,
+          paddingVertical: spacing.xs,
+        },
+      ]}
+    >
+      <Text style={[typography.captionBold, { color: badgeColor }]}>
+        {TIER_LABELS[tier] ?? tier.toUpperCase()}
+      </Text>
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// XP Progress Bar
+// ---------------------------------------------------------------------------
+const XP_PER_LEVEL = 500;
+
+function XpProgressBar({ xp }: { xp: number }) {
+  const { colors, typography, spacing } = useTheme();
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = xp % XP_PER_LEVEL;
+  const progress = xpIntoLevel / XP_PER_LEVEL;
+
+  return (
+    <View style={{ marginTop: spacing.sm }}>
+      <View style={[styles.xpLabelRow, { marginBottom: spacing.xs }]}>
+        <Text style={[typography.tiny, { color: colors.text.muted }]}>
+          Level {level}
+        </Text>
+        <MonoText variant="monoCaption" color={colors.accent.primary}>
+          {formatNumber(xpIntoLevel)} / {formatNumber(XP_PER_LEVEL)} XP
+        </MonoText>
+      </View>
+      <ProgressBar
+        progress={progress}
+        color={colors.accent.primary}
+        height={6}
+      />
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Coaching Tone Options
 // ---------------------------------------------------------------------------
 interface CoachingToneOption {
@@ -196,6 +289,14 @@ export default function ProfileScreen() {
   const settings = useSettingsStore();
   const signOut = useAuthStore((s) => s.signOut);
   const { tone: selectedTone, setTone } = useGamificationStyle();
+  const tier = useSubscriptionStore((s) => s.tier);
+
+  // Top streak from habitStore
+  const habits = useHabitStore((s) => s.habits);
+  const topStreak = useMemo(
+    () => Math.max(0, ...habits.map((h) => h.current_streak ?? 0)),
+    [habits],
+  );
 
   // Theme cycle
   const currentThemeLabel = settings.theme.charAt(0).toUpperCase() + settings.theme.slice(1);
@@ -209,11 +310,18 @@ export default function ProfileScreen() {
     void hapticLight();
   }, [settings]);
 
-  // Stats
-  const memberSince = profile?.created_at
-    ? formatDate(profile.created_at)
-    : 'N/A';
+  // Days tracked since account creation
+  const daysTracked = useMemo(() => {
+    if (!profile?.created_at) return 0;
+    const created = new Date(profile.created_at);
+    const now = new Date();
+    return Math.max(
+      0,
+      Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)),
+    );
+  }, [profile?.created_at]);
 
+  // Total workout sessions
   const [totalWorkouts, setTotalWorkouts] = useState(0);
 
   useEffect(() => {
@@ -229,6 +337,9 @@ export default function ProfileScreen() {
     void fetchWorkoutCount();
   }, []);
 
+  // XP (derive from profile if available, else 0)
+  const xp = (profile as unknown as { xp?: number })?.xp ?? 0;
+
   const handleSignOut = useCallback(() => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
@@ -243,6 +354,11 @@ export default function ProfileScreen() {
     ]);
   }, [signOut]);
 
+  // Avatar source from profile avatar_url if present
+  const avatarSource = (profile as unknown as { avatar_url?: string })?.avatar_url
+    ? { uri: (profile as unknown as { avatar_url: string }).avatar_url }
+    : undefined;
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
@@ -255,24 +371,16 @@ export default function ProfileScreen() {
     >
       <AIInsightCard screenKey="profile/index" style={{ marginBottom: spacing.md }} />
 
-      {/* Avatar + Name + Email */}
+      {/* Avatar + Name + Email + Tier */}
       <Animated.View
         entering={FadeInDown.duration(400)}
-        style={[styles.profileHeader, { marginBottom: spacing.xl }]}
+        style={[styles.profileHeader, { marginBottom: spacing.md }]}
       >
-        <View
-          style={[
-            styles.avatar,
-            {
-              backgroundColor: colors.accent.primary,
-              borderRadius: 40,
-            },
-          ]}
-        >
-          <Text style={{ fontSize: 32 }}>
-            {profile?.display_name?.charAt(0)?.toUpperCase() ?? '?'}
-          </Text>
-        </View>
+        <Avatar
+          source={avatarSource}
+          name={profile?.display_name ?? undefined}
+          size="xl"
+        />
         <View style={{ marginLeft: spacing.lg, flex: 1 }}>
           <Text
             style={[typography.h2, { color: colors.text.primary }]}
@@ -286,27 +394,33 @@ export default function ProfileScreen() {
           >
             {profile?.email ?? ''}
           </Text>
+          <View style={{ marginTop: spacing.xs }}>
+            <TierBadge tier={tier} />
+          </View>
         </View>
       </Animated.View>
 
-      {/* Key Stats Card */}
+      {/* XP Progress Bar */}
+      <Animated.View entering={FadeInDown.delay(30).duration(400)} style={{ marginBottom: spacing.lg }}>
+        <XpProgressBar xp={xp} />
+      </Animated.View>
+
+      {/* Stats Row */}
       <Animated.View entering={FadeInDown.delay(50).duration(400)}>
         <Card variant="default" style={{ marginBottom: spacing.lg }}>
           <View style={styles.statsGrid}>
-            <StatBlock label="Member Since" value={memberSince} />
             <StatBlock
-              label="Total Workouts"
+              label="Workouts"
               value={formatNumber(totalWorkouts)}
             />
             <StatBlock
-              label="Current Weight"
-              value={
-                profile?.current_weight
-                  ? `${formatNumber(profile.current_weight, 1)} lbs`
-                  : '--'
-              }
+              label="Days Tracked"
+              value={formatNumber(daysTracked)}
             />
-            <StatBlock label="Streak" value="0d" />
+            <StatBlock
+              label="Top Streak"
+              value={`${formatNumber(topStreak)}d`}
+            />
           </View>
         </Card>
       </Animated.View>
@@ -469,8 +583,8 @@ export default function ProfileScreen() {
                 {
                   text: 'Send Link',
                   onPress: async () => {
-                    const { supabase } = await import('@services/supabase');
-                    await supabase.auth.resetPasswordForEmail(email);
+                    const { supabase: sb } = await import('@services/supabase');
+                    await sb.auth.resetPasswordForEmail(email);
                     Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
                   },
                 },
@@ -549,18 +663,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatar: {
-    width: 80,
-    height: 80,
+  xpLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  tierBadge: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   statBlock: {
-    width: '50%',
+    width: '33.33%',
     alignItems: 'center',
     paddingVertical: 12,
   },

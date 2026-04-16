@@ -7,6 +7,7 @@ import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   Alert,
   StyleSheet,
   Share,
@@ -59,6 +60,13 @@ export default function PartnerScreen() {
 
   const [inviteCode, setInviteCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await fetchPartnership();
+    setIsRefreshing(false);
+  }, [fetchPartnership]);
 
   const isLinked = partnership?.status === 'active' && partnerProfile !== null;
 
@@ -169,6 +177,12 @@ export default function PartnerScreen() {
         paddingBottom: insets.bottom + 100,
       }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+        />
+      }
     >
       {isLinked && partnerProfile ? (
         <>

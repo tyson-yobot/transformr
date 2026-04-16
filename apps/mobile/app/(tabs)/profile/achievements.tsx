@@ -2,11 +2,12 @@
 // TRANSFORMR -- Achievements Screen
 // =============================================================================
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   Pressable,
   StyleSheet,
 } from 'react-native';
@@ -59,31 +60,39 @@ export default function AchievementsScreen() {
   const [earned, setEarned] = useState<UserAchievement[]>([]);
   const [selectedTier, setSelectedTier] = useState<Tier>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [achRes, earnedRes] = await Promise.all([
+        supabase.from('achievements').select('*').order('category').order('tier'),
+        supabase
+          .from('user_achievements')
+          .select('*')
+          .eq('user_id', user.id),
+      ]);
+
+      if (achRes.data) setAchievements(achRes.data as Achievement[]);
+      if (earnedRes.data) setEarned(earnedRes.data as UserAchievement[]);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
 
   // Fetch data
   useEffect(() => {
-    const load = async () => {
-      setIsLoading(true);
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const [achRes, earnedRes] = await Promise.all([
-          supabase.from('achievements').select('*').order('category').order('tier'),
-          supabase
-            .from('user_achievements')
-            .select('*')
-            .eq('user_id', user.id),
-        ]);
-
-        if (achRes.data) setAchievements(achRes.data as Achievement[]);
-        if (earnedRes.data) setEarned(earnedRes.data as UserAchievement[]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
     void load();
-  }, []);
+  }, [load]);
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    void load();
+  }, [load]);
 
   // Earned IDs set
   const earnedIds = useMemo(
@@ -149,6 +158,9 @@ export default function AchievementsScreen() {
         paddingBottom: insets.bottom + 100,
       }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+      }
     >
       <AIInsightCard screenKey="profile/achievements" style={{ marginBottom: spacing.md }} />
 
@@ -284,7 +296,7 @@ export default function AchievementsScreen() {
                     typography.captionBold,
                     {
                       color: isActive
-                        ? (filter.key === 'diamond' ? '#0F172A' : '#FFFFFF')
+                        ? (filter.key === 'diamond' ? colors.text.inverse : colors.background.primary)
                         : colors.text.secondary,
                     },
                   ]}
