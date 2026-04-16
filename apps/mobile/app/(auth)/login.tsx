@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR -- Login Screen
 // =============================================================================
 
@@ -35,7 +35,7 @@ const GYM_IMAGE = require('@assets/images/gym-hero.jpg') as number;
 // Google "G" icon — white to match dark theme
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
-    <Text style={{ fontSize: size, fontWeight: '700', color: '#F0F0FC' /* brand-ok */
+    <Text style={{ fontSize: size, fontWeight: '700', color: '#F0F0FC', lineHeight: size + 2 }}>
       G
     </Text>
   );
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 38,
     fontWeight: '800',
-    color: '#E2CBFF' /* brand-ok */
+    color: '#E2CBFF',
     letterSpacing: 10,
     textAlign: 'center',
     textShadowColor: 'rgba(168,85,247,0.8)',
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 14,
-    color: '#B8A8D8' /* brand-ok */
+    color: '#B8A8D8',
     textAlign: 'center',
     letterSpacing: 1.5,
     marginTop: 8,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   // Welcome
   welcomeText: {
     fontSize: 16,
-    color: '#F0F0FC' /* brand-ok */
+    color: '#F0F0FC',
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: '500',
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorBannerText: {
-    color: '#EF4444' /* brand-ok */
+    color: '#EF4444',
     fontSize: 14,
     textAlign: 'center',
     fontWeight: '500',
@@ -373,10 +373,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 4,
   },
-  forgotText: { fontSize: 13, color: '#C084FC' /* brand-ok */
+  forgotText: { fontSize: 13, color: '#C084FC', fontWeight: '500' },
   // Sign In button
   signInBtn: {
-    backgroundColor: '#A855F7' /* brand-ok */
+    backgroundColor: '#A855F7',
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
@@ -390,11 +390,11 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(192,132,252,0.3)',
   },
   signInBtnPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
-  signInBtnText: { color: '#FFFFFF' /* brand-ok */
+  signInBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', letterSpacing: 1.5 },
   // Divider
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 28 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' /* brand-ok */
-  dividerText: { fontSize: 12, color: '#6B5E8A' /* brand-ok */
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' },
+  dividerText: { fontSize: 12, color: '#6B5E8A', marginHorizontal: 20, fontWeight: '600', letterSpacing: 2 },
   // Social buttons
   socialBtn: {
     flexDirection: 'row',
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   socialBtnPressed: { borderColor: '#362C5E', backgroundColor: 'rgba(30,24,56,0.9)' },
-  socialBtnText: { fontSize: 16, color: '#F0F0FC' /* brand-ok */
+  socialBtnText: { fontSize: 16, color: '#F0F0FC', fontWeight: '500' },
   // Trust indicator
   trustRow: {
     flexDirection: 'row',
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 6,
   },
-  trustText: { fontSize: 11, color: '#6B5E8A' /* brand-ok */
+  trustText: { fontSize: 11, color: '#6B5E8A', letterSpacing: 0.5 },
   // Sign up
   signUpRow: {
     flexDirection: 'row',
@@ -426,11 +426,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingBottom: 40,
   },
-  signUpText: { fontSize: 15, color: '#9B8FC0' /* brand-ok */
+  signUpText: { fontSize: 15, color: '#9B8FC0' },
   signUpLink: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#C084FC' /* brand-ok */
+    color: '#C084FC',
     textDecorationLine: 'underline',
     textDecorationColor: 'rgba(192,132,252,0.3)',
   },

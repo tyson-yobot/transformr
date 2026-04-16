@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -212,7 +212,7 @@ export function FormCheckRecorder({
             },
           ]}
         >
-          <Text style={[typography.bodyBold, { color: '#FFFFFF', /* brand-ok */
+          <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
             Grant Permission
           </Text>
         </Pressable>
@@ -267,7 +267,7 @@ export function FormCheckRecorder({
               },
             ]}
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF', /* brand-ok */
+            <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
               Submit for Analysis
             </Text>
           </Pressable>
@@ -321,7 +321,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF', /* brand-ok */
+              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
                 {recordingSeconds}s / {maxDurationSeconds}s
               </Text>
             </View>
@@ -340,7 +340,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF', /* brand-ok */
+              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
                 {'\u2715'}
               </Text>
             </Pressable>

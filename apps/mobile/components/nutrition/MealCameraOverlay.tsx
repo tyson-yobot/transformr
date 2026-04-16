@@ -1,4 +1,4 @@
-﻿import React, { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -101,7 +101,7 @@ function ScanningOverlay() {
       <Text
         style={[
           typography.bodyBold,
-          { color: '#FFFFFF' /* brand-ok */
+          { color: '#FFFFFF', marginTop: spacing.xl, textAlign: 'center' },
         ]}
       >
         Position your meal in the frame
@@ -165,7 +165,7 @@ function AnalyzingOverlay() {
         <Text
           style={[
             typography.bodyBold,
-            { color: '#FFFFFF' /* brand-ok */
+            { color: '#FFFFFF', marginLeft: spacing.md },
           ]}
         >
           Analyzing your meal...
@@ -267,7 +267,7 @@ function ResultsOverlay({
             accessibilityRole="button"
             accessibilityLabel={`Add ${item.name} to food log`}
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
+            <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
               Add to Log
             </Text>
           </Pressable>
@@ -382,7 +382,7 @@ export function MealCameraOverlay({
         accessibilityLabel="Close camera"
         hitSlop={12}
       >
-        <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
+        <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
           {'\u2715'}
         </Text>
       </Pressable>

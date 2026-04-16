@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR -- Budget-Aware Grocery List (Module 5)
 // AI-generated grocery list with per-item costs, running total, budget bar,
 // and swap suggestion cards for over-budget items.

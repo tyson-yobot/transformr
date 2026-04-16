@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR — ActionToast + useActionToast
 // Lightweight per-screen confirmation toast for write operations.
 // Appears at the top of the screen, auto-dismisses after 2.2 s.

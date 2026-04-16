@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR — Coachmark (First-Run Spotlight Tour)
 // Shows a spotlight highlight with tooltip on the first visit to complex screens.
 // Dismissed state persisted to MMKV — never shown again on that screen.

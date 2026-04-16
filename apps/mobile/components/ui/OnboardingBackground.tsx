@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR -- OnboardingBackground
 // Full-screen photography background with deep-space overlay.
 // Used across all onboarding screens.

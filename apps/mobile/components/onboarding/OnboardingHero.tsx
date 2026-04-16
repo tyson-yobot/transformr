@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR -- OnboardingHero
 // Hero image (top 40% of screen) with gradient fade into Deep Space (#0C0A15).
 // Dots progress overlay sits on top (rendered by _layout.tsx).

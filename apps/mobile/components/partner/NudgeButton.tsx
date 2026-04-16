@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -333,7 +333,7 @@ export function NudgeButton({
                 disabled={customMessage.trim().length === 0}
                 accessibilityRole="button"
               >
-                <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok */
+                <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
                   Send
                 </Text>
               </Pressable>

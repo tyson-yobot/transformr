@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,

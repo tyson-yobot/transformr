@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR — GatePromptCard
 //
 // Inline card shown in place of gated content within a screen.
@@ -70,7 +70,7 @@ export function GatePromptCard({ featureKey, height = 120 }: GatePromptCardProps
         accessibilityLabel={`Unlock with ${tierLabel}`}
         accessibilityRole="button"
       >
-        <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok */
+        <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
           Unlock with {tierLabel}
         </Text>
       </Pressable>

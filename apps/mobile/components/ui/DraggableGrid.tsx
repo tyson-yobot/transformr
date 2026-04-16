@@ -1,4 +1,4 @@
-﻿import React, { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import DraggableFlatList, {
   RenderItemParams,

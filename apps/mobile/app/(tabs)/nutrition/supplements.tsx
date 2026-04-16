@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // TRANSFORMR -- Supplement Management (Budget-Aware + Evidence)
 // Real data from user_supplements table. AI recommendations with evidence
 // badges, budget tracking, tier grouping, and daily logging.

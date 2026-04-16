@@ -1,4 +1,4 @@
-﻿import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -248,7 +248,7 @@ export function RestTimer({
           ]}
           accessibilityRole="button"
         >
-          <Text style={[typography.bodyBold, { color: '#FFFFFF', /* brand-ok */
+          <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
             {isRunning ? 'Pause' : remainingSeconds === 0 ? 'Restart' : 'Start'}
           </Text>
         </Pressable>
