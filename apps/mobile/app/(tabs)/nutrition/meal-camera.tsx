@@ -29,6 +29,7 @@ import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES } from '@utils/constants';
 import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { analyzeMealPhoto } from '@services/ai/mealCamera';
 import { supabase } from '../../../services/supabase';
 
@@ -61,6 +62,7 @@ export default function MealCameraScreen() {
   }, [navigation]);
 
   const { logFood } = useNutritionStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
   const [permission, requestPermission] = useCameraPermissions();
 
   const [stage, setStage] = useState<CameraStage>('capture');
@@ -155,8 +157,9 @@ export default function MealCameraScreen() {
     }
 
     setIsLogging(false);
+    showToast('Meal logged', { subtext: `${itemsToLog.length} item${itemsToLog.length !== 1 ? 's' : ''} added` });
     router.back();
-  }, [detectedFoods, selectedItems, mealType, logFood, router]);
+  }, [detectedFoods, selectedItems, mealType, logFood, router, showToast]);
 
   const handleRetake = useCallback(() => {
     hapticLight();
@@ -202,6 +205,7 @@ export default function MealCameraScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ActionToast message={toast.message} subtext={toast.subtext} visible={toast.visible} onHide={hideToast} type={toast.type} />
       <HelpBubble id="meal_camera" message="Point at your plate for AI calorie estimates" position="above" />
       {stage === 'capture' && (
         <>

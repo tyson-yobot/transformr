@@ -35,6 +35,9 @@ import type {
   GroceryAisle,
   GroceryItem as GroceryItemType,
 } from '@app-types/ai';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 interface CheckedState {
   [itemKey: string]: boolean;
@@ -46,6 +49,13 @@ function itemKey(aisleName: string, itemName: string): string {
 
 export default function GroceryListScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.groceryListScreen} />,
+    });
+  }, [navigation]);
 
   const [groceryData, setGroceryData] = useState<BudgetGroceryListResponse | null>(null);
   const [checked, setChecked] = useState<CheckedState>({});

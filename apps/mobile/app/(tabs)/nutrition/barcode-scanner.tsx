@@ -2,7 +2,7 @@
 // TRANSFORMR -- Barcode Food Scanner
 // =============================================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,10 @@ import { formatMacro } from '@utils/formatters';
 import { MACRO_COLORS, MEAL_TYPES, OPEN_FOOD_FACTS_API } from '@utils/constants';
 import { hapticSuccess, hapticLight, hapticWarning } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -48,11 +52,19 @@ type ScanStage = 'scanning' | 'loading' | 'result' | 'not_found';
 
 export default function BarcodeScannerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.barcodeScannerScreen} />,
+    });
+  }, [navigation]);
+
   const { logFood } = useNutritionStore();
   const { profile } = useProfileStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
   const [permission, requestPermission] = useCameraPermissions();
 
   const [stage, setStage] = useState<ScanStage>('scanning');
@@ -145,8 +157,9 @@ export default function BarcodeScannerScreen() {
     });
 
     setIsLogging(false);
+    showToast('Meal logged', { subtext: scannedFood.name });
     router.back();
-  }, [scannedFood, mealType, quantity, logFood, router]);
+  }, [scannedFood, mealType, quantity, logFood, router, showToast]);
 
   const handleScanAgain = useCallback(() => {
     hapticLight();
@@ -190,6 +203,7 @@ export default function BarcodeScannerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ActionToast message={toast.message} subtext={toast.subtext} visible={toast.visible} onHide={hideToast} type={toast.type} />
       <HelpBubble id="barcode_scan" message="Scan any food barcode to auto-fill nutrition" position="above" />
       {stage === 'scanning' && (
         <>

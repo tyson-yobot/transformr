@@ -2,7 +2,7 @@
 // TRANSFORMR -- About Screen
 // =============================================================================
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,9 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { hapticLight } from '@utils/haptics';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -82,7 +85,14 @@ function LinkRow({
 // ---------------------------------------------------------------------------
 export default function AboutScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.aboutScreen} />,
+    });
+  }, [navigation]);
 
   const handleOpenUrl = useCallback((url: string) => {
     void Linking.openURL(url);

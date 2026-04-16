@@ -14,6 +14,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -39,6 +42,7 @@ interface ProgressPhoto {
 
 export default function ProgressScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([]);
@@ -57,6 +61,12 @@ export default function ProgressScreen() {
   const [compareMode, setCompareMode] = useState(false);
   const compareIndex1 = 0;
   const compareIndex2 = Math.max(1, progressPhotos.length - 1);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.progressScreen} />,
+    });
+  }, [navigation]);
 
   const chartData = weightLogs.map((w) => ({
     date: w.logged_at ?? w.created_at ?? '',

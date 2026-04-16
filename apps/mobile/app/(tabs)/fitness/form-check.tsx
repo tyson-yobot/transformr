@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Form Check Screen
 // =============================================================================
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,9 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTheme } from '@theme/index';
@@ -38,6 +41,7 @@ interface FormAnalysisResult {
 export default function FormCheckScreen() {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
 
@@ -51,6 +55,12 @@ export default function FormCheckScreen() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingPromiseRef = useRef<Promise<{ uri: string } | undefined> | null>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.formCheckScreen} />,
+    });
+  }, [navigation]);
 
   const handleStartRecording = useCallback(async () => {
     setPhase('recording');

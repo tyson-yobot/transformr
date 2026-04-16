@@ -31,6 +31,7 @@ import type { GoalMilestone } from '@app-types/database';
 export default function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const navigation = useNavigation();
   const { colors, typography, spacing } = useTheme();
   const { goals, updateGoalProgress } = useGoalStore();
 
@@ -38,6 +39,12 @@ export default function GoalDetailScreen() {
   const [milestones, setMilestones] = useState<GoalMilestone[]>([]);
   const [progressInput, setProgressInput] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.goalDetailScreen} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     if (!id) return;

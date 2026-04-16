@@ -25,6 +25,9 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
 import type { SharedPreferences } from '@app-types/database';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Privacy toggle keys
@@ -49,7 +52,14 @@ const PRIVACY_TOGGLES: readonly {
 
 export default function PartnerScreen() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.partnerScreen} />,
+    });
+  }, [navigation]);
 
   const {
     partnership,

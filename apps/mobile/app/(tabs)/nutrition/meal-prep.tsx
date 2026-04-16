@@ -4,7 +4,7 @@
 // BudgetBar, and full recipe details.
 // =============================================================================
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,9 @@ import type {
   BudgetMealPrepResponse,
 } from '@app-types/ai';
 import type { MealPrepParams } from '@services/ai/mealPrep';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
   good: { label: 'Good', icon: 'wallet-outline' },
@@ -46,6 +49,13 @@ const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
 
 export default function MealPrepScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.mealPrepScreen} />,
+    });
+  }, [navigation]);
 
   const [prepResponse, setPrepResponse] = useState<BudgetMealPrepResponse | null>(null);
   const [selectedTier, setSelectedTier] = useState<MealPrepTier>('good');

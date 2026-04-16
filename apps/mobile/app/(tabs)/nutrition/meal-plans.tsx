@@ -2,7 +2,7 @@
 // TRANSFORMR -- Weekly Meal Plans
 // =============================================================================
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,9 @@ import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { generateBudgetMealPrepPlan } from '@services/ai/mealPrep';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 interface PlannedMeal {
   id: string;
@@ -54,8 +57,15 @@ function createEmptyWeekPlan(): DayPlan[] {
 
 export default function MealPlansScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const { profile } = useProfileStore();
   const router = useRouter();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.mealPlansScreen} />,
+    });
+  }, [navigation]);
 
   const [weekPlan, setWeekPlan] = useState<DayPlan[]>(createEmptyWeekPlan);
   const [selectedDay, setSelectedDay] = useState(0);

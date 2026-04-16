@@ -2,7 +2,7 @@
 // TRANSFORMR -- Integrations Screen
 // =============================================================================
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,9 @@ import { useProfileStore } from '@stores/profileStore';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Integration definitions
@@ -89,7 +92,14 @@ const INTEGRATIONS: Integration[] = [
 // ---------------------------------------------------------------------------
 export default function IntegrationsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.integrationsScreen} />,
+    });
+  }, [navigation]);
 
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);

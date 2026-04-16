@@ -26,6 +26,9 @@ import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '../../../services/supabase';
 import type { SavedMeal } from '@app-types/database';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -33,7 +36,14 @@ type FilterType = 'all' | MealType;
 
 export default function SavedMealsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const { logFood } = useNutritionStore();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.savedMealsScreen} />,
+    });
+  }, [navigation]);
 
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
   const [isLoading, setIsLoading] = useState(true);

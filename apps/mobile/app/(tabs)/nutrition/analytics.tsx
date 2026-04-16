@@ -24,6 +24,9 @@ import { supabase } from '../../../services/supabase';
 import { MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/constants';
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type TimeRange = '7d' | '14d' | '30d' | '90d';
 
@@ -122,7 +125,14 @@ const miniBarStyles = StyleSheet.create({
 
 export default function NutritionAnalyticsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const { profile } = useProfileStore();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.analyticsScreen} />,
+    });
+  }, [navigation]);
 
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [isLoading, setIsLoading] = useState(true);

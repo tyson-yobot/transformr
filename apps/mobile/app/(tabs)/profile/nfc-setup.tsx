@@ -23,6 +23,9 @@ import { Modal } from '@components/ui/Modal';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import type { NfcTrigger } from '@app-types/database';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Available NFC actions
@@ -49,7 +52,14 @@ const NFC_ACTIONS: NfcAction[] = [
 // ---------------------------------------------------------------------------
 export default function NfcSetupScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.nfcSetupScreen} />,
+    });
+  }, [navigation]);
 
   const [triggers, setTriggers] = useState<NfcTrigger[]>([]);
   const [isLoading, setIsLoading] = useState(true);

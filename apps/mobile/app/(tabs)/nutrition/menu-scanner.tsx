@@ -2,7 +2,7 @@
 // TRANSFORMR -- Restaurant Menu Scanner
 // =============================================================================
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,9 @@ import { hapticMedium, hapticSuccess, hapticLight } from '@utils/haptics';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { analyzeMenuPhoto } from '@services/ai/mealCamera';
 import { supabase } from '../../../services/supabase';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -47,9 +50,16 @@ type ScanStage = 'capture' | 'analyzing' | 'results';
 
 export default function MenuScannerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.menuScannerScreen} />,
+    });
+  }, [navigation]);
 
   const { logFood } = useNutritionStore();
   const [permission, requestPermission] = useCameraPermissions();

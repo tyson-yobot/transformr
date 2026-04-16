@@ -12,6 +12,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -63,6 +66,7 @@ const STRETCH_LIBRARY: StretchExercise[] = [
 
 export default function MobilityScreen() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
 
   const [routines, setRoutines] = useState<MobilityRoutine[]>([]);
   const [activeRoutine, setActiveRoutine] = useState<MobilityRoutine | null>(null);
@@ -77,6 +81,12 @@ export default function MobilityScreen() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [loadTick, setLoadTick] = useState(0);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.mobilityScreen} />,
+    });
+  }, [navigation]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);

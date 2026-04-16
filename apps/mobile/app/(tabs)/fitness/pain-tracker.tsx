@@ -13,6 +13,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -75,6 +78,7 @@ const PAIN_TYPES: { value: PainType; label: string; icon: string }[] = [
 
 export default function PainTrackerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +96,12 @@ export default function PainTrackerScreen() {
 
   // Selected body part history
   const [selectedPartHistory, setSelectedPartHistory] = useState<PainLog[]>([]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.painTrackerScreen} />,
+    });
+  }, [navigation]);
 
   const loadPainLogs = useCallback(async () => {
     try {

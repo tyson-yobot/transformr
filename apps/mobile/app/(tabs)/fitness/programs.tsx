@@ -13,6 +13,9 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -36,6 +39,7 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function ProgramsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
 
   const [programsWithExercises, setProgramsWithExercises] = useState<ProgramWithExercises[]>([]);
@@ -48,6 +52,12 @@ export default function ProgramsScreen() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProgramName, setNewProgramName] = useState('');
   const [newProgramDescription, setNewProgramDescription] = useState('');
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.programsScreen} />,
+    });
+  }, [navigation]);
 
   const loadPrograms = useCallback(async () => {
     try {

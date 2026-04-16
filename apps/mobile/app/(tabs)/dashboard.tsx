@@ -128,15 +128,16 @@ export default function DashboardScreen() {
     let pending = refs.length;
     refs.forEach((ref, i) => {
       ref.current?.measure((x, y, width, height, pageX, pageY) => {
-        if (width > 0 && height > 0 && content[i]) {
+        const step = content[i];
+        if (width > 0 && height > 0 && step) {
           steps[i] = {
             targetX: pageX,
             targetY: pageY,
             targetWidth: width,
             targetHeight: height,
-            title: content[i]!.title,
-            body: content[i]!.body,
-            position: content[i]!.position,
+            title: step.title,
+            body: step.body,
+            position: step.position,
           };
         }
         if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
@@ -897,7 +898,6 @@ export default function DashboardScreen() {
       )}
 
       <HelpBubble id="dashboard_fab" message="Tap the purple button to chat with your AI coach" position="below" />
-      <Coachmark screenKey={COACHMARK_KEYS.dashboard} steps={coachmarkSteps} />
 
       {/* Recent Achievements */}
       <Animated.View entering={FadeInDown.delay(400).duration(400)}>
@@ -960,6 +960,7 @@ export default function DashboardScreen() {
           </View>
         </Card>
       </Animated.View>
+      <Coachmark screenKey={COACHMARK_KEYS.dashboard} steps={coachmarkSteps} />
     </ScrollView>
   );
 }

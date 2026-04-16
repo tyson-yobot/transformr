@@ -22,6 +22,9 @@ import { useProfileStore } from '@stores/profileStore';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import * as Notifications from 'expo-notifications';
 import type { NotificationPreferences } from '@app-types/database';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Default prefs
@@ -150,7 +153,14 @@ function formatTimeDisplay(prefs: NotificationPreferences, key: keyof Notificati
 // ---------------------------------------------------------------------------
 export default function NotificationsSettingsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.notificationsSettingsScreen} />,
+    });
+  }, [navigation]);
 
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
