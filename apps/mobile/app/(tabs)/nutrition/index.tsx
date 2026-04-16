@@ -35,6 +35,9 @@ import { MEAL_TYPES, MACRO_COLORS, DEFAULT_WATER_TARGET_OZ } from '@utils/consta
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { EmptyState } from '@components/ui/EmptyState';
+import { ProgressBar } from '@components/ui/ProgressBar';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { NutritionLog } from '@app-types/database';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -77,6 +80,9 @@ export default function NutritionHomeScreen() {
   const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog, foodNameMap } =
     useNutritionStore();
   const { profile } = useProfileStore();
+
+  const cameraGate = useFeatureGate('ai_meal_camera');
+  const barcodeGate = useFeatureGate('barcode_scanner');
 
   const [dayOffset, setDayOffset] = useState(0);
   const [fabOpen, setFabOpen] = useState(false);
@@ -169,9 +175,17 @@ export default function NutritionHomeScreen() {
     hapticMedium();
     switch (action) {
       case 'camera':
+        if (!cameraGate.isAvailable || cameraGate.isCapped) {
+          cameraGate.showUpgradeModal();
+          return;
+        }
         router.push('/(tabs)/nutrition/meal-camera');
         break;
       case 'barcode':
+        if (!barcodeGate.isAvailable || barcodeGate.isCapped) {
+          barcodeGate.showUpgradeModal();
+          return;
+        }
         router.push('/(tabs)/nutrition/barcode-scanner');
         break;
       case 'menu':
@@ -181,7 +195,7 @@ export default function NutritionHomeScreen() {
         router.push('/(tabs)/nutrition/add-food');
         break;
     }
-  }, [router]);
+  }, [router, cameraGate, barcodeGate]);
 
   const fabScale = useSharedValue(1);
   const fabAnimatedStyle = useAnimatedStyle(() => ({
@@ -351,6 +365,25 @@ export default function NutritionHomeScreen() {
             </View>
           </Card>
         </Animated.View>
+        {/* Calorie Progress Bar */}
+        <Animated.View entering={FadeInDown.duration(400).delay(150)}>
+          <Card style={{ marginBottom: spacing.lg }}>
+            <ProgressBar
+              progress={todayMacros.calories / targets.calories}
+              label={`${formatCalories(todayMacros.calories)} of ${formatCalories(targets.calories)}`}
+              showPercentage
+              color={
+                todayMacros.calories > targets.calories * 1.1
+                  ? colors.accent.danger
+                  : todayMacros.calories >= targets.calories * 0.9
+                  ? colors.accent.warning
+                  : colors.accent.success
+              }
+              height={12}
+            />
+          </Card>
+        </Animated.View>
+
         <HelpBubble id="nutrition_macros" message="Tap any ring to see your full macro breakdown" position="below" />
 
         {/* Quick Links */}
@@ -395,6 +428,20 @@ export default function NutritionHomeScreen() {
             </Pressable>
           </ScrollView>
         </Animated.View>
+
+        {/* Global empty food log state */}
+        {todayLogs.length === 0 && dayOffset === 0 && (
+          <Animated.View entering={FadeInDown.duration(400).delay(250)}>
+            <EmptyState
+              icon={'\u{1F957}'}
+              title="Nothing logged yet"
+              subtitle="Start logging to see your macros"
+              actionLabel="Log a Meal"
+              onAction={() => handleQuickAdd('snack')}
+              style={{ marginBottom: spacing.lg }}
+            />
+          </Animated.View>
+        )}
 
         {/* Meal Sections */}
         {MEAL_SECTIONS.map((section, index) => {
