@@ -58,13 +58,6 @@ export default function MealCameraScreen() {
   const navigation = useNavigation();
   const cameraRef = useRef<CameraView>(null);
   const gate = useFeatureGate('ai_meal_camera');
-  if (!gate.isAvailable) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="ai_meal_camera" height={200} />
-      </SafeAreaView>
-    );
-  }
 
   useEffect(() => {
     navigation.setOptions({
@@ -179,6 +172,15 @@ export default function MealCameraScreen() {
     setSelectedItems(new Set());
   }, []);
 
+
+  // Feature gate check (must be after all hooks)
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="ai_meal_camera" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   // Permission handling
   if (!permission) {

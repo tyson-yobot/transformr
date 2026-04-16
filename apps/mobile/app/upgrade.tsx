@@ -1,0 +1,550 @@
+// =============================================================================
+// TRANSFORMR — Upgrade Screen
+//
+// Full-screen upgrade page navigable from the profile tab (and any gate prompt).
+// Accepts an optional `feature` search param (FeatureKey) to highlight the
+// required tier for the blocked feature.
+//
+// Usage:
+//   router.push({ pathname: '/upgrade', params: { feature: 'ai_chat_coach' } });
+// =============================================================================
+
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
+import { useTheme } from '@theme/index';
+import { createSubscription, restorePurchase } from '../services/stripe';
+import { useFeatureGate, FeatureKey } from '../hooks/useFeatureGate';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+type UpgradeTier = 'pro' | 'elite' | 'partners';
+
+const TIER_PRICES: Record<UpgradeTier, { monthly: string; annual: string }> = {
+  pro:      { monthly: '$9.99',  annual: '$8.29'  },
+  elite:    { monthly: '$19.99', annual: '$16.59' },
+  partners: { monthly: '$29.99', annual: '$24.91' },
+};
+
+const TIER_FEATURES: Record<UpgradeTier, string[]> = {
+  pro: [
+    'Unlimited AI coaching messages',
+    'AI meal camera & grocery lists',
+    'Readiness score & insights',
+    'Wearable integrations',
+  ],
+  elite: [
+    'Everything in Pro',
+    'Business & finance tracking',
+    'AI trajectory simulator',
+    'Priority support',
+  ],
+  partners: [
+    'Everything in Elite',
+    'Live partner sync',
+    'Accountability features',
+    'Shared challenge progress',
+  ],
+};
+
+const TIER_LABELS: Record<UpgradeTier, string> = {
+  pro:      'Pro',
+  elite:    'Elite',
+  partners: 'Partners',
+};
+
+const TIERS: UpgradeTier[] = ['pro', 'elite', 'partners'];
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+interface TierCardProps {
+  tier: UpgradeTier;
+  isSelected: boolean;
+  isAnnual: boolean;
+  isHighlighted: boolean;
+  onSelect: (tier: UpgradeTier) => void;
+}
+
+function TierCard({ tier, isSelected, isAnnual, isHighlighted, onSelect }: TierCardProps) {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const price = isAnnual ? TIER_PRICES[tier].annual : TIER_PRICES[tier].monthly;
+  const isRecommended = tier === 'pro';
+
+  const handlePress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onSelect(tier);
+  }, [tier, onSelect]);
+
+  const borderColor = isHighlighted
+    ? colors.accent.secondary
+    : isSelected
+    ? colors.accent.primary
+    : colors.border.default;
+
+  const bgColor = isSelected ? colors.dim.primary : colors.background.tertiary;
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      style={[
+        styles.tierCard,
+        {
+          backgroundColor: bgColor,
+          borderColor,
+          borderRadius: borderRadius.md,
+          padding: spacing.md,
+          borderWidth: isHighlighted || isSelected ? 2 : 1.5,
+        },
+      ]}
+      accessibilityLabel={`Select ${TIER_LABELS[tier]} plan at ${price} per ${isAnnual ? 'month billed annually' : 'month'}`}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: isSelected }}
+    >
+      {isRecommended && (
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: colors.accent.primary,
+              borderRadius: borderRadius.sm,
+              marginBottom: spacing.xs,
+            },
+          ]}
+        >
+          <Text
+            style={[typography.caption, { color: colors.text.inverse, fontWeight: '700' }]}
+          >
+            Most Popular
+          </Text>
+        </View>
+      )}
+
+      {isHighlighted && !isRecommended && (
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: colors.accent.secondary,
+              borderRadius: borderRadius.sm,
+              marginBottom: spacing.xs,
+            },
+          ]}
+        >
+          <Text
+            style={[typography.caption, { color: colors.text.inverse, fontWeight: '700' }]}
+          >
+            Required
+          </Text>
+        </View>
+      )}
+
+      <Text
+        style={[
+          typography.h3,
+          {
+            color: isSelected ? colors.accent.primary : colors.text.primary,
+            fontWeight: '700',
+          },
+        ]}
+      >
+        {TIER_LABELS[tier]}
+      </Text>
+
+      <Text
+        style={[
+          typography.body,
+          { color: colors.text.primary, fontWeight: '700', marginTop: 2 },
+        ]}
+      >
+        {price}
+        <Text
+          style={[
+            typography.caption,
+            { color: colors.text.secondary, fontWeight: '400' },
+          ]}
+        >
+          {' '}/mo
+        </Text>
+      </Text>
+
+      <View style={{ marginTop: spacing.sm }}>
+        {TIER_FEATURES[tier].map((feature) => (
+          <View key={feature} style={[styles.featureRow, { marginTop: 4 }]}>
+            <Text
+              style={[
+                typography.caption,
+                { color: colors.accent.primary, marginRight: 4 },
+              ]}
+            >
+              ·
+            </Text>
+            <Text
+              style={[
+                typography.caption,
+                { color: colors.text.secondary, flex: 1 },
+              ]}
+              numberOfLines={2}
+            >
+              {feature}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </Pressable>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Returns the tier that gates the given feature, or 'pro' as fallback. */
+function useRequiredTier(feature: FeatureKey | undefined): UpgradeTier {
+  const gate = useFeatureGate(feature ?? 'ai_chat_coach');
+  const required = gate.requiredTier;
+  if (required === 'elite' || required === 'partners') return required;
+  return 'pro';
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
+export default function UpgradeScreen() {
+  const { colors, typography, spacing, borderRadius } = useTheme();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const params = useLocalSearchParams<{ feature?: string }>();
+  const featureParam = params.feature as FeatureKey | undefined;
+
+  const requiredTier = useRequiredTier(featureParam);
+
+  const [selectedTier, setSelectedTier] = useState<UpgradeTier>(requiredTier);
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoadingPurchase, setIsLoadingPurchase] = useState(false);
+  const [isLoadingRestore, setIsLoadingRestore] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const handleTierSelect = useCallback((tier: UpgradeTier) => {
+    setSelectedTier(tier);
+  }, []);
+
+  const handleToggleAnnual = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setIsAnnual((prev) => !prev);
+  }, []);
+
+  const handleUpgrade = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsLoadingPurchase(true);
+    setStatusMessage(null);
+    try {
+      const result = await createSubscription(
+        selectedTier,
+        isAnnual ? 'annual' : 'monthly',
+      );
+      if (result.error) {
+        setStatusMessage(result.error);
+      } else {
+        router.back();
+      }
+    } finally {
+      setIsLoadingPurchase(false);
+    }
+  }, [selectedTier, isAnnual, router]);
+
+  const handleRestore = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setIsLoadingRestore(true);
+    setStatusMessage(null);
+    try {
+      const result = await restorePurchase();
+      if (result.error) {
+        setStatusMessage(result.error);
+      } else if (result.tier) {
+        setStatusMessage(`Restored ${result.tier} subscription.`);
+        setTimeout(() => router.back(), 1200);
+      } else {
+        setStatusMessage('No active subscription found to restore.');
+      }
+    } finally {
+      setIsLoadingRestore(false);
+    }
+  }, [router]);
+
+  const featureGate = useFeatureGate(featureParam ?? 'ai_chat_coach');
+  const upgradeMessage = featureParam
+    ? featureGate.upgradeMessage
+    : 'Unlock the full TRANSFORMR experience';
+
+  const isBusy = isLoadingPurchase || isLoadingRestore;
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: 'Upgrade TRANSFORMR',
+          headerBackTitle: 'Back',
+        }}
+      />
+
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.lg,
+            paddingBottom: insets.bottom + spacing.xxl,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero headline */}
+        <Text
+          style={[
+            typography.h2,
+            {
+              color: colors.text.primary,
+              fontWeight: '700',
+              textAlign: 'center',
+              marginBottom: spacing.xs,
+            },
+          ]}
+        >
+          {upgradeMessage}
+        </Text>
+
+        <Text
+          style={[
+            typography.body,
+            {
+              color: colors.text.secondary,
+              textAlign: 'center',
+              marginBottom: spacing.lg,
+            },
+          ]}
+        >
+          Choose the plan that fits your goals.
+        </Text>
+
+        {/* Tier cards */}
+        <View style={[styles.tierRow, { gap: spacing.sm }]}>
+          {TIERS.map((tier) => (
+            <TierCard
+              key={tier}
+              tier={tier}
+              isSelected={selectedTier === tier}
+              isAnnual={isAnnual}
+              isHighlighted={tier === requiredTier && tier !== 'pro'}
+              onSelect={handleTierSelect}
+            />
+          ))}
+        </View>
+
+        {/* Annual billing toggle */}
+        <Pressable
+          onPress={handleToggleAnnual}
+          style={[
+            styles.annualToggle,
+            {
+              backgroundColor: isAnnual
+                ? colors.dim.primary
+                : colors.background.tertiary,
+              borderColor: isAnnual
+                ? colors.accent.primary
+                : colors.border.default,
+              borderRadius: borderRadius.md,
+              marginTop: spacing.lg,
+              paddingVertical: spacing.md,
+              paddingHorizontal: spacing.lg,
+              minHeight: 44,
+            },
+          ]}
+          accessibilityLabel={
+            isAnnual
+              ? 'Annual billing selected, save 17%'
+              : 'Switch to annual billing and save 17%'
+          }
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isAnnual }}
+        >
+          <View style={styles.annualToggleInner}>
+            <View
+              style={[
+                styles.toggleDot,
+                {
+                  backgroundColor: isAnnual
+                    ? colors.accent.primary
+                    : colors.text.muted,
+                },
+              ]}
+            />
+            <Text
+              style={[
+                typography.body,
+                { color: colors.text.primary, marginLeft: spacing.sm },
+              ]}
+            >
+              Annual billing{' '}
+              <Text style={{ color: colors.accent.success, fontWeight: '700' }}>
+                (save 17%)
+              </Text>
+            </Text>
+          </View>
+        </Pressable>
+
+        {/* Status / error message */}
+        {statusMessage ? (
+          <Text
+            style={[
+              typography.caption,
+              {
+                color: colors.accent.danger ?? colors.text.muted,
+                textAlign: 'center',
+                marginTop: spacing.md,
+              },
+            ]}
+          >
+            {statusMessage}
+          </Text>
+        ) : null}
+
+        {/* CTA button */}
+        <Pressable
+          onPress={handleUpgrade}
+          disabled={isBusy}
+          style={[
+            styles.ctaButton,
+            {
+              backgroundColor: isBusy
+                ? colors.accent.primaryDark
+                : colors.accent.primary,
+              borderRadius: borderRadius.md,
+              marginTop: spacing.lg,
+              height: 52,
+            },
+          ]}
+          accessibilityLabel={`Upgrade to ${TIER_LABELS[selectedTier]}`}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isBusy, busy: isBusy }}
+        >
+          {isLoadingPurchase ? (
+            <ActivityIndicator color={colors.text.inverse} />
+          ) : (
+            <Text
+              style={[
+                typography.h3,
+                { color: colors.text.inverse, fontWeight: '700' },
+              ]}
+            >
+              {`Upgrade to ${TIER_LABELS[selectedTier]}`}
+            </Text>
+          )}
+        </Pressable>
+
+        {/* Fine print */}
+        <Text
+          style={[
+            typography.caption,
+            {
+              color: colors.text.muted,
+              textAlign: 'center',
+              marginTop: spacing.md,
+            },
+          ]}
+        >
+          Cancel anytime · Secure payment by Stripe
+        </Text>
+
+        {/* Restore purchases */}
+        <Pressable
+          onPress={handleRestore}
+          disabled={isBusy}
+          style={[styles.restoreButton, { marginTop: spacing.md, minHeight: 44 }]}
+          accessibilityLabel="Restore previous purchases"
+          accessibilityRole="button"
+        >
+          {isLoadingRestore ? (
+            <ActivityIndicator size="small" color={colors.accent.primary} />
+          ) : (
+            <Text
+              style={[
+                typography.caption,
+                {
+                  color: colors.accent.primary,
+                  textDecorationLine: 'underline',
+                  fontWeight: '500',
+                },
+              ]}
+            >
+              Restore Purchases
+            </Text>
+          )}
+        </Pressable>
+      </ScrollView>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flexGrow: 1,
+  },
+  tierRow: {
+    flexDirection: 'row',
+  },
+  tierCard: {
+    flex: 1,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  annualToggle: {
+    borderWidth: 1.5,
+  },
+  annualToggleInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  ctaButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  restoreButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -58,13 +58,6 @@ export default function MenuScannerScreen() {
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
   const gate = useFeatureGate('ai_meal_camera');
-  if (!gate.isAvailable) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="ai_meal_camera" height={200} />
-      </SafeAreaView>
-    );
-  }
 
   useEffect(() => {
     navigation.setOptions({
@@ -176,6 +169,15 @@ export default function MenuScannerScreen() {
     hapticSuccess();
     Alert.alert('Saved!', `${restaurantName} has been saved to your favorites.`);
   }, [restaurantName]);
+
+  // Feature gate check (must be after all hooks)
+  if (!gate.isAvailable) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <GatePromptCard featureKey="ai_meal_camera" height={200} />
+      </SafeAreaView>
+    );
+  }
 
   if (!permission) {
     return (
