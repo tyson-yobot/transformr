@@ -183,7 +183,7 @@ export function Coachmark({ screenKey, steps, onComplete }: CoachmarkProps) {
               accessibilityRole="button"
               accessibilityLabel={stepIndex < steps.length - 1 ? 'Next tip' : 'Got it'}
             >
-              <Text style={[typography.captionBold, { color: '#fff' }]}>
+              <Text style={[typography.captionBold, { color: '#fff' /* brand-ok — white on accent button */ }]}>
                 {stepIndex < steps.length - 1 ? 'Next →' : 'Got it'}
               </Text>
             </TouchableOpacity>

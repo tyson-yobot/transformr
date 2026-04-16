@@ -333,7 +333,7 @@ export function NudgeButton({
                 disabled={customMessage.trim().length === 0}
                 accessibilityRole="button"
               >
-                <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+                <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */, textAlign: 'center' }]}>
                   Send
                 </Text>
               </Pressable>

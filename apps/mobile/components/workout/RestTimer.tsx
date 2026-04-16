@@ -248,7 +248,7 @@ export function RestTimer({
           ]}
           accessibilityRole="button"
         >
-          <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+          <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */, textAlign: 'center' }]}>
             {isRunning ? 'Pause' : remainingSeconds === 0 ? 'Restart' : 'Start'}
           </Text>
         </Pressable>

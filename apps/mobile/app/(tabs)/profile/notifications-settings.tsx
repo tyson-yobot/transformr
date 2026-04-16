@@ -214,8 +214,7 @@ export default function NotificationsSettingsScreen() {
         }
       };
       if (Platform.OS === 'ios') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (Alert as any).prompt(
+        Alert.prompt(
           'Set Time',
           'Enter time in HH:MM (24-hour) format',
           [

@@ -70,7 +70,7 @@ export function GatePromptCard({ featureKey, height = 120 }: GatePromptCardProps
         accessibilityLabel={`Unlock with ${tierLabel}`}
         accessibilityRole="button"
       >
-        <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+        <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok — white on accent button */ }]}>
           Unlock with {tierLabel}
         </Text>
       </Pressable>

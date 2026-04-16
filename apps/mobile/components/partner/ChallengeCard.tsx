@@ -288,7 +288,7 @@ export function ChallengeCard({
               accessibilityRole="button"
               accessibilityLabel="Accept challenge"
             >
-              <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+              <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */, textAlign: 'center' }]}>
                 Accept
               </Text>
             </Pressable>

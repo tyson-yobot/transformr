@@ -263,7 +263,7 @@ function SupplementItem({
           ]}
         >
           <Animated.View style={checkAnimatedStyle}>
-            <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>
+            <Text style={{ color: '#FFFFFF' /* brand-ok — white checkmark on accent */, fontSize: 14, fontWeight: '700' }}>
               {'\u2713'}
             </Text>
           </Animated.View>

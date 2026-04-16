@@ -502,12 +502,12 @@ const styles = StyleSheet.create({
   },
   // Create Account button
   createBtn: {
-    backgroundColor: '#A855F7',
+    backgroundColor: '#A855F7' /* brand-ok */,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     marginBottom: 20,
-    shadowColor: '#A855F7',
+    shadowColor: '#A855F7' /* brand-ok */,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 20,
@@ -516,11 +516,11 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(192,132,252,0.3)',
   },
   createBtnPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
-  createBtnText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', letterSpacing: 1.5 },
+  createBtnText: { color: '#FFFFFF' /* brand-ok */, fontSize: 17, fontWeight: '700', letterSpacing: 1.5 },
   // Divider
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 28 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' },
-  dividerText: { fontSize: 12, color: '#6B5E8A', marginHorizontal: 20, fontWeight: '600', letterSpacing: 2 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#2A2248' /* brand-ok */ },
+  dividerText: { fontSize: 12, color: '#6B5E8A' /* brand-ok */, marginHorizontal: 20, fontWeight: '600', letterSpacing: 2 },
   // Social buttons
   socialBtn: {
     flexDirection: 'row',
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   socialBtnPressed: { borderColor: '#362C5E', backgroundColor: 'rgba(30,24,56,0.9)' },
-  socialBtnText: { fontSize: 16, color: '#F0F0FC', fontWeight: '500' },
+  socialBtnText: { fontSize: 16, color: '#F0F0FC' /* brand-ok */, fontWeight: '500' },
   // Trust indicator
   trustRow: {
     flexDirection: 'row',
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 6,
   },
-  trustText: { fontSize: 11, color: '#6B5E8A', letterSpacing: 0.5 },
+  trustText: { fontSize: 11, color: '#6B5E8A' /* brand-ok */, letterSpacing: 0.5 },
   // Sign in
   signInRow: {
     flexDirection: 'row',
@@ -552,11 +552,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingBottom: 40,
   },
-  signInText: { fontSize: 15, color: '#9B8FC0' },
+  signInText: { fontSize: 15, color: '#9B8FC0' /* brand-ok */ },
   signInLink: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#C084FC',
+    color: '#C084FC' /* brand-ok */,
     textDecorationLine: 'underline',
     textDecorationColor: 'rgba(192,132,252,0.3)',
   },

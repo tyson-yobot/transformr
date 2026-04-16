@@ -123,7 +123,7 @@ export function MealCard({
           deleteAnimatedStyle,
         ]}
       >
-        <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Delete</Text>
+        <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on delete action */ }]}>Delete</Text>
       </Animated.View>
 
       <GestureDetector gesture={panGesture}>

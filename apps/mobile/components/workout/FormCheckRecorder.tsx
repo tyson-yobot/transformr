@@ -212,7 +212,7 @@ export function FormCheckRecorder({
             },
           ]}
         >
-          <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+          <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */ }]}>
             Grant Permission
           </Text>
         </Pressable>
@@ -267,7 +267,7 @@ export function FormCheckRecorder({
               },
             ]}
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */, textAlign: 'center' }]}>
               Submit for Analysis
             </Text>
           </Pressable>
@@ -321,7 +321,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+              <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok — white on dark camera overlay */ }]}>
                 {recordingSeconds}s / {maxDurationSeconds}s
               </Text>
             </View>
@@ -340,7 +340,7 @@ export function FormCheckRecorder({
                 },
               ]}
             >
-              <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+              <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok — white on dark dismiss button */ }]}>
                 {'\u2715'}
               </Text>
             </Pressable>

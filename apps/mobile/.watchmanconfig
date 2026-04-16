@@ -1,0 +1,3 @@
+{
+  "ignore_dirs": ["screenshots", "__tests__/snapshots", "node_modules/.cache"]
+}

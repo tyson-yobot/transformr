@@ -101,7 +101,7 @@ function ScanningOverlay() {
       <Text
         style={[
           typography.bodyBold,
-          { color: '#FFFFFF', marginTop: spacing.xl, textAlign: 'center' },
+          { color: '#FFFFFF' /* brand-ok — white on dark camera overlay */, marginTop: spacing.xl, textAlign: 'center' },
         ]}
       >
         Position your meal in the frame
@@ -165,7 +165,7 @@ function AnalyzingOverlay() {
         <Text
           style={[
             typography.bodyBold,
-            { color: '#FFFFFF', marginLeft: spacing.md },
+            { color: '#FFFFFF' /* brand-ok — white on dark camera overlay */, marginLeft: spacing.md },
           ]}
         >
           Analyzing your meal...
@@ -267,7 +267,7 @@ function ResultsOverlay({
             accessibilityRole="button"
             accessibilityLabel={`Add ${item.name} to food log`}
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF', textAlign: 'center' }]}>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */, textAlign: 'center' }]}>
               Add to Log
             </Text>
           </Pressable>
@@ -382,7 +382,7 @@ export function MealCameraOverlay({
         accessibilityLabel="Close camera"
         hitSlop={12}
       >
-        <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+        <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on dark dismiss button */ }]}>
           {'\u2715'}
         </Text>
       </Pressable>

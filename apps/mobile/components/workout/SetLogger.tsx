@@ -219,7 +219,7 @@ export function SetLogger({
             },
           ]}
         >
-          <Text style={[typography.captionBold, { color: '#FFFFFF' }]}>
+          <Text style={[typography.captionBold, { color: '#FFFFFF' /* brand-ok — white on delete action */ }]}>
             Delete
           </Text>
         </View>

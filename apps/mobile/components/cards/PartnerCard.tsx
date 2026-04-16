@@ -79,7 +79,7 @@ export function PartnerCard({
               style={[styles.avatarImage, { borderRadius: borderRadius.full }]}
             />
           ) : (
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on avatar placeholder */ }]}>
               {initials}
             </Text>
           )}

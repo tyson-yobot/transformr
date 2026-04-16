@@ -283,7 +283,7 @@ export default function PainTrackerScreen() {
                         },
                       ]}
                     >
-                      <Text style={[typography.monoCaption, { color: '#FFFFFF', fontWeight: '700' }]}>
+                      <Text style={[typography.monoCaption, { color: '#FFFFFF' /* brand-ok — white on colored badge */, fontWeight: '700' }]}>
                         {log.pain_level}
                       </Text>
                     </View>
@@ -334,7 +334,7 @@ export default function PainTrackerScreen() {
                       },
                     ]}
                   >
-                    <Text style={[typography.monoBody, { color: '#FFFFFF', fontWeight: '700' }]}>
+                    <Text style={[typography.monoBody, { color: '#FFFFFF' /* brand-ok — white on colored badge */, fontWeight: '700' }]}>
                       {log.pain_level}
                     </Text>
                   </View>

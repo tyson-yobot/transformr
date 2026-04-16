@@ -148,7 +148,7 @@ export function Timer({
             accessibilityRole="button"
             accessibilityLabel="Start timer"
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Start</Text>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */ }]}>Start</Text>
           </Pressable>
         )}
         {timerState === 'running' && (
@@ -166,7 +166,7 @@ export function Timer({
             accessibilityRole="button"
             accessibilityLabel="Pause timer"
           >
-            <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Pause</Text>
+            <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */ }]}>Pause</Text>
           </Pressable>
         )}
         {timerState === 'paused' && (
@@ -185,7 +185,7 @@ export function Timer({
               accessibilityRole="button"
               accessibilityLabel="Resume timer"
             >
-              <Text style={[typography.bodyBold, { color: '#FFFFFF' }]}>Resume</Text>
+              <Text style={[typography.bodyBold, { color: '#FFFFFF' /* brand-ok — white on accent button */ }]}>Resume</Text>
             </Pressable>
             <Pressable
               onPress={reset}
