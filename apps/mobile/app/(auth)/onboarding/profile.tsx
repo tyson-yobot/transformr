@@ -316,7 +316,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap' },
   chip: {},
   row: { flexDirection: 'row' },

@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Input } from '@components/ui/Input';
-import { hapticLight } from '@utils/haptics';
+import { hapticLight, hapticMedium } from '@utils/haptics';
 import { isValidEmail, isValidPassword, isNotEmpty } from '@utils/validators';
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
@@ -337,8 +337,10 @@ export default function RegisterScreen() {
 
               {/* Create Account Button */}
               <Pressable
-                onPress={handleSignUp}
+                onPress={() => { void hapticMedium(); void handleSignUp(); }}
                 disabled={loading}
+                accessibilityLabel="Create your account"
+                accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.createBtn,
                   pressed && styles.createBtnPressed,

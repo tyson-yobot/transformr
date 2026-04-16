@@ -256,7 +256,7 @@ export default function FitnessScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   optionRow: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
   freqRow: { flexDirection: 'row' },

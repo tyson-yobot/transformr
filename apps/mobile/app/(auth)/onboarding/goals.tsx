@@ -201,7 +201,7 @@ export default function GoalsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   grid: {},
   goalCard: {},
   goalCardContent: { flexDirection: 'row', alignItems: 'center' },

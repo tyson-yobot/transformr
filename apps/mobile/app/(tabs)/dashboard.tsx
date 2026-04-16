@@ -18,6 +18,7 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
+import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
 import { PredictionAlert } from '@components/cards/PredictionAlert';
@@ -34,7 +35,7 @@ import { useBusinessStore } from '@stores/businessStore';
 import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
 import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatters';
-import { hapticLight } from '@utils/haptics';
+import { hapticLight, hapticMedium } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '../../services/supabase';
@@ -105,6 +106,8 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
@@ -136,6 +139,14 @@ export default function DashboardScreen() {
 
   useCountdown(primaryGoal?.target_date ?? null);
 
+  // Top 3 habits by streak
+  const top3Streaks = useMemo(() => {
+    return habitStore.habits
+      .filter((h) => h.is_active !== false && (h.current_streak ?? 0) > 0)
+      .sort((a, b) => (b.current_streak ?? 0) - (a.current_streak ?? 0))
+      .slice(0, 3);
+  }, [habitStore.habits]);
+
   // Streak from habits
   const currentStreak = useMemo(() => {
     const streaks = habitStore.habits
@@ -159,11 +170,30 @@ export default function DashboardScreen() {
     return nutritionStore.todayLogs.reduce((sum, log) => sum + (log.calories ?? 0), 0);
   }, [nutritionStore.todayLogs]);
 
+  // Protein today
+  const proteinToday = useMemo(() => {
+    return nutritionStore.todayLogs.reduce((sum, log) => sum + (log.protein ?? 0), 0);
+  }, [nutritionStore.todayLogs]);
+
+  // Water today (oz)
+  const waterOzToday = useMemo(() => {
+    return nutritionStore.waterLogs.reduce((sum, log) => sum + (log.amount_oz ?? 0), 0);
+  }, [nutritionStore.waterLogs]);
+
+  // Workout done today
+  const workoutDoneToday = useMemo(() => {
+    return !!workoutStore.activeSession?.completed_at;
+  }, [workoutStore.activeSession]);
+
   // Computed readiness fallback (profile-based estimate until real score loads)
   const readinessScoreDisplay = readinessScore ?? (profile?.current_weight ? 78 : 0);
 
-  // Motivational greeting — rotates by day, adapts to time of day
+  // Greeting with user name
   const motivationalGreeting = getTodayGreeting();
+  const greetingWithName = useMemo(() => {
+    const firstName = profile?.display_name?.split(' ')[0] ?? '';
+    return firstName ? `${motivationalGreeting.text.replace(/\.$/, '')}${firstName ? `, ${firstName}` : ''}.` : motivationalGreeting.text;
+  }, [profile?.display_name, motivationalGreeting.text]);
 
   // Latest accountability message from AI coach
   const accountabilityMessage = useMemo(() => {
@@ -247,7 +277,7 @@ export default function DashboardScreen() {
           );
         }
       } catch (err: unknown) {
-        console.error('Dashboard data load failed:', err instanceof Error ? err.message : err);
+        setDashboardError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       }
     };
     void loadDashboardData();
@@ -256,21 +286,24 @@ export default function DashboardScreen() {
   // Refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    setDashboardError(null);
     await hapticLight();
     await Promise.all([
       fetchProfile(),
       goalStore.fetchGoals(),
       habitStore.fetchHabits(),
+      nutritionStore.fetchTodayNutrition(),
+      workoutStore.fetchTemplates(),
       partnerStore.fetchPartnership(),
       businessStore.fetchBusinesses(),
       insightStore.fetchAll(),
     ]);
     setRefreshing(false);
-  }, [fetchProfile, goalStore, habitStore, partnerStore, businessStore, insightStore]);
+  }, [fetchProfile, goalStore, habitStore, nutritionStore, workoutStore, partnerStore, businessStore, insightStore]);
 
   // Initial fetch
   useEffect(() => {
-    void onRefresh();
+    void onRefresh().finally(() => setInitialLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -312,6 +345,10 @@ export default function DashboardScreen() {
     diamond: '#B9F2FF',
   };
 
+  if (initialLoading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
@@ -330,7 +367,23 @@ export default function DashboardScreen() {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Motivational Greeting */}
+      {/* Dashboard error banner */}
+      {dashboardError && (
+        <Pressable
+          onPress={() => { void hapticLight(); void onRefresh(); }}
+          accessibilityLabel="Retry loading dashboard data"
+          style={[styles.errorBanner, { backgroundColor: colors.accent.danger + '18', borderColor: colors.accent.danger + '40' }]}
+        >
+          <Text style={[typography.caption, { color: colors.accent.danger }]}>
+            {dashboardError}
+          </Text>
+          <Text style={[typography.captionBold, { color: colors.accent.danger, marginTop: spacing.xs }]}>
+            Tap to retry
+          </Text>
+        </Pressable>
+      )}
+
+      {/* Greeting */}
       <Animated.View
         entering={FadeInDown.delay(0).duration(800)}
         style={{ marginBottom: spacing.xl }}
@@ -341,7 +394,7 @@ export default function DashboardScreen() {
             { color: colors.text.primary, lineHeight: 32, marginBottom: spacing.sm },
           ]}
         >
-          {motivationalGreeting.text}
+          {greetingWithName}
         </Text>
         <Text style={[typography.caption, { color: colors.text.secondary }]}>
           {motivationalGreeting.timeLabel}
@@ -482,7 +535,7 @@ export default function DashboardScreen() {
       )}
 
       {/* Primary Countdown */}
-      {primaryGoal && primaryGoal.start_date && primaryGoal.target_date && (
+      {primaryGoal && primaryGoal.start_date && primaryGoal.target_date ? (
         <Animated.View entering={FadeInDown.delay(50).duration(400)}>
           <CountdownCard
             title={primaryGoal.title}
@@ -492,12 +545,154 @@ export default function DashboardScreen() {
             style={{ marginBottom: spacing.lg }}
           />
         </Animated.View>
+      ) : (
+        <Animated.View entering={FadeInDown.delay(50).duration(400)} style={{ marginBottom: spacing.lg }}>
+          <Pressable
+            onPress={() => { void hapticMedium(); router.push('/(tabs)/goals'); }}
+            accessibilityLabel="Set your goal deadline"
+            accessibilityRole="button"
+          >
+            <Card
+              style={{
+                borderWidth: 1,
+                borderStyle: 'dashed',
+                borderColor: colors.accent.primary + '60',
+                backgroundColor: colors.accent.primary + '08',
+                alignItems: 'center',
+                paddingVertical: spacing.xl,
+              }}
+            >
+              <Text style={{ fontSize: 28, marginBottom: spacing.sm }}>🎯</Text>
+              <Text style={[typography.bodyBold, { color: colors.accent.primary, marginBottom: spacing.xs }]}>
+                Set Your Goal Deadline
+              </Text>
+              <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                Add a target date to track your countdown
+              </Text>
+            </Card>
+          </Pressable>
+        </Animated.View>
       )}
 
       {/* Quick Stats Row */}
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
         <QuickStatsRow stats={quickStats} style={{ marginBottom: spacing.lg }} />
       </Animated.View>
+
+      {/* Stats Grid — calories, protein, water, workout */}
+      <Animated.View entering={FadeInDown.delay(110).duration(400)}>
+        <Card
+          variant="default"
+          style={{ marginBottom: spacing.lg }}
+          header={
+            <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Stats</Text>
+          }
+        >
+          <View style={styles.statsGrid}>
+            <StatsCell
+              label="Calories"
+              logged={caloriesToday}
+              target={profile?.daily_calorie_target ?? 2000}
+              unit="kcal"
+            />
+            <StatsCell
+              label="Protein"
+              logged={Math.round(proteinToday)}
+              target={profile?.daily_protein_target ?? 150}
+              unit="g"
+            />
+            <StatsCell
+              label="Water"
+              logged={Math.round(waterOzToday)}
+              target={profile?.daily_water_target_oz ?? 64}
+              unit="oz"
+            />
+            <View style={styles.statsCell}>
+              <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+                Workout
+              </Text>
+              <Text style={{ fontSize: 20 }}>{workoutDoneToday ? '✅' : '⏳'}</Text>
+              <Text style={[typography.caption, { color: workoutDoneToday ? colors.accent.success : colors.text.muted }]}>
+                {workoutDoneToday ? 'Done' : 'Pending'}
+              </Text>
+            </View>
+          </View>
+        </Card>
+      </Animated.View>
+
+      {/* Quick Actions */}
+      <Animated.View entering={FadeInDown.delay(120).duration(400)}>
+        <Card variant="default" style={{ marginBottom: spacing.lg }}>
+          <View style={styles.quickActionsRow}>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
+              accessibilityLabel="Log Workout"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.primary + '15', borderColor: colors.accent.primary + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>💪</Text>
+              <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Workout
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/nutrition/add-food' as never); }}
+              accessibilityLabel="Log Meal"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.success + '15', borderColor: colors.accent.success + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>🍽️</Text>
+              <Text style={[typography.tiny, { color: colors.accent.success, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Meal
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/profile' as never); }}
+              accessibilityLabel="Log Weight"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.info + '15', borderColor: colors.accent.info + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>⚖️</Text>
+              <Text style={[typography.tiny, { color: colors.accent.info, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Weight
+              </Text>
+            </Pressable>
+          </View>
+        </Card>
+      </Animated.View>
+
+      {/* Top 3 Streaks */}
+      {top3Streaks.length > 0 && (
+        <Animated.View entering={FadeInDown.delay(130).duration(400)}>
+          <Card
+            variant="default"
+            style={{ marginBottom: spacing.lg }}
+            header={
+              <Text style={[typography.h3, { color: colors.text.primary }]}>Top Streaks 🔥</Text>
+            }
+          >
+            {top3Streaks.map((habit) => (
+              <View
+                key={habit.id}
+                style={[styles.streakRow, { borderBottomColor: colors.border.subtle }]}
+              >
+                <Text style={{ fontSize: 20, marginRight: spacing.sm }}>
+                  {habit.icon ?? '🔥'}
+                </Text>
+                <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
+                  {habit.name}
+                </Text>
+                <MonoText variant="monoBody" color={colors.accent.warning}>
+                  {`🔥 ${habit.current_streak ?? 0}`}
+                </MonoText>
+              </View>
+            ))}
+          </Card>
+        </Animated.View>
+      )}
 
       {/* Today's Plan */}
       <Animated.View entering={FadeInDown.delay(150).duration(400)}>
@@ -712,6 +907,33 @@ export default function DashboardScreen() {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+function StatsCell({
+  label,
+  logged,
+  target,
+  unit,
+}: {
+  label: string;
+  logged: number;
+  target: number;
+  unit: string;
+}) {
+  const { colors, typography, spacing } = useTheme();
+  return (
+    <View style={styles.statsCell}>
+      <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+        {label}
+      </Text>
+      <MonoText variant="monoBody" color={colors.text.primary}>
+        {formatNumber(logged)}
+      </MonoText>
+      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+        {`/ ${formatNumber(target)} ${unit}`}
+      </Text>
+    </View>
+  );
+}
+
 function PlanRow({
   emoji,
   label,
@@ -774,6 +996,41 @@ function PlanRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  errorBanner: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statsCell: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  quickActionBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 72,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   accountabilityHeader: {
     flexDirection: 'row',

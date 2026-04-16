@@ -20,8 +20,6 @@ import { Card } from '@components/ui/Card';
 import { useProfileStore } from '@stores/profileStore';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
 
-const VIVID_PURPLE = '#A855F7';
-
 // Confetti-style decorative orbs rendered behind the hero text
 function ConfettiOrb({ color, style }: { color: string; style: object }) {
   const opacity = useSharedValue(0);
@@ -52,6 +50,7 @@ function ConfettiOrb({ color, style }: { color: string; style: object }) {
 
 export default function ReadyScreen() {
   const { colors, typography, spacing } = useTheme();
+  const vividPurple = colors.accent.primary;
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
@@ -138,7 +137,7 @@ export default function ReadyScreen() {
 
   return (
     <ScrollView
-      style={styles.scroll}
+      style={[styles.scroll, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
@@ -150,9 +149,9 @@ export default function ReadyScreen() {
       />
 
       {/* Decorative celebration orbs */}
-      <ConfettiOrb color={VIVID_PURPLE + '30'} style={styles.orbTopLeft} />
-      <ConfettiOrb color={'#7C3AED25'} style={styles.orbTopRight} />
-      <ConfettiOrb color={VIVID_PURPLE + '18'} style={styles.orbBottomRight} />
+      <ConfettiOrb color={vividPurple + '30'} style={styles.orbTopLeft} />
+      <ConfettiOrb color={vividPurple + '18'} style={styles.orbTopRight} />
+      <ConfettiOrb color={vividPurple + '10'} style={styles.orbBottomRight} />
 
       <Animated.View style={[{ paddingHorizontal: spacing.xxl }, contentStyle]}>
         {/* Summary card */}
@@ -197,7 +196,7 @@ export default function ReadyScreen() {
             style={[
               StyleSheet.absoluteFillObject,
               styles.ctaGlow,
-              { backgroundColor: VIVID_PURPLE + '40' },
+              { backgroundColor: vividPurple + '40' },
               glowStyle,
             ]}
           />
@@ -209,24 +208,24 @@ export default function ReadyScreen() {
             accessibilityRole="button"
             style={[
               styles.ctaButton,
-              { backgroundColor: VIVID_PURPLE },
+              { backgroundColor: vividPurple, shadowColor: vividPurple },
             ]}
           >
-            <Text style={styles.ctaText}>Start My Transformation</Text>
+            <Text style={[styles.ctaText, { color: colors.text.inverse }]}>Start My Transformation</Text>
           </Pressable>
         </Animated.View>
       </Animated.View>
 
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>By Automate AI</Text>
+        <Text style={[styles.footerText, { color: colors.text.muted }]}>By Automate AI</Text>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   // Decorative orbs
   orbTopLeft: { position: 'absolute', top: 0, left: -30, width: 140, height: 140, borderRadius: 70 },
   orbTopRight: { position: 'absolute', top: 60, right: -50, width: 110, height: 110, borderRadius: 55 },
@@ -241,16 +240,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#A855F7',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 16,
     elevation: 8,
   },
   ctaText: {
-    color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '700' as const,
     letterSpacing: 0.3,
   },
   footer: {
@@ -260,7 +257,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 11,
-    color: '#6B5E8A',
     letterSpacing: 1,
   },
 });

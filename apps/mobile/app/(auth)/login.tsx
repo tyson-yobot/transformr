@@ -22,13 +22,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Input } from '@components/ui/Input';
-import { hapticLight } from '@utils/haptics';
+import { hapticLight, hapticMedium } from '@utils/haptics';
 import { isValidEmail } from '@utils/validators';
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
-const GYM_IMAGE = 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80';
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const GYM_IMAGE = require('@assets/images/gym-hero.jpg') as number;
 
 // Google "G" icon — white to match dark theme
 function GoogleIcon({ size = 20 }: { size?: number }) {
@@ -92,7 +93,7 @@ export default function LoginScreen() {
     <View style={[styles.root, { backgroundColor: colors.background.primary }]}>
       {/* Warm gym background */}
       <Image
-        source={{ uri: GYM_IMAGE }}
+        source={GYM_IMAGE}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
         cachePolicy="memory-disk"
@@ -205,8 +206,10 @@ export default function LoginScreen() {
 
               {/* Sign In Button */}
               <Pressable
-                onPress={handleSignIn}
+                onPress={() => { void hapticMedium(); void handleSignIn(); }}
                 disabled={loading}
+                accessibilityLabel="Sign in to your account"
+                accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.signInBtn,
                   pressed && styles.signInBtnPressed,

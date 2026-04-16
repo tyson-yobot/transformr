@@ -336,7 +336,7 @@ export default function NutritionScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   calorieRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   adjustButton: { width: 52, height: 52, justifyContent: 'center', alignItems: 'center' },
   calorieCenter: { flex: 1, marginHorizontal: 16 },

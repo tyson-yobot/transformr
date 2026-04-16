@@ -16,8 +16,8 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+import { hapticMedium } from '@utils/haptics';
 
-const _VIVID_PURPLE = '#A855F7';
 
 const VALUE_PROPS = [
   { icon: '\uD83D\uDCAA', text: 'AI-powered workout tracking with ghost sets and PR detection' },
@@ -27,7 +27,7 @@ const VALUE_PROPS = [
 ] as const;
 
 export default function WelcomeScreen() {
-  const { typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
 
   const contentOpacity = useSharedValue(0);
@@ -63,7 +63,7 @@ export default function WelcomeScreen() {
 
   return (
     <ScrollView
-      style={styles.scroll}
+      style={[styles.scroll, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
@@ -92,7 +92,7 @@ export default function WelcomeScreen() {
             ]}
           >
             <Text style={{ fontSize: 22, marginRight: spacing.md }}>{prop.icon}</Text>
-            <Text style={[typography.body, { color: '#C4B8E0', flex: 1, lineHeight: 20 }]}>
+            <Text style={[typography.body, { color: colors.text.secondary, flex: 1, lineHeight: 20 }]}>
               {prop.text}
             </Text>
           </View>
@@ -103,9 +103,10 @@ export default function WelcomeScreen() {
       <Animated.View style={[{ paddingHorizontal: spacing.xxl, marginTop: spacing.lg }, buttonStyle]}>
         <Button
           title="Let's Begin"
-          onPress={() => router.push('/(auth)/onboarding/profile')}
+          onPress={() => { void hapticMedium(); router.push('/(auth)/onboarding/profile'); }}
           fullWidth
           size="lg"
+          accessibilityLabel="Begin onboarding"
         />
       </Animated.View>
     </ScrollView>
@@ -113,6 +114,6 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   propRow: { flexDirection: 'row', alignItems: 'center' },
 });

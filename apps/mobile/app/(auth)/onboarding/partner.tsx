@@ -20,7 +20,6 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const HERO_URI = 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80';
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
-const DEEP_SPACE = '#0C0A15';
 
 interface PrivacyToggle {
   key: string;
@@ -41,6 +40,7 @@ const DEFAULT_PRIVACY: PrivacyToggle[] = [
 
 export default function PartnerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const deepSpace = colors.background.primary;
   const router = useRouter();
   const createPartnershipInvite = usePartnerStore((s) => s.createPartnershipInvite);
   const linkPartner = usePartnerStore((s) => s.linkPartner);
@@ -82,7 +82,7 @@ export default function PartnerScreen() {
   // Choice screen — hero image + action buttons
   if (mode === 'choice') {
     return (
-      <View style={styles.choiceRoot}>
+      <View style={[styles.choiceRoot, { backgroundColor: colors.background.primary }]}>
         {/* Hero image */}
         <View style={[styles.choiceImageWrap, { height: imageHeight }]}>
           <Image
@@ -94,7 +94,7 @@ export default function PartnerScreen() {
             transition={300}
           />
           <LinearGradient
-            colors={['transparent', DEEP_SPACE]}
+            colors={['transparent', deepSpace]}
             locations={[0.4, 1]}
             style={styles.fill}
           />
@@ -144,7 +144,7 @@ export default function PartnerScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        style={styles.scroll}
+        style={[styles.scroll, { backgroundColor: colors.background.primary }]}
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -244,9 +244,9 @@ export default function PartnerScreen() {
 
 const styles = StyleSheet.create({
   kav: { flex: 1 },
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   // Choice screen
-  choiceRoot: { flex: 1, backgroundColor: '#0C0A15' },
+  choiceRoot: { flex: 1 },
   choiceImageWrap: { width: '100%', position: 'relative', overflow: 'hidden' },
   choiceHeadingWrap: {
     position: 'absolute',

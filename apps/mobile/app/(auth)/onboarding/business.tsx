@@ -19,7 +19,6 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const HERO_URI = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80';
 const BLUR_HASH = 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH';
-const DEEP_SPACE = '#0C0A15';
 
 type BusinessType = 'saas' | 'service' | 'product' | 'consulting' | 'other';
 
@@ -33,6 +32,7 @@ const BUSINESS_TYPES: { value: BusinessType; label: string; icon: string }[] = [
 
 export default function BusinessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const deepSpace = colors.background.primary;
   const router = useRouter();
   const createBusiness = useBusinessStore((s) => s.createBusiness);
   const { height: screenHeight } = useWindowDimensions();
@@ -63,7 +63,7 @@ export default function BusinessScreen() {
   // Decision screen — hero image + two choices
   if (trackBusiness === null) {
     return (
-      <View style={styles.decisionRoot}>
+      <View style={[styles.decisionRoot, { backgroundColor: colors.background.primary }]}>
         {/* Hero image */}
         <View style={[styles.decisionImageWrap, { height: imageHeight }]}>
           <Image
@@ -75,7 +75,7 @@ export default function BusinessScreen() {
             transition={300}
           />
           <LinearGradient
-            colors={['transparent', DEEP_SPACE]}
+            colors={['transparent', deepSpace]}
             locations={[0.4, 1]}
             style={styles.fill}
           />
@@ -117,7 +117,7 @@ export default function BusinessScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        style={styles.scroll}
+        style={[styles.scroll, { backgroundColor: colors.background.primary }]}
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -231,9 +231,9 @@ export default function BusinessScreen() {
 
 const styles = StyleSheet.create({
   kav: { flex: 1 },
-  scroll: { flex: 1, backgroundColor: '#0C0A15' },
+  scroll: { flex: 1 },
   // Decision screen
-  decisionRoot: { flex: 1, backgroundColor: '#0C0A15' },
+  decisionRoot: { flex: 1 },
   decisionImageWrap: { width: '100%', position: 'relative', overflow: 'hidden' },
   decisionHeadingWrap: {
     position: 'absolute',
