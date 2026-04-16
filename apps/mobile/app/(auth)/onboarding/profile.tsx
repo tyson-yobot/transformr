@@ -2,7 +2,7 @@
 // TRANSFORMR -- Onboarding: Profile Setup
 // =============================================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ComponentType } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,21 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
+import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { OnboardingBackground } from '@components/ui/OnboardingBackground';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
-import { OnboardingHero } from '@components/onboarding/OnboardingHero';
+import { formatDateInput, dateInputToISO } from '@utils/formatters';
+
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const Image = ExpoImage as unknown as ComponentType<ImageProps>;
+
+const HERO_URL = 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=1200&q=80';
+const BLUR_HASH = 'LBF}@q~q~qj[~qj[WBj[j[j[M{j[';
 
 type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say';
 type GoalDirection = 'gain' | 'lose' | 'maintain';
@@ -53,14 +61,14 @@ export default function ProfileScreen() {
   const validate = useCallback((): boolean => {
     const errs: Record<string, string> = {};
 
-    // Validate date of birth — must be YYYY-MM-DD and a real calendar date
-    const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+    // Validate date of birth — must be MM/DD/YYYY and a real calendar date
+    const dobRegex = /^\d{2}\/\d{2}\/\d{4}$/;
     if (!dateOfBirth.trim()) {
       errs.dob = 'Date of birth is required';
     } else if (!dobRegex.test(dateOfBirth)) {
-      errs.dob = 'Use format YYYY-MM-DD (e.g. 1990-05-21)';
+      errs.dob = 'Use format MM/DD/YYYY (e.g. 05/21/1990)';
     } else {
-      const parsed = new Date(dateOfBirth);
+      const parsed = new Date(dateInputToISO(dateOfBirth));
       const now = new Date();
       if (isNaN(parsed.getTime()) || parsed >= now) {
         errs.dob = 'Enter a valid date in the past';
@@ -100,7 +108,7 @@ export default function ProfileScreen() {
     const totalInches = parseInt(heightFeet, 10) * 12 + parseInt(heightInches, 10);
 
     await updateProfile({
-      date_of_birth: dateOfBirth,
+      date_of_birth: dateInputToISO(dateOfBirth),
       gender: gender ?? 'prefer_not_to_say',
       height_inches: totalInches,
       current_weight: parseFloat(currentWeight),
@@ -112,211 +120,244 @@ export default function ProfileScreen() {
   }, [validate, dateOfBirth, gender, heightFeet, heightInches, currentWeight, goalWeight, goalDirection, updateProfile, router]);
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-    <ScrollView
-      style={[styles.scroll, { backgroundColor: colors.background.primary }]}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <OnboardingHero
-        imageUri={require('@assets/images/hero-profile.jpg') as number}
-        heading="Let's get to know you."
-        subheading="The more we know, the better your AI coach becomes. This takes about 2 minutes."
-        style={{ marginBottom: spacing.xl }}
-      />
-      <View style={{ paddingHorizontal: spacing.xxl }}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Icon + Headline */}
+          <View style={styles.heroSection}>
+            <Image
+              source={require('@assets/images/transformr-icon.png')}
+              style={styles.icon}
+              contentFit="contain"
+            />
+            <Text style={styles.headline}>Where are you{'\n'}starting from?</Text>
+            <Text style={styles.subheadline}>
+              No judgment here. Every transformation has a starting line — this is yours.
+            </Text>
+          </View>
 
-      {/* Date of Birth */}
-      <Input
-        label="Date of Birth"
-        placeholder="YYYY-MM-DD"
-        value={dateOfBirth}
-        onChangeText={(t) => {
-          setDateOfBirth(t);
-          setErrors((prev) => ({ ...prev, dob: '' }));
-        }}
-        error={errors.dob}
-        keyboardType={Platform.OS === 'ios' ? 'default' : 'default'}
-        containerStyle={{ marginBottom: spacing.xl }}
-      />
+          {/* Form */}
+          <View style={styles.formSection}>
 
-      {/* Gender Selection */}
-      <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
-        Gender
-      </Text>
-      <View style={[styles.chipRow, { marginBottom: spacing.xs }]}>
-        {GENDERS.map((g) => {
-          const isSelected = gender === g.value;
-          return (
-            <Pressable
-              key={g.value}
-              onPress={() => {
-                hapticLight();
-                setGender(g.value);
-                setErrors((prev) => ({ ...prev, gender: '' }));
+            {/* Date of Birth */}
+            <Input
+              label="Date of Birth"
+              placeholder="MM/DD/YYYY"
+              value={dateOfBirth}
+              onChangeText={(t) => {
+                setDateOfBirth(formatDateInput(t));
+                setErrors((prev) => ({ ...prev, dob: '' }));
               }}
-              accessibilityLabel={`Gender: ${g.label}`}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: isSelected ? colors.accent.primary : colors.background.secondary,
-                  borderRadius: borderRadius.full,
-                  paddingVertical: spacing.sm,
-                  paddingHorizontal: spacing.lg,
-                  marginRight: spacing.sm,
-                  marginBottom: spacing.sm,
-                  borderWidth: 1,
-                  borderColor: isSelected ? colors.accent.primary : colors.border.default,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  typography.caption,
-                  { color: isSelected ? colors.text.inverse : colors.text.primary },
-                ]}
-              >
-                {g.label}
+              error={errors.dob}
+              keyboardType="number-pad"
+              maxLength={10}
+              containerStyle={{ marginBottom: spacing.xl }}
+            />
+
+            {/* Gender Selection */}
+            <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
+              Gender
+            </Text>
+            <View style={[styles.chipRow, { marginBottom: spacing.xs }]}>
+              {GENDERS.map((g) => {
+                const isSelected = gender === g.value;
+                return (
+                  <Pressable
+                    key={g.value}
+                    onPress={() => {
+                      hapticLight();
+                      setGender(g.value);
+                      setErrors((prev) => ({ ...prev, gender: '' }));
+                    }}
+                    accessibilityLabel={`Gender: ${g.label}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    style={[
+                      styles.chip,
+                      {
+                        backgroundColor: isSelected ? colors.accent.primary : colors.background.secondary,
+                        borderRadius: borderRadius.full,
+                        paddingVertical: spacing.sm,
+                        paddingHorizontal: spacing.lg,
+                        marginRight: spacing.sm,
+                        marginBottom: spacing.sm,
+                        borderWidth: 1,
+                        borderColor: isSelected ? colors.accent.primary : colors.border.default,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        typography.caption,
+                        { color: isSelected ? colors.text.inverse : colors.text.primary },
+                      ]}
+                    >
+                      {g.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {errors.gender && (
+              <Text style={[typography.caption, { color: colors.accent.danger, marginBottom: spacing.lg }]}>
+                {errors.gender}
               </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-      {errors.gender && (
-        <Text style={[typography.caption, { color: colors.accent.danger, marginBottom: spacing.lg }]}>
-          {errors.gender}
-        </Text>
-      )}
+            )}
 
-      {/* Height */}
-      <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
-        Height
-      </Text>
-      <View style={[styles.row, { marginBottom: errors.height ? spacing.xs : spacing.xl }]}>
-        <View style={styles.halfInput}>
-          <Input
-            placeholder="Feet"
-            value={heightFeet}
-            onChangeText={(t) => {
-              setHeightFeet(t);
-              setErrors((prev) => ({ ...prev, height: '' }));
-            }}
-            keyboardType="number-pad"
-            rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>ft</Text>}
-          />
-        </View>
-        <View style={[styles.halfInput, { marginLeft: spacing.md }]}>
-          <Input
-            placeholder="Inches"
-            value={heightInches}
-            onChangeText={(t) => {
-              setHeightInches(t);
-              setErrors((prev) => ({ ...prev, height: '' }));
-            }}
-            keyboardType="number-pad"
-            rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>in</Text>}
-          />
-        </View>
-      </View>
-      {errors.height && (
-        <Text style={[typography.caption, { color: colors.accent.danger, marginBottom: spacing.lg }]}>
-          {errors.height}
-        </Text>
-      )}
-
-      {/* Current Weight */}
-      <Input
-        label="Current Weight"
-        placeholder="175"
-        value={currentWeight}
-        onChangeText={(t) => {
-          setCurrentWeight(t);
-          setErrors((prev) => ({ ...prev, currentWeight: '' }));
-        }}
-        error={errors.currentWeight}
-        keyboardType="decimal-pad"
-        rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>lbs</Text>}
-        containerStyle={{ marginBottom: spacing.xl }}
-      />
-
-      {/* Goal Weight */}
-      <Input
-        label="Goal Weight"
-        placeholder="165"
-        value={goalWeight}
-        onChangeText={(t) => {
-          setGoalWeight(t);
-          setErrors((prev) => ({ ...prev, goalWeight: '' }));
-        }}
-        error={errors.goalWeight}
-        keyboardType="decimal-pad"
-        rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>lbs</Text>}
-        containerStyle={{ marginBottom: spacing.xl }}
-      />
-
-      {/* Goal Direction */}
-      <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
-        Goal Direction
-      </Text>
-      <View style={[styles.directionRow, { marginBottom: spacing.xxxl }]}>
-        {GOAL_DIRECTIONS.map((dir) => {
-          const isSelected = goalDirection === dir.value;
-          return (
-            <Pressable
-              key={dir.value}
-              onPress={() => { hapticLight(); setGoalDirection(dir.value); }}
-              accessibilityLabel={`Goal: ${dir.label}`}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-              style={[
-                styles.directionCard,
-                {
-                  flex: 1,
-                  backgroundColor: isSelected ? colors.accent.primary + '20' : colors.background.secondary,
-                  borderRadius: borderRadius.md,
-                  padding: spacing.md,
-                  marginHorizontal: spacing.xs,
-                  borderWidth: 1.5,
-                  borderColor: isSelected ? colors.accent.primary : colors.border.default,
-                  alignItems: 'center',
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 20, marginBottom: spacing.xs }}>{dir.icon}</Text>
-              <Text
-                style={[
-                  typography.captionBold,
-                  { color: isSelected ? colors.accent.primary : colors.text.primary, textAlign: 'center' },
-                ]}
-              >
-                {dir.label}
+            {/* Height */}
+            <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
+              Height
+            </Text>
+            <View style={[styles.row, { marginBottom: errors.height ? spacing.xs : spacing.xl }]}>
+              <View style={styles.halfInput}>
+                <Input
+                  placeholder="Feet"
+                  value={heightFeet}
+                  onChangeText={(t) => {
+                    setHeightFeet(t);
+                    setErrors((prev) => ({ ...prev, height: '' }));
+                  }}
+                  keyboardType="number-pad"
+                  rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>ft</Text>}
+                />
+              </View>
+              <View style={[styles.halfInput, { marginLeft: spacing.md }]}>
+                <Input
+                  placeholder="Inches"
+                  value={heightInches}
+                  onChangeText={(t) => {
+                    setHeightInches(t);
+                    setErrors((prev) => ({ ...prev, height: '' }));
+                  }}
+                  keyboardType="number-pad"
+                  rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>in</Text>}
+                />
+              </View>
+            </View>
+            {errors.height && (
+              <Text style={[typography.caption, { color: colors.accent.danger, marginBottom: spacing.lg }]}>
+                {errors.height}
               </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+            )}
 
-      {/* Continue Button */}
-      <Button
-        title="Continue"
-        onPress={handleContinue}
-        fullWidth
-        size="lg"
-      />
-      </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
+            {/* Current Weight */}
+            <Input
+              label="Current Weight"
+              placeholder="175"
+              value={currentWeight}
+              onChangeText={(t) => {
+                setCurrentWeight(t);
+                setErrors((prev) => ({ ...prev, currentWeight: '' }));
+              }}
+              error={errors.currentWeight}
+              keyboardType="decimal-pad"
+              rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>lbs</Text>}
+              containerStyle={{ marginBottom: spacing.xl }}
+            />
+
+            {/* Goal Weight */}
+            <Input
+              label="Goal Weight"
+              placeholder="165"
+              value={goalWeight}
+              onChangeText={(t) => {
+                setGoalWeight(t);
+                setErrors((prev) => ({ ...prev, goalWeight: '' }));
+              }}
+              error={errors.goalWeight}
+              keyboardType="decimal-pad"
+              rightIcon={<Text style={[typography.caption, { color: colors.text.muted }]}>lbs</Text>}
+              containerStyle={{ marginBottom: spacing.xl }}
+            />
+
+            {/* Goal Direction */}
+            <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.sm }]}>
+              Goal Direction
+            </Text>
+            <View style={[styles.directionRow, { marginBottom: spacing.xxxl }]}>
+              {GOAL_DIRECTIONS.map((dir) => {
+                const isSelected = goalDirection === dir.value;
+                return (
+                  <Pressable
+                    key={dir.value}
+                    onPress={() => { hapticLight(); setGoalDirection(dir.value); }}
+                    accessibilityLabel={`Goal: ${dir.label}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    style={[
+                      styles.directionCard,
+                      {
+                        flex: 1,
+                        backgroundColor: isSelected ? colors.accent.primary + '20' : colors.background.secondary,
+                        borderRadius: borderRadius.md,
+                        padding: spacing.md,
+                        marginHorizontal: spacing.xs,
+                        borderWidth: 1.5,
+                        borderColor: isSelected ? colors.accent.primary : colors.border.default,
+                        alignItems: 'center',
+                      },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 20, marginBottom: spacing.xs }}>{dir.icon}</Text>
+                    <Text
+                      style={[
+                        typography.captionBold,
+                        { color: isSelected ? colors.accent.primary : colors.text.primary, textAlign: 'center' },
+                      ]}
+                    >
+                      {dir.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Continue Button */}
+            <Button
+              title="Continue"
+              onPress={handleContinue}
+              fullWidth
+              size="lg"
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </OnboardingBackground>
   );
 }
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
+  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  heroSection: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  icon: { width: 56, height: 56, marginBottom: 12 },
+  headline: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#F0F0FC',
+    textAlign: 'center',
+    marginBottom: 8,
+    lineHeight: 34,
+  },
+  subheadline: {
+    fontSize: 15,
+    color: 'rgba(240, 240, 252, 0.75)',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  formSection: { paddingHorizontal: 24 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap' },
   chip: {},
   row: { flexDirection: 'row' },
