@@ -9,6 +9,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { ThemeProvider } from '@theme/index';
@@ -124,15 +125,17 @@ export default function RootLayout() {
   }, [onLayoutReady]);
 
   return (
-    <SafeAreaProvider>
-      <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider mode={themeMode}>
-            <StatusBar style="light" />
-            <Slot />
-          </ThemeProvider>
-        </QueryClientProvider>
-      </StripeProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider mode={themeMode}>
+              <StatusBar style="light" />
+              <Slot />
+            </ThemeProvider>
+          </QueryClientProvider>
+        </StripeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
