@@ -223,7 +223,7 @@ export default function PartnerChallengesScreen() {
                     <ProgressBar
                       progress={challenge.target_value ? Math.min((challenge.user_b_progress ?? 0) / challenge.target_value, 1) : 0}
                       showPercentage
-                      color="#22C55E"
+                      color={colors.accent.success}
                     />
                   </View>
                 </View>

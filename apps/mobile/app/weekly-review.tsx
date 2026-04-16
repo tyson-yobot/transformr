@@ -53,7 +53,7 @@ export default function WeeklyReviewScreen() {
   const [review, setReview] = useState<WeeklyReview | null>(null);
   const [previousReview, setPreviousReview] = useState<WeeklyReview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchReview = async () => {
@@ -100,6 +100,19 @@ export default function WeeklyReviewScreen() {
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={200} />
         </View>
+      </View>
+    );
+  }
+
+  if (error && !review) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <Text style={[typography.h2, { color: colors.accent.danger, textAlign: 'center' }]}>
+          Could not load review
+        </Text>
+        <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
+          {error}
+        </Text>
       </View>
     );
   }
@@ -283,7 +296,7 @@ export default function WeeklyReviewScreen() {
 function StatRow({ label, value, delta }: { label: string; value: string; delta: string | null }) {
   const { colors, typography, spacing } = useTheme();
   return (
-    <View style={[styles.statRow, { paddingVertical: spacing.sm }]}>
+    <View style={[styles.statRow, { paddingVertical: spacing.sm, borderBottomColor: colors.border.subtle }]}>
       <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>{label}</Text>
       <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '700' }]}>{value}</Text>
       {delta && (
@@ -322,7 +335,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(248,250,252,0.1)',
   },
   listItem: {
     flexDirection: 'row',

@@ -55,9 +55,9 @@ export default function DailyBriefingScreen() {
   };
 
   const getReadinessColor = (score: number): string => {
-    if (score >= 70) return '#10B981';
-    if (score >= 40) return '#F59E0B';
-    return '#EF4444';
+    if (score >= 70) return colors.accent.success;
+    if (score >= 40) return colors.accent.warning;
+    return colors.accent.danger;
   };
 
   const getReadinessRecommendation = (score: number): string => {

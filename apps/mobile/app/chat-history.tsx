@@ -52,6 +52,17 @@ function formatRelativeDate(iso: string): string {
   return then.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function getDateGroupLabel(iso: string): string {
+  const now = new Date();
+  const then = new Date(iso);
+  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const thenDay = new Date(then.getFullYear(), then.getMonth(), then.getDate());
+  const diffDays = Math.floor((nowDay.getTime() - thenDay.getTime()) / 86400000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  return then.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 export default function ChatHistoryScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -137,76 +148,127 @@ export default function ChatHistoryScreen() {
     [conversations],
   );
 
-  const renderItem: ListRenderItem<ChatConversation> = useCallback(
-    ({ item, index }) => (
-      <Animated.View entering={FadeInDown.delay(index * 30).duration(280)}>
-        <Pressable
-          onPress={() => void handleOpen(item.id)}
-          onLongPress={() => handleLongPress(item)}
-          style={({ pressed }) => [
-            styles.row,
-            {
-              backgroundColor: colors.background.secondary,
-              borderColor: colors.border.subtle,
-              borderRadius: borderRadius.md,
-              padding: spacing.md,
-              marginBottom: spacing.sm,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel={`Open conversation: ${item.title}`}
-        >
-          <View
+  // Build date-grouped sections for recent conversations
+  type FlatItem =
+    | { kind: 'header'; label: string }
+    | { kind: 'item'; conversation: ChatConversation; index: number };
+
+  const groupedItems = useMemo<FlatItem[]>(() => {
+    const result: FlatItem[] = [];
+    let lastLabel: string | null = null;
+    let runningIndex = 0;
+
+    if (pinned.length > 0) {
+      result.push({ kind: 'header', label: 'Pinned' });
+      for (const c of pinned) {
+        result.push({ kind: 'item', conversation: c, index: runningIndex++ });
+      }
+    }
+
+    for (const c of recent) {
+      const label = getDateGroupLabel(c.last_message_at);
+      if (label !== lastLabel) {
+        result.push({ kind: 'header', label });
+        lastLabel = label;
+      }
+      result.push({ kind: 'item', conversation: c, index: runningIndex++ });
+    }
+
+    return result;
+  }, [pinned, recent]);
+
+  const renderItem: ListRenderItem<FlatItem> = useCallback(
+    ({ item }) => {
+      if (item.kind === 'header') {
+        return (
+          <Text
             style={[
-              styles.iconWrapper,
+              typography.caption,
               {
-                backgroundColor: colors.accent.primaryDim,
-                borderRadius: borderRadius.md,
+                color: colors.text.muted,
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                marginTop: spacing.md,
+                marginBottom: spacing.sm,
               },
             ]}
           >
-            <Ionicons
-              name={TOPIC_ICONS[item.topic] ?? 'chatbubble-outline'}
-              size={20}
-              color={colors.accent.cyan}
-            />
-          </View>
-          <View style={{ flex: 1, marginLeft: spacing.md }}>
-            <View style={styles.titleRow}>
-              {item.pinned && (
-                <Ionicons
-                  name="pin"
-                  size={12}
-                  color={colors.accent.gold}
-                  style={{ marginRight: spacing.xs }}
-                />
-              )}
+            {item.label}
+          </Text>
+        );
+      }
+      const conv = item.conversation;
+      const itemIndex = item.index;
+      return (
+        <Animated.View entering={FadeInDown.delay(itemIndex * 30).duration(280)}>
+          <Pressable
+            onPress={() => void handleOpen(conv.id)}
+            onLongPress={() => handleLongPress(conv)}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                backgroundColor: colors.background.secondary,
+                borderColor: colors.border.subtle,
+                borderRadius: borderRadius.md,
+                padding: spacing.md,
+                marginBottom: spacing.sm,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={`Open conversation: ${conv.title}`}
+          >
+            <View
+              style={[
+                styles.iconWrapper,
+                {
+                  backgroundColor: colors.accent.primaryDim,
+                  borderRadius: borderRadius.md,
+                },
+              ]}
+            >
+              <Ionicons
+                name={TOPIC_ICONS[conv.topic] ?? 'chatbubble-outline'}
+                size={20}
+                color={colors.accent.cyan}
+              />
+            </View>
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <View style={styles.titleRow}>
+                {conv.pinned && (
+                  <Ionicons
+                    name="pin"
+                    size={12}
+                    color={colors.accent.gold}
+                    style={{ marginRight: spacing.xs }}
+                  />
+                )}
+                <Text
+                  style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}
+                  numberOfLines={1}
+                >
+                  {conv.title}
+                </Text>
+              </View>
               <Text
-                style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}
+                style={[
+                  typography.caption,
+                  { color: colors.text.secondary, marginTop: spacing.xs / 2 },
+                ]}
                 numberOfLines={1}
               >
-                {item.title}
+                {conv.message_count} {conv.message_count === 1 ? 'message' : 'messages'} · {formatRelativeDate(conv.last_message_at)}
               </Text>
             </View>
-            <Text
-              style={[
-                typography.caption,
-                { color: colors.text.secondary, marginTop: spacing.xs / 2 },
-              ]}
-              numberOfLines={1}
-            >
-              {item.message_count} {item.message_count === 1 ? 'message' : 'messages'} · {formatRelativeDate(item.last_message_at)}
-            </Text>
-          </View>
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color={colors.text.muted}
-          />
-        </Pressable>
-      </Animated.View>
-    ),
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.text.muted}
+            />
+          </Pressable>
+        </Animated.View>
+      );
+    },
     [
       borderRadius.md,
       colors.accent.cyan,
@@ -226,6 +288,7 @@ export default function ChatHistoryScreen() {
       typography.caption,
     ],
   );
+
 
   const renderEmpty = () => (
     <View
@@ -383,32 +446,17 @@ export default function ChatHistoryScreen() {
         </View>
       ) : (
         <FlatList
-          data={[...pinned, ...recent]}
+          data={groupedItems}
           renderItem={renderItem}
-          keyExtractor={(c) => c.id}
+          keyExtractor={(fi, idx) =>
+            fi.kind === 'header' ? `header-${fi.label}-${idx}` : fi.conversation.id
+          }
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,
             paddingBottom: insets.bottom + spacing.xl,
             flexGrow: 1,
           }}
-          ListHeaderComponent={
-            pinned.length > 0 && recent.length > 0 ? (
-              <Text
-                style={[
-                  typography.caption,
-                  {
-                    color: colors.text.muted,
-                    textTransform: 'uppercase',
-                    letterSpacing: 1,
-                    marginBottom: spacing.sm,
-                  },
-                ]}
-              >
-                Pinned
-              </Text>
-            ) : null
-          }
           ListEmptyComponent={renderEmpty}
           refreshControl={
             <RefreshControl

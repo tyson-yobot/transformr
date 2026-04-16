@@ -338,7 +338,7 @@ export default function GoalCinemaScreen() {
           accessibilityLabel="Close cinema"
           accessibilityRole="button"
         >
-          <Text style={[typography.captionBold, { color: '#F8FAFC' }]}>Close</Text>
+          <Text style={[typography.captionBold, { color: colors.text.primary }]}>Close</Text>
         </Pressable>
       </View>
     </View>
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   photoSlide: { flex: 1, width: SCREEN_WIDTH, justifyContent: 'flex-end' },
   progressPhoto: { ...StyleSheet.absoluteFillObject },
   photoOverlay: {
-    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 24,
   },
   controls: {

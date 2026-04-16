@@ -111,7 +111,7 @@ export default function NudgeScreen() {
         {/* Success Banner */}
         {sentMessage && (
           <Animated.View entering={FadeIn}>
-            <Card style={{ marginTop: spacing.lg, backgroundColor: '#22C55E20' }}>
+            <Card style={{ marginTop: spacing.lg, backgroundColor: colors.accent.successDim }}>
               <Text style={[typography.bodyBold, { color: colors.accent.success, textAlign: 'center' }]}>
                 Nudge sent!
               </Text>

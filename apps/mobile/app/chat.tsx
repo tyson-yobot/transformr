@@ -25,9 +25,11 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Chip } from '@components/ui/Chip';
 import { Disclaimer } from '@components/ui/Disclaimer';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useChatStore } from '@stores/chatStore';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { ChatMessage, ChatTopic } from '@app-types/ai';
-import { hapticLight } from '@utils/haptics';
+import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 
 const TOPICS: { id: ChatTopic; label: string; icon: string }[] = [
@@ -102,7 +104,10 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState('');
   const [topic, setTopic] = useState<ChatTopic>(params.topic ?? 'general');
+  const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
+
+  const chatGate = useFeatureGate('ai_chat_coach');
 
   const activeConversationId = useChatStore((s) => s.activeConversationId);
   const messagesByConversation = useChatStore((s) => s.messagesByConversation);
@@ -144,25 +149,34 @@ export default function ChatScreen() {
     return () => clearTimeout(timeout);
   }, [messages.length]);
 
+  const handleRefreshMessages = useCallback(async () => {
+    if (!activeConversationId) return;
+    setRefreshing(true);
+    await openConversation(activeConversationId);
+    setRefreshing(false);
+  }, [activeConversationId, openConversation]);
+
   const handleSend = useCallback(() => {
     const trimmed = input.trim();
     if (trimmed.length === 0 || isSending) return;
     setInput('');
-    void hapticLight();
+    void hapticMedium();
+    chatGate.trackUsage();
     void sendMessage(trimmed, topic);
-  }, [input, isSending, sendMessage, topic]);
+  }, [chatGate, input, isSending, sendMessage, topic]);
 
   const handleStarterPress = useCallback(
     (starter: string) => {
-      void hapticLight();
+      void hapticMedium();
       setInput('');
+      chatGate.trackUsage();
       void sendMessage(starter, topic);
     },
-    [sendMessage, topic],
+    [chatGate, sendMessage, topic],
   );
 
   const handleNewChat = useCallback(() => {
-    void hapticLight();
+    void hapticMedium();
     startNewConversation();
     setInput('');
   }, [startNewConversation]);
@@ -226,7 +240,7 @@ export default function ChatScreen() {
               style={[
                 typography.body,
                 {
-                  color: isUser ? '#FFFFFF' : colors.text.primary,
+                  color: isUser ? colors.text.inverse : colors.text.primary,
                   marginTop: isUser ? 0 : spacing.xs,
                 },
               ]}
@@ -378,14 +392,26 @@ export default function ChatScreen() {
         </Pressable>
         <View style={styles.headerTitle}>
           <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
-          <Text
-            style={[
-              typography.h3,
-              { color: colors.text.primary, marginLeft: spacing.xs },
-            ]}
-          >
-            AI Coach
-          </Text>
+          <View>
+            <Text
+              style={[
+                typography.h3,
+                { color: colors.text.primary, marginLeft: spacing.xs },
+              ]}
+            >
+              AI Coach
+            </Text>
+            {chatGate.remainingUses !== null && (
+              <Text
+                style={[
+                  typography.tiny,
+                  { color: colors.text.muted, marginLeft: spacing.xs },
+                ]}
+              >
+                {chatGate.remainingUses} messages left today
+              </Text>
+            )}
+          </View>
         </View>
         <View style={styles.headerActions}>
           <Pressable
@@ -470,6 +496,8 @@ export default function ChatScreen() {
           }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          refreshing={refreshing}
+          onRefresh={handleRefreshMessages}
           ListFooterComponent={
             isSending ? (
               <View style={[styles.typingRow, { marginTop: spacing.sm }]}>
@@ -541,73 +569,88 @@ export default function ChatScreen() {
 
       <HelpBubble id="chat_context" message="Your coach knows all your data — ask anything" position="below" />
 
-      {/* Composer */}
-      <View
-        style={[
-          styles.composerRow,
-          {
+      {/* Composer or Gate */}
+      {chatGate.isCapped ? (
+        <View
+          style={{
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.sm,
             paddingBottom: insets.bottom > 0 ? insets.bottom : spacing.md,
             backgroundColor: colors.background.secondary,
+            borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.border.subtle,
-          },
-        ]}
-      >
+          }}
+        >
+          <GatePromptCard featureKey="ai_chat_coach" height={100} />
+        </View>
+      ) : (
         <View
           style={[
-            styles.inputWrapper,
+            styles.composerRow,
             {
-              backgroundColor: colors.background.input,
-              borderRadius: borderRadius.lg,
-              borderColor: colors.border.subtle,
-              paddingHorizontal: spacing.md,
+              paddingHorizontal: spacing.lg,
+              paddingTop: spacing.sm,
+              paddingBottom: insets.bottom > 0 ? insets.bottom : spacing.md,
+              backgroundColor: colors.background.secondary,
+              borderTopColor: colors.border.subtle,
             },
           ]}
         >
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            placeholder="Message your coach…"
-            placeholderTextColor={colors.text.muted}
+          <View
             style={[
-              styles.input,
-              typography.body,
-              { color: colors.text.primary },
+              styles.inputWrapper,
+              {
+                backgroundColor: colors.background.input,
+                borderRadius: borderRadius.lg,
+                borderColor: colors.border.subtle,
+                paddingHorizontal: spacing.md,
+              },
             ]}
-            multiline
-            maxLength={2000}
-            editable={!isSending}
-            accessibilityLabel="Message input"
-          />
-        </View>
-        <Pressable
-          onPress={handleSend}
-          disabled={isSending || input.trim().length === 0}
-          style={[
-            styles.sendButton,
-            {
-              backgroundColor: input.trim().length === 0
-                ? colors.background.tertiary
-                : colors.accent.primary,
-              marginLeft: spacing.sm,
-              borderRadius: borderRadius.full,
-            },
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Send message"
-        >
-          {isSending ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Ionicons
-              name="arrow-up"
-              size={22}
-              color={input.trim().length === 0 ? colors.text.muted : '#FFFFFF'}
+          >
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              placeholder="Message your coach…"
+              placeholderTextColor={colors.text.muted}
+              style={[
+                styles.input,
+                typography.body,
+                { color: colors.text.primary },
+              ]}
+              multiline
+              maxLength={2000}
+              editable={!isSending}
+              accessibilityLabel="Message input"
             />
-          )}
-        </Pressable>
-      </View>
+          </View>
+          <Pressable
+            onPress={handleSend}
+            disabled={isSending || input.trim().length === 0}
+            style={[
+              styles.sendButton,
+              {
+                backgroundColor: input.trim().length === 0
+                  ? colors.background.tertiary
+                  : colors.accent.primary,
+                marginLeft: spacing.sm,
+                borderRadius: borderRadius.full,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Send message"
+          >
+            {isSending ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Ionicons
+                name="arrow-up"
+                size={22}
+                color={input.trim().length === 0 ? colors.text.muted : '#FFFFFF'}
+              />
+            )}
+          </Pressable>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
