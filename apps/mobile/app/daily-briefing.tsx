@@ -62,7 +62,7 @@ export default function DailyBriefingScreen() {
 
   const getReadinessRecommendation = (score: number): string => {
     if (score >= 80) return 'You are primed for a high-intensity session.';
-    if (score >= 70) return 'Solid readiness -- train with confidence.';
+    if (score >= 70) return 'Solid readiness \u2014 train with confidence.';
     if (score >= 50) return 'Moderate readiness. Consider adjusting volume.';
     if (score >= 40) return 'Recovery is lagging. A lighter session may be wise.';
     return 'Your body needs rest. Prioritize recovery today.';

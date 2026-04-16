@@ -151,11 +151,11 @@ export async function getSleepSamples(
       { startDate, endDate, ascending: false, limit: 50 },
       (err: string | null, results: HealthValue[]) => {
         if (err) return reject(new Error(err));
-        const typed = results as unknown as Array<{
+        const typed = results as unknown as {
           startDate: string;
           endDate: string;
           value: HealthSleepSample['value'];
-        }>;
+        }[];
         resolve(typed.map((r) => ({
           startDate: r.startDate,
           endDate: r.endDate,

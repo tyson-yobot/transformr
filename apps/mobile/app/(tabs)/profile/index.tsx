@@ -29,7 +29,7 @@ import { useSubscriptionStore } from '@stores/subscriptionStore';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle';
 import { upgradeModalEvents } from '@hooks/useFeatureGate';
-import { formatDate, formatNumber } from '@utils/formatters';
+import { formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '../../../services/supabase';
@@ -583,9 +583,14 @@ export default function ProfileScreen() {
                 {
                   text: 'Send Link',
                   onPress: async () => {
-                    const { supabase: sb } = await import('@services/supabase');
-                    await sb.auth.resetPasswordForEmail(email);
-                    Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
+                    try {
+                      const { supabase: sb } = await import('@services/supabase');
+                      const { error: resetError } = await sb.auth.resetPasswordForEmail(email);
+                      if (resetError) throw resetError;
+                      Alert.alert('Email Sent', 'Check your inbox for a password reset link.');
+                    } catch (err: unknown) {
+                      Alert.alert('Error', err instanceof Error ? err.message : 'Failed to send reset link. Please try again.');
+                    }
                   },
                 },
               ],

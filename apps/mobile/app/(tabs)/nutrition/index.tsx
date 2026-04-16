@@ -443,7 +443,7 @@ export default function NutritionHomeScreen() {
         )}
 
         {/* Meal Sections */}
-        {MEAL_SECTIONS.map((section, index) => {
+        {MEAL_SECTIONS.map((section) => {
           const logs = logsByMeal[section.type] ?? [];
           const sectionCalories = logs.reduce((sum, l) => sum + l.calories, 0);
 
@@ -593,7 +593,9 @@ export default function NutritionHomeScreen() {
                     onPress={() => {
                       if (!supp.taken) {
                         hapticSuccess();
-                        useNutritionStore.getState().logSupplement(supp.id);
+                        useNutritionStore.getState().logSupplement(supp.id).catch(() => {
+                          // Supplement log is non-critical; store state already updated optimistically
+                        });
                       }
                     }}
                   >

@@ -472,7 +472,7 @@ export default function FitnessHomeScreen() {
             />
           ) : (
             <EmptyState
-              icon="\uD83C\uDFCB\uFE0F"
+              icon={'\u{1F3CB}\uFE0F'}
               title="No workouts yet"
               subtitle="Every legend started with a first rep. Log your first workout and let's see what you're made of."
               actionLabel="Start a Workout"

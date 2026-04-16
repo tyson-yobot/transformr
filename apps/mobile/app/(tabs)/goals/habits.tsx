@@ -340,10 +340,12 @@ export default function HabitTracker() {
                               ? colors.accent.gold
                               : streak >= 7
                                 ? colors.accent.warning
-                                : colors.accent.success
+                                : streak > 0
+                                  ? colors.accent.success
+                                  : colors.text.muted
                           }
                         >
-                          {'🔥'}{streak}
+                          {streak > 0 ? '\uD83D\uDD25' : '\u23F3'}{streak}
                         </MonoText>
                         <Text
                           style={[
@@ -351,9 +353,11 @@ export default function HabitTracker() {
                             { color: colors.text.muted },
                           ]}
                         >
-                          {isIntense
-                            ? gamStyle.streakLabel.replace('{count}', String(streak))
-                            : 'day streak'}
+                          {streak === 0
+                            ? 'start today'
+                            : isIntense
+                              ? gamStyle.streakLabel.replace('{count}', String(streak))
+                              : 'day streak'}
                         </Text>
                       </View>
                     </View>
@@ -469,7 +473,7 @@ export default function HabitTracker() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: spacing.sm }}
+          contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.sm }}
         >
           {HABIT_CATEGORIES.map((cat) => (
             <Chip
@@ -496,7 +500,7 @@ export default function HabitTracker() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { paddingBottom: 24 },
+  content: { paddingBottom: 100 },
   progressRow: { flexDirection: 'row', alignItems: 'center' },
   progressTrack: { flex: 1, overflow: 'hidden' },
   progressFill: { height: '100%' },

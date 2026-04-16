@@ -69,7 +69,12 @@ export const useSleepStore = create<SleepStore>()((set) => ({
         .single();
       if (error) throw error;
 
-      set({ lastSleep: entry as SleepLog, isLoading: false });
+      const newEntry = entry as SleepLog;
+      set((state) => ({
+        lastSleep: newEntry,
+        sleepHistory: [newEntry, ...state.sleepHistory],
+        isLoading: false,
+      }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to log sleep';
       set({ error: message, isLoading: false });

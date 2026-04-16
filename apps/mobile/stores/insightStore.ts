@@ -64,38 +64,48 @@ export const useInsightStore = create<InsightState>()((set, get) => ({
   },
 
   acknowledgePrediction: async (id: string) => {
-    await supabase
-      .from('ai_predictions')
-      .update({ is_acknowledged: true })
-      .eq('id', id);
-
+    // Optimistic update first for instant UI response
     set((s) => ({
       predictions: s.predictions.filter((p) => p.id !== id),
     }));
+    const { error } = await supabase
+      .from('ai_predictions')
+      .update({ is_acknowledged: true })
+      .eq('id', id);
+    if (error) {
+      // Restore if server rejected — re-fetch to sync state
+      void get().fetchAll();
+    }
   },
 
   dismissMessage: async (id: string) => {
-    await supabase
-      .from('proactive_messages')
-      .update({ is_dismissed: true })
-      .eq('id', id);
-
+    // Optimistic update first for instant UI response
     set((s) => ({
       proactiveMessages: s.proactiveMessages.filter((m) => m.id !== id),
     }));
+    const { error } = await supabase
+      .from('proactive_messages')
+      .update({ is_dismissed: true })
+      .eq('id', id);
+    if (error) {
+      void get().fetchAll();
+    }
   },
 
   markMessageRead: async (id: string) => {
-    await supabase
-      .from('proactive_messages')
-      .update({ is_read: true })
-      .eq('id', id);
-
+    // Optimistic update first for instant UI response
     set((s) => ({
       proactiveMessages: s.proactiveMessages.map((m) =>
         m.id === id ? { ...m, is_read: true } : m,
       ),
     }));
+    const { error } = await supabase
+      .from('proactive_messages')
+      .update({ is_read: true })
+      .eq('id', id);
+    if (error) {
+      void get().fetchAll();
+    }
   },
 
   unreadCount: () => {

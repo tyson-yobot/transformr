@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -72,6 +73,7 @@ function generateMockPlan(): DayPlan[] {
 export default function MealPlansScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const { profile } = useProfileStore();
+  const router = useRouter();
 
   const [weekPlan, setWeekPlan] = useState<DayPlan[]>(generateMockPlan);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -158,10 +160,14 @@ export default function MealPlansScreen() {
     );
   }, []);
 
-  const handleSwapMeal = useCallback((_dayIndex: number, _mealId: string) => {
+  const handleSwapMeal = useCallback((dayIndex: number, mealId: string) => {
     hapticLight();
-    Alert.alert('Swap Meal', 'This would open the food search to replace this meal.');
-  }, []);
+    const meal = weekPlan[dayIndex]?.meals.find((m) => m.id === mealId);
+    router.push({
+      pathname: '/(tabs)/nutrition/add-food',
+      params: { meal: meal?.mealType ?? 'snack' },
+    } as never);
+  }, [weekPlan, router]);
 
   const MEAL_TYPE_EMOJI: Record<string, string> = {
     breakfast: '\u{1F373}',

@@ -111,6 +111,7 @@ export default function DashboardScreen() {
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
   const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
+  const [workoutsThisWeekCount, setWorkoutsThisWeekCount] = useState<number | null>(null);
 
   // Stores
   const profile = useProfileStore((s) => s.profile);
@@ -155,15 +156,8 @@ export default function DashboardScreen() {
     return streaks.length > 0 ? Math.max(...streaks) : 0;
   }, [habitStore.habits]);
 
-  // Workouts this week
-  const workoutsThisWeek = useMemo(() => {
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-    // Count from templates as a proxy; in production this queries sessions
-    return workoutStore.templates.length > 0 ? Math.min(workoutStore.templates.length, 5) : 0;
-  }, [workoutStore.templates]);
+  // Workouts this week — real completed session count from Supabase
+  const workoutsThisWeek = workoutsThisWeekCount ?? 0;
 
   // Calories today
   const caloriesToday = useMemo(() => {
@@ -254,6 +248,18 @@ export default function DashboardScreen() {
             })),
           );
         }
+
+        // Workouts completed this week
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        const { count: sessionCount } = await supabase
+          .from('workout_sessions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .not('completed_at', 'is', null)
+          .gte('completed_at', weekStart.toISOString());
+        if (sessionCount != null) setWorkoutsThisWeekCount(sessionCount);
 
         // Recent achievements
         const { data: achievements } = await supabase
@@ -407,6 +413,50 @@ export default function DashboardScreen() {
         </Text>
       </Animated.View>
       <HelpBubble id="dashboard_greeting" message="Pull down to refresh your daily briefing" position="below" />
+
+      {/* Quick Actions — placed here so they're always above the ChatFAB */}
+      <Animated.View entering={FadeInDown.delay(30).duration(400)}>
+        <Card variant="default" style={{ marginBottom: spacing.lg }}>
+          <View style={styles.quickActionsRow}>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
+              accessibilityLabel="Log Workout"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.primary + '15', borderColor: colors.accent.primary + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>💪</Text>
+              <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Workout
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/nutrition/add-food' as never); }}
+              accessibilityLabel="Log Meal"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.success + '15', borderColor: colors.accent.success + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>🍽️</Text>
+              <Text style={[typography.tiny, { color: colors.accent.success, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Meal
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => { void hapticMedium(); router.push('/(tabs)/profile' as never); }}
+              accessibilityLabel="Log Weight"
+              accessibilityRole="button"
+              hitSlop={8}
+              style={[styles.quickActionBtn, { backgroundColor: colors.accent.info + '15', borderColor: colors.accent.info + '40' }]}
+            >
+              <Text style={{ fontSize: 22 }}>⚖️</Text>
+              <Text style={[typography.tiny, { color: colors.accent.info, textAlign: 'center', marginTop: spacing.xs }]}>
+                Log Weight
+              </Text>
+            </Pressable>
+          </View>
+        </Card>
+      </Animated.View>
 
       {/* Daily Accountability Card */}
       {accountabilityMessage && (
@@ -616,50 +666,6 @@ export default function DashboardScreen() {
                 {workoutDoneToday ? 'Done' : 'Pending'}
               </Text>
             </View>
-          </View>
-        </Card>
-      </Animated.View>
-
-      {/* Quick Actions */}
-      <Animated.View entering={FadeInDown.delay(120).duration(400)}>
-        <Card variant="default" style={{ marginBottom: spacing.lg }}>
-          <View style={styles.quickActionsRow}>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
-              accessibilityLabel="Log Workout"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.primary + '15', borderColor: colors.accent.primary + '40' }]}
-            >
-              <Text style={{ fontSize: 22 }}>💪</Text>
-              <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Workout
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/nutrition/add-food' as never); }}
-              accessibilityLabel="Log Meal"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.success + '15', borderColor: colors.accent.success + '40' }]}
-            >
-              <Text style={{ fontSize: 22 }}>🍽️</Text>
-              <Text style={[typography.tiny, { color: colors.accent.success, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Meal
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/profile' as never); }}
-              accessibilityLabel="Log Weight"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[styles.quickActionBtn, { backgroundColor: colors.accent.info + '15', borderColor: colors.accent.info + '40' }]}
-            >
-              <Text style={{ fontSize: 22 }}>⚖️</Text>
-              <Text style={[typography.tiny, { color: colors.accent.info, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Weight
-              </Text>
-            </Pressable>
           </View>
         </Card>
       </Animated.View>

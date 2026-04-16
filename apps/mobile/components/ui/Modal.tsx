@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
+    elevation: 20,
     justifyContent: 'flex-end',
   },
   backdrop: {

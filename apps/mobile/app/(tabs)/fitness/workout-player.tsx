@@ -441,24 +441,24 @@ export default function WorkoutPlayerScreen() {
             <Skeleton variant="card" height={200} />
           </View>
         ) : exercisesWithSets.length === 0 ? (
-          <Card style={{ marginBottom: spacing.lg }}>
-            {exerciseLoadError ? (
-              <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>
-                {exerciseLoadError}
-              </Text>
-            ) : (
-              <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-                No exercises loaded. This is an empty workout session.
-              </Text>
-            )}
+          <View style={{ alignItems: 'center', paddingVertical: spacing.xl }}>
+            <Text style={{ fontSize: 56, marginBottom: spacing.lg }}>{'\u{1F3CB}\uFE0F'}</Text>
+            <Text style={[typography.h3, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
+              {exerciseLoadError ? 'Failed to load exercises' : 'No exercises yet'}
+            </Text>
+            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xl, lineHeight: 22 }]}>
+              {exerciseLoadError
+                ? exerciseLoadError
+                : 'Search the library and add exercises to build your session.'}
+            </Text>
             <Button
-              title="Browse Exercises"
-              variant="outline"
+              title="Browse Exercise Library"
               onPress={() => router.push('/(tabs)/fitness/exercises' as never)}
               fullWidth
-              style={{ marginTop: spacing.md }}
+              accessibilityLabel="Browse exercises to add"
+              leftIcon={<Ionicons name="search" size={18} color={colors.text.inverse} />}
             />
-          </Card>
+          </View>
         ) : (
           <>
             {/* Exercise Tabs */}

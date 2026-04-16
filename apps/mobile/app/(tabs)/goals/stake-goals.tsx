@@ -19,7 +19,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
-import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { hapticSuccess, hapticMedium } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
 import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '../../../services/supabase';
