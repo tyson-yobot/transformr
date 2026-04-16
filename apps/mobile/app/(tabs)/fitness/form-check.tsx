@@ -23,7 +23,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { analyzeExerciseForm } from '@services/ai/formCheck';
-import { supabase } from '../../../services/supabase';
+import { supabase } from '@services/supabase';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -272,7 +272,7 @@ export default function FormCheckScreen() {
             fullWidth
             size="lg"
             style={{ marginTop: spacing.xl }}
-            leftIcon={<Ionicons name="videocam" size={22} color="#FFFFFF" />}
+            leftIcon={<Ionicons name="videocam" size={22} color={colors.text.inverse} />}
           />
         </ScrollView>
       </View>
@@ -365,7 +365,7 @@ export default function FormCheckScreen() {
             onPress={handleSubmitForAnalysis}
             fullWidth
             size="lg"
-            leftIcon={<Ionicons name="sparkles" size={20} color="#FFFFFF" />}
+            leftIcon={<Ionicons name="sparkles" size={20} color={colors.text.inverse} />}
           />
           <Button
             title="Re-record"
@@ -574,7 +574,7 @@ export default function FormCheckScreen() {
               title="Check Another Exercise"
               onPress={handleReset}
               fullWidth
-              leftIcon={<Ionicons name="refresh" size={20} color="#FFFFFF" />}
+              leftIcon={<Ionicons name="refresh" size={20} color={colors.text.inverse} />}
             />
             <Button
               title="Back to Fitness"

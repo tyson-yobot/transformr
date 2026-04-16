@@ -13,6 +13,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -21,6 +23,8 @@ import { Badge } from '@components/ui/Badge';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { Skeleton } from '@components/ui/Skeleton';
+import { MonoText } from '@components/ui/MonoText';
+import { NarratorCard } from '@components/workout/NarratorCard';
 import { useWorkout } from '@hooks/useWorkout';
 import {
   formatTimerDisplay,
@@ -62,8 +66,20 @@ interface ExerciseWithSets {
 export default function WorkoutPlayerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { activeSession, logSetWithPRDetection, completeWorkout, getGhostData, isLoading } =
     useWorkout();
+
+  // Hide the tab bar while the workout player is focused
+  useFocusEffect(
+    useCallback(() => {
+      const parent = navigation.getParent();
+      parent?.setOptions({ tabBarStyle: { display: 'none' } });
+      return () => {
+        parent?.setOptions({ tabBarStyle: undefined });
+      };
+    }, [navigation]),
+  );
 
   const [exercisesWithSets, setExercisesWithSets] = useState<ExerciseWithSets[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -81,6 +97,7 @@ export default function WorkoutPlayerScreen() {
   const [loadingExercises, setLoadingExercises] = useState(true);
   const [exerciseLoadError, setExerciseLoadError] = useState<string | null>(null);
   const [aiCoachTip, setAiCoachTip] = useState<string | null>(null);
+  const [narratorText, setNarratorText] = useState<string | null>(null);
 
   // Set logger state per exercise
   const [currentWeight, setCurrentWeight] = useState('');
@@ -188,7 +205,7 @@ export default function WorkoutPlayerScreen() {
     const currentExercise = exercisesWithSets[activeExerciseIndex];
     if (!currentExercise) return;
 
-    await hapticLight();
+    await hapticMedium();
 
     const result = await logSetWithPRDetection(currentExercise.exercise.id, {
       weight,
@@ -243,10 +260,20 @@ export default function WorkoutPlayerScreen() {
         });
     }
 
+    // Show narrator card after set
+    setNarratorText(null); // clear previous so card remounts on next set
+
     // Start rest timer
     const restDuration = currentExercise.templateExercise?.rest_seconds ?? restTarget;
     setRestSeconds(restDuration);
     setIsResting(true);
+
+    // Show narrator card with a coaching note after each set
+    setNarratorText(
+      result.isPR
+        ? `Personal record! ${weight} lbs x ${reps} reps. Outstanding effort.`
+        : `Set ${currentExercise.loggedSets.length + 1} logged. Rest up — you earned it.`,
+    );
 
     // Clear inputs
     setCurrentWeight('');
@@ -371,9 +398,13 @@ export default function WorkoutPlayerScreen() {
             position="above"
           />
           <Ionicons name="timer-outline" size={48} color={colors.accent.info} />
-          <Text style={[typography.countdown, { color: colors.text.primary, marginTop: spacing.md }]}>
+          <MonoText
+            variant="countdown"
+            color={colors.text.primary}
+            style={{ marginTop: spacing.md, fontSize: 64 }}
+          >
             {formatRestTimer(restSeconds)}
-          </Text>
+          </MonoText>
           <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
             Rest Time
           </Text>
@@ -389,7 +420,7 @@ export default function WorkoutPlayerScreen() {
 
       {/* PR Celebration */}
       {showPRCelebration && (
-        <View style={[styles.prOverlay, { backgroundColor: 'rgba(234, 179, 8, 0.08)' }]}>
+        <View style={[styles.prOverlay, { backgroundColor: colors.accent.goldDim }]}>
           <Ionicons name="trophy" size={64} color={colors.accent.gold} />
           <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
             NEW PR!
@@ -464,7 +495,7 @@ export default function WorkoutPlayerScreen() {
                       typography.captionBold,
                       {
                         color:
-                          idx === activeExerciseIndex ? '#FFFFFF' : colors.text.secondary,
+                          idx === activeExerciseIndex ? colors.text.inverse : colors.text.secondary,
                       },
                     ]}
                     numberOfLines={1}
@@ -523,9 +554,23 @@ export default function WorkoutPlayerScreen() {
               </Card>
             )}
 
+            {/* Narrator Card — shown after each set */}
+            {narratorText && (
+              <View style={{ marginBottom: spacing.lg }}>
+                <NarratorCard narration={narratorText} restSeconds={isResting ? restSeconds : 0} />
+              </View>
+            )}
+
             {/* Active Exercise Card */}
             {currentExercise && (
-              <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+              <Card
+                variant="elevated"
+                style={{
+                  marginBottom: spacing.lg,
+                  borderWidth: 1,
+                  borderColor: colors.accent.primary,
+                }}
+              >
                 <View style={styles.exerciseHeader}>
                   <View style={{ flex: 1 }}>
                     <Text style={[typography.h2, { color: colors.text.primary }]}>
@@ -725,7 +770,7 @@ export default function WorkoutPlayerScreen() {
                   fullWidth
                   accessibilityLabel={`Log set ${currentExercise.loggedSets.length + 1} for ${currentExercise.exercise.name}`}
                   style={{ marginTop: spacing.md }}
-                  leftIcon={<Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />}
+                  leftIcon={<Ionicons name="checkmark-circle" size={20} color={colors.text.inverse} />}
                 />
                 <HelpBubble id="workout_log_set" message="Enter weight and reps, then tap check to log" position="above" />
 
@@ -770,7 +815,7 @@ export default function WorkoutPlayerScreen() {
           fullWidth
           size="lg"
           accessibilityLabel="Complete workout session"
-          leftIcon={<Ionicons name="checkmark-done" size={22} color="#FFFFFF" />}
+          leftIcon={<Ionicons name="checkmark-done" size={22} color={colors.text.inverse} />}
         />
       </View>
 

@@ -408,7 +408,7 @@ export default function ExerciseDetailScreen() {
           fullWidth
           size="lg"
           accessibilityLabel={`Add ${exercise.name} to workout`}
-          leftIcon={<Ionicons name="add-circle" size={22} color="#FFFFFF" />}
+          leftIcon={<Ionicons name="add-circle" size={22} color={colors.text.inverse} />}
         />
       </View>
     </View>

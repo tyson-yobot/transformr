@@ -11,6 +11,7 @@ import {
   Pressable,
   Alert,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -69,15 +70,25 @@ export default function ExercisesScreen() {
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentFilter>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const doFetch = useCallback(() => {
     const category = selectedCategory !== 'all' ? selectedCategory : undefined;
     const equipment = selectedEquipment !== 'all' ? selectedEquipment : undefined;
     const search = searchQuery.trim() || undefined;
     const hasFilters = category !== undefined || equipment !== undefined || search !== undefined;
-
-    fetchExercises(hasFilters ? { category, equipment, search } : undefined);
+    return fetchExercises(hasFilters ? { category, equipment, search } : undefined);
   }, [selectedCategory, selectedEquipment, searchQuery, fetchExercises]);
+
+  useEffect(() => {
+    doFetch();
+  }, [doFetch]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await doFetch();
+    setRefreshing(false);
+  }, [doFetch]);
 
   const filteredExercises = useMemo(() => {
     return exercises;
@@ -305,6 +316,13 @@ export default function ExercisesScreen() {
             padding: spacing.lg,
             paddingBottom: 100,
           }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.accent.primary}
+            />
+          }
           ListEmptyComponent={
             <View style={[styles.centered, { paddingVertical: spacing.xxxl }]}>
               <Ionicons name="search-outline" size={48} color={colors.text.muted} />
@@ -337,7 +355,7 @@ export default function ExercisesScreen() {
           },
         ]}
       >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color={colors.text.inverse} />
       </Pressable>
 
       {/* Add Custom Exercise Modal */}

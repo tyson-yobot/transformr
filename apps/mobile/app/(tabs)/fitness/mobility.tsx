@@ -9,6 +9,7 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -71,9 +72,16 @@ export default function MobilityScreen() {
   const [completedCount, setCompletedCount] = useState(0);
   const [recentSessions, setRecentSessions] = useState<MobilitySession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [loadTick, setLoadTick] = useState(0);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setLoadTick((prev) => prev + 1);
+  }, []);
 
   // Load data
   useEffect(() => {
@@ -181,11 +189,12 @@ export default function MobilityScreen() {
         setRoutines([pushDayRoutineFallback, legDayRoutineFallback, fullBodyRoutineFallback]);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [loadTick]);
 
   const handleStretchComplete = useCallback(async () => {
     if (!activeRoutine) return;
@@ -432,7 +441,7 @@ export default function MobilityScreen() {
                     title={timerSeconds === activeExercise.durationSeconds ? 'Start' : 'Resume'}
                     onPress={handleStartTimer}
                     style={{ flex: 2 }}
-                    leftIcon={<Ionicons name="play" size={20} color="#FFFFFF" />}
+                    leftIcon={<Ionicons name="play" size={20} color={colors.text.inverse} />}
                   />
                 )}
                 <Button
@@ -493,7 +502,7 @@ export default function MobilityScreen() {
                       ]}
                     >
                       {exercise.isCompleted ? (
-                        <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                        <Ionicons name="checkmark" size={14} color={colors.text.inverse} />
                       ) : (
                         <Text
                           style={[
@@ -542,6 +551,13 @@ export default function MobilityScreen() {
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
       >
         {/* Session load error — routines still functional */}
         {error && (
@@ -623,7 +639,7 @@ export default function MobilityScreen() {
               onPress={() => handleStartRoutine(routine)}
               fullWidth
               style={{ marginTop: spacing.md }}
-              leftIcon={<Ionicons name="play" size={18} color="#FFFFFF" />}
+              leftIcon={<Ionicons name="play" size={18} color={colors.text.inverse} />}
             />
           </Card>
         ))}

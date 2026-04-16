@@ -10,6 +10,7 @@ import {
   Pressable,
   Alert,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,6 +41,7 @@ export default function ProgramsScreen() {
   const [programsWithExercises, setProgramsWithExercises] = useState<ProgramWithExercises[]>([]);
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Create/Edit modal
@@ -92,6 +94,12 @@ export default function ProgramsScreen() {
 
   useEffect(() => {
     loadPrograms();
+  }, [loadPrograms]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadPrograms();
+    setRefreshing(false);
   }, [loadPrograms]);
 
   const handleStartProgram = useCallback(
@@ -346,6 +354,13 @@ export default function ProgramsScreen() {
         maxToRenderPerBatch={5}
         initialNumToRender={6}
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
         ListEmptyComponent={
           <View style={[styles.centered, { paddingVertical: spacing.xxxl }]}>
             <Ionicons name="calendar-outline" size={48} color={colors.text.muted} />
@@ -377,7 +392,7 @@ export default function ProgramsScreen() {
           },
         ]}
       >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color={colors.text.inverse} />
       </Pressable>
 
       {/* Create Program Modal */}

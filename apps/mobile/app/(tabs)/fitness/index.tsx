@@ -524,7 +524,7 @@ export default function FitnessHomeScreen() {
           },
         ]}
       >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={28} color={colors.text.inverse} />
       </Pressable>
     </View>
   );

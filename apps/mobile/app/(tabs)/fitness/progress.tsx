@@ -11,6 +11,7 @@ import {
   Image,
   Alert,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -44,6 +45,8 @@ export default function ProgressScreen() {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [refreshing, setRefreshing] = useState(false);
 
   // Log weight modal
   const [showLogWeightModal, setShowLogWeightModal] = useState(false);
@@ -119,6 +122,12 @@ export default function ProgressScreen() {
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
   }, [loadData]);
 
   const handleLogWeight = useCallback(async () => {
@@ -235,12 +244,27 @@ export default function ProgressScreen() {
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
       >
         <AIInsightCard screenKey="fitness/progress" style={{ marginBottom: spacing.md }} />
 
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
             <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
+            <Button
+              title="Retry"
+              variant="outline"
+              onPress={() => { void loadData(); }}
+              size="sm"
+              style={{ marginTop: spacing.sm }}
+              accessibilityLabel="Retry loading progress data"
+            />
           </Card>
         )}
 
@@ -514,7 +538,7 @@ export default function ProgressScreen() {
             },
           ]}
         >
-          <Ionicons name="scale-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="scale-outline" size={24} color={colors.text.inverse} />
         </Pressable>
         <Pressable
           onPress={() => {
@@ -531,7 +555,7 @@ export default function ProgressScreen() {
             },
           ]}
         >
-          <Ionicons name="camera-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="camera-outline" size={24} color={colors.text.inverse} />
         </Pressable>
       </View>
 

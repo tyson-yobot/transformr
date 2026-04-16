@@ -10,6 +10,7 @@ import {
   Pressable,
   Alert,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -77,6 +78,7 @@ export default function PainTrackerScreen() {
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Body map selection
@@ -116,6 +118,12 @@ export default function PainTrackerScreen() {
 
   useEffect(() => {
     loadPainLogs();
+  }, [loadPainLogs]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadPainLogs();
+    setRefreshing(false);
   }, [loadPainLogs]);
 
   // Update history when body part selected
@@ -203,10 +211,25 @@ export default function PainTrackerScreen() {
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accent.primary}
+          />
+        }
       >
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
             <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
+            <Button
+              title="Retry"
+              variant="outline"
+              onPress={() => { void loadPainLogs(); }}
+              size="sm"
+              style={{ marginTop: spacing.sm }}
+              accessibilityLabel="Retry loading pain logs"
+            />
           </Card>
         )}
 
@@ -290,7 +313,7 @@ export default function PainTrackerScreen() {
                   hapticLight();
                   setShowLogModal(true);
                 }}
-                leftIcon={<Ionicons name="add" size={16} color="#FFFFFF" />}
+                leftIcon={<Ionicons name="add" size={16} color={colors.text.inverse} />}
               />
             </View>
 
