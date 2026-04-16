@@ -21,7 +21,7 @@ function AuthStack() {
 
 export default function AuthLayout() {
   return (
-    <ThemeProvider mode="dark">
+    <ThemeProvider forceDark>
       <AuthStack />
     </ThemeProvider>
   );

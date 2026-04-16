@@ -33,6 +33,8 @@ interface HabitState {
   habits: Habit[];
   todayCompletions: HabitCompletion[];
   allCompletions: HabitCompletion[];
+  /** Overall streak: consecutive calendar days with ≥1 habit completion. Null before first fetch. */
+  overallStreak: number | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -48,6 +50,49 @@ interface HabitActions {
 
 type HabitStore = HabitState & HabitActions;
 
+/**
+ * Computes consecutive calendar days ending today (or yesterday) on which
+ * at least one habit_completion exists. This is the authoritative "overall streak".
+ */
+function computeOverallStreak(completions: HabitCompletion[]): number {
+  if (completions.length === 0) return 0;
+
+  // Collect unique YYYY-MM-DD dates
+  const uniqueDates = [
+    ...new Set(
+      completions
+        .filter((c) => Boolean(c.completed_at))
+        .map((c) => (c.completed_at as string).split('T')[0] as string),
+    ),
+  ].sort().reverse(); // newest first
+
+  if (uniqueDates.length === 0) return 0;
+
+  let streak = 0;
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+
+  for (const dateStr of uniqueDates) {
+    const cursorStr = cursor.toISOString().split('T')[0] as string;
+
+    // Allow today or yesterday as a valid start
+    if (streak === 0) {
+      const yesterday = new Date(cursor);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0] as string;
+      if (dateStr !== cursorStr && dateStr !== yesterdayStr) break;
+      if (dateStr === yesterdayStr) cursor.setDate(cursor.getDate() - 1);
+    } else if (dateStr !== cursorStr) {
+      break;
+    }
+
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
 function getTodayRange(): { start: string; end: string } {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -60,6 +105,7 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
   habits: [],
   todayCompletions: [],
   allCompletions: [],
+  overallStreak: null,
   isLoading: false,
   error: null,
 
@@ -98,10 +144,12 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
       if (completionsResult.error) throw completionsResult.error;
       if (historyResult.error) throw historyResult.error;
 
+      const fetchedHistory = (historyResult.data ?? []) as HabitCompletion[];
       set({
         habits: (habitsResult.data ?? []) as Habit[],
         todayCompletions: (completionsResult.data ?? []) as HabitCompletion[],
-        allCompletions: (historyResult.data ?? []) as HabitCompletion[],
+        allCompletions: fetchedHistory,
+        overallStreak: computeOverallStreak(fetchedHistory),
         isLoading: false,
       });
     } catch (err: unknown) {
@@ -139,16 +187,20 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
         .update({ current_streak: newStreak, longest_streak: newLongest })
         .eq('id', habitId);
 
-      set((state) => ({
-        todayCompletions: [...state.todayCompletions, completion],
-        allCompletions: [...state.allCompletions, completion],
-        habits: state.habits.map((h) =>
-          h.id === habitId
-            ? { ...h, current_streak: newStreak, longest_streak: newLongest }
-            : h,
-        ),
-        isLoading: false,
-      }));
+      set((state) => {
+        const newAllCompletions = [...state.allCompletions, completion];
+        return {
+          todayCompletions: [...state.todayCompletions, completion],
+          allCompletions: newAllCompletions,
+          overallStreak: computeOverallStreak(newAllCompletions),
+          habits: state.habits.map((h) =>
+            h.id === habitId
+              ? { ...h, current_streak: newStreak, longest_streak: newLongest }
+              : h,
+          ),
+          isLoading: false,
+        };
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to complete habit';
       set({ error: message, isLoading: false });
@@ -261,6 +313,7 @@ export const useHabitStore = create<HabitStore>()((set, get) => ({
       habits: [],
       todayCompletions: [],
       allCompletions: [],
+      overallStreak: null,
       isLoading: false,
       error: null,
     }),

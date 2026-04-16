@@ -12,10 +12,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { ThemeProvider } from '@theme/index';
+import { ThemeProvider, useTheme } from '@theme/index';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
-import { useSettingsStore } from '@stores/settingsStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
@@ -42,9 +41,13 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? 'light' : 'dark'} />;
+}
+
 export default function RootLayout() {
   const listenToAuthChanges = useAuthStore((s) => s.listenToAuthChanges);
-  const themeMode = useSettingsStore((s) => s.theme);
   useOfflineSync();
 
   const [fontsLoaded] = useFonts({
@@ -129,8 +132,8 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider mode={themeMode}>
-              <StatusBar style="light" />
+            <ThemeProvider>
+              <AppStatusBar />
               <Slot />
             </ThemeProvider>
           </QueryClientProvider>

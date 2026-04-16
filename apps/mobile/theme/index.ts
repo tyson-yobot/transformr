@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { colors, ColorScheme, ThemeMode } from './colors';
 import { typography } from './typography';
 import { spacing, borderRadius } from './spacing';
+import { useSettingsStore } from '@stores/settingsStore';
 
 interface ThemeContextValue {
   colors: ColorScheme;
@@ -11,32 +12,53 @@ interface ThemeContextValue {
   borderRadius: typeof borderRadius;
   isDark: boolean;
   mode: ThemeMode;
+  toggleTheme: () => void;
+  setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 interface ThemeProviderProps {
-  mode?: ThemeMode;
   children: React.ReactNode;
+  /** When true, always renders the dark theme regardless of user preference. */
+  forceDark?: boolean;
 }
 
-export function ThemeProvider({ mode = 'dark', children }: ThemeProviderProps) {
+export function ThemeProvider({ children, forceDark = false }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
+  const mode = useSettingsStore((s) => s.theme);
+  const updateSetting = useSettingsStore((s) => s.updateSetting);
 
-  const isDark = mode === 'system'
+  const isDark = forceDark || (mode === 'system'
     ? systemScheme !== 'light'
-    : mode === 'dark';
+    : mode === 'dark');
 
   const themeColors: ColorScheme = isDark ? colors.dark : colors.light;
 
-  const value = useMemo<ThemeContextValue>(() => ({
-    colors: themeColors,
-    typography,
-    spacing,
-    borderRadius,
-    isDark,
-    mode,
-  }), [themeColors, isDark, mode]);
+  const setMode = useCallback(
+    (next: ThemeMode) => {
+      updateSetting('theme', next);
+    },
+    [updateSetting],
+  );
+
+  const toggleTheme = useCallback(() => {
+    setMode(isDark ? 'light' : 'dark');
+  }, [isDark, setMode]);
+
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      colors: themeColors,
+      typography,
+      spacing,
+      borderRadius,
+      isDark,
+      mode,
+      toggleTheme,
+      setMode,
+    }),
+    [themeColors, isDark, mode, toggleTheme, setMode],
+  );
 
   return React.createElement(ThemeContext.Provider, { value }, children);
 }
@@ -52,6 +74,8 @@ export function useTheme(): ThemeContextValue {
       borderRadius,
       isDark: true,
       mode: 'dark',
+      toggleTheme: () => undefined,
+      setMode: () => undefined,
     };
   }
   return context;

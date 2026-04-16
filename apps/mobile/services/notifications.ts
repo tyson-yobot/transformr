@@ -40,7 +40,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
       name: 'Default',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#6366F1',
+      lightColor: '#A855F7',
     });
 
     Notifications.setNotificationChannelAsync('workout', {

@@ -16,6 +16,65 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import type { ThemeMode } from '@theme/colors';
+
+// ---------------------------------------------------------------------------
+// Appearance segmented control
+// ---------------------------------------------------------------------------
+const THEME_OPTIONS: { value: ThemeMode; label: string; icon: string }[] = [
+  { value: 'dark', label: 'Dark', icon: '🌙' },
+  { value: 'light', label: 'Light', icon: '☀️' },
+  { value: 'system', label: 'System', icon: '⚙️' },
+];
+
+function AppearancePicker() {
+  const { colors, typography, spacing, borderRadius, mode, setMode } = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        backgroundColor: colors.background.secondary,
+        borderRadius: borderRadius.md,
+        padding: 4,
+        marginBottom: spacing.xs,
+      }}
+    >
+      {THEME_OPTIONS.map((opt) => {
+        const active = mode === opt.value;
+        return (
+          <Pressable
+            key={opt.value}
+            onPress={() => {
+              void hapticLight();
+              setMode(opt.value);
+            }}
+            accessibilityRole="radio"
+            accessibilityLabel={`Theme: ${opt.label}`}
+            accessibilityState={{ selected: active }}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: spacing.sm,
+              borderRadius: borderRadius.sm,
+              backgroundColor: active ? colors.accent.primary : 'transparent',
+            }}
+          >
+            <Text style={{ fontSize: 14, marginRight: 4 }}>{opt.icon}</Text>
+            <Text
+              style={[
+                typography.captionBold,
+                { color: active ? '#FFFFFF' : colors.text.secondary },
+              ]}
+            >
+              {opt.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
 import { MonoText } from '@components/ui/MonoText';
@@ -298,17 +357,6 @@ export default function ProfileScreen() {
     [habits],
   );
 
-  // Theme cycle
-  const currentThemeLabel = settings.theme.charAt(0).toUpperCase() + settings.theme.slice(1);
-
-  const handleThemeCycle = useCallback(() => {
-    const themeOptions: ThemeMode[] = ['dark', 'light', 'system'];
-    const currentIdx = themeOptions.indexOf(settings.theme);
-    const nextIdx = (currentIdx + 1) % themeOptions.length;
-    const nextTheme = themeOptions[nextIdx] as ThemeMode;
-    settings.updateSetting('theme', nextTheme);
-    void hapticLight();
-  }, [settings]);
 
   // Days tracked since account creation
   const daysTracked = useMemo(() => {
@@ -481,14 +529,13 @@ export default function ProfileScreen() {
       <HelpBubble id="profile_coaching" message="Choose how your AI coach talks to you" position="below" />
 
       {/* Settings */}
+      <SectionHeader title="Appearance" />
+      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <AppearancePicker />
+      </Animated.View>
+
       <SectionHeader title="Preferences" />
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-        <SettingsRow
-          icon="🎨"
-          label="Theme"
-          value={currentThemeLabel}
-          onPress={handleThemeCycle}
-        />
         <SettingsRow
           icon="🔔"
           label="Notification Settings"

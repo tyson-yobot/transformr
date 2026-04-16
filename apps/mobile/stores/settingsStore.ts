@@ -4,8 +4,15 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from '../utils/storage';
 import { supabase } from '../services/supabase';
+
+// Synchronous MMKV adapter for zustand persist
+const mmkvStorage = {
+  getItem: (name: string): string | null => storage.getString(name) ?? null,
+  setItem: (name: string, value: string): void => { storage.set(name, value); },
+  removeItem: (name: string): void => { storage.delete(name); },
+};
 import type { Profile } from '../types/database';
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -125,7 +132,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'transformr-settings',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => mmkvStorage),
       version: 1,
       migrate: (persistedState, version) => {
         if (version < 1) {

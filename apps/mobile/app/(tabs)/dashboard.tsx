@@ -148,13 +148,9 @@ export default function DashboardScreen() {
       .slice(0, 3);
   }, [habitStore.habits]);
 
-  // Streak from habits
-  const currentStreak = useMemo(() => {
-    const streaks = habitStore.habits
-      .filter((h) => h.is_active !== false)
-      .map((h) => h.current_streak ?? 0);
-    return streaks.length > 0 ? Math.max(...streaks) : 0;
-  }, [habitStore.habits]);
+  // Streak from computed overallStreak (consecutive days with ≥1 completion).
+  // Null before first fetch — renders as '—' in UI.
+  const currentStreak: number | null = habitStore.overallStreak;
 
   // Workouts this week — real completed session count from Supabase
   const workoutsThisWeek = workoutsThisWeekCount ?? 0;
@@ -179,8 +175,8 @@ export default function DashboardScreen() {
     return !!workoutStore.activeSession?.completed_at;
   }, [workoutStore.activeSession]);
 
-  // Computed readiness fallback (profile-based estimate until real score loads)
-  const readinessScoreDisplay = readinessScore ?? (profile ? 72 : null);
+  // Null until the edge function returns a real value — renders as '—' in UI
+  const readinessScoreDisplay = readinessScore;
 
   // Greeting with user name
   const motivationalGreeting = getTodayGreeting();
@@ -319,8 +315,8 @@ export default function DashboardScreen() {
       {
         icon: <Text style={{ fontSize: 18 }}>🔥</Text>,
         label: 'Streak',
-        valueNode: <MonoText variant="monoBody">{currentStreak}d</MonoText>,
-        value: `${currentStreak}d`,
+        valueNode: <MonoText variant="monoBody">{currentStreak !== null ? `${currentStreak}d` : '—'}</MonoText>,
+        value: currentStreak !== null ? `${currentStreak}d` : '—',
       },
       {
         icon: <Text style={{ fontSize: 18 }}>💪</Text>,
