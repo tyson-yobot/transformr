@@ -12,7 +12,7 @@
       "policy": "sdkVersion"
     },
     "icon": "./assets/images/icon.png",
-    "scheme": "transformr",
+    "scheme": "com.automateai.transformr",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",

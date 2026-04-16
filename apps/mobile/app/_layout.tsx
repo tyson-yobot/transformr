@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useEffect, useCallback } from 'react';
+import { Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,6 +16,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
+import { supabase } from '@services/supabase';
 
 const STRIPE_PUBLISHABLE_KEY = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
 
@@ -58,6 +60,42 @@ export default function RootLayout() {
       subscription.unsubscribe();
     };
   }, [listenToAuthChanges]);
+
+  // Handle OAuth deep link callbacks (PKCE code exchange on cold start or resume)
+  const handleOAuthUrl = useCallback(async (url: string) => {
+    if (!url.includes('auth/callback')) return;
+    try {
+      const parsed = new URL(url);
+      const code = parsed.searchParams.get('code');
+      if (code) {
+        await supabase.auth.exchangeCodeForSession(code);
+        return;
+      }
+      const hash = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
+      const hashParams = new URLSearchParams(hash);
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      }
+    } catch {
+      // deep link parse failed — ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    // Handle OAuth redirect on cold start
+    void Linking.getInitialURL().then((url) => {
+      if (url) void handleOAuthUrl(url);
+    });
+
+    // Handle OAuth redirect while app is running
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      void handleOAuthUrl(url);
+    });
+
+    return () => sub.remove();
+  }, [handleOAuthUrl]);
 
   const onLayoutReady = useCallback(async () => {
     if (fontsLoaded) {

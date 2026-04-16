@@ -56,6 +56,7 @@ export const useAuthStore = create<AuthStore>()(
             password,
             options: {
               data: { display_name: displayName },
+              emailRedirectTo: Linking.createURL('auth/callback'),
             },
           });
           if (error) {
@@ -129,38 +130,45 @@ export const useAuthStore = create<AuthStore>()(
       signInWithGoogle: async () => {
         set({ loading: true, error: null });
         try {
-          const redirectUrl = Linking.createURL('callback');
+          const redirectUrl = Linking.createURL('auth/callback');
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
               redirectTo: redirectUrl,
-              queryParams: { access_type: 'offline', prompt: 'consent' },
+              queryParams: { access_type: 'offline', prompt: 'select_account' },
               skipBrowserRedirect: true,
             },
           });
           if (error) throw error;
           if (!data.url) throw new Error('No auth URL returned');
 
-          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+          await WebBrowser.warmUpAsync();
+          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl, { showInRecents: false });
+          await WebBrowser.coolDownAsync();
+
           if (result.type === 'success' && result.url) {
-            const url = new URL(result.url);
-            const code = url.searchParams.get('code');
+            const parsed = new URL(result.url);
+            const code = parsed.searchParams.get('code');
             if (code) {
               await supabase.auth.exchangeCodeForSession(code);
               set({ loading: false });
               return;
             }
-            const hash = url.hash.startsWith('#') ? url.hash.substring(1) : '';
+            const hash = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
             const hashParams = new URLSearchParams(hash);
-            const accessToken = hashParams.get('access_token') ?? url.searchParams.get('access_token');
-            const refreshToken = hashParams.get('refresh_token') ?? url.searchParams.get('refresh_token');
+            const accessToken = hashParams.get('access_token') ?? parsed.searchParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') ?? parsed.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
               set({ loading: false });
               return;
             }
           }
-          set({ loading: false });
+          if (result.type === 'cancel') {
+            set({ loading: false });
+            return;
+          }
+          set({ loading: false, error: 'Google sign in did not complete. Please try again.' });
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Google sign-in failed';
           set({ error: raw, loading: false });
@@ -170,7 +178,7 @@ export const useAuthStore = create<AuthStore>()(
       signInWithApple: async () => {
         set({ loading: true, error: null });
         try {
-          const redirectUrl = Linking.createURL('callback');
+          const redirectUrl = Linking.createURL('auth/callback');
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'apple',
             options: {
@@ -181,28 +189,33 @@ export const useAuthStore = create<AuthStore>()(
           if (error) throw error;
           if (!data.url) throw new Error('No auth URL returned');
 
-          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+          await WebBrowser.warmUpAsync();
+          const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl, { preferEphemeralSession: true });
+          await WebBrowser.coolDownAsync();
+
           if (result.type === 'success' && result.url) {
-            const url = new URL(result.url);
-            // PKCE flow: exchange code for session
-            const code = url.searchParams.get('code');
+            const parsed = new URL(result.url);
+            const code = parsed.searchParams.get('code');
             if (code) {
               await supabase.auth.exchangeCodeForSession(code);
               set({ loading: false });
               return;
             }
-            // Implicit flow: tokens may be in hash fragment
-            const hash = url.hash.startsWith('#') ? url.hash.substring(1) : '';
+            const hash = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
             const hashParams = new URLSearchParams(hash);
-            const accessToken = hashParams.get('access_token') ?? url.searchParams.get('access_token');
-            const refreshToken = hashParams.get('refresh_token') ?? url.searchParams.get('refresh_token');
+            const accessToken = hashParams.get('access_token') ?? parsed.searchParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') ?? parsed.searchParams.get('refresh_token');
             if (accessToken && refreshToken) {
               await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
               set({ loading: false });
               return;
             }
           }
-          set({ loading: false });
+          if (result.type === 'cancel') {
+            set({ loading: false });
+            return;
+          }
+          set({ loading: false, error: 'Apple sign in did not complete. Please try again.' });
         } catch (err: unknown) {
           const raw = err instanceof Error ? err.message : 'Apple sign-in failed';
           set({ error: raw, loading: false });

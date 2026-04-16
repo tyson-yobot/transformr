@@ -16,6 +16,29 @@ interface ScreenInsightState {
 
 const COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 hours
 
+/**
+ * Edge functions occasionally return insight wrapped in a markdown JSON fence.
+ * Strip it and extract the plain string.
+ */
+function stripJsonFence(raw: string): string {
+  const trimmed = raw.trim();
+  // Remove ```json ... ``` or ``` ... ``` blocks
+  const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  const inner = fenceMatch ? fenceMatch[1]!.trim() : trimmed;
+  // If the result looks like JSON, try to extract .insight from it
+  if (inner.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(inner) as Record<string, unknown>;
+      if (typeof parsed['insight'] === 'string') {
+        return parsed['insight'];
+      }
+    } catch {
+      // not valid JSON — return as-is
+    }
+  }
+  return inner;
+}
+
 // In-memory cache to avoid duplicate requests within the same session
 const memoryCache: Record<
   string,
@@ -58,7 +81,9 @@ export function useScreenInsight(screenKey: string): ScreenInsightState {
           return;
         }
 
-        const insightText = (data as { insight?: string })?.insight ?? null;
+        // Strip markdown JSON fences if edge function returns wrapped content
+        const rawInsight = (data as { insight?: string })?.insight ?? null;
+        const insightText = rawInsight ? stripJsonFence(rawInsight) : null;
         const cat = (data as { category?: string })?.category ?? 'general';
 
         setInsight(insightText);

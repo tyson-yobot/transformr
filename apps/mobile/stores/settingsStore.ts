@@ -69,7 +69,7 @@ export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set, get) => ({
       // --- State ---
-      theme: 'system',
+      theme: 'dark',
       notifications: DEFAULT_NOTIFICATIONS,
       voiceEnabled: false,
       narratorEnabled: false,
@@ -126,6 +126,18 @@ export const useSettingsStore = create<SettingsStore>()(
     {
       name: 'transformr-settings',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      migrate: (persistedState, version) => {
+        if (version < 1) {
+          // Migrate 'system' default → 'dark' (v0 had system as default which
+          // shows light theme on emulators/Android that default to light mode)
+          const state = persistedState as Partial<SettingsStore>;
+          if (state.theme === 'system') {
+            state.theme = 'dark';
+          }
+        }
+        return persistedState as SettingsStore;
+      },
     },
   ),
 );

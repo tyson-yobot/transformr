@@ -3,9 +3,12 @@
 // Dot progress overlay sits on top of hero images, edge-to-edge.
 // =============================================================================
 
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, type ComponentType } from 'react-native';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
 const VIVID_PURPLE = '#A855F7';
 const DOT_UPCOMING = '#2A2248';
@@ -63,12 +66,19 @@ export default function OnboardingLayout() {
         }}
       />
 
-      {/* Progress dots — absolute overlay on top of hero images */}
+      {/* Progress dots — absolute overlay with gradient bg to prevent text bleed-through */}
       <View
-        style={[styles.overlay, { top: insets.top + 10 }]}
+        style={[styles.overlay, { top: 0 }]}
         pointerEvents="box-none"
       >
-        <View style={styles.headerRow} pointerEvents="auto">
+        {/* Gradient fade: opaque at top → transparent below nav area */}
+        <LinearGradient
+          colors={['rgba(12,10,21,0.85)', 'rgba(12,10,21,0.0)']}
+          locations={[0, 1]}
+          style={[styles.overlayGradient, { height: insets.top + 56 }]}
+          pointerEvents="none"
+        />
+        <View style={[styles.headerRow, { marginTop: insets.top + 10 }]} pointerEvents="auto">
           {/* Back */}
           <View style={styles.sideSlot}>
             {showBack ? (
@@ -116,7 +126,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
+    top: 0,
     zIndex: 100,
+  },
+  overlayGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
   },
   headerRow: {
     flexDirection: 'row',
