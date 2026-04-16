@@ -19,6 +19,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticSuccess } from '@utils/haptics';
+import { formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import type { Profile } from '@app-types/database';
 
 type Gender = NonNullable<Profile['gender']>;
@@ -65,7 +66,7 @@ export default function EditProfileScreen() {
   useEffect(() => {
     if (!profile) return;
     setDisplayName(profile.display_name ?? '');
-    setDateOfBirth(profile.date_of_birth ?? '');
+    setDateOfBirth(isoToDateInput(profile.date_of_birth ?? ''));
     setGender(profile.gender ?? 'prefer_not_to_say');
     setHeightInches(profile.height_inches != null ? String(profile.height_inches) : '');
     setCurrentWeight(profile.current_weight != null ? String(profile.current_weight) : '');
@@ -90,12 +91,12 @@ export default function EditProfileScreen() {
     };
 
     if (dateOfBirth.trim()) {
-      const dobRegex = /^\d{4}-\d{2}-\d{2}$/;
+      const dobRegex = /^\d{2}\/\d{2}\/\d{4}$/;
       if (!dobRegex.test(dateOfBirth)) {
-        Alert.alert('Invalid Date', 'Use format YYYY-MM-DD');
+        Alert.alert('Invalid Date', 'Use format MM/DD/YYYY (e.g. 05/21/1990)');
         return;
       }
-      updates.date_of_birth = dateOfBirth.trim();
+      updates.date_of_birth = dateInputToISO(dateOfBirth);
     }
 
     if (heightInches) updates.height_inches = parseFloat(heightInches);
@@ -135,8 +136,10 @@ export default function EditProfileScreen() {
             <Input
               label="Date of Birth"
               value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              placeholder="YYYY-MM-DD"
+              onChangeText={(t) => setDateOfBirth(formatDateInput(t))}
+              placeholder="MM/DD/YYYY"
+              keyboardType="number-pad"
+              maxLength={10}
               containerStyle={{ marginTop: spacing.md }}
             />
 

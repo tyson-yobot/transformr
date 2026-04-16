@@ -19,7 +19,7 @@ import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useFinanceStore } from '@stores/financeStore';
-import { formatCurrencyDetailed, formatDate } from '@utils/formatters';
+import { formatCurrencyDetailed, formatDate, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import type { FinanceTransaction } from '@app-types/database';
 
@@ -57,7 +57,7 @@ export default function TransactionsScreen() {
   const [category, setCategory] = useState<TxCategory>('other');
   const [description, setDescription] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState('');
-  const [txDate, setTxDate] = useState(new Date().toISOString().substring(0, 10));
+  const [txDate, setTxDate] = useState(isoToDateInput(new Date().toISOString().substring(0, 10)));
 
   useEffect(() => {
     fetchAccounts();
@@ -86,7 +86,7 @@ export default function TransactionsScreen() {
       amount: isExpense ? -parsed : parsed,
       category,
       description: description.trim() || undefined,
-      transaction_date: txDate,
+      transaction_date: dateInputToISO(txDate),
     });
     await hapticSuccess();
     setShowAddModal(false);
@@ -261,7 +261,7 @@ export default function TransactionsScreen() {
         )}
 
         <Input label="Description (optional)" value={description} onChangeText={setDescription} placeholder="What was this for?" containerStyle={{ marginTop: spacing.md }} />
-        <Input label="Date" value={txDate} onChangeText={setTxDate} placeholder="YYYY-MM-DD" containerStyle={{ marginTop: spacing.md }} />
+        <Input label="Date" value={txDate} onChangeText={(t) => setTxDate(formatDateInput(t))} placeholder="MM/DD/YYYY" keyboardType="number-pad" maxLength={10} containerStyle={{ marginTop: spacing.md }} />
 
         <Button
           title="Add Transaction"

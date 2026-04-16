@@ -26,7 +26,7 @@ import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useGoalStore } from '@stores/goalStore';
-import { formatDate, formatCountdown, formatPercentage } from '@utils/formatters';
+import { formatDate, formatCountdown, formatPercentage, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { EmptyState } from '@components/ui/EmptyState';
 import { HelpBubble } from '@components/ui/HelpBubble';
@@ -63,7 +63,7 @@ const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
 export default function GoalsDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { goals, isLoading, fetchGoals, createGoal } = useGoalStore();
+  const { goals, isLoading, fetchGoals, createGoal, updateGoal } = useGoalStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -71,6 +71,9 @@ export default function GoalsDashboard() {
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalCategory, setNewGoalCategory] = useState<GoalCategory>('personal');
   const [newGoalTargetDate, setNewGoalTargetDate] = useState('');
+  // Inline deadline editing: maps goal.id → draft date string (MM/DD/YYYY)
+  const [editingDeadline, setEditingDeadline] = useState<string | null>(null);
+  const [deadlineDraft, setDeadlineDraft] = useState('');
 
   useEffect(() => {
     fetchGoals();
@@ -127,7 +130,7 @@ export default function GoalsDashboard() {
     await createGoal({
       title: newGoalTitle.trim(),
       category: newGoalCategory,
-      target_date: newGoalTargetDate || undefined,
+      target_date: dateInputToISO(newGoalTargetDate) || undefined,
     });
     await hapticSuccess();
     setShowAddModal(false);
@@ -139,6 +142,42 @@ export default function GoalsDashboard() {
     if (!goal.target_value || goal.target_value === 0) return 0;
     return Math.min((goal.current_value ?? 0) / goal.target_value, 1);
   };
+
+  const urgentGoals = useMemo(
+    () =>
+      goals.filter((g) => {
+        if (!g.target_date || g.status !== 'active') return false;
+        const days = Math.ceil(
+          (new Date(g.target_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+        );
+        return days >= 0 && days <= 3;
+      }),
+    [goals],
+  );
+
+  const goalsWithoutDate = useMemo(
+    () => goals.filter((g) => !g.target_date && g.status === 'active'),
+    [goals],
+  );
+
+  const handleSaveDeadline = useCallback(
+    async (goalId: string) => {
+      const iso = dateInputToISO(deadlineDraft);
+      if (iso) {
+        await updateGoal(goalId, { target_date: iso });
+        await hapticSuccess();
+      }
+      setEditingDeadline(null);
+      setDeadlineDraft('');
+    },
+    [deadlineDraft, updateGoal],
+  );
+
+  const handleStartEditDeadline = useCallback((goal: Goal) => {
+    hapticLight();
+    setEditingDeadline(goal.id);
+    setDeadlineDraft(goal.target_date ? isoToDateInput(goal.target_date) : '');
+  }, []);
 
   if (isLoading && goals.length === 0) {
     return (
@@ -451,8 +490,10 @@ export default function GoalsDashboard() {
         <Input
           label="Target Date (optional)"
           value={newGoalTargetDate}
-          onChangeText={setNewGoalTargetDate}
-          placeholder="YYYY-MM-DD"
+          onChangeText={(t) => setNewGoalTargetDate(formatDateInput(t))}
+          placeholder="MM/DD/YYYY"
+          keyboardType="number-pad"
+          maxLength={10}
           containerStyle={{ marginTop: spacing.lg }}
         />
 

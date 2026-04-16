@@ -21,7 +21,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useBusinessStore } from '@stores/businessStore';
-import { formatCurrency, formatDate } from '@utils/formatters';
+import { formatCurrency, formatDate, formatDateInput, dateInputToISO } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { BusinessMilestone } from '@app-types/database';
@@ -102,7 +102,7 @@ export default function MilestonesScreen() {
         target_metric: formMetric.trim() || undefined,
         target_value: formTargetValue ? parseFloat(formTargetValue) : undefined,
         current_value: formCurrentValue ? parseFloat(formCurrentValue) : undefined,
-        target_date: formTargetDate || undefined,
+        target_date: dateInputToISO(formTargetDate) || undefined,
       };
 
       if (editingMilestone) {
@@ -312,7 +312,7 @@ export default function MilestonesScreen() {
         <Input label="Target Metric (optional)" value={formMetric} onChangeText={setFormMetric} placeholder="e.g. MRR, Customers" containerStyle={{ marginTop: spacing.md }} />
         <Input label="Target Value ($)" value={formTargetValue} onChangeText={setFormTargetValue} placeholder="10000" keyboardType="decimal-pad" containerStyle={{ marginTop: spacing.md }} />
         <Input label="Current Value ($)" value={formCurrentValue} onChangeText={setFormCurrentValue} placeholder="0" keyboardType="decimal-pad" containerStyle={{ marginTop: spacing.md }} />
-        <Input label="Target Date (optional)" value={formTargetDate} onChangeText={setFormTargetDate} placeholder="YYYY-MM-DD" containerStyle={{ marginTop: spacing.md }} />
+        <Input label="Target Date (optional)" value={formTargetDate} onChangeText={(t) => setFormTargetDate(formatDateInput(t))} placeholder="MM/DD/YYYY" keyboardType="number-pad" maxLength={10} containerStyle={{ marginTop: spacing.md }} />
         <Button
           title={editingMilestone ? 'Update Milestone' : 'Create Milestone'}
           onPress={handleSaveMilestone}

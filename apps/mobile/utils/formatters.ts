@@ -125,6 +125,30 @@ export function getGradeColor(grade: string): string {
   return gradeColors[grade] ?? '#94A3B8';
 }
 
+// Date input formatting — auto-inserts / as the user types MM/DD/YYYY
+export function formatDateInput(text: string): string {
+  const digits = text.replace(/\D/g, '').substring(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+// Converts MM/DD/YYYY display value to YYYY-MM-DD for database storage
+export function dateInputToISO(formatted: string): string {
+  const match = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return '';
+  const [, mm, dd, yyyy] = match;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// Converts YYYY-MM-DD ISO date to MM/DD/YYYY for display in inputs
+export function isoToDateInput(iso: string): string {
+  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return '';
+  const [, yyyy, mm, dd] = match;
+  return `${mm}/${dd}/${yyyy}`;
+}
+
 // Ordinal suffix
 export function ordinal(n: number): string {
   const s = ['th', 'st', 'nd', 'rd'];

@@ -18,7 +18,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { useBusinessStore } from '@stores/businessStore';
-import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/formatters';
+import { formatCurrency, formatCurrencyDetailed, formatDate, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import type { RevenueLog } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
@@ -46,7 +46,7 @@ export default function RevenueScreen() {
   const [customerName, setCustomerName] = useState('');
   const [description, setDescription] = useState('');
   const [transactionDate, setTransactionDate] = useState(
-    new Date().toISOString().substring(0, 10),
+    isoToDateInput(new Date().toISOString().substring(0, 10)),
   );
 
   const selectedBusiness = businesses[0] ?? null;
@@ -62,7 +62,7 @@ export default function RevenueScreen() {
       type: revenueType,
       customer_name: customerName.trim() || undefined,
       description: description.trim() || undefined,
-      transaction_date: transactionDate,
+      transaction_date: dateInputToISO(transactionDate),
     });
     await hapticSuccess();
     setAmount('');
@@ -165,8 +165,10 @@ export default function RevenueScreen() {
             <Input
               label="Date"
               value={transactionDate}
-              onChangeText={setTransactionDate}
-              placeholder="YYYY-MM-DD"
+              onChangeText={(t) => setTransactionDate(formatDateInput(t))}
+              placeholder="MM/DD/YYYY"
+              keyboardType="number-pad"
+              maxLength={10}
               containerStyle={{ marginTop: spacing.md }}
             />
 
