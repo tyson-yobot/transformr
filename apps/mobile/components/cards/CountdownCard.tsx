@@ -219,14 +219,16 @@ export function CountdownCard({
         </View>
       )}
 
-      {/* Progress bar */}
-      <ProgressBar
-        progress={progress}
-        label="Time elapsed"
-        showPercentage
-        color={colors.accent.primary}
-        height={6}
-      />
+      {/* Progress bar — only shown while countdown is active */}
+      {!isComplete && (
+        <ProgressBar
+          progress={progress}
+          label="Time elapsed"
+          showPercentage
+          color={colors.accent.primary}
+          height={6}
+        />
+      )}
     </View>
   );
 }

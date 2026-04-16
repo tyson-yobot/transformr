@@ -132,8 +132,9 @@ export default function DashboardScreen() {
 
   // Primary countdown -- uses the first active goal with a target date
   const primaryGoal = useMemo(() => {
+    const now = new Date();
     const goalsWithDates = goalStore.goals.filter(
-      (g) => g.status === 'active' && g.target_date,
+      (g) => g.status === 'active' && g.target_date && new Date(g.target_date) > now,
     );
     return goalsWithDates[0] ?? null;
   }, [goalStore.goals]);
