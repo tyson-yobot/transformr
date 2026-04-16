@@ -26,6 +26,7 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { MonoText } from '@components/ui/MonoText';
 import { NarratorCard } from '@components/workout/NarratorCard';
 import { useWorkout } from '@hooks/useWorkout';
+import { useWorkoutStore } from '@stores/workoutStore';
 import { useNutritionStore } from '@stores/nutritionStore';
 import {
   formatTimerDisplay,
@@ -71,6 +72,8 @@ export default function WorkoutPlayerScreen() {
   const { activeSession, logSetWithPRDetection, completeWorkout, getGhostData, isLoading } =
     useWorkout();
   const logCaloriesBurned = useNutritionStore((s) => s.logCaloriesBurned);
+  const pendingExerciseId = useWorkoutStore((s) => s.pendingExerciseId);
+  const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
 
   // Hide the tab bar while the workout player is focused
   useFocusEffect(
@@ -85,6 +88,8 @@ export default function WorkoutPlayerScreen() {
 
   const [exercisesWithSets, setExercisesWithSets] = useState<ExerciseWithSets[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const elapsedSecondsRef = React.useRef(elapsedSeconds);
+  React.useEffect(() => { elapsedSecondsRef.current = elapsedSeconds; }, [elapsedSeconds]);
   const [restSeconds, setRestSeconds] = useState(0);
   const [isResting, setIsResting] = useState(false);
   const [restTarget] = useState(90);
@@ -112,6 +117,44 @@ export default function WorkoutPlayerScreen() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Consume pendingExerciseId set by exercise-detail "Add to Workout"
+  useFocusEffect(
+    useCallback(() => {
+      if (!pendingExerciseId) return;
+      const id = pendingExerciseId;
+      setPendingExerciseId(null);
+
+      void (async () => {
+        try {
+          const { data, error } = await supabase
+            .from('exercises')
+            .select('*')
+            .eq('id', id)
+            .single();
+          if (error || !data) return;
+
+          const ghostData = await getGhostData(data.id);
+          setExercisesWithSets((prev) => {
+            if (prev.some((e) => e.exercise.id === id)) return prev;
+            const newList = [
+              ...prev,
+              {
+                exercise: data as Exercise,
+                templateExercise: null,
+                loggedSets: [],
+                ghostSets: ghostData,
+              },
+            ];
+            setActiveExerciseIndex(newList.length - 1);
+            return newList;
+          });
+        } catch {
+          // Non-fatal
+        }
+      })();
+    }, [pendingExerciseId, setPendingExerciseId, getGhostData]),
+  );
 
   // Workout duration timer — only runs when user taps the play button
   useEffect(() => {
@@ -375,7 +418,7 @@ export default function WorkoutPlayerScreen() {
       await completeWorkout();
 
       // Calculate and log estimated calories burned to nutrition
-      const durationMinutes = Math.round(elapsedSeconds / 60);
+      const durationMinutes = Math.round(elapsedSecondsRef.current / 60);
       const estimatedCalories = Math.round(totalVolume * 0.05 + durationMinutes * 5);
       if (estimatedCalories > 0) {
         await logCaloriesBurned(estimatedCalories, activeSession?.name ?? 'Workout');
@@ -389,7 +432,7 @@ export default function WorkoutPlayerScreen() {
     router.replace(
       `/(tabs)/fitness/workout-summary?sessionId=${sessionId}` as never,
     );
-  }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router]);
+  }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router, logCaloriesBurned]);
 
   const currentExercise = exercisesWithSets[activeExerciseIndex] ?? null;
 

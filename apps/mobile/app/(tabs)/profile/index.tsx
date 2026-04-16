@@ -16,6 +16,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import type { ThemeMode } from '@theme/colors';
+import { Card } from '@components/ui/Card';
+import { Toggle } from '@components/ui/Toggle';
+import { MonoText } from '@components/ui/MonoText';
+import { Avatar } from '@components/ui/Avatar';
+import { ProgressBar } from '@components/ui/ProgressBar';
+import { useProfileStore } from '@stores/profileStore';
+import { useSettingsStore } from '@stores/settingsStore';
+import { useAuthStore } from '@stores/authStore';
+import { useHabitStore } from '@stores/habitStore';
+import { useSubscriptionStore } from '@stores/subscriptionStore';
+import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle';
+import { upgradeModalEvents } from '@hooks/useFeatureGate';
+import { formatNumber } from '@utils/formatters';
+import { hapticLight, hapticMedium } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
+import { supabase } from '../../../services/supabase';
 
 // ---------------------------------------------------------------------------
 // Appearance segmented control
@@ -75,24 +92,6 @@ function AppearancePicker() {
     </View>
   );
 }
-import { Card } from '@components/ui/Card';
-import { Toggle } from '@components/ui/Toggle';
-import { MonoText } from '@components/ui/MonoText';
-import { Avatar } from '@components/ui/Avatar';
-import { ProgressBar } from '@components/ui/ProgressBar';
-import { useProfileStore } from '@stores/profileStore';
-import { useSettingsStore } from '@stores/settingsStore';
-import { useAuthStore } from '@stores/authStore';
-import { useHabitStore } from '@stores/habitStore';
-import { useSubscriptionStore } from '@stores/subscriptionStore';
-import { AIInsightCard } from '@components/cards/AIInsightCard';
-import { useGamificationStyle, CoachingTone } from '@hooks/useGamificationStyle';
-import { upgradeModalEvents } from '@hooks/useFeatureGate';
-import { formatNumber } from '@utils/formatters';
-import { hapticLight, hapticMedium } from '@utils/haptics';
-import { HelpBubble } from '@components/ui/HelpBubble';
-import { supabase } from '../../../services/supabase';
-
 // ---------------------------------------------------------------------------
 // Section Header
 // ---------------------------------------------------------------------------

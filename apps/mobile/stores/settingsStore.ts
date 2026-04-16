@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { storage } from '../utils/storage';
 import { supabase } from '../services/supabase';
+import type { Profile } from '../types/database';
 
 // Synchronous MMKV adapter for zustand persist
 const mmkvStorage = {
@@ -13,7 +14,6 @@ const mmkvStorage = {
   setItem: (name: string, value: string): void => { storage.set(name, value); },
   removeItem: (name: string): void => { storage.delete(name); },
 };
-import type { Profile } from '../types/database';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
