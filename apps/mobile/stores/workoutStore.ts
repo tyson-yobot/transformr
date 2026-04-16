@@ -46,6 +46,7 @@ interface WorkoutState {
   exercises: Exercise[];
   isLoading: boolean;
   error: string | null;
+  pendingExerciseId: string | null;
 }
 
 interface WorkoutActions {
@@ -55,6 +56,7 @@ interface WorkoutActions {
   fetchTemplates: () => Promise<void>;
   fetchExercises: (filters?: ExerciseFilter) => Promise<void>;
   getGhostData: (exerciseId: string) => Promise<GhostSet[]>;
+  setPendingExerciseId: (id: string | null) => void;
   clearError: () => void;
   reset: () => void;
 }
@@ -68,6 +70,7 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
   exercises: [],
   isLoading: false,
   error: null,
+  pendingExerciseId: null,
 
   // --- Actions ---
   startWorkout: async (templateId) => {
@@ -250,6 +253,8 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
     }
   },
 
+  setPendingExerciseId: (id) => set({ pendingExerciseId: id }),
+
   clearError: () => set({ error: null }),
 
   reset: () =>
@@ -259,5 +264,6 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
       exercises: [],
       isLoading: false,
       error: null,
+      pendingExerciseId: null,
     }),
 }));

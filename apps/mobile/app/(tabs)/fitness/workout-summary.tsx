@@ -11,7 +11,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -39,6 +42,7 @@ interface ExerciseBreakdown {
 export default function WorkoutSummaryScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
 
   const [session, setSession] = useState<WorkoutSession | null>(null);
@@ -129,6 +133,11 @@ export default function WorkoutSummaryScreen() {
     loadSummary();
   }, [sessionId]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.workoutSummary} />,
+    });
+  }, [navigation]);
 
   const handleSaveAsTemplate = useCallback(async () => {
     if (!session) return;

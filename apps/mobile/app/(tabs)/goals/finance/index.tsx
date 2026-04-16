@@ -11,7 +11,10 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -25,6 +28,7 @@ import { EmptyState } from '@components/ui/EmptyState';
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { accounts, transactions, netWorthHistory, isLoading, error, fetchAccounts } =
     useFinanceStore();
 
@@ -33,6 +37,12 @@ export default function FinanceDashboard() {
   useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.financeHome} />,
+    });
+  }, [navigation]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

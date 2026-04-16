@@ -12,6 +12,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -22,6 +23,8 @@ import { formatPercentage } from '@utils/formatters';
 import type { Achievement, UserAchievement } from '@app-types/database';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { ShareButton } from '@components/social/ShareButton';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,6 +58,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 export default function AchievementsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [earned, setEarned] = useState<UserAchievement[]>([]);
@@ -82,6 +86,12 @@ export default function AchievementsScreen() {
       setIsRefreshing(false);
     }
   }, []);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.achievementsScreen} />,
+    });
+  }, [navigation]);
 
   // Fetch data
   useEffect(() => {

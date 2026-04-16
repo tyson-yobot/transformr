@@ -12,6 +12,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -28,6 +29,9 @@ import { MonoText } from '@components/ui/MonoText';
 import { EmptyState } from '@components/ui/EmptyState';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { Habit } from '@app-types/database';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type HabitCategory = NonNullable<Habit['category']>;
 
@@ -46,6 +50,7 @@ const STREAK_MILESTONES = [7, 14, 21, 30, 50, 75, 100, 200, 365];
 
 export default function HabitTracker() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
   const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();
   const isIntense = isDrillSergeant || isMotivational;
   const {
@@ -57,6 +62,7 @@ export default function HabitTracker() {
     completeHabit,
     createHabit,
   } = useHabitStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const { isAvailable: canAddHabit, showUpgradeModal } = useFeatureGate('unlimited_habits');
 
@@ -66,6 +72,13 @@ export default function HabitTracker() {
   const [newHabitName, setNewHabitName] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<HabitCategory>('personal');
   const [, setCompletedAnimations] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.habitsScreen} />,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     fetchHabits();
   }, [fetchHabits]);
@@ -104,13 +117,14 @@ export default function HabitTracker() {
         return;
       }
       await hapticSuccess();
+      showToast('Habit complete \u2713', { subtext: 'Keep the streak going' });
       setCompletedAnimations((prev) => new Set(prev).add(habitId));
       const newStreak = (currentStreak ?? 0) + 1;
       if (STREAK_MILESTONES.includes(newStreak)) {
         await hapticStreakMilestone();
       }
     },
-    [completedIds, completeHabit],
+    [completedIds, completeHabit, showToast],
   );
 
   const handleAddHabit = useCallback(async () => {
@@ -151,6 +165,13 @@ export default function HabitTracker() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}

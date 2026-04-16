@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -33,6 +34,8 @@ import { formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '../../../services/supabase';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 // ---------------------------------------------------------------------------
 // Appearance segmented control
@@ -342,6 +345,7 @@ export default function ProfileScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
 
   const profile = useProfileStore((s) => s.profile);
   const settings = useSettingsStore();
@@ -367,6 +371,12 @@ export default function ProfileScreen() {
       Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)),
     );
   }, [profile?.created_at]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.profileHome} />,
+    });
+  }, [navigation]);
 
   // Total workout sessions
   const [totalWorkouts, setTotalWorkouts] = useState(0);

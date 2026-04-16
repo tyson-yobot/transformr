@@ -13,6 +13,9 @@ import {
   Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Chip } from '@components/ui/Chip';
@@ -42,6 +45,13 @@ const TILE_SIZE = (SCREEN_WIDTH - 32 - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
 
 export default function VisionBoard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.visionBoardScreen} />,
+    });
+  }, [navigation]);
 
   const [items, setItems] = useState<VisionBoardItem[]>([]);
   const [filterCategory, setFilterCategory] = useState<VisionCategory | null>(null);

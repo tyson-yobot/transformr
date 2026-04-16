@@ -2,7 +2,7 @@
 // TRANSFORMR -- Data Export Screen
 // =============================================================================
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,10 @@ import {
   Share,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -55,6 +58,13 @@ type DateRangeKey = typeof DATE_RANGES[number]['key'];
 export default function DataExportScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.dataExportScreen} />,
+    });
+  }, [navigation]);
 
   const [format, setFormat] = useState<ExportFormat>('csv');
   const [dateRange, setDateRange] = useState<DateRangeKey>('month');

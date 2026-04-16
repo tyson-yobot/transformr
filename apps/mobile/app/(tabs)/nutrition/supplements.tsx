@@ -15,6 +15,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -103,6 +106,13 @@ function groupByTier(
 
 export default function SupplementsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.supplements} />,
+    });
+  }, [navigation]);
 
   const supplements = useSupplementsStore((s) => s.supplements);
   const todayLogs = useSupplementsStore((s) => s.todayLogs);

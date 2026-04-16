@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Meal Camera Screen
 // =============================================================================
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -48,7 +51,14 @@ export default function MealCameraScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
   const cameraRef = useRef<CameraView>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.mealCamera} />,
+    });
+  }, [navigation]);
 
   const { logFood } = useNutritionStore();
   const [permission, requestPermission] = useCameraPermissions();

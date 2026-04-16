@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -27,16 +28,31 @@ import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { HelpIcon } from '@components/ui/HelpIcon';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { Coachmark } from '@components/ui/Coachmark';
+import { SCREEN_HELP } from '../../../../constants/screenHelp';
+import { HELP } from '../../../../constants/helpContent';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../../constants/coachmarkSteps';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
   const { businesses, fetchBusinesses, getMonthlyMetrics } =
     useBusinessStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);
   const [selectedBusinessIndex, setSelectedBusinessIndex] = useState(0);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.businessDashboard} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     fetchBusinesses();
@@ -80,6 +96,19 @@ export default function BusinessDashboard() {
     [monthlyMetrics],
   );
 
+  const coachmarkSteps = useMemo(
+    () => COACHMARK_CONTENT.business.map((c) => ({
+      targetX: 20,
+      targetY: 200,
+      targetWidth: 120,
+      targetHeight: 40,
+      title: c.title,
+      body: c.body,
+      position: c.position,
+    })),
+    [],
+  );
+
   if (!hasBusinessTracking) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
@@ -90,6 +119,14 @@ export default function BusinessDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
+      <Coachmark screenKey={COACHMARK_KEYS.business} steps={coachmarkSteps} />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}
@@ -153,17 +190,23 @@ export default function BusinessDashboard() {
           <Card variant="elevated">
             <View style={styles.mrrSection}>
               <View>
-                <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                  MRR
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                    MRR
+                  </Text>
+                  <HelpIcon content={HELP.mrr} size={14} />
+                </View>
                 <Text style={[typography.stat, { color: colors.accent.success }]}>
                   {formatCurrency(mrr)}
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                  ARR
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                    ARR
+                  </Text>
+                  <HelpIcon content={HELP.revenueLog} size={14} />
+                </View>
                 <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                   {formatCurrency(arr)}
                 </Text>
@@ -228,7 +271,11 @@ export default function BusinessDashboard() {
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
             <Button
               title="Log Revenue"
-              onPress={() => { hapticLight(); router.push('/(tabs)/goals/business/revenue'); }}
+              onPress={() => {
+                hapticLight();
+                showToast('Revenue logged', { subtext: `+${formatCurrency(mrr > 0 ? mrr : 0)}` });
+                router.push('/(tabs)/goals/business/revenue');
+              }}
               accessibilityLabel="Log revenue"
               fullWidth
             />

@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -28,6 +29,8 @@ import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 interface RecentWorkout {
   id: string;
@@ -53,6 +56,7 @@ const QUICK_ACTIONS = [
 export default function FitnessHomeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { templates, fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
 
   const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkout[]>([]);
@@ -171,6 +175,12 @@ export default function FitnessHomeScreen() {
       setLoadingData(false);
     }
   }, []);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.fitnessHome} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     fetchTemplates();

@@ -291,7 +291,7 @@ export default function DashboardScreen() {
     setRefreshing(true);
     setDashboardError(null);
     await hapticLight();
-    await Promise.all([
+    await Promise.allSettled([
       fetchProfile(),
       goalStore.fetchGoals(),
       habitStore.fetchHabits(),
@@ -304,9 +304,13 @@ export default function DashboardScreen() {
     setRefreshing(false);
   }, [fetchProfile, goalStore, habitStore, nutritionStore, workoutStore, partnerStore, businessStore, insightStore]);
 
-  // Initial fetch
+  // Initial fetch — timeout ensures skeleton never hangs if network is unavailable
   useEffect(() => {
-    void onRefresh().finally(() => setInitialLoading(false));
+    const timeout = setTimeout(() => setInitialLoading(false), 15_000);
+    void onRefresh().finally(() => {
+      clearTimeout(timeout);
+      setInitialLoading(false);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

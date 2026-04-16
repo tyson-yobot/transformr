@@ -235,7 +235,7 @@ export default function LoginScreen() {
             <Animated.View entering={FadeInDown.delay(500).duration(300)}>
               {Platform.OS === 'ios' && (
                 <Pressable
-                  onPress={() => { hapticLight(); signInWithApple(); }}
+                  onPress={() => { hapticLight(); void signInWithApple(); }}
                   disabled={loading}
                   style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
                 >
@@ -245,7 +245,7 @@ export default function LoginScreen() {
               )}
 
               <Pressable
-                onPress={() => { hapticLight(); signInWithGoogle(); }}
+                onPress={() => { hapticLight(); void signInWithGoogle(); }}
                 disabled={loading}
                 style={({ pressed }) => [styles.socialBtn, pressed && styles.socialBtnPressed, loading && { opacity: 0.5 }]}
               >

@@ -11,6 +11,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -25,6 +26,9 @@ import type { JournalEntry } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '@services/supabase';
 import { getJournalResponse } from '@services/ai/journaling';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -43,6 +47,8 @@ const SUGGESTED_TAGS = [
 
 export default function JournalScreen() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [currentPrompt] = useState(
     () => AI_PROMPTS[Math.floor(Math.random() * AI_PROMPTS.length)],
@@ -57,6 +63,12 @@ export default function JournalScreen() {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.journalScreen} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -139,13 +151,14 @@ export default function JournalScreen() {
         setAiResponse('Entry saved. AI reflection is currently unavailable — check back later.');
       }
       await hapticSuccess();
+      showToast('Entry saved', { subtext: 'Keep reflecting' });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save journal entry';
       Alert.alert('Save Failed', message);
     } finally {
       setIsSubmitting(false);
     }
-  }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt]);
+  }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt, showToast]);
 
   const handleClearEntry = useCallback(() => {
     setEntryText('');
@@ -159,6 +172,13 @@ export default function JournalScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}

@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useEffect, useMemo, type ComponentType } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import Animated, {
   useSharedValue,
@@ -129,11 +129,13 @@ export default function ReadyScreen() {
   }, [profile]);
 
   const handleStart = async () => {
-    await updateProfile({ onboarding_completed: true });
-    const { error } = useProfileStore.getState();
-    if (!error) {
-      router.replace('/(tabs)/dashboard');
+    try {
+      await updateProfile({ onboarding_completed: true });
+    } catch {
+      Alert.alert('Error', 'Failed to save your profile. You can update it later in Settings.');
     }
+    // Navigate regardless — onboarding is visually complete even if the save failed
+    router.replace('/(tabs)/dashboard');
   };
 
   const onPressIn = () => {

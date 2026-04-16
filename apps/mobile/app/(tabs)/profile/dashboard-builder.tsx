@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Builder Screen
 // =============================================================================
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,10 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -47,6 +50,13 @@ const SIZE_LABELS: Record<string, string> = {
 export default function DashboardBuilderScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.dashboardBuilderScreen} />,
+    });
+  }, [navigation]);
 
   const {
     layout,

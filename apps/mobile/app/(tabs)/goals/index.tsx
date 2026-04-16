@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -31,6 +33,14 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { EmptyState } from '@components/ui/EmptyState';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import type { Goal } from '@app-types/database';
+import { HelpIcon } from '@components/ui/HelpIcon';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { HELP } from '../../../constants/helpContent';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type GoalCategory = NonNullable<Goal['category']>;
 
@@ -63,7 +73,14 @@ const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
 export default function GoalsDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const { goals, isLoading, fetchGoals, createGoal, updateGoal } = useGoalStore();
+
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  const [coachmarkSteps, setCoachmarkSteps] = React.useState<CoachmarkStep[]>([]);
+  const goalsHeaderRef = React.useRef<View>(null);
+  const navGridRef = React.useRef<View>(null);
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -78,6 +95,31 @@ export default function GoalsDashboard() {
   useEffect(() => {
     fetchGoals();
   }, [fetchGoals]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.goalsHome} />,
+    });
+  }, [navigation]);
+
+  const measureCoachmarks = React.useCallback(() => {
+    const content = COACHMARK_CONTENT.goals;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    goalsHeaderRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    navGridRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -127,8 +169,9 @@ export default function GoalsDashboard() {
 
   const handleAddGoal = useCallback(async () => {
     if (!newGoalTitle.trim()) return;
+    const titleForToast = newGoalTitle.trim();
     await createGoal({
-      title: newGoalTitle.trim(),
+      title: titleForToast,
       category: newGoalCategory,
       target_date: dateInputToISO(newGoalTargetDate) || undefined,
     });
@@ -136,7 +179,8 @@ export default function GoalsDashboard() {
     setShowAddModal(false);
     setNewGoalTitle('');
     setNewGoalTargetDate('');
-  }, [newGoalTitle, newGoalCategory, newGoalTargetDate, createGoal]);
+    showToast('Goal set', { subtext: `Starting ${titleForToast}` });
+  }, [newGoalTitle, newGoalCategory, newGoalTargetDate, createGoal, showToast]);
 
   const getGoalProgress = (goal: Goal): number => {
     if (!goal.target_value || goal.target_value === 0) return 0;
@@ -204,7 +248,7 @@ export default function GoalsDashboard() {
         <AIInsightCard screenKey="goals/index" style={{ marginBottom: spacing.md }} />
 
         {/* Overall Completion Ring */}
-        <Animated.View entering={FadeInDown.delay(100)} style={styles.ringSection}>
+        <Animated.View ref={goalsHeaderRef} onLayout={measureCoachmarks} entering={FadeInDown.delay(100)} style={styles.ringSection}>
           <ProgressRing progress={overallCompletion} size={140} strokeWidth={12}>
             <MonoText variant="stat" color={colors.text.primary}>
               {formatPercentage(overallCompletion * 100)}
@@ -229,7 +273,7 @@ export default function GoalsDashboard() {
         </Animated.View>
 
         {/* Quick Nav */}
-        <Animated.View entering={FadeInDown.delay(200)}>
+        <Animated.View ref={navGridRef} entering={FadeInDown.delay(200)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -250,14 +294,19 @@ export default function GoalsDashboard() {
                 ]}
               >
                 <Text style={styles.navIcon}>{item.icon}</Text>
-                <Text
-                  style={[
-                    typography.tiny,
-                    { color: colors.text.secondary, marginTop: spacing.xs },
-                  ]}
-                >
-                  {item.label}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs, gap: 3 }}>
+                  <Text
+                    style={[
+                      typography.tiny,
+                      { color: colors.text.secondary },
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  {item.label === 'Habits' && (
+                    <HelpIcon content={HELP.habitStreaks} size={13} />
+                  )}
+                </View>
               </Pressable>
             ))}
           </ScrollView>
@@ -554,6 +603,15 @@ export default function GoalsDashboard() {
       >
         <Text style={[typography.h2, { color: '#FFFFFF' }]}>+</Text>
       </Pressable>
+
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
+      <Coachmark screenKey={COACHMARK_KEYS.goals} steps={coachmarkSteps} />
 
       {/* Add Goal Modal */}
       <Modal

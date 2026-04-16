@@ -223,7 +223,7 @@ export function CountdownCard({
       {!isComplete && (
         <ProgressBar
           progress={progress}
-          label="Time elapsed"
+          label="Progress"
           showPercentage
           color={colors.accent.primary}
           height={6}

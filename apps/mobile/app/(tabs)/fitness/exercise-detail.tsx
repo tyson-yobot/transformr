@@ -19,6 +19,7 @@ import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
 import { hapticLight } from '@utils/haptics';
 import { formatWeight, formatDate, formatSetDisplay } from '@utils/formatters';
 import { supabase } from '@services/supabase';
+import { useWorkoutStore } from '@stores/workoutStore';
 import type { Exercise, PersonalRecord, WorkoutSet } from '@app-types/database';
 
 interface RecentPerformance {
@@ -31,6 +32,9 @@ export default function ExerciseDetailScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
+
+  const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
+  const activeSession = useWorkoutStore((s) => s.activeSession);
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [prs, setPrs] = useState<PersonalRecord[]>([]);
@@ -126,8 +130,15 @@ export default function ExerciseDetailScreen() {
 
   const handleAddToWorkout = useCallback(() => {
     hapticLight();
-    router.push({ pathname: '/(tabs)/fitness/workout-player' as never, params: { exerciseId } });
-  }, [router, exerciseId]);
+    if (!activeSession) {
+      // No active workout — navigate to workout player which will start one
+      router.push({ pathname: '/(tabs)/fitness/workout-player' as never, params: { exerciseId } });
+      return;
+    }
+    // Signal workout-player via store, then navigate back to it
+    setPendingExerciseId(exerciseId);
+    router.back();
+  }, [router, exerciseId, activeSession, setPendingExerciseId]);
 
   if (loading) {
     return (

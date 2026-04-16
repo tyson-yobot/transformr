@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,6 +12,7 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, {
@@ -38,6 +40,14 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { NutritionLog } from '@app-types/database';
+import { HelpIcon } from '@components/ui/HelpIcon';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { HELP } from '../../../constants/helpContent';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -74,6 +84,7 @@ export default function NutritionHomeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
 
   const { todayMacros } = useNutrition();
   const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog, foodNameMap } =
@@ -87,9 +98,40 @@ export default function NutritionHomeScreen() {
   const [fabOpen, setFabOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  const [coachmarkSteps, setCoachmarkSteps] = React.useState<CoachmarkStep[]>([]);
+  const macroRingsRef = React.useRef<View>(null);
+  const fabRef = React.useRef<View>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.nutritionHome} />,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     void fetchTodayNutrition(dayOffset);
   }, [dayOffset, fetchTodayNutrition]);
+
+  const measureCoachmarks = React.useCallback(() => {
+    const content = COACHMARK_CONTENT.nutrition;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    macroRingsRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    fabRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const targets = useMemo(() => ({
     calories: profile?.daily_calorie_target ?? 2200,
@@ -162,7 +204,9 @@ export default function NutritionHomeScreen() {
   const handleAddWater = useCallback(async (oz: number) => {
     hapticSuccess();
     await logWater(oz);
-  }, [logWater]);
+    const newTotal = totalWater + oz;
+    showToast('Hydration logged', { subtext: `${Math.round(newTotal)}oz today` });
+  }, [logWater, totalWater, showToast]);
 
   const handleFabToggle = useCallback(() => {
     hapticLight();
@@ -269,8 +313,12 @@ export default function NutritionHomeScreen() {
         <AIInsightCard screenKey="nutrition/index" style={{ marginBottom: spacing.md }} />
 
         {/* Macro Rings */}
-        <View>
+        <View ref={macroRingsRef} onLayout={measureCoachmarks}>
           <Card style={{ marginBottom: spacing.lg }}>
+            <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
+              <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Macros</Text>
+              <HelpIcon content={HELP.macroRings} size={13} />
+            </View>
             <View style={styles.macroRingsRow}>
               <ProgressRing
                 progress={Math.min(1, todayMacros.calories / targets.calories)}
@@ -512,9 +560,12 @@ export default function NutritionHomeScreen() {
         <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Text style={[typography.h3, { color: colors.text.primary }]}>
-                {'\u{1F4A7}'} Water
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={[typography.h3, { color: colors.text.primary }]}>
+                  {'\u{1F4A7}'} Water
+                </Text>
+                <HelpIcon content={HELP.waterTracker} size={13} />
+              </View>
               <MonoText variant="monoCaption" color={colors.text.muted}>
                 {formatOz(totalWater)} / {formatOz(targets.water)}
               </MonoText>
@@ -646,6 +697,7 @@ export default function NutritionHomeScreen() {
 
       {/* FAB */}
       <Animated.View
+        ref={fabRef}
         style={[
           styles.fab,
           {
@@ -667,6 +719,15 @@ export default function NutritionHomeScreen() {
           <Ionicons name={fabOpen ? 'close' : 'add'} size={28} color="#FFFFFF" />
         </Pressable>
       </Animated.View>
+
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
+      <Coachmark screenKey={COACHMARK_KEYS.nutrition} steps={coachmarkSteps} />
 
       {/* FAB Bottom Sheet */}
       <BottomSheet

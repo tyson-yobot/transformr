@@ -14,6 +14,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -27,6 +28,9 @@ import { useProfileStore } from '@stores/profileStore';
 import { MEAL_TYPES, MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Food } from '@app-types/database';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -43,10 +47,12 @@ const MEAL_TYPE_OPTIONS: { value: MealType; label: string; emoji: string }[] = [
 export default function AddFoodScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{ meal?: string; editId?: string }>();
 
   const { searchResults, isLoading, searchFoods, logFood } = useNutritionStore();
   const { profile } = useProfileStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
@@ -63,6 +69,12 @@ export default function AddFoodScreen() {
   const [manualProtein, setManualProtein] = useState('');
   const [manualCarbs, setManualCarbs] = useState('');
   const [manualFat, setManualFat] = useState('');
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.addFood} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     // Load recent/popular foods on mount
@@ -132,8 +144,9 @@ export default function AddFoodScreen() {
       Alert.alert('Failed to Log', storeError);
       return;
     }
+    showToast('Meal logged', { subtext: 'Nutrition updated' });
     router.back();
-  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router]);
+  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router, showToast]);
 
   const canLog = manualMode
     ? manualName.length > 0 && Number(manualCalories) > 0
@@ -145,6 +158,13 @@ export default function AddFoodScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}
     >
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}

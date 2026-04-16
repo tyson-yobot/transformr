@@ -12,6 +12,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -26,14 +27,19 @@ import { useSleepStore } from '@stores/sleepStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 const isValidTime = (t: string): boolean => /^\d{1,2}:\d{2}$/.test(t);
 
 export default function SleepTracker() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
   const { lastSleep, sleepHistory, isLoading, fetchSleepHistory, logSleep } =
     useSleepStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
@@ -42,6 +48,12 @@ export default function SleepTracker() {
   const [quality, setQuality] = useState(3);
   const [caffeineCutoff, setCaffeineCutoff] = useState('14:00');
   const [screenCutoff, setScreenCutoff] = useState('21:00');
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.sleepScreen} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const now = new Date();
@@ -98,8 +110,9 @@ export default function SleepTracker() {
       return;
     }
     await hapticSuccess();
+    showToast('Sleep logged', { subtext: 'Check your readiness score tomorrow' });
     setShowLogModal(false);
-  }, [bedtime, wakeTime, quality, caffeineCutoff, screenCutoff, logSleep, calculateDuration]);
+  }, [bedtime, wakeTime, quality, caffeineCutoff, screenCutoff, logSleep, calculateDuration, showToast]);
 
   const chartData = useMemo(
     () => {
@@ -149,6 +162,13 @@ export default function SleepTracker() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}

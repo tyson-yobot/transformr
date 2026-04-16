@@ -24,3 +24,9 @@ export { BudgetBar } from './BudgetBar';
 export { DashboardSkeleton, ListSkeleton, DetailSkeleton, FormSkeleton, CardSkeleton } from './ScreenSkeleton';
 
 export type { BodyPart, PainLevel } from './BodyMap';
+export { HelpIcon } from './HelpIcon';
+export type { HelpContent } from './HelpIcon';
+export { ScreenHelpButton } from './ScreenHelpButton';
+export { ActionToast, useActionToast } from './ActionToast';
+export { Coachmark } from './Coachmark';
+export type { CoachmarkStep } from './Coachmark';

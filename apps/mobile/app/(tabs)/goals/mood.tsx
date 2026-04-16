@@ -11,6 +11,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -24,6 +25,9 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useMoodStore } from '@stores/moodStore';
 import { hapticSuccess, hapticLight } from '@utils/haptics';
 import type { MoodLog } from '@app-types/database';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MoodContext = NonNullable<MoodLog['context']>;
 
@@ -45,8 +49,10 @@ const CONTEXTS: { key: MoodContext; label: string }[] = [
 
 export default function MoodLogger() {
   const { colors, typography, spacing } = useTheme();
+  const navigation = useNavigation();
   const { todayMood, moodHistory, isLoading, logMood, fetchMoodHistory } =
     useMoodStore();
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);
   const [mood, setMood] = useState(5);
@@ -55,6 +61,12 @@ export default function MoodLogger() {
   const [motivation, setMotivation] = useState(5);
   const [context, setContext] = useState<MoodContext>('morning');
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.moodScreen} />,
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const now = new Date();
@@ -86,8 +98,9 @@ export default function MoodLogger() {
       return;
     }
     await hapticSuccess();
+    showToast('Mood logged', { subtext: "Today's check-in complete" });
     setNotes('');
-  }, [mood, energy, stress, motivation, context, notes, logMood]);
+  }, [mood, energy, stress, motivation, context, notes, logMood, showToast]);
 
   const chartData = useMemo(
     () =>
@@ -144,6 +157,13 @@ export default function MoodLogger() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ActionToast
+        message={toast.message}
+        subtext={toast.subtext}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+      />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}

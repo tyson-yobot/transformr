@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Workout Player Screen
 // =============================================================================
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,14 @@ import { supabase } from '@services/supabase';
 import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { HelpIcon } from '@components/ui/HelpIcon';
+import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { HELP } from '../../../constants/helpContent';
+import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
 
 interface GhostSet {
@@ -74,6 +82,39 @@ export default function WorkoutPlayerScreen() {
   const logCaloriesBurned = useNutritionStore((s) => s.logCaloriesBurned);
   const pendingExerciseId = useWorkoutStore((s) => s.pendingExerciseId);
   const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
+
+  const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  // Header help button
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.workoutPlayer} />,
+    });
+  }, [navigation]);
+
+  // Coachmark state and refs
+  const [coachmarkSteps, setCoachmarkSteps] = React.useState<CoachmarkStep[]>([]);
+  const setInputRef = React.useRef<View>(null);
+  const restTimerRefCoach = React.useRef<View>(null);
+
+  const measureCoachmarks = React.useCallback(() => {
+    const content = COACHMARK_CONTENT.workoutPlayer;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    setInputRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    restTimerRefCoach.current?.measure((_x, _y, w, h, px, py) => {
+      const s2 = content[2];
+      if (s2) steps[2] = { ...s2, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   // Hide the tab bar while the workout player is focused
   useFocusEffect(
@@ -325,6 +366,15 @@ export default function WorkoutPlayerScreen() {
       setShowPRCelebration(true);
       setPrMessage(`New PR! ${weight} x ${reps}`);
       setTimeout(() => setShowPRCelebration(false), 3000);
+      showToast('New Personal Record!', {
+        subtext: `${currentExercise.exercise.name}: ${weight} lbs`,
+        type: 'pr',
+      });
+    } else {
+      showToast('Set logged', {
+        subtext: `${weight} lbs × ${reps} reps`,
+        type: 'success',
+      });
     }
 
     // Request AI coaching tip every 3rd set
@@ -380,6 +430,7 @@ export default function WorkoutPlayerScreen() {
     totalSets,
     totalVolume,
     elapsedSeconds,
+    showToast,
   ]);
 
   const handleSkipRest = useCallback(() => {
@@ -452,6 +503,7 @@ export default function WorkoutPlayerScreen() {
   }
 
   return (
+    <>
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       {/* Top Bar: Timer + Volume */}
       <View
@@ -516,6 +568,7 @@ export default function WorkoutPlayerScreen() {
       {/* Rest Timer Overlay */}
       {isResting && (
         <View
+          ref={restTimerRefCoach}
           style={[
             styles.restOverlay,
             { backgroundColor: `${colors.background.primary}E6`, padding: spacing.xl },
@@ -841,7 +894,7 @@ export default function WorkoutPlayerScreen() {
                 )}
 
                 {/* Set Logger Inputs */}
-                <View style={[styles.setLogger, { marginTop: spacing.lg, gap: spacing.sm }]}>
+                <View ref={setInputRef} onLayout={measureCoachmarks} style={[styles.setLogger, { marginTop: spacing.lg, gap: spacing.sm }]}>
                   <View style={styles.inputGroup}>
                     <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
                       WEIGHT (lbs)
@@ -893,9 +946,12 @@ export default function WorkoutPlayerScreen() {
                     />
                   </View>
                   <View style={styles.inputGroup}>
-                    <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
-                      RPE
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                        RPE
+                      </Text>
+                      <HelpIcon content={HELP.rpeRating} size={13} style={{ marginLeft: 3 }} />
+                    </View>
                     <TextInput
                       value={currentRpe.toString()}
                       accessibilityLabel="Rate of perceived exertion"
@@ -946,6 +1002,7 @@ export default function WorkoutPlayerScreen() {
                   <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.xs }]}>
                     {showGhostOverlay ? 'Hide' : 'Show'} previous session
                   </Text>
+                  <HelpIcon content={HELP.ghostMode} size={13} style={{ marginLeft: 3 }} />
                 </Pressable>
               </Card>
             )}
@@ -999,6 +1056,15 @@ export default function WorkoutPlayerScreen() {
         </View>
       </Modal>
     </View>
+    <ActionToast
+      message={toast.message}
+      subtext={toast.subtext}
+      visible={toast.visible}
+      onHide={hideToast}
+      type={toast.type}
+    />
+    <Coachmark screenKey={COACHMARK_KEYS.workoutPlayer} steps={coachmarkSteps} />
+    </>
   );
 }
 

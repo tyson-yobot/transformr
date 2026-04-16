@@ -40,6 +40,8 @@ interface SettingsState {
   briefingEnabled: boolean;
   lastBriefingDate: string | null;
   fitnessPreferences: FitnessPreferences;
+  /** True after the user has seen the Dashboard for the first time post-onboarding. */
+  hasSeenDashboard: boolean;
 }
 
 type SettingKey = keyof SettingsState;
@@ -52,6 +54,8 @@ interface SettingsActions {
   loadFromProfile: (profile: Profile) => void;
   /** Push theme/voice/narrator to Supabase profiles row. */
   syncToProfile: () => Promise<void>;
+  /** Mark that the user has seen the Dashboard for the first time. */
+  markDashboardSeen: () => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -82,6 +86,7 @@ export const useSettingsStore = create<SettingsStore>()(
       narratorEnabled: false,
       briefingEnabled: true,
       lastBriefingDate: null,
+      hasSeenDashboard: false,
       fitnessPreferences: {
         workoutDaysPerWeek: 4,
         experienceLevel: 'intermediate',
@@ -101,6 +106,10 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({
           fitnessPreferences: { ...state.fitnessPreferences, ...prefs },
         }));
+      },
+
+      markDashboardSeen: () => {
+        set({ hasSeenDashboard: true });
       },
 
       loadFromProfile: (profile) => {
