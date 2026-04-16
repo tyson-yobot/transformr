@@ -270,7 +270,7 @@ export default function NutritionHomeScreen() {
         <AIInsightCard screenKey="nutrition/index" style={{ marginBottom: spacing.md }} />
 
         {/* Macro Rings */}
-        <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+        <Animated.View entering={FadeInDown.duration(300)}>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.macroRingsRow}>
               <ProgressRing
@@ -366,7 +366,7 @@ export default function NutritionHomeScreen() {
           </Card>
         </Animated.View>
         {/* Calorie Progress Bar */}
-        <Animated.View entering={FadeInDown.duration(400).delay(150)}>
+        <Animated.View entering={FadeInDown.duration(300).delay(50)}>
           <Card style={{ marginBottom: spacing.lg }}>
             <ProgressBar
               progress={todayMacros.calories / targets.calories}
@@ -387,7 +387,7 @@ export default function NutritionHomeScreen() {
         <HelpBubble id="nutrition_macros" message="Tap any ring to see your full macro breakdown" position="below" />
 
         {/* Quick Links */}
-        <Animated.View entering={FadeInDown.duration(400).delay(200)}>
+        <Animated.View entering={FadeInDown.duration(300).delay(80)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -431,7 +431,7 @@ export default function NutritionHomeScreen() {
 
         {/* Global empty food log state */}
         {todayLogs.length === 0 && dayOffset === 0 && (
-          <Animated.View entering={FadeInDown.duration(400).delay(250)}>
+          <Animated.View entering={FadeInDown.duration(300).delay(100)}>
             <EmptyState
               icon={'\u{1F957}'}
               title="Nothing logged yet"
@@ -451,7 +451,7 @@ export default function NutritionHomeScreen() {
           return (
             <Animated.View
               key={section.type}
-              entering={FadeInDown.duration(400).delay(300 + index * 50)}
+              entering={FadeInDown.duration(250).delay(index * 30)}
               style={{ marginBottom: spacing.lg }}
             >
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
@@ -511,7 +511,7 @@ export default function NutritionHomeScreen() {
         })}
 
         {/* Water Tracker */}
-        <Animated.View entering={FadeInDown.duration(400).delay(600)}>
+        <Animated.View entering={FadeInDown.duration(250).delay(80)}>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -572,7 +572,7 @@ export default function NutritionHomeScreen() {
         </Animated.View>
 
         {/* Supplement Checklist */}
-        <Animated.View entering={FadeInDown.duration(400).delay(700)}>
+        <Animated.View entering={FadeInDown.duration(250).delay(120)}>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>

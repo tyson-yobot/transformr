@@ -3,7 +3,8 @@
 // Dot progress overlay sits on top of hero images, edge-to-edge.
 // =============================================================================
 
-import { View, Text, StyleSheet, Pressable, type ComponentType } from 'react-native';
+import { type ComponentType } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
