@@ -31,6 +31,7 @@ interface GoalState {
 interface GoalActions {
   fetchGoals: () => Promise<void>;
   createGoal: (data: GoalInput) => Promise<void>;
+  updateGoal: (id: string, updates: Partial<Pick<Goal, 'target_date' | 'title' | 'description' | 'color' | 'status'>>) => Promise<void>;
   updateGoalProgress: (id: string, value: number) => Promise<void>;
   clearError: () => void;
   reset: () => void;
@@ -119,6 +120,24 @@ export const useGoalStore = create<GoalStore>()((set) => ({
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to create goal';
       set({ error: message, isLoading: false });
+    }
+  },
+
+  updateGoal: async (id, updates) => {
+    try {
+      const { data: updated, error } = await supabase
+        .from('goals')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      set((state) => ({
+        goals: state.goals.map((g) => (g.id === id ? (updated as Goal) : g)),
+      }));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update goal';
+      set({ error: message });
     }
   },
 

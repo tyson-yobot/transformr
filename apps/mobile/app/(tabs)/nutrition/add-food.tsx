@@ -396,7 +396,7 @@ export default function AddFoodScreen() {
             ) : (
               <>
                 <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
-                  {searchQuery.length >= 2 ? 'Results' : 'Recent Foods'}
+                  {searchQuery.length >= 2 ? 'Results' : 'Common Foods'}
                 </Text>
 
                 {searchResults.length > 0 ? (

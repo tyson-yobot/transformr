@@ -191,7 +191,7 @@ export default function NotificationsScreen() {
 
     await updateProfile({ notification_preferences: prefs });
     router.push('/(auth)/onboarding/ready');
-  }, [groups, permissionGranted, requestPermission, updateProfile, router]);
+  }, [groups, mealTimes, permissionGranted, requestPermission, updateProfile, router]);
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
@@ -273,7 +273,7 @@ export default function NotificationsScreen() {
                   />
                 </View>
 
-                {/* Time Picker (simplified as text input) */}
+                {/* Generic single time picker */}
                 {group.hasTime && state.enabled && (
                   <View style={[styles.timeRow, { marginTop: spacing.md }]}>
                     <Text style={[typography.caption, { color: colors.text.muted, marginRight: spacing.sm }]}>
@@ -286,6 +286,30 @@ export default function NotificationsScreen() {
                       keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
                       containerStyle={{ flex: 1 }}
                     />
+                  </View>
+                )}
+
+                {/* Meal reminders — individual time picker per meal type */}
+                {group.key === 'meals' && state.enabled && (
+                  <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+                    {MEAL_SLOTS.map((slot) => (
+                      <View key={slot.key} style={[styles.timeRow, { alignItems: 'center' }]}>
+                        <Text style={{ fontSize: 16, width: 24 }}>{slot.icon}</Text>
+                        <Text style={[typography.caption, { color: colors.text.secondary, flex: 1, marginLeft: spacing.sm }]}>
+                          {slot.label}
+                        </Text>
+                        <Input
+                          placeholder="HH:MM"
+                          value={mealTimes[slot.key]}
+                          onChangeText={(t) => updateMealTime(slot.key, t)}
+                          keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+                          containerStyle={{ width: 90 }}
+                        />
+                      </View>
+                    ))}
+                    <Text style={[typography.tiny, { color: colors.text.muted, marginTop: spacing.xs }]}>
+                      Leave blank for any meal you don't want a reminder for.
+                    </Text>
                   </View>
                 )}
               </Animated.View>
