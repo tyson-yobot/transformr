@@ -12,7 +12,16 @@ import {
   Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  useSharedValue,
+  withTiming,
+  withRepeat,
+  useAnimatedStyle,
+  Easing,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
@@ -20,6 +29,7 @@ import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
+import { QuickActionTile } from '@components/ui/QuickActionTile';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
 import { PredictionAlert } from '@components/cards/PredictionAlert';
@@ -106,6 +116,20 @@ export default function DashboardScreen() {
   }, []);
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
+
+  // Animated gradient bar (greeting section)
+  const gradientBarWidth = useSharedValue(0);
+  useEffect(() => {
+    gradientBarWidth.value = withTiming(120, { duration: 600, easing: Easing.out(Easing.cubic) });
+  }, [gradientBarWidth]);
+  const gradientBarStyle = useAnimatedStyle(() => ({ width: gradientBarWidth.value }));
+
+  // Pulsing dot for AI accountability card
+  const pulseAnim = useSharedValue(1);
+  useEffect(() => {
+    pulseAnim.value = withRepeat(withTiming(0.3, { duration: 1000 }), -1, true);
+  }, [pulseAnim]);
+  const pulseDotStyle = useAnimatedStyle(() => ({ opacity: pulseAnim.value }));
   const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
   const [workoutsThisWeekCount, setWorkoutsThisWeekCount] = useState<number | null>(null);
 
@@ -414,17 +438,29 @@ export default function DashboardScreen() {
         <View ref={greetingRef} onLayout={measureCoachmarks} style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <Text
             style={[
-              typography.h2,
-              { color: colors.text.primary, lineHeight: 32, marginBottom: spacing.sm, flex: 1, paddingRight: 8 },
+              typography.h1,
+              { color: colors.text.primary, lineHeight: 40, marginBottom: spacing.sm, flex: 1, paddingRight: 8 },
             ]}
           >
             {greetingWithName}
           </Text>
           <HelpIcon content={SCREEN_HELP.dashboard} size={20} style={{ marginTop: 4 }} />
         </View>
-        <Text style={[typography.caption, { color: colors.text.secondary }]}>
+        {/* Animated brand gradient bar */}
+        <View style={{ height: 3, marginBottom: spacing.sm, overflow: 'hidden', borderRadius: 2 }}>
+          <Animated.View style={[{ height: 3, borderRadius: 2, overflow: 'hidden' }, gradientBarStyle]}>
+            <LinearGradient
+              colors={[colors.accent.primary, colors.accent.cyan, 'transparent']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
+        </View>
+        <Text style={[typography.caption, { color: colors.accent.primary }]}>
           {motivationalGreeting.timeLabel}
-          {' — '}
+        </Text>
+        <Text style={[typography.caption, { color: colors.text.secondary }]}>
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             month: 'long',
@@ -436,79 +472,29 @@ export default function DashboardScreen() {
 
       {/* Quick Actions — placed here so they're always above the ChatFAB */}
       <Animated.View entering={FadeInDown.delay(30).duration(400)}>
-        <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
-          <View ref={quickActionsRef} style={styles.quickActionsRow}>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/fitness'); }}
-              accessibilityLabel="Log Workout"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[
-                styles.quickActionBtn,
-                {
-                  backgroundColor: colors.accent.primarySubtle,
-                  borderColor: colors.accent.primary,
-                  shadowColor: colors.accent.primary,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 12,
-                  elevation: 6,
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 22 }}>💪</Text>
-              <Text style={[typography.tiny, { color: colors.accent.primary, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Workout
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/nutrition/add-food' as never); }}
-              accessibilityLabel="Log Meal"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[
-                styles.quickActionBtn,
-                {
-                  backgroundColor: colors.accent.successSubtle,
-                  borderColor: colors.accent.success,
-                  shadowColor: colors.accent.success,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 12,
-                  elevation: 6,
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 22 }}>🍽️</Text>
-              <Text style={[typography.tiny, { color: colors.accent.success, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Meal
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { void hapticMedium(); router.push('/(tabs)/profile' as never); }}
-              accessibilityLabel="Log Weight"
-              accessibilityRole="button"
-              hitSlop={8}
-              style={[
-                styles.quickActionBtn,
-                {
-                  backgroundColor: colors.accent.cyanSubtle,
-                  borderColor: colors.accent.cyan,
-                  shadowColor: colors.accent.cyan,
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 12,
-                  elevation: 6,
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 22 }}>⚖️</Text>
-              <Text style={[typography.tiny, { color: colors.accent.cyan, textAlign: 'center', marginTop: spacing.xs }]}>
-                Log Weight
-              </Text>
-            </Pressable>
-          </View>
-        </Card>
+        <View ref={quickActionsRef} style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg }}>
+          <QuickActionTile
+            icon="barbell-outline"
+            label="Log Workout"
+            accentColor={colors.accent.primary}
+            dimColor={colors.dim.primary}
+            onPress={() => router.push('/(tabs)/fitness' as never)}
+          />
+          <QuickActionTile
+            icon="restaurant-outline"
+            label="Log Meal"
+            accentColor={colors.accent.success}
+            dimColor={colors.dim.success}
+            onPress={() => router.push('/(tabs)/nutrition/add-food' as never)}
+          />
+          <QuickActionTile
+            icon="scale-outline"
+            label="Log Weight"
+            accentColor={colors.accent.info}
+            dimColor={colors.dim.info}
+            onPress={() => router.push('/(tabs)/profile' as never)}
+          />
+        </View>
       </Animated.View>
 
       {/* Daily Accountability Card */}
@@ -530,13 +516,16 @@ export default function DashboardScreen() {
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: colors.accent.cyan,
-                  }}
+                <Animated.View
+                  style={[
+                    {
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: colors.accent.cyan,
+                    },
+                    pulseDotStyle,
+                  ]}
                 />
                 <Text
                   style={[
@@ -658,28 +647,40 @@ export default function DashboardScreen() {
       ) : (
         <Animated.View entering={FadeInDown.delay(50).duration(400)} style={{ marginBottom: spacing.lg }}>
           <Pressable
-            onPress={() => { void hapticMedium(); router.push('/(tabs)/goals'); }}
-            accessibilityLabel="Set your goal deadline"
+            onPress={() => router.push('/trajectory' as never)}
+            accessibilityLabel="Set your countdown goal"
             accessibilityRole="button"
+            style={{
+              backgroundColor: colors.dim.primary,
+              borderRadius: borderRadius.xl,
+              borderWidth: 1.5,
+              borderColor: `${colors.accent.primary}50`,
+              padding: spacing.lg,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.md,
+            }}
           >
-            <Card
-              style={{
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: colors.accent.primary + '60',
-                backgroundColor: colors.accent.primary + '08',
-                alignItems: 'center',
-                paddingVertical: spacing.xl,
-              }}
-            >
-              <Text style={{ fontSize: 28, marginBottom: spacing.sm }}>🎯</Text>
-              <Text style={[typography.bodyBold, { color: colors.accent.primary, marginBottom: spacing.xs }]}>
-                Set Your Goal Deadline
-              </Text>
-              <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                Add a target date to track your countdown
-              </Text>
-            </Card>
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              backgroundColor: colors.accent.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: colors.accent.primary,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.4,
+              shadowRadius: 12,
+              elevation: 6,
+            }}>
+              <Ionicons name="calendar-outline" size={24} color="#FFFFFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Set Your Countdown Goal</Text>
+              <Text style={[typography.caption, { color: colors.text.secondary, marginTop: 2 }]}>Every transformation needs a deadline. Set yours.</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
           </Pressable>
         </Animated.View>
       )}
