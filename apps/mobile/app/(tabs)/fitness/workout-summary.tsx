@@ -210,11 +210,23 @@ export default function WorkoutSummaryScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Animated.View entering={FadeInDown.delay(100)} style={[styles.headerBlock, { marginBottom: spacing.xl }]}>
-          <Ionicons name="checkmark-circle" size={56} color={colors.accent.success} />
-          <Text style={[typography.h1, { color: colors.text.primary, marginTop: spacing.md }]}>
-            Workout Complete!
-          </Text>
+        <Animated.View entering={FadeInDown.delay(100)} style={{ alignItems: 'center', marginBottom: spacing.xl }}>
+          {/* Glow circle */}
+          <View style={{
+            width: 100, height: 100, borderRadius: 50,
+            backgroundColor: `${colors.accent.success}15`,
+            borderWidth: 2, borderColor: `${colors.accent.success}40`,
+            alignItems: 'center', justifyContent: 'center',
+            marginBottom: spacing.md,
+            shadowColor: colors.accent.success,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.5, shadowRadius: 24, elevation: 12,
+          }}>
+            <Ionicons name="checkmark" size={52} color={colors.accent.success} />
+          </View>
+          {/* Brand gradient line above title */}
+          <View style={{ width: 60, height: 3, borderRadius: 2, backgroundColor: colors.accent.primary, marginBottom: spacing.sm }} />
+          <Text style={[typography.h1, { color: colors.text.primary }]}>Workout Complete!</Text>
           <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.xs }]}>
             {session.name}
           </Text>
@@ -226,9 +238,14 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.statBox,
               {
-                backgroundColor: colors.background.secondary,
+                backgroundColor: colors.dim.primary,
                 borderRadius: borderRadius.md,
                 padding: spacing.lg,
+                shadowColor: colors.accent.primary,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 2,
               },
             ]}
           >
@@ -242,9 +259,14 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.statBox,
               {
-                backgroundColor: colors.background.secondary,
+                backgroundColor: colors.dim.fire,
                 borderRadius: borderRadius.md,
                 padding: spacing.lg,
+                shadowColor: colors.accent.fire,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 2,
               },
             ]}
           >
@@ -258,9 +280,14 @@ export default function WorkoutSummaryScreen() {
             style={[
               styles.statBox,
               {
-                backgroundColor: colors.background.secondary,
+                backgroundColor: colors.dim.info,
                 borderRadius: borderRadius.md,
                 padding: spacing.lg,
+                shadowColor: colors.accent.info,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                elevation: 2,
               },
             ]}
           >
@@ -274,44 +301,47 @@ export default function WorkoutSummaryScreen() {
 
         {/* PRs Achieved */}
         {prsAchieved.length > 0 && (
-          <Card
-            variant="elevated"
-            style={{
-              marginBottom: spacing.lg,
-              borderLeftWidth: 3,
-              borderLeftColor: colors.accent.gold,
-            }}
-          >
-            <View style={styles.sectionRow}>
-              <Ionicons name="trophy" size={20} color={colors.accent.gold} />
-              <Text
-                style={[
-                  typography.h3,
-                  { color: colors.accent.gold, marginLeft: spacing.sm },
-                ]}
-              >
-                {prsAchieved.length} New {prsAchieved.length === 1 ? 'PR' : 'PRs'}!
-              </Text>
-            </View>
-            {prsAchieved.map((pr) => (
-              <View
-                key={pr.id}
-                style={[styles.prRow, { marginTop: spacing.sm }]}
-              >
-                <Text style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}>
-                  {pr.record_type?.replace(/_/g, ' ')}
+          <Animated.View entering={FadeInDown.springify()}>
+            <Card
+              variant="elevated"
+              style={{
+                marginBottom: spacing.lg,
+                borderLeftWidth: 3,
+                borderLeftColor: colors.accent.gold,
+                backgroundColor: colors.dim.gold,
+              }}
+            >
+              <View style={styles.sectionRow}>
+                <Ionicons name="trophy" size={20} color={colors.accent.gold} />
+                <Text
+                  style={[
+                    typography.h3,
+                    { color: colors.accent.gold, marginLeft: spacing.sm },
+                  ]}
+                >
+                  {prsAchieved.length} New {prsAchieved.length === 1 ? 'PR' : 'PRs'}!
                 </Text>
-                <Text style={[typography.monoBody, { color: colors.accent.gold, fontWeight: '700' }]}>
-                  {pr.value}
-                </Text>
-                {pr.previous_record ? (
-                  <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
-                    (was {pr.previous_record})
-                  </Text>
-                ) : null}
               </View>
-            ))}
-          </Card>
+              {prsAchieved.map((pr) => (
+                <View
+                  key={pr.id}
+                  style={[styles.prRow, { marginTop: spacing.sm }]}
+                >
+                  <Text style={[typography.bodyBold, { color: colors.text.primary, flex: 1 }]}>
+                    {pr.record_type?.replace(/_/g, ' ')}
+                  </Text>
+                  <Text style={[typography.monoBody, { color: colors.accent.gold, fontWeight: '700' }]}>
+                    {pr.value}
+                  </Text>
+                  {pr.previous_record ? (
+                    <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
+                      (was {pr.previous_record})
+                    </Text>
+                  ) : null}
+                </View>
+              ))}
+            </Card>
+          </Animated.View>
         )}
 
         {/* Exercise Breakdown */}
