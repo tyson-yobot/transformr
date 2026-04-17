@@ -10,8 +10,8 @@ import {
   ScrollView,
   RefreshControl,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -98,12 +98,7 @@ export default function InsightsScreen() {
 
         {/* Loading */}
         {isLoading && isEmpty && (
-          <View style={styles.loadingState}>
-            <ActivityIndicator size="large" color={colors.accent.cyan} />
-            <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.md }]}>
-              Analyzing your data...
-            </Text>
-          </View>
+          <ListSkeleton />
         )}
 
         {/* Error */}

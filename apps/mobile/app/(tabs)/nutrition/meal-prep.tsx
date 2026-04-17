@@ -12,8 +12,8 @@ import {
   Pressable,
   StyleSheet,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
@@ -193,15 +193,9 @@ export default function MealPrepScreen() {
 
   if (isGenerating) {
     return (
-      <View style={[styles.container, styles.centerContent, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <ActivityIndicator size="large" color={colors.accent.cyan} />
-        <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
-          Generating tiered meal prep plans...
-        </Text>
-        <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
-          Building Good, Better, and Best options
-        </Text>
+        <ListSkeleton />
       </View>
     );
   }

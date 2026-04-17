@@ -13,8 +13,8 @@ import {
   StyleSheet,
   Alert,
   Share,
-  ActivityIndicator,
 } from 'react-native';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -246,14 +246,8 @@ export default function GroceryListScreen() {
 
   if (isGenerating) {
     return (
-      <View style={[styles.container, styles.centerContent, { backgroundColor: colors.background.primary }]}>
-        <ActivityIndicator size="large" color={colors.accent.cyan} />
-        <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
-          Building your grocery list...
-        </Text>
-        <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
-          Estimating costs and organizing by aisle
-        </Text>
+      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        <ListSkeleton />
       </View>
     );
   }

@@ -11,10 +11,10 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  ActivityIndicator,
   Alert,
   ListRenderItem,
 } from 'react-native';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -377,9 +377,7 @@ export default function LabsHistoryScreen() {
       )}
 
       {isLoading && uploads.length === 0 ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={colors.accent.primary} />
-        </View>
+        <ListSkeleton />
       ) : (
         <FlatList
           data={uploads}
