@@ -18,11 +18,13 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import type { ThemeMode } from '@theme/colors';
+import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
 import { MonoText } from '@components/ui/MonoText';
 import { Avatar } from '@components/ui/Avatar';
 import { ProgressBar } from '@components/ui/ProgressBar';
+import { SectionTile } from '@components/ui/SectionTile';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
@@ -41,61 +43,26 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 // ---------------------------------------------------------------------------
 // Appearance segmented control
 // ---------------------------------------------------------------------------
-const THEME_OPTIONS: { value: ThemeMode; label: string; icon: string }[] = [
-  { value: 'dark', label: 'Dark', icon: '🌙' },
-  { value: 'light', label: 'Light', icon: '☀️' },
-  { value: 'system', label: 'System', icon: '⚙️' },
-];
+const THEME_OPTIONS = [
+  { value: 'dark'   as ThemeMode, icon: 'moon-outline'     as keyof typeof Ionicons.glyphMap, label: 'Dark' },
+  { value: 'light'  as ThemeMode, icon: 'sunny-outline'    as keyof typeof Ionicons.glyphMap, label: 'Light' },
+  { value: 'system' as ThemeMode, icon: 'settings-outline' as keyof typeof Ionicons.glyphMap, label: 'System' },
+] as const;
 
 function AppearancePicker() {
-  const { colors, typography, spacing, borderRadius, mode, setMode } = useTheme();
+  const { spacing, mode, setMode } = useTheme();
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: colors.background.secondary,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.border.default,
-        padding: 4,
-        marginBottom: spacing.xs,
-        ...colors.shadow.card,
-      }}
-    >
-      {THEME_OPTIONS.map((opt) => {
-        const active = mode === opt.value;
-        return (
-          <Pressable
-            key={opt.value}
-            onPress={() => {
-              void hapticLight();
-              setMode(opt.value);
-            }}
-            accessibilityRole="radio"
-            accessibilityLabel={`Theme: ${opt.label}`}
-            accessibilityState={{ selected: active }}
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingVertical: spacing.sm,
-              borderRadius: borderRadius.sm,
-              backgroundColor: active ? colors.accent.primary : 'transparent',
-            }}
-          >
-            <Text style={{ fontSize: 14, marginRight: 4 }}>{opt.icon}</Text>
-            <Text
-              style={[
-                typography.captionBold,
-                { color: active ? '#FFFFFF' : colors.text.secondary }, /* brand-ok */
-              ]}
-            >
-              {opt.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+    <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs }}>
+      {THEME_OPTIONS.map((opt) => (
+        <SectionTile
+          key={opt.value}
+          icon={opt.icon}
+          label={opt.label}
+          size="sm"
+          isSelected={mode === opt.value}
+          onPress={() => setMode(opt.value)}
+        />
+      ))}
     </View>
   );
 }
@@ -126,7 +93,8 @@ function SectionHeader({ title, danger = false }: { title: string; danger?: bool
 // Row item
 // ---------------------------------------------------------------------------
 interface SettingsRowProps {
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor?: string;
   label: string;
   value?: string;
   onPress?: () => void;
@@ -138,6 +106,7 @@ interface SettingsRowProps {
 
 function SettingsRow({
   icon,
+  iconColor,
   label,
   value,
   onPress,
@@ -149,6 +118,7 @@ function SettingsRow({
   const { colors, typography, spacing, borderRadius } = useTheme();
 
   const iconBackground = iconBg ?? (danger ? colors.accent.dangerSubtle : colors.accent.primarySubtle);
+  const resolvedIconColor = iconColor ?? (danger ? colors.accent.danger : colors.accent.primary);
 
   const content = (
     <View
@@ -160,22 +130,23 @@ function SettingsRow({
           paddingVertical: spacing.md,
           paddingHorizontal: spacing.lg,
           marginBottom: spacing.xs,
+          minHeight: 52,
           ...colors.shadow.cardSubtle,
         },
       ]}
     >
       <View
         style={{
-          width: 32,
-          height: 32,
-          borderRadius: 10,
+          width: 36,
+          height: 36,
+          borderRadius: 8,
           backgroundColor: iconBackground,
           alignItems: 'center',
           justifyContent: 'center',
           marginRight: spacing.md,
         }}
       >
-        <Text style={{ fontSize: 16 }}>{icon}</Text>
+        <Ionicons name={icon} size={20} color={resolvedIconColor} />
       </View>
       <Text
         style={[
@@ -437,6 +408,8 @@ export default function ProfileScreen() {
     : undefined;
 
   return (
+    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+    <StatusBar style="light" backgroundColor="#0C0A15" />
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{
@@ -453,13 +426,24 @@ export default function ProfileScreen() {
         entering={FadeInDown.duration(400)}
         style={[styles.profileHeader, { marginBottom: spacing.md }]}
       >
-        <Avatar
-          source={avatarSource}
-          name={profile?.display_name ?? undefined}
-          size="xl"
-        />
+        <View style={{
+          padding: 3,
+          borderRadius: 999,
+          borderWidth: 3,
+          borderColor: colors.accent.primary,
+          shadowColor: colors.accent.primary,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.35,
+          shadowRadius: 14,
+          elevation: 8,
+        }}>
+          <Avatar
+            source={avatarSource}
+            name={profile?.display_name ?? undefined}
+            size="xl"
+          />
+        </View>
         <View style={{ marginLeft: spacing.lg, flex: 1 }}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
           <Text
             style={[typography.h2, { color: colors.text.primary }]}
             numberOfLines={1}
@@ -568,15 +552,17 @@ export default function ProfileScreen() {
       <SectionHeader title="Preferences" />
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
         <SettingsRow
-          icon="🔔"
+          icon="notifications-outline"
+          iconColor={colors.accent.warning}
           label="Notification Settings"
-          iconBg={colors.accent.warningSubtle}
+          iconBg={colors.dim.warning}
           onPress={() => router.push('/(tabs)/profile/notifications-settings')}
         />
         <SettingsRow
-          icon="🎙️"
+          icon="mic-outline"
+          iconColor={colors.accent.info}
           label="Voice Commands"
-          iconBg={colors.accent.cyanSubtle}
+          iconBg={colors.dim.info}
           accessibilityLabel="Toggle voice commands"
           rightElement={
             <Toggle
@@ -586,9 +572,10 @@ export default function ProfileScreen() {
           }
         />
         <SettingsRow
-          icon="📖"
+          icon="mic-outline"
+          iconColor={colors.accent.primary}
           label="Narrator"
-          iconBg={colors.accent.primarySubtle}
+          iconBg={colors.dim.primary}
           accessibilityLabel="Toggle narrator"
           rightElement={
             <Toggle
@@ -600,7 +587,8 @@ export default function ProfileScreen() {
           }
         />
         <SettingsRow
-          icon="📏"
+          icon="resize-outline"
+          iconColor={colors.accent.primary}
           label="Units"
           value="Imperial"
           onPress={() => {
@@ -613,33 +601,38 @@ export default function ProfileScreen() {
       <SectionHeader title="Features" />
       <Animated.View entering={FadeInDown.delay(150).duration(400)}>
         <SettingsRow
-          icon="👫"
+          icon="people-outline"
+          iconColor={colors.accent.pink}
           label="Partner"
-          iconBg={colors.accent.pinkSubtle}
+          iconBg={colors.dim.pink}
           onPress={() => router.push('/(tabs)/profile/partner')}
         />
         <SettingsRow
-          icon="🏆"
+          icon="trophy-outline"
+          iconColor={colors.accent.gold}
           label="Achievements"
-          iconBg={colors.accent.goldSubtle}
+          iconBg={colors.dim.gold}
           onPress={() => router.push('/(tabs)/profile/achievements')}
         />
         <SettingsRow
-          icon="📊"
+          icon="grid-outline"
+          iconColor={colors.accent.primary}
           label="Customize Dashboard"
-          iconBg={colors.accent.primarySubtle}
+          iconBg={colors.dim.primary}
           onPress={() => router.push('/(tabs)/profile/dashboard-builder')}
         />
         <SettingsRow
-          icon="📱"
+          icon="radio-outline"
+          iconColor={colors.accent.cyan}
           label="NFC Triggers"
-          iconBg={colors.accent.cyanSubtle}
+          iconBg={colors.dim.cyan}
           onPress={() => router.push('/(tabs)/profile/nfc-setup')}
         />
         <SettingsRow
-          icon="🔗"
+          icon="link-outline"
+          iconColor={colors.accent.info}
           label="Integrations"
-          iconBg={colors.accent.successSubtle}
+          iconBg={colors.dim.info}
           onPress={() => router.push('/(tabs)/profile/integrations')}
         />
       </Animated.View>
@@ -647,7 +640,8 @@ export default function ProfileScreen() {
       <SectionHeader title="Account" danger />
       <Animated.View entering={FadeInDown.delay(200).duration(400)}>
         <SettingsRow
-          icon="✏️"
+          icon="create-outline"
+          iconColor={colors.accent.primary}
           label="Edit Profile"
           onPress={() => {
             hapticLight();
@@ -655,9 +649,10 @@ export default function ProfileScreen() {
           }}
         />
         <SettingsRow
-          icon="🔑"
+          icon="key-outline"
+          iconColor={colors.accent.warning}
           label="Change Password"
-          iconBg={colors.accent.warningSubtle}
+          iconBg={colors.dim.warning}
           onPress={() => {
             hapticLight();
             const email = useAuthStore.getState().user?.email;
@@ -685,7 +680,7 @@ export default function ProfileScreen() {
           }}
         />
         <SettingsRow
-          icon="🚪"
+          icon="log-out-outline"
           label="Sign Out"
           danger
           onPress={handleSignOut}
@@ -695,25 +690,32 @@ export default function ProfileScreen() {
       <SectionHeader title="Data" />
       <Animated.View entering={FadeInDown.delay(250).duration(400)}>
         <SettingsRow
-          icon="📤"
+          icon="download-outline"
+          iconColor={colors.accent.success}
           label="Export Data"
+          iconBg={colors.dim.success}
           onPress={() => router.push('/(tabs)/profile/data-export')}
         />
         <SettingsRow
-          icon="🔒"
+          icon="lock-closed-outline"
+          iconColor={colors.accent.primary}
           label="Privacy"
+          iconBg={colors.dim.primary}
           onPress={() => {
             hapticLight();
             router.push('/(tabs)/profile/about' as never);
           }}
         />
         <SettingsRow
-          icon="ℹ️"
+          icon="information-circle-outline"
+          iconColor={colors.accent.primary}
           label="About"
+          iconBg={colors.dim.primary}
           onPress={() => router.push('/(tabs)/profile/about')}
         />
       </Animated.View>
     </ScrollView>
+    </View>
   );
 }
 
