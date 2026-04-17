@@ -37,12 +37,10 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { EmptyState } from '@components/ui/EmptyState';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import type { Goal } from '@app-types/database';
-import { HelpIcon } from '@components/ui/HelpIcon';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
-import { HELP } from '../../../constants/helpContent';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 

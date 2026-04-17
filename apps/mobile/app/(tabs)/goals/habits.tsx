@@ -93,7 +93,7 @@ const HABIT_CATEGORIES: { key: HabitCategory; label: string }[] = [
 const STREAK_MILESTONES = [7, 14, 21, 30, 50, 75, 100, 200, 365];
 
 export default function HabitTracker() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();

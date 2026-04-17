@@ -23,8 +23,8 @@ export const QuickActionTile = memo(function QuickActionTile({
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const handlePressIn = useCallback(() => { scale.value = withSpring(0.94, { damping: 12, stiffness: 400 }); }, []);
-  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, []);
+  const handlePressIn = useCallback(() => { scale.value = withSpring(0.94, { damping: 12, stiffness: 400 }); }, [scale]);
+  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, [scale]);
   const handlePress = useCallback(() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onPress(); }, [onPress]);
 
   return (

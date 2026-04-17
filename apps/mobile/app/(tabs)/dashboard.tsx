@@ -48,7 +48,7 @@ import { useBusinessStore } from '@stores/businessStore';
 import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
 import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatters';
-import { hapticLight, hapticMedium } from '@utils/haptics';
+import { hapticLight } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { HelpIcon } from '@components/ui/HelpIcon';
