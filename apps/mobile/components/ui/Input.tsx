@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View,
   TextInput,
@@ -53,7 +53,7 @@ export function Input({
   }, [focusAnim]);
 
   const toggleSecure = useCallback(() => {
-    setIsSecureVisible((prev) => !prev);
+    setIsSecureVisible((prev: boolean) => !prev);
   }, []);
 
   const animatedBorderStyle = useAnimatedStyle(() => {

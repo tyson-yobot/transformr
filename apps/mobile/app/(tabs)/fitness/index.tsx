@@ -34,6 +34,7 @@ import { supabase } from '@services/supabase';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { SectionTile } from '@components/ui/SectionTile';
 
 interface RecentWorkout {
   id: string;
@@ -286,7 +287,7 @@ export default function FitnessHomeScreen() {
 
         {/* Today's Workout */}
         <Animated.View entering={FadeInDown.delay(0).duration(400)}>
-          <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+          <Card variant="elevated" style={{ marginBottom: spacing.lg, borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}>
             <View style={styles.sectionHeader}>
               <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
               <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
@@ -295,7 +296,7 @@ export default function FitnessHomeScreen() {
             </View>
             {todayTemplate ? (
               <View style={{ marginTop: spacing.md }}>
-                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                <Text style={[typography.h3, { color: colors.text.primary }]}>
                   {todayTemplate.name}
                 </Text>
                 {todayTemplate.description ? (
@@ -315,6 +316,7 @@ export default function FitnessHomeScreen() {
                 ) : null}
                 <Button
                   title="Start Workout"
+                  variant="primary"
                   onPress={() => handleStartWorkout(todayTemplate.id)}
                   loading={isLoading}
                   fullWidth
@@ -444,39 +446,25 @@ export default function FitnessHomeScreen() {
         {/* Quick Actions */}
         <Animated.View
           entering={FadeInDown.delay(100).duration(400)}
-          style={[styles.quickActions, { gap: spacing.sm, marginBottom: spacing.lg }]}
+          style={{ marginBottom: spacing.lg }}
         >
-          {QUICK_ACTIONS.map((action) => {
-            const color = accentForKey(action.colorKey);
-            return (
-              <Pressable
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}
+          >
+            {QUICK_ACTIONS.map((action) => (
+              <SectionTile
                 key={action.label}
-                onPress={() => handleNavigate(action.route)}
+                icon={action.iconName}
+                label={action.label}
+                accentColor={accentForKey(action.colorKey)}
+                size="md"
+                onPress={() => router.push(action.route as never)}
                 accessibilityLabel={action.a11y}
-                style={[
-                  styles.quickActionBtn,
-                  {
-                    backgroundColor: colors.background.secondary,
-                    borderRadius: borderRadius.md,
-                    borderColor: colors.background.tertiary,
-                    padding: spacing.md,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.quickActionIconWrap,
-                    { backgroundColor: `${color}20`, borderRadius: 10 },
-                  ]}
-                >
-                  <Ionicons name={action.iconName} size={20} color={color} />
-                </View>
-                <Text style={[typography.tiny, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.xs }]}>
-                  {action.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+              />
+            ))}
+          </ScrollView>
         </Animated.View>
         <HelpBubble id="fitness_programs" message="Follow a program for structured training" position="below" />
 
@@ -486,14 +474,14 @@ export default function FitnessHomeScreen() {
             <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
               Recent PRs
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: spacing.lg }}>
               {personalRecords.map((pr) => (
                 <View
                   key={pr.id}
                   style={[
                     styles.prCard,
                     {
-                      backgroundColor: colors.background.secondary,
+                      backgroundColor: colors.dim.gold,
                       borderRadius: borderRadius.md,
                       padding: spacing.md,
                       marginRight: spacing.sm,
