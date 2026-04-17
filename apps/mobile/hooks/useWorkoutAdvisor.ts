@@ -68,11 +68,8 @@ export function useWorkoutAdvisor(
           userGoal,
         });
         setRecommendation(result);
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to get recommendation';
-        setError(message);
-        console.error('[useWorkoutAdvisor] Error:', message);
+      } catch {
+        setError('Failed to get recommendation. Pull to refresh.');
       } finally {
         setIsLoading(false);
       }
