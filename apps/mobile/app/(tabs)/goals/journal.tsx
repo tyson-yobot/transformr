@@ -194,8 +194,8 @@ export default function JournalScreen() {
           <Card
             variant="elevated"
             style={{
-              borderLeftWidth: 3,
-              borderLeftColor: colors.accent.primary,
+              borderLeftWidth: 2,
+              borderLeftColor: colors.accent.cyan,
             }}
           >
             <View style={styles.promptHeader}>
@@ -203,7 +203,7 @@ export default function JournalScreen() {
             </View>
             <Text
               style={[
-                typography.h3,
+                typography.body,
                 { color: colors.text.primary, marginTop: spacing.sm },
               ]}
             >
@@ -366,9 +366,9 @@ export default function JournalScreen() {
 
         {showPastEntries && pastEntries.length === 0 && (
           <EmptyState
-            icon="\uD83D\uDCDD"
+            ionIcon="journal-outline"
             title="No past entries yet"
-            subtitle="Your journal is a safe place to reflect, celebrate wins, and process the tough days. Write your first entry today."
+            subtitle="Your AI coach generates a personalized prompt each evening based on your day."
             style={{ paddingVertical: 24 }}
           />
         )}

@@ -29,6 +29,8 @@ import { Chip } from '@components/ui/Chip';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { SectionTile } from '@components/ui/SectionTile';
+import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -46,30 +48,31 @@ import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkS
 
 type GoalCategory = NonNullable<Goal['category']>;
 
-const CATEGORIES: { key: GoalCategory; label: string; icon: string }[] = [
-  { key: 'fitness', label: 'Fitness', icon: '\uD83D\uDCAA' },
-  { key: 'business', label: 'Business', icon: '\uD83D\uDCBC' },
-  { key: 'personal', label: 'Personal', icon: '\u2728' },
-  { key: 'financial', label: 'Financial', icon: '\uD83D\uDCB0' },
-  { key: 'health', label: 'Health', icon: '\u2764\uFE0F' },
-  { key: 'education', label: 'Education', icon: '\uD83D\uDCDA' },
-  { key: 'mindset', label: 'Mindset', icon: '\uD83E\uDDE0' },
-  { key: 'relationship', label: 'Relationship', icon: '\uD83D\uDC9C' },
-  { key: 'nutrition', label: 'Nutrition', icon: '\uD83C\uDF4E' },
+const CATEGORIES: { key: GoalCategory; label: string }[] = [
+  { key: 'fitness', label: 'Fitness' },
+  { key: 'business', label: 'Business' },
+  { key: 'personal', label: 'Personal' },
+  { key: 'financial', label: 'Financial' },
+  { key: 'health', label: 'Health' },
+  { key: 'education', label: 'Education' },
+  { key: 'mindset', label: 'Mindset' },
+  { key: 'relationship', label: 'Relationship' },
+  { key: 'nutrition', label: 'Nutrition' },
 ];
 
-const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
-  { route: '/(tabs)/goals/habits', label: 'Habits', icon: '\u2705' },
-  { route: '/(tabs)/goals/sleep', label: 'Sleep', icon: '\uD83D\uDE34' },
-  { route: '/(tabs)/goals/mood', label: 'Mood', icon: '\uD83D\uDE0A' },
-  { route: '/(tabs)/goals/journal', label: 'Journal', icon: '\uD83D\uDCD3' },
-  { route: '/(tabs)/goals/focus-mode', label: 'Focus', icon: '\uD83C\uDFAF' },
-  { route: '/(tabs)/goals/vision-board', label: 'Vision', icon: '\uD83C\uDF1F' },
-  { route: '/(tabs)/goals/skills', label: 'Skills', icon: '\uD83D\uDCA1' },
-  { route: '/(tabs)/goals/challenges', label: 'Challenges', icon: '\uD83C\uDFC6' },
-  { route: '/(tabs)/goals/stake-goals', label: 'Stakes', icon: '\uD83D\uDD25' },
-  { route: '/(tabs)/goals/business', label: 'Business', icon: '\uD83D\uDCC8' },
-  { route: '/(tabs)/goals/finance', label: 'Finance', icon: '\uD83D\uDCB3' },
+
+type NavAccent = 'success' | 'info' | 'warning' | 'cyan' | 'fire' | 'pink' | 'gold' | 'danger';
+
+const NAV_ITEMS: { route: string; label: string; icon: keyof typeof Ionicons.glyphMap; accent: NavAccent }[] = [
+  { route: '/(tabs)/goals/habits',       label: 'Habits',     icon: 'checkmark-circle-outline', accent: 'success' },
+  { route: '/(tabs)/goals/sleep',        label: 'Sleep',      icon: 'moon-outline',             accent: 'info' },
+  { route: '/(tabs)/goals/mood',         label: 'Mood',       icon: 'happy-outline',            accent: 'warning' },
+  { route: '/(tabs)/goals/journal',      label: 'Journal',    icon: 'journal-outline',          accent: 'cyan' },
+  { route: '/(tabs)/goals/focus-mode',   label: 'Focus',      icon: 'timer-outline',            accent: 'fire' },
+  { route: '/(tabs)/goals/vision-board', label: 'Vision',     icon: 'images-outline',           accent: 'pink' },
+  { route: '/(tabs)/goals/skills',       label: 'Skills',     icon: 'bulb-outline',             accent: 'gold' },
+  { route: '/(tabs)/goals/challenges',   label: 'Challenges', icon: 'trophy-outline',           accent: 'gold' },
+  { route: '/(tabs)/goals/stake-goals',  label: 'Stakes',     icon: 'flame-outline',            accent: 'danger' },
 ];
 
 export default function GoalsDashboard() {
@@ -281,37 +284,17 @@ export default function GoalsDashboard() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[styles.navRow, { gap: spacing.sm }]}
+            contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg, paddingBottom: spacing.xs }}
           >
             {NAV_ITEMS.map((item) => (
-              <Pressable
+              <SectionTile
                 key={item.route}
-                onPress={() => { hapticLight(); router.push(item.route as Href); }}
-                accessibilityLabel={item.label}
-                style={[
-                  styles.navItem,
-                  {
-                    backgroundColor: colors.background.secondary,
-                    borderRadius: borderRadius.md,
-                    padding: spacing.md,
-                  },
-                ]}
-              >
-                <Text style={styles.navIcon}>{item.icon}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs, gap: 3 }}>
-                  <Text
-                    style={[
-                      typography.tiny,
-                      { color: colors.text.secondary },
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.label === 'Habits' && (
-                    <HelpIcon content={HELP.habitStreaks} size={13} />
-                  )}
-                </View>
-              </Pressable>
+                icon={item.icon}
+                label={item.label}
+                accentColor={colors.accent[item.accent]}
+                size="md"
+                onPress={() => router.push(item.route as Href)}
+              />
             ))}
           </ScrollView>
         </Animated.View>
@@ -342,7 +325,7 @@ export default function GoalsDashboard() {
               return (
                 <Chip
                   key={cat.key}
-                  label={`${cat.icon} ${cat.label} (${count})`}
+                  label={`${cat.label} (${count})`}
                   selected={selectedCategory === cat.key}
                   onPress={() =>
                     setSelectedCategory(
@@ -534,7 +517,7 @@ export default function GoalsDashboard() {
 
           {filteredGoals.length === 0 && (
             <EmptyState
-              icon="\uD83C\uDFAF"
+              ionIcon="trophy-outline"
               title="No goals yet"
               subtitle="Dream big, start small. Set your first goal and watch your momentum build."
               actionLabel="Add a Goal"
@@ -651,7 +634,7 @@ export default function GoalsDashboard() {
           {CATEGORIES.map((cat) => (
             <Chip
               key={cat.key}
-              label={`${cat.icon} ${cat.label}`}
+              label={cat.label}
               selected={newGoalCategory === cat.key}
               onPress={() => setNewGoalCategory(cat.key)}
             />
@@ -685,9 +668,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { paddingBottom: 24 },
   ringSection: { alignItems: 'center', marginBottom: 16 },
-  navRow: { paddingVertical: 8 },
-  navItem: { alignItems: 'center', width: 72, borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
-  navIcon: { fontSize: 24 },
   goalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
