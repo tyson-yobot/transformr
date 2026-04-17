@@ -135,9 +135,9 @@ export const colors = {
 
   light: {
     background: {
-      primary:        '#F7F5FF',   // Warm lavender white — TRANSFORMR branded
+      primary:        '#F8F7FF',   // Warm lavender white — TRANSFORMR branded
       secondary:      '#FFFFFF',   // Cards: pure white against lavender bg
-      tertiary:       '#EDE9FE',   // Elevated surfaces: deeper lavender
+      tertiary:       '#F3F1FF',   // Elevated surfaces: deeper lavender
       input:          '#FFFFFF',
       elevated:       '#DDD6FE',   // Highest elevation: violet tint
       glass:          'rgba(255,255,255,0.92)',
