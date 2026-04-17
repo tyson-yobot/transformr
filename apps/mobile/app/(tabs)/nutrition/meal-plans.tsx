@@ -194,7 +194,7 @@ export default function MealPlansScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginBottom: spacing.lg }}
-          contentContainerStyle={{ gap: spacing.sm }}
+          contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}
         >
           {weekPlan.map((day, index) => {
             const dayTotal = day.meals.reduce((sum, m) => sum + m.calories, 0);
@@ -293,7 +293,7 @@ export default function MealPlansScreen() {
         {/* Meals for selected day */}
         {currentDayPlan?.meals.map((meal, index) => (
           <Animated.View key={meal.id} entering={FadeInDown.duration(300).delay(index * 80)}>
-            <Card style={{ marginBottom: spacing.sm }}>
+            <Card style={{ marginBottom: spacing.sm, borderLeftWidth: 2, borderLeftColor: colors.accent.primary }}>
               <View style={styles.mealRow}>
                 <View style={{ flex: 1 }}>
                   <View style={styles.mealHeader}>
@@ -342,7 +342,7 @@ export default function MealPlansScreen() {
 
         {currentDayPlan && currentDayPlan.meals.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="calendar-outline" size={48} color={colors.text.muted} />
+            <Ionicons name="restaurant-outline" size={48} color={colors.text.muted} />
             <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
               No meals planned for this day
             </Text>

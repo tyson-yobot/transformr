@@ -28,6 +28,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '@services/supabase';
 import type { ChallengeDifficulty } from '@app-types/database';
 
@@ -299,6 +300,14 @@ export default function ChallengesScreen() {
           </Text>
         </Animated.View>
         <HelpBubble id="challenges_browse" message="Pick a challenge to get auto-tracked daily tasks" position="below" />
+
+        {browseChallenges.length === 0 && (
+          <EmptyState
+            ionIcon="trophy-outline"
+            title="No challenges yet"
+            subtitle="Challenges will appear here. Create a custom one to get started."
+          />
+        )}
 
         <View style={styles.grid}>
           {browseChallenges.map((def, index) => (

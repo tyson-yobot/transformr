@@ -685,7 +685,7 @@ export default function SupplementsScreen() {
           />
 
           <Text style={[typography.caption, { color: colors.text.secondary }]}>Category</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}>
             {CATEGORY_OPTIONS.map((cat) => (
               <Pressable
                 key={cat.key}

@@ -147,7 +147,7 @@ export default function BusinessDashboard() {
 
         {businesses.length === 0 ? (
           <EmptyState
-            icon="💰"
+            ionIcon="trending-up-outline"
             title="Track every dollar"
             subtitle="Add your business to start tracking MRR, ARR, and revenue trends with AI-powered insights."
             actionLabel="Add Revenue Entry"

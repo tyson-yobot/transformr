@@ -184,7 +184,7 @@ export default function SavedMealsScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginBottom: spacing.lg }}
-          contentContainerStyle={{ gap: spacing.sm }}
+          contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}
         >
           {FILTER_OPTIONS.map((filter) => (
             <Pressable
@@ -238,15 +238,21 @@ export default function SavedMealsScreen() {
                         <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '700' }]}>
                           {formatCalories(meal.total_calories ?? 0)}
                         </Text>
-                        <Text style={[typography.tiny, { color: MACRO_COLORS.protein }]}>
-                          P: {formatMacro(meal.total_protein ?? 0)}
-                        </Text>
-                        <Text style={[typography.tiny, { color: MACRO_COLORS.carbs }]}>
-                          C: {formatMacro(meal.total_carbs ?? 0)}
-                        </Text>
-                        <Text style={[typography.tiny, { color: MACRO_COLORS.fat }]}>
-                          F: {formatMacro(meal.total_fat ?? 0)}
-                        </Text>
+                        <View style={[styles.macroPill, { backgroundColor: `${MACRO_COLORS.protein}20` }]}>
+                          <Text style={[typography.tiny, { color: MACRO_COLORS.protein, fontWeight: '600' }]}>
+                            P {formatMacro(meal.total_protein ?? 0)}
+                          </Text>
+                        </View>
+                        <View style={[styles.macroPill, { backgroundColor: `${MACRO_COLORS.carbs}20` }]}>
+                          <Text style={[typography.tiny, { color: MACRO_COLORS.carbs, fontWeight: '600' }]}>
+                            C {formatMacro(meal.total_carbs ?? 0)}
+                          </Text>
+                        </View>
+                        <View style={[styles.macroPill, { backgroundColor: `${MACRO_COLORS.fat}20` }]}>
+                          <Text style={[typography.tiny, { color: MACRO_COLORS.fat, fontWeight: '600' }]}>
+                            F {formatMacro(meal.total_fat ?? 0)}
+                          </Text>
+                        </View>
                       </View>
                       <View style={[styles.mealTags, { marginTop: spacing.sm, gap: spacing.xs }]}>
                         {meal.meal_type && <Badge label={meal.meal_type} size="sm" variant="info" />}
@@ -374,6 +380,12 @@ const styles = StyleSheet.create({
   mealMacros: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  macroPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   mealTags: {
     flexDirection: 'row',

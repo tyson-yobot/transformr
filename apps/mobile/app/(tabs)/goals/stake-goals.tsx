@@ -349,7 +349,7 @@ export default function StakeGoalsScreen() {
 
             {stakeGoals.filter((sg) => sg.is_active).length === 0 && (
               <EmptyState
-                icon="🔥"
+                ionIcon="flame-outline"
                 title="No active stakes"
                 subtitle="Put money on the line to stay accountable. When real stakes are involved, you show up."
                 actionLabel="Create First Stake"
