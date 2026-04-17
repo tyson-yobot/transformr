@@ -235,7 +235,6 @@ export default function ChatHistoryScreen() {
               />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
               <View style={styles.titleRow}>
                 {conv.pinned && (
                   <Ionicons
@@ -362,6 +361,7 @@ export default function ChatHistoryScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View
         style={[

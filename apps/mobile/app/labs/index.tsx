@@ -160,7 +160,6 @@ export default function LabsHistoryScreen() {
             <Ionicons name="flask-outline" size={20} color={colors.accent.cyan} />
           </View>
           <View style={{ flex: 1, marginLeft: spacing.md }}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
             <Text
               style={[typography.bodyBold, { color: colors.text.primary }]}
               numberOfLines={1}
@@ -300,6 +299,7 @@ export default function LabsHistoryScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View
         style={[
