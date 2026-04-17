@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import type { ErrorBoundaryProps } from 'expo-router';
 
 const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? 'support@transformr.ai';
@@ -13,6 +14,7 @@ export default function ErrorBoundary({ error }: ErrorBoundaryProps) {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <Text style={styles.emoji}>⚠️</Text>
       <Text style={styles.title}>Something went wrong</Text>
       <Text style={styles.message}>{message}</Text>

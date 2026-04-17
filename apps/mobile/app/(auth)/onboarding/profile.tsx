@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -46,6 +48,7 @@ const GOAL_DIRECTIONS: { value: GoalDirection; label: string; icon: string }[] =
 
 export default function ProfileScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const updateProfile = useProfileStore((s) => s.updateProfile);
 
@@ -121,13 +124,14 @@ export default function ProfileScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -336,7 +340,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   heroSection: {
     alignItems: 'center',
     paddingHorizontal: 24,

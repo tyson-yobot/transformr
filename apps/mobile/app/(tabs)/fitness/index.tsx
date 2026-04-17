@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -56,6 +58,7 @@ const QUICK_ACTIONS = [
 
 export default function FitnessHomeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { templates, fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
@@ -169,9 +172,8 @@ export default function FitnessHomeScreen() {
         }
         setCurrentStreak(streak);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load fitness data';
-      setError(message);
+    } catch {
+      setError('Unable to load fitness data. Pull to refresh.');
     } finally {
       setLoadingData(false);
     }
@@ -261,9 +263,10 @@ export default function FitnessHomeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

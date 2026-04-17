@@ -11,6 +11,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -43,6 +45,7 @@ const CATEGORY_OPTIONS: { key: TxCategory; label: string }[] = [
 
 export default function TransactionsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { accounts, transactions, isLoading, fetchAccounts, logTransaction } =
     useFinanceStore();
 
@@ -120,6 +123,7 @@ export default function TransactionsScreen() {
   if (isLoading && transactions.length === 0) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={60} />
           <Skeleton variant="card" height={60} />
@@ -132,7 +136,7 @@ export default function TransactionsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

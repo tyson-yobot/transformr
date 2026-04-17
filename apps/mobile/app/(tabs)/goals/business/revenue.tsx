@@ -10,6 +10,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -37,6 +39,7 @@ const REVENUE_TYPES: { key: RevenueType; label: string }[] = [
 
 export default function RevenueScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
   const { businesses, revenueData, isLoading, logRevenue, getMonthlyMetrics } =
     useBusinessStore();
@@ -83,6 +86,7 @@ export default function RevenueScreen() {
   if (!hasBusinessTracking) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <GatePromptCard featureKey="business_tracking" height={200} />
       </View>
     );
@@ -91,7 +95,7 @@ export default function RevenueScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Monthly Total */}

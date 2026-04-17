@@ -16,6 +16,8 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -52,6 +54,7 @@ const GOAL_DIRECTION_OPTIONS: { key: GoalDirection; label: string }[] = [
 
 export default function EditProfileScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const router = useRouter();
   const { profile, updateProfile, isLoading } = useProfileStore();
@@ -126,8 +129,9 @@ export default function EditProfileScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

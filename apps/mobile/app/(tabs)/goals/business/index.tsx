@@ -14,6 +14,8 @@ import {
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -39,6 +41,7 @@ import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../../constants/coachma
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
@@ -113,6 +116,7 @@ export default function BusinessDashboard() {
   if (!hasBusinessTracking) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <GatePromptCard featureKey="business_tracking" height={200} />
       </View>
     );
@@ -129,7 +133,7 @@ export default function BusinessDashboard() {
       />
       <Coachmark screenKey={COACHMARK_KEYS.business} steps={coachmarkSteps} />
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

@@ -10,6 +10,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -35,6 +37,7 @@ const STATUS_OPTIONS: { key: CustomerStatus; label: string }[] = [
 
 export default function CustomersScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const businesses = useBusinessStore((s) => s.businesses);
   const businessId = businesses[0]?.id ?? null;
 
@@ -128,8 +131,9 @@ export default function CustomersScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Summary */}

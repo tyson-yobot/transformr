@@ -10,7 +10,7 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -18,6 +18,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -30,6 +31,7 @@ import { EmptyState } from '@components/ui/EmptyState';
 
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const gate = useFeatureGate('finance_tracking');
@@ -108,6 +110,7 @@ export default function FinanceDashboard() {
   if (isLoading && accounts.length === 0) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={80} />
@@ -121,7 +124,7 @@ export default function FinanceDashboard() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

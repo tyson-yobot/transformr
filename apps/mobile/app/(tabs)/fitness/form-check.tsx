@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,6 +42,7 @@ interface FormAnalysisResult {
 
 export default function FormCheckScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const [permission, requestPermission] = useCameraPermissions();
@@ -190,8 +193,9 @@ export default function FormCheckScreen() {
   if (phase === 'setup') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
           showsVerticalScrollIndicator={false}
         >
           <AIInsightCard screenKey="fitness/form-check" style={{ marginBottom: spacing.md }} />
@@ -407,8 +411,9 @@ export default function FormCheckScreen() {
   if (phase === 'results' && analysisResult) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Score */}

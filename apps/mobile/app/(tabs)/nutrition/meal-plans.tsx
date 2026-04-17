@@ -15,6 +15,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -57,6 +59,7 @@ function createEmptyWeekPlan(): DayPlan[] {
 
 export default function MealPlansScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { profile } = useProfileStore();
   const router = useRouter();
@@ -170,9 +173,10 @@ export default function MealPlansScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+        contentContainerStyle={{  padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
         {/* AI Generate Button */}

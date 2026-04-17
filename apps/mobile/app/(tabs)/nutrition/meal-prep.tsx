@@ -14,12 +14,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -52,6 +53,7 @@ const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
 
 export default function MealPrepScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const gate = useFeatureGate('ai_meal_prep');
 
@@ -181,6 +183,7 @@ export default function MealPrepScreen() {
   if (!gate.isAvailable) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <GatePromptCard featureKey="ai_meal_prep" height={200} />
       </SafeAreaView>
     );
@@ -191,6 +194,7 @@ export default function MealPrepScreen() {
   if (isGenerating) {
     return (
       <View style={[styles.container, styles.centerContent, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <ActivityIndicator size="large" color={colors.accent.cyan} />
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
           Generating tiered meal prep plans...
@@ -205,6 +209,7 @@ export default function MealPrepScreen() {
   if (!prepResponse) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={[styles.centerContent, { padding: spacing.lg }]}
           showsVerticalScrollIndicator={false}
@@ -290,9 +295,10 @@ export default function MealPrepScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Budget Bar */}

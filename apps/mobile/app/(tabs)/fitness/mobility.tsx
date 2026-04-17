@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
@@ -66,6 +68,7 @@ const STRETCH_LIBRARY: StretchExercise[] = [
 
 export default function MobilityScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
   const [routines, setRoutines] = useState<MobilityRoutine[]>([]);
@@ -157,7 +160,7 @@ export default function MobilityScreen() {
 
         setRoutines([pushDayRoutine, legDayRoutine, fullBodyRoutine]);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Failed to load session history');
+        setError('Failed to load session history. Pull to refresh.');
         // Still populate default routines so the screen is functional
         const pushDayRoutineFallback: MobilityRoutine = {
           id: 'r1',
@@ -337,8 +340,9 @@ export default function MobilityScreen() {
   if (activeRoutine) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
           showsVerticalScrollIndicator={false}
         >
           {/* Routine Header */}
@@ -558,8 +562,9 @@ export default function MobilityScreen() {
   // Routine selection view
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

@@ -11,6 +11,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
@@ -21,6 +23,7 @@ import { formatCurrency, formatDate } from '@utils/formatters';
 
 export default function NetWorthScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { accounts, netWorthHistory, isLoading, fetchAccounts } = useFinanceStore();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -67,6 +70,7 @@ export default function NetWorthScreen() {
   if (isLoading && netWorthHistory.length === 0) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={140} />
           <Skeleton variant="card" height={200} />
@@ -79,7 +83,7 @@ export default function NetWorthScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

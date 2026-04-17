@@ -17,6 +17,7 @@ import {
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -92,6 +93,7 @@ export default function LoginScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Warm gym background */}
       <Image
         source={GYM_IMAGE}

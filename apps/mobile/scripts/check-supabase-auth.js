@@ -1,4 +1,5 @@
 // Check and fix Supabase auth configuration via Playwright
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { chromium } = require('playwright');
 
 (async () => {

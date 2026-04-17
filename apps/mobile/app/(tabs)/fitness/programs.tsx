@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,6 +40,7 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function ProgramsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
@@ -95,8 +98,7 @@ export default function ProgramsScreen() {
         setProgramsWithExercises(programs);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load programs';
-      setError(message);
+      setError('Failed to load programs. Pull to refresh.');
     } finally {
       setLoading(false);
     }
@@ -343,6 +345,7 @@ export default function ProgramsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {error && (
         <Card
           style={{
@@ -363,7 +366,7 @@ export default function ProgramsScreen() {
         windowSize={5}
         maxToRenderPerBatch={5}
         initialNumToRender={6}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

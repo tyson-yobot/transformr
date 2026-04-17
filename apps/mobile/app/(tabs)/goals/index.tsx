@@ -15,6 +15,8 @@ import {
 import { useRouter, type Href } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -72,6 +74,7 @@ const NAV_ITEMS: { route: string; label: string; icon: string }[] = [
 
 export default function GoalsDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { goals, isLoading, fetchGoals, createGoal, updateGoal } = useGoalStore();
@@ -234,8 +237,9 @@ export default function GoalsDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

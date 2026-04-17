@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -60,6 +62,7 @@ const EQUIPMENT: { value: EquipmentFilter; label: string }[] = [
 
 export default function ExercisesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { exercises, fetchExercises, isLoading } = useWorkoutStore();
@@ -172,6 +175,7 @@ export default function ExercisesScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Search Bar */}
       <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
         <Input
@@ -262,7 +266,7 @@ export default function ExercisesScreen() {
           initialNumToRender={12}
           contentContainerStyle={{
             padding: spacing.lg,
-            paddingBottom: 100,
+            paddingBottom: insets.bottom + 90,
           }}
           refreshControl={
             <RefreshControl

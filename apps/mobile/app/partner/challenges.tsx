@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -38,6 +40,7 @@ const CHALLENGE_TYPES: { key: ChallengeType; label: string }[] = [
 
 export default function PartnerChallengesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { partnership, partnerProfile } = usePartnerStore();
   const myProfile = useProfileStore((s) => s.profile);
 
@@ -137,6 +140,7 @@ export default function PartnerChallengesScreen() {
   if (isLoading) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={120} />
@@ -148,6 +152,7 @@ export default function PartnerChallengesScreen() {
   if (!partnership) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>No Partner Linked</Text>
         <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
           Link with a partner to create challenges.
@@ -159,7 +164,7 @@ export default function PartnerChallengesScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

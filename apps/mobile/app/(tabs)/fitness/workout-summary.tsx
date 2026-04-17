@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -42,6 +44,7 @@ interface ExerciseBreakdown {
 
 export default function WorkoutSummaryScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
@@ -124,8 +127,7 @@ export default function WorkoutSummaryScreen() {
           setAiNote(feedback.coaching_note ?? null);
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Failed to load workout summary';
-        setError(message);
+        setError('Failed to load workout summary. Pull to refresh.');
       } finally {
         setLoading(false);
       }
@@ -201,9 +203,10 @@ export default function WorkoutSummaryScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}

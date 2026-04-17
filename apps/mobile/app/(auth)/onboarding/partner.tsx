@@ -6,6 +6,8 @@ import { useState, useCallback, useEffect, type ComponentType } from 'react';
 import { View, Text, ScrollView, StyleSheet, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -39,6 +41,7 @@ const DEFAULT_PRIVACY: PrivacyToggle[] = [
 
 export default function PartnerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const createPartnershipInvite = usePartnerStore((s) => s.createPartnershipInvite);
   const linkPartner = usePartnerStore((s) => s.linkPartner);
@@ -79,6 +82,7 @@ export default function PartnerScreen() {
   if (mode === 'choice') {
     return (
       <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={styles.choiceRoot}>
           {/* Heading */}
           <View style={styles.choiceHero}>
@@ -125,13 +129,14 @@ export default function PartnerScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -241,7 +246,7 @@ export default function PartnerScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   // Choice screen
   choiceRoot: {
     flex: 1,

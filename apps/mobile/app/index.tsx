@@ -4,6 +4,7 @@
 
 import { useEffect, useCallback, useRef, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -113,6 +114,7 @@ export default function Index() {
 
   return (
     <Animated.View style={[styles.root, containerStyle]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Hero background photo */}
       <Image
         source={HERO_IMAGE}

@@ -12,13 +12,14 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Chip } from '@components/ui/Chip';
@@ -48,6 +49,7 @@ const TILE_SIZE = (SCREEN_WIDTH - 32 - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
 
 export default function VisionBoard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const gate = useFeatureGate('vision_board');
 
@@ -144,6 +146,7 @@ export default function VisionBoard() {
     const currentItem = filteredItems[inspirationIndex];
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <Pressable style={styles.inspirationContainer} onPress={handleNextInspiration}>
           {currentItem && (
             <>
@@ -204,7 +207,7 @@ export default function VisionBoard() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Category Filter */}

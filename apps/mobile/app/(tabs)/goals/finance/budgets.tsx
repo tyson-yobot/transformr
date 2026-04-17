@@ -12,6 +12,8 @@ import {
   Alert,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -33,6 +35,7 @@ const BUDGET_CATEGORIES = [
 
 export default function BudgetsScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const { budgets, isLoading, fetchBudgets } = useFinanceStore();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -124,6 +127,7 @@ export default function BudgetsScreen() {
   if (isLoading && budgets.length === 0) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={100} />
           <Skeleton variant="card" height={80} />
@@ -136,7 +140,7 @@ export default function BudgetsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

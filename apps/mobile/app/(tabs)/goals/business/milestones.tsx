@@ -12,6 +12,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -28,6 +30,7 @@ import type { BusinessMilestone } from '@app-types/database';
 
 export default function MilestonesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { businesses } = useBusinessStore();
 
   const [milestones, setMilestones] = useState<BusinessMilestone[]>([]);
@@ -57,8 +60,7 @@ export default function MilestonesScreen() {
       if (fetchError) throw fetchError;
       setMilestones((data ?? []) as BusinessMilestone[]);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch milestones';
-      setError(message);
+      setError('Failed to load milestones. Pull to refresh.');
     } finally {
       setIsLoading(false);
     }
@@ -130,8 +132,7 @@ export default function MilestonesScreen() {
       setShowAddModal(false);
       resetForm();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save milestone';
-      setError(message);
+      setError('Failed to save milestone. Please try again.');
     }
   }, [formTitle, formMetric, formTargetValue, formCurrentValue, formTargetDate, selectedBusiness, editingMilestone, milestones.length, resetForm]);
 
@@ -153,8 +154,7 @@ export default function MilestonesScreen() {
       );
       if (newCompleted) await hapticSuccess();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to update milestone';
-      setError(message);
+      setError('Failed to update milestone. Please try again.');
     }
   }, []);
 
@@ -177,6 +177,7 @@ export default function MilestonesScreen() {
   if (isLoading) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={120} />
@@ -189,7 +190,7 @@ export default function MilestonesScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

@@ -9,6 +9,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -56,6 +58,7 @@ const BODY_PART_LABELS: Record<BodyPart, string> = {
 
 export default function PainTrackerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
@@ -89,7 +92,7 @@ export default function PainTrackerScreen() {
       if (fetchError) throw fetchError;
       setPainLogs((data ?? []) as PainLog[]);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load pain logs');
+      setError('Failed to load pain logs. Pull to refresh.');
     } finally {
       setLoading(false);
     }
@@ -171,8 +174,9 @@ export default function PainTrackerScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 60 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

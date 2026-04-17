@@ -10,12 +10,13 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { ProgressRing } from '@components/ui/ProgressRing';
@@ -35,6 +36,7 @@ interface PartnerStats {
 
 export default function PartnerDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const gate = useFeatureGate('partner_features');
   const { partnership, partnerProfile, isLoading, fetchPartnership } = usePartnerStore();
@@ -139,6 +141,7 @@ export default function PartnerDashboard() {
   if (!gate.isAvailable) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <GatePromptCard featureKey="partner_features" height={200} />
       </SafeAreaView>
     );
@@ -147,6 +150,7 @@ export default function PartnerDashboard() {
   if (isLoading && !partnership) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={200} />
@@ -159,6 +163,7 @@ export default function PartnerDashboard() {
   if (!partnership || !partnerProfile) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.md }]}>
           No Partner Linked
         </Text>
@@ -173,7 +178,7 @@ export default function PartnerDashboard() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent.primary} />

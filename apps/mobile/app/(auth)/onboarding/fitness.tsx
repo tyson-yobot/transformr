@@ -6,6 +6,8 @@ import { useState, useCallback, type ComponentType } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
@@ -52,6 +54,7 @@ const EQUIPMENT_OPTIONS: { value: Equipment; label: string }[] = [
 
 export default function FitnessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const updateProfile = useProfileStore((s) => s.updateProfile);
   const setFitnessPrefs = useSettingsStore((s) => s.setFitnessPrefs);
@@ -75,10 +78,11 @@ export default function FitnessScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
           showsVerticalScrollIndicator={false}
         >
           {/* Icon + Headline */}
@@ -274,7 +278,7 @@ export default function FitnessScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   heroSection: {
     alignItems: 'center',
     paddingHorizontal: 24,

@@ -18,6 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -46,6 +48,7 @@ const MEAL_TYPE_OPTIONS: { value: MealType; label: string; emoji: string }[] = [
 
 export default function AddFoodScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ meal?: string; editId?: string }>();
@@ -158,6 +161,7 @@ export default function AddFoodScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}
     >
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}
         subtext={toast.subtext}
@@ -167,7 +171,7 @@ export default function AddFoodScreen() {
       />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}
+        contentContainerStyle={{  padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >

@@ -8,6 +8,8 @@ import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -115,6 +117,7 @@ const NOTIFICATION_GROUPS: NotificationGroup[] = [
 
 export default function NotificationsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const updateProfile = useProfileStore((s) => s.updateProfile);
 
@@ -195,9 +198,10 @@ export default function NotificationsScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Icon + Headline */}
@@ -344,7 +348,7 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   heroSection: {
     alignItems: 'center',
     paddingHorizontal: 24,

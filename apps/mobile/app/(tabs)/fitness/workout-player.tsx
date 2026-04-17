@@ -15,6 +15,8 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -75,6 +77,7 @@ interface ExerciseWithSets {
 
 export default function WorkoutPlayerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
   const { activeSession, logSetWithPRDetection, completeWorkout, getGhostData, isLoading } =
@@ -272,7 +275,7 @@ export default function WorkoutPlayerScreen() {
           }
         }
       } catch (err: unknown) {
-        setExerciseLoadError(err instanceof Error ? err.message : 'Failed to load exercises');
+        setExerciseLoadError('Failed to load exercises. Pull to refresh.');
       } finally {
         setLoadingExercises(false);
       }
@@ -505,6 +508,7 @@ export default function WorkoutPlayerScreen() {
   return (
     <>
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Top Bar: Timer + Volume */}
       <View
         style={[
@@ -614,7 +618,7 @@ export default function WorkoutPlayerScreen() {
       )}
 
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 120 }}
         showsVerticalScrollIndicator={false}
       >
         {loadingExercises ? (

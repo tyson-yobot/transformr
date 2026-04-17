@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { supabase } from '@services/supabase';
 
@@ -35,6 +36,7 @@ export default function OAuthCallbackScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary, alignItems: 'center', justifyContent: 'center' }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActivityIndicator color={colors.accent.primary} size="large" />
     </View>
   );

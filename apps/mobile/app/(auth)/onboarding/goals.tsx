@@ -6,6 +6,8 @@ import { useState, useCallback, type ComponentType } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -42,6 +44,7 @@ const GOAL_OPTIONS: GoalOption[] = [
 
 export default function GoalsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const createGoal = useGoalStore((s) => s.createGoal);
 
@@ -94,9 +97,10 @@ export default function GoalsScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Icon + Headline */}
@@ -227,7 +231,7 @@ export default function GoalsScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   heroSection: {
     alignItems: 'center',
     paddingHorizontal: 24,

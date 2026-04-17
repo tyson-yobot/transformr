@@ -275,7 +275,7 @@ export default function DashboardScreen() {
           );
         }
       } catch (err: unknown) {
-        setDashboardError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+        setDashboardError('Failed to load dashboard data. Pull to refresh.');
       }
     };
     void loadDashboardData();

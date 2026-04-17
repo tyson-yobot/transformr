@@ -15,6 +15,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Button } from '@components/ui/Button';
@@ -55,6 +56,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

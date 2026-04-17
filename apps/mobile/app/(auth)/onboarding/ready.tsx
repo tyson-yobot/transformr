@@ -5,6 +5,8 @@
 import { useEffect, useMemo, type ComponentType } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -57,6 +59,7 @@ function ConfettiOrb({ color, style }: { color: string; style: object }) {
 
 export default function ReadyScreen() {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const vividPurple = colors.accent.primary;
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
@@ -147,9 +150,10 @@ export default function ReadyScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Decorative celebration orbs */}
@@ -248,7 +252,7 @@ export default function ReadyScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   // Decorative orbs
   orbTopLeft: { position: 'absolute', top: 0, left: -30, width: 140, height: 140, borderRadius: 70 },
   orbTopRight: { position: 'absolute', top: 60, right: -50, width: 110, height: 110, borderRadius: 55 },

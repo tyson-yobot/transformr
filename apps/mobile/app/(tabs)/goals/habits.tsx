@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -50,6 +52,7 @@ const STREAK_MILESTONES = [7, 14, 21, 30, 50, 75, 100, 200, 365];
 
 export default function HabitTracker() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();
   const isIntense = isDrillSergeant || isMotivational;
@@ -165,6 +168,7 @@ export default function HabitTracker() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}
         subtext={toast.subtext}
@@ -173,7 +177,7 @@ export default function HabitTracker() {
         type={toast.type}
       />
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

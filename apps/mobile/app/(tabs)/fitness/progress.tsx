@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import * as ImagePicker from 'expo-image-picker';
@@ -42,6 +44,7 @@ interface ProgressPhoto {
 
 export default function ProgressScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [weightLogs, setWeightLogs] = useState<WeightLog[]>([]);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
@@ -123,8 +126,7 @@ export default function ProgressScreen() {
         setMeasurements(measureRes.data as Measurement[]);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load progress data';
-      setError(message);
+      setError('Failed to load progress data. Pull to refresh.');
     } finally {
       setLoading(false);
     }
@@ -251,8 +253,9 @@ export default function ProgressScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
-        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

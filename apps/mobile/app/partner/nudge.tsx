@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -45,6 +47,7 @@ const PREBUILT_NUDGES: PrebuiltNudge[] = [
 
 export default function NudgeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const { partnership, partnerProfile, sendNudge } = usePartnerStore();
 
   const [customMessage, setCustomMessage] = useState('');
@@ -85,6 +88,7 @@ export default function NudgeScreen() {
   if (!partnership || !partnerProfile) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>No Partner Linked</Text>
         <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
           Link with a partner to send nudges.
@@ -96,7 +100,7 @@ export default function NudgeScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: spacing.lg }]}
+        contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
       >
         <Animated.View entering={FadeInDown.delay(100)}>

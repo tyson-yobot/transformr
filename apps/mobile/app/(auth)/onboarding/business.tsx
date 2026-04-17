@@ -6,6 +6,8 @@ import { useState, useCallback, type ComponentType } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -31,6 +33,7 @@ const BUSINESS_TYPES: { value: BusinessType; label: string; icon: string }[] = [
 
 export default function BusinessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const createBusiness = useBusinessStore((s) => s.createBusiness);
 
@@ -60,6 +63,7 @@ export default function BusinessScreen() {
   if (trackBusiness === null) {
     return (
       <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={styles.decisionRoot}>
           {/* Heading */}
           <View style={styles.decisionHero}>
@@ -98,13 +102,14 @@ export default function BusinessScreen() {
 
   return (
     <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 50, paddingBottom: insets.bottom + 40 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -226,7 +231,7 @@ export default function BusinessScreen() {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 100, paddingBottom: 40 },
+  scrollContent: {},
   // Decision screen
   decisionRoot: {
     flex: 1,
