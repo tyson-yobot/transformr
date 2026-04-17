@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
 import { Canvas, RoundedRect, BlurMask } from '@shopify/react-native-skia';
 import Animated, {
-  useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, interpolate,
+  cancelAnimation, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, interpolate,
 } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
 
@@ -42,6 +42,7 @@ export function GlowCard({
       -1,
       true,
     );
+    return () => cancelAnimation(pulse);
   }, [animated, pulse]);
 
   const canvasAnim = useAnimatedStyle(() =>
@@ -52,24 +53,27 @@ export function GlowCard({
 
   return (
     <View style={[styles.wrapper, style]}>
-      <Animated.View
-        style={[StyleSheet.absoluteFill, { zIndex: 0 }, canvasAnim]}
-        pointerEvents="none"
-      >
-        <Canvas style={{ width: sw, height: sw, position: 'absolute', top: -pad, left: -pad }}>
-          <RoundedRect
-            x={pad} y={pad}
-            width={sw - pad * 2} height={sw - pad * 2}
-            r={cardBorderRadius}
-            color={color}
-            opacity={opacity}
-            style="stroke"
-            strokeWidth={2}
-          >
-            <BlurMask blur={blur} style="outer" respectCTM />
-          </RoundedRect>
-        </Canvas>
-      </Animated.View>
+      {/* Only render the Skia canvas when animated=true — static glow uses a simple border instead */}
+      {animated ? (
+        <Animated.View
+          style={[StyleSheet.absoluteFill, { zIndex: 0 }, canvasAnim]}
+          pointerEvents="none"
+        >
+          <Canvas style={{ width: sw, height: sw, position: 'absolute', top: -pad, left: -pad }}>
+            <RoundedRect
+              x={pad} y={pad}
+              width={sw - pad * 2} height={sw - pad * 2}
+              r={cardBorderRadius}
+              color={color}
+              opacity={opacity}
+              style="stroke"
+              strokeWidth={2}
+            >
+              <BlurMask blur={blur} style="outer" respectCTM />
+            </RoundedRect>
+          </Canvas>
+        </Animated.View>
+      ) : null}
       <View style={[{
         backgroundColor: colors.background.secondary,
         borderRadius: cardBorderRadius,

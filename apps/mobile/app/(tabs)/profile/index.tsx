@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import type { ThemeMode } from '@theme/colors';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
@@ -458,6 +459,7 @@ export default function ProfileScreen() {
           size="xl"
         />
         <View style={{ marginLeft: spacing.lg, flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
           <Text
             style={[typography.h2, { color: colors.text.primary }]}
             numberOfLines={1}

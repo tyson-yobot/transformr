@@ -50,6 +50,11 @@ const memoryCache: Record<
   { insight: string; category: string; fetchedAt: number }
 > = {};
 
+// Track which screen keys have already attempted a force-refresh this session
+// to prevent an infinite re-fetch loop when the edge function keeps returning
+// backtick-contaminated content.
+const forcedRefreshAttempted = new Set<string>();
+
 export function useScreenInsight(screenKey: string): ScreenInsightState {
   const [insight, setInsight] = useState<string | null>(
     memoryCache[screenKey]?.insight ?? null,
@@ -92,7 +97,10 @@ export function useScreenInsight(screenKey: string): ScreenInsightState {
         const cat = (data as { category?: string })?.category ?? 'general';
 
         // If the DB had poisoned (fence-wrapped) cache, force a fresh fetch once
-        if (insightText && insightText.includes('```') && !forceRefresh) {
+        // per session to clear it. Guard with forcedRefreshAttempted so we don't
+        // loop indefinitely if the edge function keeps returning contaminated data.
+        if (insightText && insightText.includes('```') && !forceRefresh && !forcedRefreshAttempted.has(screenKey)) {
+          forcedRefreshAttempted.add(screenKey);
           void fetchInsight(true);
           return;
         }

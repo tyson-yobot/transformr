@@ -22,6 +22,7 @@ import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { createSubscription, restorePurchase } from '../services/stripe';
 import { useFeatureGate, FeatureKey } from '../hooks/useFeatureGate';
 
@@ -344,6 +345,7 @@ export default function UpgradeScreen() {
 
         {/* Tier cards */}
         <View style={[styles.tierRow, { gap: spacing.sm }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
           {TIERS.map((tier) => (
             <TierCard
               key={tier}

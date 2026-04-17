@@ -40,7 +40,13 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      retry: 2,
+      // Only retry once; use exponential backoff so a network failure does not
+      // create a tight retry loop (default linear delay is 1s per attempt).
+      retry: 1,
+      retryDelay: (attempt) => Math.min(1000 * Math.pow(2, attempt), 30_000),
+      // Pause queries automatically while the device is offline so React Query
+      // does not hammer the network when Supabase is unreachable.
+      networkMode: 'online',
     },
   },
 });

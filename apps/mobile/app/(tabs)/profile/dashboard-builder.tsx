@@ -19,6 +19,7 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { useDashboardStore } from '@stores/dashboardStore';
@@ -270,6 +271,7 @@ export default function DashboardBuilderScreen() {
                 {WIDGET_ICONS[widget.type] ?? '📦'}
               </Text>
               <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                 <Text
                   style={[typography.bodyBold, { color: colors.text.primary }]}
                   numberOfLines={1}

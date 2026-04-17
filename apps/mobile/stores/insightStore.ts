@@ -73,8 +73,9 @@ export const useInsightStore = create<InsightState>()((set, get) => ({
       .update({ is_acknowledged: true })
       .eq('id', id);
     if (error) {
-      // Restore if server rejected — re-fetch to sync state
-      void get().fetchAll();
+      // Log the failure but do NOT immediately re-fetch — a network failure
+      // would cause a tight retry loop of failed requests.
+      console.warn('[insightStore] acknowledgePrediction failed:', error.message);
     }
   },
 
@@ -88,7 +89,9 @@ export const useInsightStore = create<InsightState>()((set, get) => ({
       .update({ is_dismissed: true })
       .eq('id', id);
     if (error) {
-      void get().fetchAll();
+      // Log the failure but do NOT immediately re-fetch — a network failure
+      // would cause a tight retry loop of failed requests.
+      console.warn('[insightStore] dismissMessage failed:', error.message);
     }
   },
 
@@ -104,7 +107,9 @@ export const useInsightStore = create<InsightState>()((set, get) => ({
       .update({ is_read: true })
       .eq('id', id);
     if (error) {
-      void get().fetchAll();
+      // Log the failure but do NOT immediately re-fetch — a network failure
+      // would cause a tight retry loop of failed requests.
+      console.warn('[insightStore] markMessageRead failed:', error.message);
     }
   },
 

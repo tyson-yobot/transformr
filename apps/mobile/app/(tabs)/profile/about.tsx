@@ -16,6 +16,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { hapticLight } from '@utils/haptics';
 import { useNavigation } from '@react-navigation/native';
@@ -141,6 +142,7 @@ export default function AboutScreen() {
       {/* App Icon & Version */}
       <Animated.View entering={FadeInDown.duration(400)}>
         <View style={[styles.heroSection, { marginBottom: spacing.xl }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
           <View
             style={[
               styles.appIcon,

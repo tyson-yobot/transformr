@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { supabase } from '@services/supabase';
@@ -326,6 +327,7 @@ export default function AchievementsScreen() {
           entering={FadeInDown.delay(150 + groupIndex * 50).duration(400)}
         >
           <View style={[styles.categoryHeader, { marginBottom: spacing.md }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
             <Text style={{ fontSize: 18, marginRight: spacing.sm }}>
               {CATEGORY_ICONS[category] ?? '🏆'}
             </Text>

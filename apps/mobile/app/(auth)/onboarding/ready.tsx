@@ -8,6 +8,7 @@ import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -88,6 +89,7 @@ export default function ReadyScreen() {
         true,
       ),
     );
+    return () => cancelAnimation(glowOpacity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

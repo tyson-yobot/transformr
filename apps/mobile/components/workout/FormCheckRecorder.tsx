@@ -10,6 +10,7 @@ import {
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
 import { Video, ResizeMode } from 'expo-av';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withTiming,
@@ -63,8 +64,10 @@ export function FormCheckRecorder({
         false,
       );
     } else {
+      cancelAnimation(recordPulse);
       recordPulse.value = withTiming(1, { duration: 200 });
     }
+    return () => cancelAnimation(recordPulse);
   }, [state, recordPulse]);
 
   const recordPulseStyle = useAnimatedStyle(() => ({

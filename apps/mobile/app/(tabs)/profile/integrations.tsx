@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -250,6 +251,7 @@ export default function IntegrationsScreen() {
                 </View>
 
                 <View style={{ flex: 1, marginLeft: spacing.md }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                   <View style={styles.nameRow}>
                     <Text
                       style={[

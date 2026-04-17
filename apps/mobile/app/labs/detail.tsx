@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { useLabsStore } from '@stores/labsStore';
 import type {
@@ -526,6 +527,7 @@ export default function LabDetailScreen() {
                     ]}
                   >
                     <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                       <Text
                         style={[
                           typography.bodyBold,

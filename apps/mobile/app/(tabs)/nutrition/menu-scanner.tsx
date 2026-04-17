@@ -19,6 +19,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -363,6 +364,7 @@ export default function MenuScannerScreen() {
                       color={selectedItems.has(item.id) ? colors.accent.success : colors.text.muted}
                     />
                     <View style={{ flex: 1, marginLeft: spacing.md }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                       <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                         {item.name}
                       </Text>

@@ -14,6 +14,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { ProgressRing } from '@components/ui/ProgressRing';
@@ -115,6 +116,7 @@ export default function DailyBriefingScreen() {
 
         {countdown ? (
           <View style={[styles.countdownContainer, { marginTop: spacing.xl }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
             <View style={styles.countdownRow}>
               <MonoText variant="countdown" color={colors.text.primary}>
                 {countdown.daysRemaining}

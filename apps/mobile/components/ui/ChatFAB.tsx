@@ -7,6 +7,7 @@
 import { useCallback, useEffect } from 'react';
 import { Pressable, StyleSheet, View, ViewStyle, AccessibilityRole } from 'react-native';
 import Animated, {
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -37,14 +38,17 @@ export function ChatFAB({ bottom = 96, right = 20, style, onPress }: ChatFABProp
   const glow = useSharedValue(0.6);
 
   useEffect(() => {
+    // Slow glow pulse — 3600ms per half-cycle to minimise CPU on the UI/Reanimated worklet thread.
+    // cancelAnimation ensures the worklet is stopped if the FAB ever unmounts.
     glow.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 1800 }),
-        withTiming(0.6, { duration: 1800 }),
+        withTiming(1, { duration: 3600 }),
+        withTiming(0.6, { duration: 3600 }),
       ),
       -1,
       true,
     );
+    return () => cancelAnimation(glow);
   }, [glow]);
 
   const pressStyle = useAnimatedStyle(() => ({

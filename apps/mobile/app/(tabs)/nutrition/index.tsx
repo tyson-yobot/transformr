@@ -22,6 +22,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { MonoText } from '@components/ui/MonoText';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
@@ -562,6 +563,7 @@ export default function NutritionHomeScreen() {
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                 <Text style={[typography.h3, { color: colors.text.primary }]}>
                   {'\u{1F4A7}'} Water
                 </Text>

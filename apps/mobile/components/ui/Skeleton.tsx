@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { StyleSheet, ViewStyle, DimensionValue } from 'react-native';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -36,6 +37,7 @@ export function Skeleton({
       -1,
       true,
     );
+    return () => cancelAnimation(shimmer);
   }, [shimmer]);
 
   const getVariantStyle = (): ViewStyle => {

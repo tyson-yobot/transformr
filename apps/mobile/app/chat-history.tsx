@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { useChatStore } from '@stores/chatStore';
 import type { ChatConversation, ChatTopic } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
@@ -234,6 +235,7 @@ export default function ChatHistoryScreen() {
               />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
               <View style={styles.titleRow}>
                 {conv.pinned && (
                   <Ionicons

@@ -16,6 +16,7 @@ import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -223,6 +224,7 @@ export default function PartnerScreen() {
                   </Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: spacing.lg }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                   <Text
                     style={[typography.h2, { color: colors.text.primary }]}
                     numberOfLines={1}

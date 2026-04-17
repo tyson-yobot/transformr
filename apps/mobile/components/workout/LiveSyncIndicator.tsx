@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -48,7 +49,14 @@ function PulsingDot({
         -1,
         false,
       );
+    } else {
+      cancelAnimation(pulseScale);
+      cancelAnimation(pulseOpacity);
     }
+    return () => {
+      cancelAnimation(pulseScale);
+      cancelAnimation(pulseOpacity);
+    };
   }, [isSynced, pulseScale, pulseOpacity]);
 
   const pulseRingStyle = useAnimatedStyle(() => ({

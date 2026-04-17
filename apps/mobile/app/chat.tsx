@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Chip } from '@components/ui/Chip';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
@@ -502,6 +503,7 @@ export default function ChatScreen() {
           ListFooterComponent={
             isSending ? (
               <View style={[styles.typingRow, { marginTop: spacing.sm }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                 <View
                   style={[
                     styles.typingBubble,

@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { useLabsStore } from '@stores/labsStore';
 import type { LabUpload, LabUploadStatus } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
@@ -158,6 +159,7 @@ export default function LabsHistoryScreen() {
             <Ionicons name="flask-outline" size={20} color={colors.accent.cyan} />
           </View>
           <View style={{ flex: 1, marginLeft: spacing.md }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
             <Text
               style={[typography.bodyBold, { color: colors.text.primary }]}
               numberOfLines={1}

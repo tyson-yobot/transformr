@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
@@ -71,24 +72,30 @@ export function NudgeButton({
   const pulseScale = useSharedValue(1);
 
   const isOnCooldown = remaining > 0;
+  // Keep a stable ref so the interval callback can read current remaining without
+  // triggering a new effect every second (which caused interval churn).
+  const remainingRef = useRef(remaining);
+  remainingRef.current = remaining;
 
   useEffect(() => {
     setRemaining(getRemainingCooldown(lastNudgeSentAt, cooldownSeconds));
   }, [lastNudgeSentAt, cooldownSeconds]);
 
+  // Single stable interval — only restart when cooldown begins (remaining flips from 0 to > 0).
   useEffect(() => {
     if (remaining <= 0) return;
     const timer = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
+      const next = remainingRef.current - 1;
+      if (next <= 0) {
+        clearInterval(timer);
+        setRemaining(0);
+      } else {
+        setRemaining(next);
+      }
     }, 1000);
     return () => clearInterval(timer);
-  }, [remaining]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remaining > 0]); // only re-run when cooldown state flips on/off
 
   useEffect(() => {
     if (!isOnCooldown) {
@@ -101,8 +108,10 @@ export function NudgeButton({
         false,
       );
     } else {
+      cancelAnimation(pulseScale);
       pulseScale.value = withTiming(1, { duration: 200 });
     }
+    return () => cancelAnimation(pulseScale);
   }, [isOnCooldown, pulseScale]);
 
   const handleFabPress = useCallback(() => {

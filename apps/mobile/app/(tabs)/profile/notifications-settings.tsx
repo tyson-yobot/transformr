@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Toggle } from '@components/ui/Toggle';
@@ -297,6 +298,7 @@ export default function NotificationsSettingsScreen() {
         <Card variant="elevated" style={{ marginBottom: spacing.xl }}>
           <View style={styles.globalRow}>
             <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
               <Text
                 style={[typography.h3, { color: colors.text.primary }]}
               >

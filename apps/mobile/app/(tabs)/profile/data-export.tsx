@@ -20,6 +20,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { ProgressBar } from '@components/ui/ProgressBar';
@@ -238,6 +239,7 @@ export default function DataExportScreen() {
           Export Format
         </Text>
         <View style={[styles.formatRow, { gap: spacing.sm, marginBottom: spacing.xl }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
           {FORMAT_OPTIONS.map((opt) => {
             const isActive = format === opt.key;
             return (

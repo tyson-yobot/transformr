@@ -16,6 +16,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
@@ -320,6 +321,7 @@ export default function NfcSetupScreen() {
                     {actionInfo.icon}
                   </Text>
                   <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                     <Text
                       style={[
                         typography.bodyBold,

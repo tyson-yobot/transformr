@@ -6,6 +6,7 @@ import { useEffect, useCallback, useRef, type ComponentType } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -51,6 +52,7 @@ export default function Index() {
       -1,
       false,
     );
+    return () => cancelAnimation(scale);
   }, [scale]);
 
   const iconStyle = useAnimatedStyle(() => ({

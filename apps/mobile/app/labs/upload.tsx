@@ -25,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Input } from '@components/ui/Input';
 import { Button } from '@components/ui/Button';
 import { Disclaimer } from '@components/ui/Disclaimer';
@@ -184,6 +185,7 @@ export default function LabUploadScreen() {
   if (!gate.isAvailable) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
         <GatePromptCard featureKey="lab_scanner" height={200} />
       </SafeAreaView>
     );
@@ -196,6 +198,7 @@ export default function LabUploadScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View
         style={[

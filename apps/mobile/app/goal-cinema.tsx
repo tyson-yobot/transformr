@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, {
+  cancelAnimation,
   FadeIn,
   FadeOut,
   useSharedValue,
@@ -26,6 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { useProfileStore } from '@stores/profileStore';
 import { useGoalStore } from '@stores/goalStore';
@@ -77,6 +79,7 @@ export default function GoalCinemaScreen() {
       -1,
       true,
     );
+    return () => cancelAnimation(pulseScale);
   }, [pulseScale]);
 
   // Fetch weight logs for progress photos
@@ -212,6 +215,7 @@ export default function GoalCinemaScreen() {
   if (slides.length === 0) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center' }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
         <Text style={[typography.h2, { color: colors.text.primary }]}>Loading Cinema...</Text>
       </View>
     );

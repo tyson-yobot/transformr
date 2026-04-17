@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -63,6 +64,7 @@ function PulsingDot({ color }: { color: string }) {
       -1,
       false,
     );
+    return () => cancelAnimation(opacity);
   }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({

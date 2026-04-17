@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
+import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -262,6 +263,7 @@ export default function TrajectoryScreen() {
               <Card style={{ marginBottom: spacing.sm }}>
                 <View style={styles.actionRow}>
                   <View style={{ flex: 1 }}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
                     <Text style={[typography.body, { color: colors.text.primary }]}>{item.description}</Text>
                   </View>
                   <Badge

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   FadeInDown,
   FadeInUp,
   FadeOut,
@@ -42,13 +43,20 @@ export function HelpBubble({
     opacity: pulseOpacity.value,
   }));
 
+  // Only run the pulse animation while the bubble is actually visible.
+  // Starting withRepeat(-1) before visible=true wastes Reanimated worklet CPU.
   useEffect(() => {
+    if (!visible) {
+      cancelAnimation(pulseOpacity);
+      return;
+    }
     pulseOpacity.value = withRepeat(
       withTiming(1.0, { duration: PULSE_DURATION_MS }),
       -1,
       true,
     );
-  }, [pulseOpacity]);
+    return () => cancelAnimation(pulseOpacity);
+  }, [visible, pulseOpacity]);
 
   useEffect(() => {
     let mounted = true;
