@@ -29,8 +29,8 @@ export const SectionTile = memo(function SectionTile({
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const handlePressIn = useCallback(() => { scale.value = withSpring(0.92, { damping: 12, stiffness: 400 }); }, [scale]);
-  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, [scale]);
+  const handlePressIn = useCallback(() => { scale.value = withSpring(0.92, { damping: 12, stiffness: 400 }); }, []);
+  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, []);
   const handlePress = useCallback(() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(); }, [onPress]);
 
   return (

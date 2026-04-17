@@ -23,8 +23,8 @@ export const QuickActionTile = memo(function QuickActionTile({
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  const handlePressIn = useCallback(() => { scale.value = withSpring(0.94, { damping: 12, stiffness: 400 }); }, [scale]);
-  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, [scale]);
+  const handlePressIn = useCallback(() => { scale.value = withSpring(0.94, { damping: 12, stiffness: 400 }); }, []);
+  const handlePressOut = useCallback(() => { scale.value = withSpring(1.0, { damping: 14, stiffness: 300 }); }, []);
   const handlePress = useCallback(() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onPress(); }, [onPress]);
 
   return (
@@ -44,8 +44,7 @@ export const QuickActionTile = memo(function QuickActionTile({
         shadowOpacity: 0.18,
         shadowRadius: 8,
         elevation: 3,
-        overflow: 'hidden',
-      }, style, animated]}
+      }, animated, style]}
     >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: accentColor, borderRadius: 2 }} />
       <Ionicons name={icon} size={26} color={accentColor} />

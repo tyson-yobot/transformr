@@ -10,7 +10,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 
 interface EmptyStateProps {
-  icon: string;
+  icon?: string;
   ionIcon?: keyof typeof Ionicons.glyphMap;
   accentColor?: string;
   title: string;
@@ -47,9 +47,9 @@ export function EmptyState({ icon, ionIcon, accentColor, title, subtitle, action
       >
         {ionIcon ? (
           <Ionicons name={ionIcon} size={36} color={accent} />
-        ) : (
+        ) : icon ? (
           <Text style={styles.icon}>{icon}</Text>
-        )}
+        ) : null}
       </View>
 
       <Text
