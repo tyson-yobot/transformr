@@ -118,8 +118,9 @@ export default function LabsHistoryScreen() {
         case 'complete':
           return colors.accent.success;
         case 'processing':
+          return colors.accent.info;
         case 'pending':
-          return colors.accent.cyan;
+          return colors.accent.warning;
         case 'failed':
           return colors.accent.danger;
       }
@@ -178,24 +179,26 @@ export default function LabsHistoryScreen() {
             </Text>
             <View style={[styles.statusRow, { marginTop: spacing.xs }]}>
               <View
-                style={[
-                  styles.statusDot,
-                  { backgroundColor: statusColor(item.status) },
-                ]}
-              />
-              <Text
-                style={[
-                  typography.tiny,
-                  {
-                    color: statusColor(item.status),
-                    marginLeft: spacing.xs,
-                    textTransform: 'uppercase',
-                    letterSpacing: 1,
-                  },
-                ]}
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                  borderRadius: 12,
+                  backgroundColor: `${statusColor(item.status)}15`,
+                }}
               >
-                {STATUS_LABEL[item.status]}
-              </Text>
+                <Text
+                  style={[
+                    typography.tiny,
+                    {
+                      color: statusColor(item.status),
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                    },
+                  ]}
+                >
+                  {STATUS_LABEL[item.status]}
+                </Text>
+              </View>
             </View>
           </View>
           <Ionicons

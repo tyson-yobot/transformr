@@ -231,7 +231,7 @@ export function TrajectoryChart({
     });
   }, [allDates, chartArea]);
 
-  const currentColor = colors.accent.primary;
+  const currentColor = colors.accent.danger;
   const optimalColor = colors.accent.success;
 
   return (

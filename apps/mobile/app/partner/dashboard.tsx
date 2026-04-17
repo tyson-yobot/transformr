@@ -19,8 +19,11 @@ import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
+import { Avatar } from '@components/ui/Avatar';
+import { EmptyState } from '@components/ui/EmptyState';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
+import { NudgeButton } from '@components/partner/NudgeButton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
@@ -39,7 +42,7 @@ export default function PartnerDashboard() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const gate = useFeatureGate('partner_features');
-  const { partnership, partnerProfile, isLoading, fetchPartnership } = usePartnerStore();
+  const { partnership, partnerProfile, isLoading, fetchPartnership, sendNudge } = usePartnerStore();
   const myProfile = useProfileStore((s) => s.profile);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -164,13 +167,13 @@ export default function PartnerDashboard() {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.md }]}>
-          No Partner Linked
-        </Text>
-        <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.xl }]}>
-          Link with a partner to see side-by-side stats, do live workouts together, and keep each other accountable.
-        </Text>
-        <Button title="Link Partner" onPress={() => router.push('/(tabs)/profile/partner')} />
+        <EmptyState
+          ionIcon="people-outline"
+          title="No Partner Linked"
+          subtitle="Link with a partner to see side-by-side stats, do live workouts together, and keep each other accountable."
+          actionLabel="Link Partner"
+          onAction={() => router.push('/(tabs)/profile/partner')}
+        />
       </View>
     );
   }
@@ -211,13 +214,25 @@ export default function PartnerDashboard() {
           </Text>
           <Card>
             <View style={styles.compareRow}>
-              <View style={styles.compareCol}>
+              <View style={[styles.compareCol, { alignItems: 'center', gap: 4 }]}>
+                <Avatar
+                  name={myProfile?.display_name ?? 'You'}
+                  size="md"
+                  showOnlineIndicator
+                  isOnline
+                />
                 <Text style={[typography.captionBold, { color: colors.accent.primary, textAlign: 'center' }]}>
                   {myProfile?.display_name ?? 'You'}
                 </Text>
               </View>
               <View style={[styles.compareDivider, { backgroundColor: colors.background.primary }]} />
-              <View style={styles.compareCol}>
+              <View style={[styles.compareCol, { alignItems: 'center', gap: 4 }]}>
+                <Avatar
+                  name={partnerProfile.display_name}
+                  size="md"
+                  showOnlineIndicator
+                  isOnline={partnership?.status === 'active'}
+                />
                 <Text style={[typography.captionBold, { color: colors.accent.success, textAlign: 'center' }]}>
                   {partnerProfile.display_name}
                 </Text>
@@ -270,7 +285,7 @@ export default function PartnerDashboard() {
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
             <Button title="Start Live Workout" onPress={() => { hapticLight(); router.push('/partner/live-workout'); }} accessibilityLabel="Start live workout with partner" fullWidth />
             <Button title="Active Challenges" onPress={() => { hapticLight(); router.push('/partner/challenges'); }} accessibilityLabel="View active partner challenges" variant="secondary" fullWidth />
-            <Button title="Send Nudge" onPress={() => { hapticLight(); router.push('/partner/nudge'); }} accessibilityLabel="Send a nudge to your partner" variant="outline" fullWidth />
+            <NudgeButton onSendNudge={(type, message) => { void sendNudge(type, message ?? ''); }} />
           </View>
         </Animated.View>
 

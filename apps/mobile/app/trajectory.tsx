@@ -21,6 +21,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
 import { MonoText } from '@components/ui/MonoText';
+import { EmptyState } from '@components/ui/EmptyState';
 import { TrajectoryChart } from '@components/charts/TrajectoryChart';
 import { useProfileStore } from '@stores/profileStore';
 import { formatNumber, formatCurrency } from '@utils/formatters';
@@ -217,6 +218,13 @@ export default function TrajectoryScreen() {
             <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
               12-Month Projection
             </Text>
+            {currentPath.length === 0 ? (
+              <EmptyState
+                ionIcon="trending-up-outline"
+                title="No Trajectory Data"
+                subtitle="Set a goal to see your projected path."
+              />
+            ) : (
             <TrajectoryChart
               currentPath={currentPath}
               optimalPath={optimalPath}
@@ -225,6 +233,7 @@ export default function TrajectoryScreen() {
               unit={domainConfig.unit}
               youAreHereIndex={0}
             />
+            )}
           </Card>
         </Animated.View>
 

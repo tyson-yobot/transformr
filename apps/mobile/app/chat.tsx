@@ -213,6 +213,8 @@ export default function ChatScreen() {
                 maxWidth: '85%',
                 borderWidth: isUser ? 0 : 1,
                 borderColor: isUser ? 'transparent' : colors.border.subtle,
+                borderLeftWidth: isUser ? 0 : 2,
+                borderLeftColor: isUser ? 'transparent' : colors.accent.cyan,
               },
             ]}
           >

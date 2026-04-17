@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
+import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
 import { ShareButton } from '@components/social/ShareButton';
@@ -26,15 +27,25 @@ interface GradeCardProps {
   grade: string | undefined;
 }
 
+function gradeTintColor(gradeStr: string, colors: ReturnType<typeof useTheme>['colors']): string {
+  const g = gradeStr[0] ?? '';
+  if (g === 'A') return `${colors.accent.success}20`;
+  if (g === 'B') return `${colors.accent.info}20`;
+  if (g === 'C') return `${colors.accent.warning}20`;
+  if (g === 'D' || g === 'F') return `${colors.accent.danger}20`;
+  return colors.background.secondary;
+}
+
 function GradeCard({ label, grade }: GradeCardProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const gradeStr = grade ?? '--';
   const color = getGradeColor(gradeStr);
+  const bgColor = gradeTintColor(gradeStr, colors);
 
   return (
     <View
       style={[styles.gradeCard, {
-        backgroundColor: colors.background.secondary,
+        backgroundColor: bgColor,
         borderRadius: borderRadius.md,
         padding: spacing.md,
       }]}
@@ -122,12 +133,11 @@ export default function WeeklyReviewScreen() {
   if (!review) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
-        <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>
-          No Weekly Review Yet
-        </Text>
-        <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
-          Your weekly review will appear here once generated. Check back at the end of the week!
-        </Text>
+        <EmptyState
+          ionIcon="calendar-outline"
+          title="No Weekly Review Yet"
+          subtitle="Your weekly review will appear here once generated. Check back at the end of the week!"
+        />
       </View>
     );
   }
