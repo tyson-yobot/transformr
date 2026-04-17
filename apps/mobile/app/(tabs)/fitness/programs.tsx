@@ -25,6 +25,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
+import { EmptyState } from '@components/ui/EmptyState';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -180,9 +181,18 @@ export default function ProgramsScreen() {
     ({ item }: { item: ProgramWithExercises }) => {
       const isExpanded = expandedProgramId === item.id;
 
+      const difficultyColor =
+        item.difficulty === 'beginner'
+          ? colors.accent.success
+          : item.difficulty === 'intermediate'
+            ? colors.accent.warning
+            : item.difficulty === 'advanced'
+              ? colors.accent.danger
+              : null;
+
       return (
         <Card
-          style={{ marginBottom: spacing.sm }}
+          style={{ marginBottom: spacing.sm, borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}
           onPress={() => {
             setExpandedProgramId(isExpanded ? null : item.id);
             hapticLight();
@@ -201,6 +211,26 @@ export default function ProgramsScreen() {
                     size="sm"
                     style={{ marginLeft: spacing.sm }}
                   />
+                )}
+                {difficultyColor && item.difficulty && (
+                  <View
+                    style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      borderRadius: 12,
+                      backgroundColor: `${difficultyColor}15`,
+                      marginLeft: spacing.sm,
+                    }}
+                  >
+                    <Text
+                      style={[
+                        typography.tiny,
+                        { color: difficultyColor, textTransform: 'capitalize' },
+                      ]}
+                    >
+                      {item.difficulty}
+                    </Text>
+                  </View>
                 )}
               </View>
               {item.description && (
@@ -375,17 +405,11 @@ export default function ProgramsScreen() {
           />
         }
         ListEmptyComponent={
-          <View style={[styles.centered, { paddingVertical: spacing.xxxl }]}>
-            <Ionicons name="calendar-outline" size={48} color={colors.text.muted} />
-            <Text
-              style={[
-                typography.body,
-                { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' },
-              ]}
-            >
-              No programs yet.{'\n'}Create your first workout program!
-            </Text>
-          </View>
+          <EmptyState
+            ionIcon="calendar-outline"
+            title="No Programs Yet"
+            subtitle="Create your first workout program to get started."
+          />
         }
       />
 

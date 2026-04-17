@@ -189,7 +189,7 @@ export default function SleepTracker() {
 
         {sleepHistory.length === 0 && !isLoading ? (
           <EmptyState
-            icon="🌙"
+            ionIcon="moon-outline"
             title="Sleep is where you grow"
             subtitle="Log your sleep to unlock AI-powered recovery insights and optimize your performance."
             actionLabel="Log Last Night's Sleep"
@@ -381,6 +381,59 @@ export default function SleepTracker() {
           </Animated.View>
         )}
 
+        {/* Sleep History with Duration Badges */}
+        {sleepHistory.length > 1 && (
+          <Animated.View entering={FadeInDown.delay(520)}>
+            <Text
+              style={[
+                typography.h3,
+                { color: colors.text.primary, marginTop: spacing.xl, marginBottom: spacing.md },
+              ]}
+            >
+              Sleep History
+            </Text>
+            {sleepHistory.slice(0, 7).map((entry) => {
+              const hours = (entry.duration_minutes ?? 0) / 60;
+              const badgeBg =
+                hours < 6
+                  ? colors.accent.danger
+                  : hours < 7
+                    ? colors.accent.warning
+                    : colors.accent.success;
+              return (
+                <View
+                  key={entry.id}
+                  style={[
+                    styles.historyRow,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderRadius: 10,
+                      padding: spacing.md,
+                      marginBottom: spacing.sm,
+                    },
+                  ]}
+                >
+                  <Text style={[typography.caption, { color: colors.text.secondary, flex: 1 }]}>
+                    {entry.bedtime ? new Date(entry.bedtime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '--'}
+                  </Text>
+                  <View
+                    style={{
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                      borderRadius: 12,
+                      backgroundColor: badgeBg,
+                    }}
+                  >
+                    <Text style={[typography.tiny, { color: '#FFFFFF', fontWeight: '600' }]}>
+                      {hours.toFixed(1)}h
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </Animated.View>
+        )}
+
         {/* Disclaimer */}
         {aiRecommendation && (
           <Animated.View entering={FadeInDown.delay(550)}>
@@ -509,5 +562,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
+  },
+  historyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

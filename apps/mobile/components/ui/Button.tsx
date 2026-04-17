@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Pressable,
   Text,
@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
@@ -88,7 +89,8 @@ export function Button({
         return {
           container: {
             ...base,
-            backgroundColor: colors.accent.primary,
+            backgroundColor: 'transparent',
+            overflow: 'hidden',
             shadowColor: colors.accent.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.4,
@@ -120,7 +122,8 @@ export function Button({
     }
   };
 
-  const variantStyles = getVariantStyles();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const variantStyles = useMemo(() => getVariantStyles(), [variant, size, colors, spacing, borderRadius]);
   const isDisabled = disabled || loading;
   const currentSize = sizeConfig[size];
 
@@ -130,7 +133,7 @@ export function Button({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={isDisabled}
-      android_ripple={{ color: 'transparent' }}
+      android_ripple={{ color: 'rgba(255,255,255,0.12)', borderless: false }}
       style={[
         styles.container,
         variantStyles.container,
@@ -140,9 +143,17 @@ export function Button({
         style,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={accessibilityLabel ?? title}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
+      {variant === 'primary' && (
+        <LinearGradient
+          colors={[colors.accent.primary, colors.accent.primaryDark]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+        />
+      )}
       {loading ? (
         <ActivityIndicator
           size="small"

@@ -324,5 +324,5 @@ const styles = StyleSheet.create({
   challengeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   progressSection: {},
   dateRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  completedCard: { flexDirection: 'row', alignItems: 'center' },
+  completedCard: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

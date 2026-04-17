@@ -217,7 +217,7 @@ export default function FinanceDashboard() {
           ))}
           {accounts.length === 0 && (
             <EmptyState
-              icon="\uD83C\uDFE6"
+              ionIcon="card-outline"
               title="No accounts yet"
               subtitle="Connect your accounts to get a clear picture of your financial health in one place."
               style={{ paddingVertical: 24 }}
@@ -260,7 +260,7 @@ export default function FinanceDashboard() {
           ))}
           {recentTransactions.length === 0 && (
             <EmptyState
-              icon="\uD83E\uDDFE"
+              ionIcon="receipt-outline"
               title="No transactions yet"
               subtitle="Track every purchase and payment to understand where your money goes and where it can grow."
               style={{ paddingVertical: 24 }}
@@ -305,6 +305,6 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   netWorthBreakdown: { flexDirection: 'row' },
   metricsRow: { flexDirection: 'row' },
-  accountRow: { flexDirection: 'row', alignItems: 'center' },
-  txRow: { flexDirection: 'row', alignItems: 'center' },
+  accountRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
+  txRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

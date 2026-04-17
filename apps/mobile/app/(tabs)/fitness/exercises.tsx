@@ -25,6 +25,7 @@ import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
+import { EmptyState } from '@components/ui/EmptyState';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { hapticLight } from '@utils/haptics';
@@ -141,6 +142,8 @@ export default function ExercisesScreen() {
           style={{
             backgroundColor: colors.background.secondary,
             borderRadius: borderRadius.lg,
+            borderWidth: 1,
+            borderColor: 'rgba(168, 85, 247, 0.15)',
             marginBottom: spacing.sm,
             padding: spacing.md,
             flexDirection: 'row',
@@ -214,7 +217,7 @@ export default function ExercisesScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: spacing.lg }}
+          contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingRight: spacing.lg }}
         >
           {EQUIPMENT.map((item) => {
             const isActive = item.value === selectedEquipment;
@@ -276,17 +279,11 @@ export default function ExercisesScreen() {
             />
           }
           ListEmptyComponent={
-            <View style={[styles.centered, { paddingVertical: spacing.xxxl }]}>
-              <Ionicons name="search-outline" size={48} color={colors.text.muted} />
-              <Text
-                style={[
-                  typography.body,
-                  { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' },
-                ]}
-              >
-                No exercises found.{'\n'}Try adjusting your filters.
-              </Text>
-            </View>
+            <EmptyState
+              ionIcon="barbell-outline"
+              title="No Exercises Found"
+              subtitle="Try adjusting your search or filters to find what you're looking for."
+            />
           }
         />
       )}

@@ -13,10 +13,12 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
+import type { ColorScheme } from '@theme/colors';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Modal } from '@components/ui/Modal';
@@ -37,6 +39,46 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type HabitCategory = NonNullable<Habit['category']>;
 
+function HabitCheckbox({ isCompleted, colors }: {
+  isCompleted: boolean;
+  colors: ColorScheme;
+}) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  useEffect(() => {
+    if (isCompleted) {
+      scale.value = withSpring(0.8, { damping: 10, stiffness: 400 }, () => {
+        scale.value = withSpring(1.2, { damping: 10, stiffness: 300 }, () => {
+          scale.value = withSpring(1.0, { damping: 14, stiffness: 250 });
+        });
+      });
+    }
+  }, [isCompleted, scale]);
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          borderWidth: 1.5,
+          borderColor: isCompleted ? colors.accent.success : colors.border.default,
+          backgroundColor: isCompleted ? colors.accent.success : colors.background.tertiary,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        animatedStyle,
+      ]}
+    >
+      {isCompleted && (
+        <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+      )}
+    </Animated.View>
+  );
+}
+
 const HABIT_CATEGORIES: { key: HabitCategory; label: string }[] = [
   { key: 'fitness', label: 'Fitness' },
   { key: 'nutrition', label: 'Nutrition' },
@@ -51,7 +93,7 @@ const HABIT_CATEGORIES: { key: HabitCategory; label: string }[] = [
 const STREAK_MILESTONES = [7, 14, 21, 30, 50, 75, 100, 200, 365];
 
 export default function HabitTracker() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();
@@ -264,7 +306,7 @@ export default function HabitTracker() {
         <View style={{ marginTop: spacing.lg, gap: spacing.md }}>
           {habits.length === 0 && (
             <EmptyState
-              icon="✅"
+              ionIcon="checkmark-circle-outline"
               title="Build your daily foundation"
               subtitle="Small habits, compounded over time, create extraordinary results. Add your first habit to get started."
               actionLabel="Add First Habit"
@@ -303,29 +345,10 @@ export default function HabitTracker() {
                   >
                     <View style={styles.habitRow}>
                       {/* Checkbox */}
-                      <View
-                        style={[
-                          styles.checkbox,
-                          {
-                            borderColor: isCompleted
-                              ? colors.accent.success
-                              : colors.border.default,
-                            backgroundColor: isCompleted
-                              ? colors.accent.success
-                              : 'transparent',
-                            borderRadius: borderRadius.sm,
-                          },
-                        ]}
-                      >
-                        {isCompleted && (
-                          <Animated.Text
-                            entering={ZoomIn.duration(200)}
-                            style={styles.checkmark}
-                          >
-                            {'\u2713'}
-                          </Animated.Text>
-                        )}
-                      </View>
+                      <HabitCheckbox
+                        isCompleted={isCompleted}
+                        colors={colors}
+                      />
 
                       {/* Habit Info */}
                       <View style={{ flex: 1, marginLeft: spacing.md }}>
@@ -531,14 +554,6 @@ const styles = StyleSheet.create({
   progressTrack: { flex: 1, overflow: 'hidden' },
   progressFill: { height: '100%' },
   habitRow: { flexDirection: 'row', alignItems: 'center' },
-  checkbox: {
-    width: 28,
-    height: 28,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkmark: { color: 'white', fontSize: 16, fontWeight: '700' },
   streakBadge: { alignItems: 'center', marginLeft: 8 },
   milestoneTrack: { width: '100%', overflow: 'hidden' },
 });

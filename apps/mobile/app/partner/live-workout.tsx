@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   splitView: { flexDirection: 'row' },
   divider: { width: 1 },
-  setCard: {},
+  setCard: { borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   reactionsRow: { flexDirection: 'row', justifyContent: 'center', gap: 12 },
   reactionButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 });

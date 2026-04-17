@@ -29,6 +29,7 @@ import { hapticSuccess, hapticLight } from '@utils/haptics';
 import type { MoodLog } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { EmptyState } from '@components/ui/EmptyState';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MoodContext = NonNullable<MoodLog['context']>;
@@ -297,6 +298,16 @@ export default function MoodLogger() {
           loading={isLoading}
           style={{ marginTop: spacing.xl }}
         />
+
+        {/* Empty state for no mood history */}
+        {moodHistory.length === 0 && !isLoading && (
+          <EmptyState
+            ionIcon="happy-outline"
+            title="No mood history yet"
+            subtitle="Log your mood daily to discover patterns and unlock AI-powered emotional insights."
+            style={{ paddingVertical: 24 }}
+          />
+        )}
 
         {/* Mood Chart */}
         {chartData.length > 1 && (

@@ -249,9 +249,9 @@ export default function VisionBoard() {
         {/* Empty State */}
         {filteredItems.length === 0 && items.length === 0 && (
           <EmptyState
-            icon="🌟"
+            ionIcon="images-outline"
             title="Your vision board is empty"
-            subtitle="Add images that represent your dreams and goals. See them daily to stay motivated."
+            subtitle="Add images that represent your dreams and goals. Link them to your goals and see them daily to stay motivated."
             actionLabel="Add First Image"
             onAction={handlePickFromLibrary}
           />

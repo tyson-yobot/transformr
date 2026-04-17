@@ -163,6 +163,7 @@ export interface WorkoutTemplate {
   name: string;
   description?: string;
   category?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
   day_of_week?: number;
   estimated_duration_minutes?: number;
   is_shared?: boolean;

@@ -26,6 +26,8 @@ import { ProgressBar } from '@components/ui/ProgressBar';
 import { formatTimerDisplay } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { Skeleton } from '@components/ui/Skeleton';
+import { EmptyState } from '@components/ui/EmptyState';
+import { MonoText } from '@components/ui/MonoText';
 import { supabase } from '@services/supabase';
 import type { MobilitySession } from '@app-types/database';
 
@@ -615,15 +617,15 @@ export default function MobilityScreen() {
                 <View style={[styles.routineMeta, { marginTop: spacing.sm, gap: spacing.md }]}>
                   <View style={styles.metaItem}>
                     <Ionicons name="time-outline" size={14} color={colors.text.muted} />
-                    <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: 4 }]}>
+                    <MonoText variant="monoCaption" color={colors.text.muted} style={{ marginLeft: 4 }}>
                       {routine.totalDurationMinutes} min
-                    </Text>
+                    </MonoText>
                   </View>
                   <View style={styles.metaItem}>
-                    <Ionicons name="fitness-outline" size={14} color={colors.text.muted} />
-                    <Text style={[typography.monoCaption, { color: colors.text.muted, marginLeft: 4 }]}>
+                    <Ionicons name="body-outline" size={14} color={colors.text.muted} />
+                    <MonoText variant="monoCaption" color={colors.text.muted} style={{ marginLeft: 4 }}>
                       {routine.exercises.length} stretches
-                    </Text>
+                    </MonoText>
                   </View>
                 </View>
               </View>
@@ -660,27 +662,27 @@ export default function MobilityScreen() {
         ))}
 
         {/* Completion History */}
-        {recentSessions.length > 0 && (
-          <View style={{ marginTop: spacing.lg }}>
-            <Text
-              style={[
-                typography.h3,
-                { color: colors.text.primary, marginBottom: spacing.md },
-              ]}
-            >
-              Recent Sessions
-            </Text>
-            {recentSessions.map((session) => (
+        <View style={{ marginTop: spacing.lg }}>
+          <Text
+            style={[
+              typography.h3,
+              { color: colors.text.primary, marginBottom: spacing.md },
+            ]}
+          >
+            Recent Sessions
+          </Text>
+          {recentSessions.length > 0 ? (
+            recentSessions.map((session) => (
               <Card key={session.id} style={{ marginBottom: spacing.sm }}>
                 <View style={styles.sessionRow}>
-                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.success} />
+                  <Ionicons name="body-outline" size={20} color={colors.accent.success} />
                   <View style={{ flex: 1, marginLeft: spacing.md }}>
                     <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                       Mobility Session
                     </Text>
                     <Text style={[typography.tiny, { color: colors.text.muted }]}>
-                      <Text style={typography.monoCaption}>{session.duration_minutes ?? 0}</Text> min |{' '}
-                      <Text style={typography.monoCaption}>{session.target_muscles?.length ?? 0}</Text> muscle groups
+                      <MonoText variant="monoCaption" color={colors.text.muted}>{session.duration_minutes ?? 0}</MonoText> min |{' '}
+                      <MonoText variant="monoCaption" color={colors.text.muted}>{session.target_muscles?.length ?? 0}</MonoText> muscle groups
                     </Text>
                   </View>
                   {session.completed_at && (
@@ -690,9 +692,15 @@ export default function MobilityScreen() {
                   )}
                 </View>
               </Card>
-            ))}
-          </View>
-        )}
+            ))
+          ) : (
+            <EmptyState
+              ionIcon="body-outline"
+              title="No Sessions Yet"
+              subtitle="Complete a mobility routine to start tracking your recovery sessions."
+            />
+          )}
+        </View>
       </ScrollView>
     </View>
   );

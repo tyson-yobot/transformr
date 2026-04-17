@@ -242,6 +242,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { paddingBottom: 24 },
   breakdownRow: { flexDirection: 'row' },
-  accountRow: { flexDirection: 'row', alignItems: 'center' },
+  accountRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   snapshotRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });

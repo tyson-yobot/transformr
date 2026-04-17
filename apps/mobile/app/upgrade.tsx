@@ -296,6 +296,7 @@ export default function UpgradeScreen() {
 
   return (
     <>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       <Stack.Screen
         options={{
           title: 'Upgrade TRANSFORMR',
@@ -345,7 +346,6 @@ export default function UpgradeScreen() {
 
         {/* Tier cards */}
         <View style={[styles.tierRow, { gap: spacing.sm }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
           {TIERS.map((tier) => (
             <TierCard
               key={tier}

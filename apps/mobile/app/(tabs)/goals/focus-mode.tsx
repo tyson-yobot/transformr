@@ -25,6 +25,7 @@ import { Chip } from '@components/ui/Chip';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
+import { EmptyState } from '@components/ui/EmptyState';
 import { formatTimerDisplay } from '@utils/formatters';
 import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
@@ -289,6 +290,8 @@ export default function FocusMode() {
               <Button
                 title="Start"
                 onPress={handleStart}
+                variant="primary"
+                size="lg"
                 accessibilityLabel="Start focus timer"
                 style={{ flex: 1 }}
               />
@@ -296,8 +299,9 @@ export default function FocusMode() {
               <Button
                 title="Pause"
                 onPress={handlePause}
+                variant="primary"
+                size="lg"
                 accessibilityLabel="Pause focus timer"
-                variant="secondary"
                 style={{ flex: 1 }}
               />
             )}
@@ -378,6 +382,16 @@ export default function FocusMode() {
             </View>
           </Card>
         </Animated.View>
+
+        {/* Session History Empty State */}
+        {sessionHistory.length === 0 && (
+          <EmptyState
+            ionIcon="timer-outline"
+            title="No sessions yet"
+            subtitle="Complete your first focus session to start tracking your deep work history."
+            style={{ paddingVertical: 24 }}
+          />
+        )}
 
         {/* Session History */}
         {sessionHistory.length > 0 && (

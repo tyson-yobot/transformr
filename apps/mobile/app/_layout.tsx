@@ -5,10 +5,6 @@
 import { useEffect, useCallback } from 'react';
 import { Linking, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-
-// Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
-// All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
-LogBox.ignoreLogs(['Network request failed']);
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -22,6 +18,10 @@ import { useAuthStore } from '@stores/authStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
+
+// Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
+// All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
+LogBox.ignoreLogs(['Network request failed']);
 
 const STRIPE_PUBLISHABLE_KEY = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
 

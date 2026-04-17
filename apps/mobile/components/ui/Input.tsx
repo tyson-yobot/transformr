@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View,
   TextInput,
@@ -38,7 +38,6 @@ export function Input({
   ...textInputProps
 }: InputProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
-  const [, setIsFocused] = useState(false);
   const [isSecureVisible, setIsSecureVisible] = useState(!initialSecure);
   const focusAnim = useSharedValue(0);
   const inputRef = useRef<TextInput>(null);
@@ -46,26 +45,31 @@ export function Input({
   const isPassword = initialSecure;
 
   const handleFocus = useCallback(() => {
-    setIsFocused(true);
     focusAnim.value = withTiming(1, { duration: 200 });
   }, [focusAnim]);
 
   const handleBlur = useCallback(() => {
-    setIsFocused(false);
     focusAnim.value = withTiming(0, { duration: 200 });
   }, [focusAnim]);
 
   const toggleSecure = useCallback(() => {
-    setIsSecureVisible((prev) => !prev);
+    setIsSecureVisible((prev: boolean) => !prev);
   }, []);
 
   const animatedBorderStyle = useAnimatedStyle(() => {
-    const color = interpolateColor(
+    const borderColor = interpolateColor(
       focusAnim.value,
       [0, 1],
       [colors.border.default, error ? colors.accent.danger : colors.border.focus],
     );
-    return { borderColor: color };
+    return {
+      borderColor,
+      shadowColor: colors.accent.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: focusAnim.value * 0.25,
+      shadowRadius: 8,
+      elevation: Math.round(focusAnim.value * 3),
+    };
   });
 
   return (

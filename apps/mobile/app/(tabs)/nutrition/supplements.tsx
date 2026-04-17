@@ -685,7 +685,7 @@ export default function SupplementsScreen() {
           />
 
           <Text style={[typography.caption, { color: colors.text.secondary }]}>Category</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}>
             {CATEGORY_OPTIONS.map((cat) => (
               <Pressable
                 key={cat.key}
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   suppMeta: { flexDirection: 'row', flexWrap: 'wrap' },
   suppActions: { marginLeft: 12, alignItems: 'center' },
   actionBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  inactiveRow: { flexDirection: 'row', alignItems: 'center' },
+  inactiveRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   noBudgetRow: { flexDirection: 'row', alignItems: 'center' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center' },
   recRow: { flexDirection: 'row', alignItems: 'flex-start' },

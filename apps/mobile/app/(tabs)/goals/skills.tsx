@@ -228,7 +228,7 @@ export default function SkillsScreen() {
               </View>
               <ProgressBar
                 progress={progress}
-                color={colors.accent.primary}
+                color={colors.accent.gold}
                 style={{ marginTop: spacing.sm }}
               />
               {skill.hours_practiced != null && skill.hours_practiced > 0 && (
@@ -242,7 +242,7 @@ export default function SkillsScreen() {
       })}
       {skills.length === 0 && (
         <EmptyState
-          icon="💡"
+          ionIcon="bulb-outline"
           title="No skills tracked yet"
           subtitle="Track your mastery in any skill. Add proficiency levels and watch your expertise grow over time."
           actionLabel="Add First Skill"
@@ -260,7 +260,7 @@ export default function SkillsScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: spacing.sm, marginBottom: spacing.sm }}
+        contentContainerStyle={{ gap: spacing.sm, marginBottom: spacing.sm, paddingRight: spacing.lg }}
       >
         <Chip label="All" selected={bookFilter === null} onPress={() => setBookFilter(null)} />
         {BOOK_STATUSES.map((s) => (
@@ -324,7 +324,7 @@ export default function SkillsScreen() {
       })}
       {filteredBooks.length === 0 && (
         <EmptyState
-          icon="📚"
+          ionIcon="book-outline"
           title="No books yet"
           subtitle="Start building your reading list. Leaders are readers — every book is a mentor."
           actionLabel="Add First Book"
@@ -381,7 +381,7 @@ export default function SkillsScreen() {
       ))}
       {courses.length === 0 && (
         <EmptyState
-          icon="🎓"
+          ionIcon="school-outline"
           title="No courses yet"
           subtitle="Invest in yourself. Add courses you're taking or planning to track your learning journey."
           actionLabel="Add First Course"

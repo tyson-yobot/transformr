@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   milestoneHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   checkBox: { width: 24, height: 24, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   checkBoxDone: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  completedRow: { flexDirection: 'row', alignItems: 'center' },
+  completedRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   fab: {
     position: 'absolute', bottom: 24, right: 24, width: 56, height: 56,
     alignItems: 'center', justifyContent: 'center',

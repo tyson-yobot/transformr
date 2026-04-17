@@ -283,7 +283,7 @@ export default function TransactionsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { paddingBottom: 24 },
-  txRow: { flexDirection: 'row', alignItems: 'center' },
+  txRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   toggleRow: { flexDirection: 'row' },
   fab: {
     position: 'absolute', bottom: 24, right: 24,
