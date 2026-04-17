@@ -630,6 +630,8 @@ const styles = StyleSheet.create({
   measureItem: {
     width: '30%',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   compareContainer: {
     flexDirection: 'row',

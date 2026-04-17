@@ -5,11 +5,14 @@
 
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 
 interface EmptyStateProps {
   icon: string;
+  ionIcon?: keyof typeof Ionicons.glyphMap;
+  accentColor?: string;
   title: string;
   subtitle: string;
   actionLabel?: string;
@@ -17,8 +20,9 @@ interface EmptyStateProps {
   style?: ViewStyle;
 }
 
-export function EmptyState({ icon, title, subtitle, actionLabel, onAction, style }: EmptyStateProps) {
+export function EmptyState({ icon, ionIcon, accentColor, title, subtitle, actionLabel, onAction, style }: EmptyStateProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const accent = accentColor ?? colors.accent.primary;
 
   return (
     <Animated.View entering={FadeIn.duration(400)} style={[styles.container, style]}>
@@ -26,15 +30,26 @@ export function EmptyState({ icon, title, subtitle, actionLabel, onAction, style
         style={[
           styles.iconWrap,
           {
-            backgroundColor: colors.accent.primary + '15',
+            backgroundColor: `${accent}15`,
             borderRadius: borderRadius.full,
             width: 80,
             height: 80,
             marginBottom: spacing.xl,
+            borderWidth: 1,
+            borderColor: `${accent}25`,
+            shadowColor: accent,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 4,
           },
         ]}
       >
-        <Text style={styles.icon}>{icon}</Text>
+        {ionIcon ? (
+          <Ionicons name={ionIcon} size={36} color={accent} />
+        ) : (
+          <Text style={styles.icon}>{icon}</Text>
+        )}
       </View>
 
       <Text

@@ -358,6 +358,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   dayChip: {
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   comparisonRow: {
     flexDirection: 'row',

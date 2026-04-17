@@ -493,6 +493,8 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   sectionRow: {
     flexDirection: 'row',

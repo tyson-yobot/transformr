@@ -30,3 +30,7 @@ export { ScreenHelpButton } from './ScreenHelpButton';
 export { ActionToast, useActionToast } from './ActionToast';
 export { Coachmark } from './Coachmark';
 export type { CoachmarkStep } from './Coachmark';
+export { SectionTile } from './SectionTile';
+export type { SectionTileProps } from './SectionTile';
+export { QuickActionTile } from './QuickActionTile';
+export type { QuickActionTileProps } from './QuickActionTile';

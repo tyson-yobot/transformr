@@ -285,5 +285,5 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   formSection: { paddingHorizontal: 24 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

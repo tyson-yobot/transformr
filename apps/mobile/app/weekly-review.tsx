@@ -231,6 +231,7 @@ export default function WeeklyReviewScreen() {
                 style={[styles.listItem, {
                   backgroundColor: colors.background.secondary,
                   borderRadius: borderRadius.md,
+                  borderColor: 'rgba(168, 85, 247, 0.15)',
                   padding: spacing.md,
                   marginBottom: spacing.sm,
                 }]}
@@ -254,6 +255,7 @@ export default function WeeklyReviewScreen() {
                 style={[styles.listItem, {
                   backgroundColor: colors.background.secondary,
                   borderRadius: borderRadius.md,
+                  borderColor: 'rgba(168, 85, 247, 0.15)',
                   padding: spacing.md,
                   marginBottom: spacing.sm,
                 }]}
@@ -277,6 +279,7 @@ export default function WeeklyReviewScreen() {
                 style={[styles.listItem, {
                   backgroundColor: colors.background.secondary,
                   borderRadius: borderRadius.md,
+                  borderColor: 'rgba(168, 85, 247, 0.15)',
                   padding: spacing.md,
                   marginBottom: spacing.sm,
                 }]}
@@ -332,6 +335,8 @@ const styles = StyleSheet.create({
   gradeCard: {
     width: 100,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   statRow: {
     flexDirection: 'row',
@@ -341,5 +346,6 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
   },
 });

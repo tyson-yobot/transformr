@@ -141,6 +141,8 @@ export default function ExercisesScreen() {
           style={{
             backgroundColor: colors.background.secondary,
             borderRadius: borderRadius.lg,
+            borderWidth: 1,
+            borderColor: 'rgba(168, 85, 247, 0.15)',
             marginBottom: spacing.sm,
             padding: spacing.md,
             flexDirection: 'row',

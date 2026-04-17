@@ -12,6 +12,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
@@ -88,7 +89,8 @@ export function Button({
         return {
           container: {
             ...base,
-            backgroundColor: colors.accent.primary,
+            backgroundColor: 'transparent',
+            overflow: 'hidden',
             shadowColor: colors.accent.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.4,
@@ -143,6 +145,14 @@ export function Button({
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
+      {variant === 'primary' && (
+        <LinearGradient
+          colors={[colors.accent.primary, colors.accent.primaryDark]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+        />
+      )}
       {loading ? (
         <ActivityIndicator
           size="small"

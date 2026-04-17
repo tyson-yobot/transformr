@@ -572,6 +572,8 @@ const styles = StyleSheet.create({
   foodResult: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   foodResultMacros: {
     alignItems: 'flex-end',

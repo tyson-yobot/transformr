@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   ringSection: { alignItems: 'center', marginBottom: 16 },
   navRow: { paddingVertical: 8 },
-  navItem: { alignItems: 'center', width: 72 },
+  navItem: { alignItems: 'center', width: 72, borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   navIcon: { fontSize: 24 },
   goalHeader: {
     flexDirection: 'row',
@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   deadlineRow: { flexDirection: 'row', alignItems: 'center' },
-  deadlineItem: { flexDirection: 'row', alignItems: 'center' },
+  deadlineItem: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   deadlineSaveBtn: { paddingHorizontal: 10, paddingVertical: 6 },
   urgentBanner: { borderWidth: 1 },
   fab: {

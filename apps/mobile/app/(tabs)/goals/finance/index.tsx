@@ -305,6 +305,6 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 24 },
   netWorthBreakdown: { flexDirection: 'row' },
   metricsRow: { flexDirection: 'row' },
-  accountRow: { flexDirection: 'row', alignItems: 'center' },
-  txRow: { flexDirection: 'row', alignItems: 'center' },
+  accountRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
+  txRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

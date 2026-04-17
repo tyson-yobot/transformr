@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   suppMeta: { flexDirection: 'row', flexWrap: 'wrap' },
   suppActions: { marginLeft: 12, alignItems: 'center' },
   actionBtn: { width: 36, height: 36, justifyContent: 'center', alignItems: 'center' },
-  inactiveRow: { flexDirection: 'row', alignItems: 'center' },
+  inactiveRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   noBudgetRow: { flexDirection: 'row', alignItems: 'center' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center' },
   recRow: { flexDirection: 'row', alignItems: 'flex-start' },

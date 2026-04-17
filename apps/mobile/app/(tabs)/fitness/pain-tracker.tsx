@@ -457,5 +457,5 @@ const styles = StyleSheet.create({
   logRow: { flexDirection: 'row', alignItems: 'center' },
   logMeta: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
   painTypeGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  painTypeChip: { width: '30%', alignItems: 'center' },
+  painTypeChip: { width: '30%', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

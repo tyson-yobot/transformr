@@ -199,5 +199,7 @@ const styles = StyleSheet.create({
     width: 160,
     minHeight: 80,
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
 });

@@ -311,5 +311,5 @@ const styles = StyleSheet.create({
   compareRow: { flexDirection: 'row', alignItems: 'center' },
   compareCol: { flex: 1 },
   compareDivider: { width: 1, height: 20 },
-  activityRow: { flexDirection: 'row', alignItems: 'center' },
+  activityRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
 });

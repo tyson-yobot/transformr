@@ -60,12 +60,19 @@ export function Input({
   }, []);
 
   const animatedBorderStyle = useAnimatedStyle(() => {
-    const color = interpolateColor(
+    const borderColor = interpolateColor(
       focusAnim.value,
       [0, 1],
       [colors.border.default, error ? colors.accent.danger : colors.border.focus],
     );
-    return { borderColor: color };
+    return {
+      borderColor,
+      shadowColor: colors.accent.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: focusAnim.value * 0.25,
+      shadowRadius: 8,
+      elevation: focusAnim.value * 3,
+    };
   });
 
   return (

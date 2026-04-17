@@ -8,6 +8,7 @@ import { View, ActivityIndicator } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { supabase } from '@services/supabase';
 
@@ -16,6 +17,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function OAuthCallbackScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function OAuthCallbackScreen() {
   }, [router]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background.primary, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background.primary, alignItems: 'center', justifyContent: 'center', paddingTop: insets.top }}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActivityIndicator color={colors.accent.primary} size="large" />
     </View>

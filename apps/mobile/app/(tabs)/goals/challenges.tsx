@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  taskSummary: {},
+  taskSummary: { borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   macroItem: {
     alignItems: 'center',
   },
-  labelChip: {},
+  labelChip: { borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   recipeHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
