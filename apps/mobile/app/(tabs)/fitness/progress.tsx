@@ -28,6 +28,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { WeightChart } from '@components/charts/WeightChart';
 import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
+import { EmptyState } from '@components/ui/EmptyState';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatWeight, formatDate } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -267,6 +268,16 @@ export default function ProgressScreen() {
       >
         <AIInsightCard screenKey="fitness/progress" style={{ marginBottom: spacing.md }} />
 
+        {!error && weightLogs.length === 0 && measurements.length === 0 && progressPhotos.length === 0 && (
+          <EmptyState
+            ionIcon="trending-up-outline"
+            title="No Progress Data Yet"
+            subtitle="Log your weight and measurements to start tracking your transformation."
+            actionLabel="Log Weight"
+            onAction={() => { setShowLogWeightModal(true); }}
+          />
+        )}
+
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
             <Text style={[typography.caption, { color: colors.accent.danger }]}>{error}</Text>
@@ -465,6 +476,7 @@ export default function ProgressScreen() {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 style={{ marginTop: spacing.md }}
+                contentContainerStyle={{ paddingRight: spacing.lg }}
               >
                 {progressPhotos.map((photo) => (
                   <View key={photo.id} style={{ marginRight: spacing.sm }}>
