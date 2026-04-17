@@ -4,43 +4,56 @@
 
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatFAB } from '@components/ui/ChatFAB';
 import { UpgradeModal } from '@components/ui/UpgradeModal';
 
 interface TabIconProps {
-  icon: string;
-  label: string;
+  routeName: string;
   focused: boolean;
 }
 
-function TabIcon({ icon, label, focused }: TabIconProps) {
+const TAB_ICONS: Record<string, { outline: keyof typeof Ionicons.glyphMap; filled: keyof typeof Ionicons.glyphMap }> = {
+  dashboard:  { outline: 'home-outline',        filled: 'home' },
+  fitness:    { outline: 'barbell-outline',      filled: 'barbell' },
+  nutrition:  { outline: 'restaurant-outline',  filled: 'restaurant' },
+  goals:      { outline: 'flag-outline',        filled: 'flag' },
+  profile:    { outline: 'person-outline',      filled: 'person' },
+};
+
+const ROUTE_LABELS: Record<string, string> = {
+  dashboard: 'Home', fitness: 'Fitness', nutrition: 'Nutrition', goals: 'Goals', profile: 'Profile',
+};
+
+function TabIcon({ routeName, focused }: TabIconProps) {
   const { colors, typography } = useTheme();
+  const icons = TAB_ICONS[routeName] ?? { outline: 'apps-outline', filled: 'apps' };
+  const iconName = focused ? icons.filled : icons.outline;
 
   return (
     <View style={styles.tabIconContainer}>
-      <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>{icon}</Text>
+      <View style={{
+        width: 36, height: 28, borderRadius: 14,
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: focused ? colors.dim.primary : 'transparent',
+      }}>
+        <Ionicons name={iconName} size={22} color={focused ? colors.accent.primary : colors.text.muted} />
+      </View>
       <Text
         style={[
           typography.tiny,
           {
             color: focused ? colors.accent.primary : colors.text.muted,
+            fontWeight: focused ? '600' : '400',
             marginTop: 2,
           },
         ]}
         numberOfLines={1}
       >
-        {label}
+        {ROUTE_LABELS[routeName] ?? routeName}
       </Text>
-      {focused && (
-        <View
-          style={[
-            styles.activeIndicator,
-            { backgroundColor: colors.accent.primary, borderRadius: 2 },
-          ]}
-        />
-      )}
     </View>
   );
 }
@@ -82,7 +95,7 @@ export default function TabsLayout() {
           name="dashboard"
           options={{
             tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon icon={'\uD83C\uDFE0'} label="Home" focused={focused} />
+              <TabIcon routeName="dashboard" focused={focused} />
             ),
           }}
         />
@@ -90,7 +103,7 @@ export default function TabsLayout() {
           name="fitness"
           options={{
             tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon icon={'\uD83C\uDFCB\uFE0F'} label="Fitness" focused={focused} />
+              <TabIcon routeName="fitness" focused={focused} />
             ),
           }}
         />
@@ -98,7 +111,7 @@ export default function TabsLayout() {
           name="nutrition"
           options={{
             tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon icon={'\uD83C\uDF4E'} label="Nutrition" focused={focused} />
+              <TabIcon routeName="nutrition" focused={focused} />
             ),
           }}
         />
@@ -106,7 +119,7 @@ export default function TabsLayout() {
           name="goals"
           options={{
             tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon icon={'\uD83C\uDFAF'} label="Goals" focused={focused} />
+              <TabIcon routeName="goals" focused={focused} />
             ),
           }}
         />
@@ -114,7 +127,7 @@ export default function TabsLayout() {
           name="profile"
           options={{
             tabBarIcon: ({ focused }: { focused: boolean }) => (
-              <TabIcon icon={'\uD83D\uDC64'} label="Profile" focused={focused} />
+              <TabIcon routeName="profile" focused={focused} />
             ),
           }}
         />
@@ -130,10 +143,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 50,
-  },
-  activeIndicator: {
-    width: 20,
-    height: 3,
-    marginTop: 4,
   },
 });
