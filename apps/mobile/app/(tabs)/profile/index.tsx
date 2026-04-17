@@ -722,7 +722,8 @@ export default function ProfileScreen() {
 // ---------------------------------------------------------------------------
 // Stat Block
 // ---------------------------------------------------------------------------
-function StatBlock({ label, value }: { label: string; value: string }) {
+interface StatBlockProps { label: string; value: string }
+function StatBlock({ label, value }: StatBlockProps) {
   const { colors, typography, spacing } = useTheme();
   return (
     <View style={styles.statBlock}>
