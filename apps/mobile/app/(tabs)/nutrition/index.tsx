@@ -43,6 +43,7 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { NutritionLog } from '@app-types/database';
 import { HelpIcon } from '@components/ui/HelpIcon';
 import { GlowCard } from '@components/ui/GlowCard';
+import { SectionTile } from '@components/ui/SectionTile';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
@@ -56,18 +57,22 @@ type MealType = typeof MEAL_TYPES[number];
 interface MealSection {
   type: MealType;
   label: string;
-  emoji: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
 }
 
-const MEAL_SECTIONS: MealSection[] = [
-  { type: 'breakfast', label: 'Breakfast', emoji: '\u{1F373}' },
-  { type: 'lunch', label: 'Lunch', emoji: '\u{1F96A}' },
-  { type: 'dinner', label: 'Dinner', emoji: '\u{1F35D}' },
-  { type: 'snack', label: 'Snacks', emoji: '\u{1F34E}' },
-  { type: 'shake', label: 'Shakes', emoji: '\u{1F964}' },
-  { type: 'pre_workout', label: 'Pre-Workout', emoji: '\u{26A1}' },
-  { type: 'post_workout', label: 'Post-Workout', emoji: '\u{1F4AA}' },
-];
+// MEAL_SECTIONS is defined as a function so it can use theme colors at render time
+function getMealSections(colors: ReturnType<typeof useTheme>['colors']): MealSection[] {
+  return [
+    { type: 'breakfast', label: 'Breakfast', icon: 'sunny-outline', color: colors.accent.warning },
+    { type: 'lunch', label: 'Lunch', icon: 'restaurant-outline', color: colors.accent.success },
+    { type: 'dinner', label: 'Dinner', icon: 'moon-outline', color: colors.accent.info },
+    { type: 'snack', label: 'Snacks', icon: 'nutrition-outline', color: colors.accent.pink },
+    { type: 'shake', label: 'Shakes', icon: 'water-outline', color: colors.accent.cyan },
+    { type: 'pre_workout', label: 'Pre-Workout', icon: 'flash-outline', color: colors.accent.fire },
+    { type: 'post_workout', label: 'Post-Workout', icon: 'barbell-outline', color: colors.accent.primary },
+  ];
+}
 
 function getDateString(offset: number): string {
   const date = new Date();
@@ -84,6 +89,7 @@ function getDateLabel(offset: number): string {
 
 export default function NutritionHomeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
+  const MEAL_SECTIONS = getMealSections(colors);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
@@ -249,6 +255,7 @@ export default function NutritionHomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View
         style={[
@@ -436,46 +443,35 @@ export default function NutritionHomeScreen() {
         <HelpBubble id="nutrition_macros" message="Tap any ring to see your full macro breakdown" position="below" />
 
         {/* Quick Links */}
-        <View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: spacing.lg }}
-            contentContainerStyle={{ gap: spacing.sm }}
-          >
-            <Pressable
-              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-plans'); }}
-              accessibilityLabel="Meal plans"
-              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
-            >
-              <Ionicons name="calendar-outline" size={16} color={colors.accent.primary} />
-              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Plans</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-prep'); }}
-              accessibilityLabel="Meal prep"
-              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
-            >
-              <Ionicons name="restaurant-outline" size={16} color={colors.accent.success} />
-              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Meal Prep</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/grocery-list'); }}
-              accessibilityLabel="Grocery list"
-              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
-            >
-              <Ionicons name="cart-outline" size={16} color={colors.accent.warning} />
-              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Groceries</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/supplements'); }}
-              accessibilityLabel="View supplements"
-              style={[styles.quickLink, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}
-            >
-              <Ionicons name="medical-outline" size={16} color={colors.accent.info} />
-              <Text style={[typography.caption, { color: colors.text.primary, marginLeft: spacing.xs }]}>Supplements</Text>
-            </Pressable>
-          </ScrollView>
+        <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg, justifyContent: 'space-between' }}>
+          <SectionTile
+            icon="calendar-outline"
+            label="Meal Plans"
+            size="sm"
+            accentColor={colors.accent.primary}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-plans'); }}
+          />
+          <SectionTile
+            icon="fast-food-outline"
+            label="Meal Prep"
+            size="sm"
+            accentColor={colors.accent.success}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-prep'); }}
+          />
+          <SectionTile
+            icon="cart-outline"
+            label="Groceries"
+            size="sm"
+            accentColor={colors.accent.warning}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/grocery-list'); }}
+          />
+          <SectionTile
+            icon="medical-outline"
+            label="Supplements"
+            size="sm"
+            accentColor={colors.accent.info}
+            onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/supplements'); }}
+          />
         </View>
 
         {/* Global empty food log state */}
@@ -504,8 +500,16 @@ export default function NutritionHomeScreen() {
             >
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
                 <View style={styles.sectionTitleRow}>
+                  <View style={{
+                    width: 28, height: 28, borderRadius: 6,
+                    backgroundColor: `${section.color}15`,
+                    alignItems: 'center', justifyContent: 'center',
+                    marginRight: spacing.sm,
+                  }}>
+                    <Ionicons name={section.icon} size={16} color={section.color} />
+                  </View>
                   <Text style={[typography.h3, { color: colors.text.primary }]}>
-                    {section.emoji} {section.label}
+                    {section.label}
                   </Text>
                   {sectionCalories > 0 && (
                     <Badge label={formatCalories(sectionCalories)} variant="info" size="sm" />
@@ -563,7 +567,6 @@ export default function NutritionHomeScreen() {
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
                 <Text style={[typography.h3, { color: colors.text.primary }]}>
                   {'\u{1F4A7}'} Water
                 </Text>
@@ -870,10 +873,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   supplementRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quickLink: {
     flexDirection: 'row',
     alignItems: 'center',
   },

@@ -458,15 +458,21 @@ export default function AddFoodScreen() {
                             {Math.round(food.calories)} cal
                           </Text>
                           <View style={[styles.foodResultMacroRow, { marginTop: 4 }]}>
-                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.protein, fontSize: 10 }]}>
-                              P{Math.round(food.protein)}g
-                            </Text>
-                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.carbs, fontSize: 10, marginLeft: 6 }]}>
-                              C{Math.round(food.carbs)}g
-                            </Text>
-                            <Text style={[typography.monoCaption, { color: MACRO_COLORS.fat, fontSize: 10, marginLeft: 6 }]}>
-                              F{Math.round(food.fat)}g
-                            </Text>
+                            <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, backgroundColor: `${colors.accent.success}15` }}>
+                              <Text style={[typography.tiny, { color: colors.accent.success, fontWeight: '600' }]}>
+                                P: {Math.round(food.protein)}g
+                              </Text>
+                            </View>
+                            <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, backgroundColor: `${colors.accent.info}15` }}>
+                              <Text style={[typography.tiny, { color: colors.accent.info, fontWeight: '600' }]}>
+                                C: {Math.round(food.carbs)}g
+                              </Text>
+                            </View>
+                            <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10, backgroundColor: `${colors.accent.warning}15` }}>
+                              <Text style={[typography.tiny, { color: colors.accent.warning, fontWeight: '600' }]}>
+                                F: {Math.round(food.fat)}g
+                              </Text>
+                            </View>
                           </View>
                         </View>
                         <Ionicons name="chevron-forward" size={18} color={colors.text.muted} style={{ marginLeft: spacing.sm }} />
@@ -519,6 +525,7 @@ export default function AddFoodScreen() {
             title={isLogging ? 'Adding...' : 'Add to Log'}
             onPress={handleAddToLog}
             loading={isLogging}
+            variant="primary"
             fullWidth
             size="lg"
           />
@@ -580,6 +587,7 @@ const styles = StyleSheet.create({
   },
   foodResultMacroRow: {
     flexDirection: 'row',
+    gap: 4,
   },
   emptyState: {
     alignItems: 'center',
