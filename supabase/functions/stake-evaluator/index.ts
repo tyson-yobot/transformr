@@ -1,4 +1,8 @@
-// NOTE: No AI API calls — compliance preamble not required
+// =============================================================================
+// TRANSFORMR — Stake Evaluator
+// Runs daily via cron. Evaluates goals, captures holds on failure, cancels on pass.
+// Uses payment_intent_id + capture/cancel (NOT create new intent on failure).
+// =============================================================================
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -10,40 +14,71 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-async function chargeStake(
-  paymentMethodId: string,
-  customerId: string,
-  amount: number,
-  description: string
-): Promise<{ success: boolean; charge_id?: string; error?: string }> {
+// Capture an existing hold — user FAILED the goal, charge them.
+async function captureStakeHold(
+  paymentIntentId: string,
+): Promise<{ success: boolean; status?: string; error?: string }> {
   try {
     const response = await fetch(
-      "https://api.stripe.com/v1/payment_intents",
+      `https://api.stripe.com/v1/payment_intents/${paymentIntentId}/capture`,
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({
-          amount: String(Math.round(amount * 100)),
-          currency: "usd",
-          customer: customerId,
-          payment_method: paymentMethodId,
-          confirm: "true",
-          off_session: "true",
-          description,
-        }).toString(),
-      }
+      },
     );
     const data = await response.json();
     if (data.error) {
       return { success: false, error: data.error.message };
     }
-    return { success: true, charge_id: data.id };
+    return { success: true, status: data.status };
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
   }
+}
+
+// Cancel an existing hold — user PASSED the goal, release their funds.
+async function cancelStakeHold(
+  paymentIntentId: string,
+): Promise<{ success: boolean; status?: string; error?: string }> {
+  try {
+    const response = await fetch(
+      `https://api.stripe.com/v1/payment_intents/${paymentIntentId}/cancel`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      },
+    );
+    const data = await response.json();
+    if (data.error) {
+      return { success: false, error: data.error.message };
+    }
+    return { success: true, status: data.status };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+}
+
+interface EvaluationResult {
+  stake_id: string;
+  user_id: string;
+  goal_type: string;
+  passed: boolean;
+  evidence: Record<string, unknown>;
+  payment_action: "captured" | "cancelled" | "skipped";
+  payment_error: string | null;
+  update_error: string | null;
 }
 
 serve(async (req) => {
@@ -54,21 +89,20 @@ serve(async (req) => {
   try {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Optionally evaluate a specific stake
     let stakeId: string | null = null;
     try {
       const body = await req.json();
       stakeId = body.stake_id || null;
     } catch {
-      // No body
+      // No body — cron run, evaluate all due stakes
     }
 
-    // Fetch stakes that are due for evaluation
+    // Fetch active stake_goals that are due for evaluation
     let query = supabaseAdmin
-      .from("stakes")
+      .from("stake_goals")
       .select("*")
       .eq("status", "active")
       .lte("evaluation_date", new Date().toISOString());
@@ -80,16 +114,14 @@ serve(async (req) => {
     const { data: stakes, error: stakesError } = await query;
     if (stakesError) throw stakesError;
 
-    const evaluations: any[] = [];
+    const evaluations: EvaluationResult[] = [];
 
-    for (const stake of stakes || []) {
-      const userId = stake.user_id;
-
-      // Evaluate criteria based on goal type
+    for (const stake of stakes ?? []) {
+      const userId = stake.user_id as string;
       let passed = false;
-      let evidence: any = {};
+      let evidence: Record<string, unknown> = {};
 
-      switch (stake.goal_type) {
+      switch (stake.goal_type as string) {
         case "weight": {
           const { data: latestWeight } = await supabaseAdmin
             .from("weight_logs")
@@ -99,15 +131,15 @@ serve(async (req) => {
             .limit(1)
             .single();
 
-          const currentWeight = latestWeight?.weight_lbs;
-          const targetWeight = stake.target_value;
+          const current = (latestWeight?.weight_lbs as number) ?? null;
+          const target = stake.target_value as number;
 
-          if (stake.goal_direction === "lose") {
-            passed = currentWeight != null && currentWeight <= targetWeight;
+          if (stake.goal_direction === "lose" || stake.goal_direction === "not_exceed") {
+            passed = current !== null && current <= target;
           } else {
-            passed = currentWeight != null && currentWeight >= targetWeight;
+            passed = current !== null && current >= target;
           }
-          evidence = { current_weight: currentWeight, target_weight: targetWeight };
+          evidence = { current_weight: current, target_weight: target };
           break;
         }
 
@@ -119,29 +151,30 @@ serve(async (req) => {
             .gte("started_at", stake.start_date)
             .lte("started_at", stake.evaluation_date);
 
-          passed = (count || 0) >= stake.target_value;
+          passed = (count ?? 0) >= (stake.target_value as number);
           evidence = { workouts_completed: count, target: stake.target_value };
           break;
         }
 
         case "streak": {
           const { data: streakData } = await supabaseAdmin
-            .from("streaks")
-            .select("current_count")
+            .from("habits")
+            .select("current_streak")
             .eq("user_id", userId)
-            .eq("streak_type", "daily_checkin")
+            .order("current_streak", { ascending: false })
+            .limit(1)
             .single();
 
-          passed = (streakData?.current_count || 0) >= stake.target_value;
-          evidence = { current_streak: streakData?.current_count, target: stake.target_value };
+          passed = ((streakData?.current_streak as number) ?? 0) >= (stake.target_value as number);
+          evidence = { current_streak: streakData?.current_streak, target: stake.target_value };
           break;
         }
 
         case "checkin_rate": {
-          const startDate = new Date(stake.start_date);
-          const endDate = new Date(stake.evaluation_date);
+          const startDate = new Date(stake.start_date as string);
+          const endDate = new Date(stake.evaluation_date as string);
           const totalDays = Math.ceil(
-            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
           );
 
           const { count } = await supabaseAdmin
@@ -152,8 +185,8 @@ serve(async (req) => {
             .gte("date", stake.start_date)
             .lte("date", stake.evaluation_date);
 
-          const rate = totalDays > 0 ? ((count || 0) / totalDays) * 100 : 0;
-          passed = rate >= stake.target_value;
+          const rate = totalDays > 0 ? ((count ?? 0) / totalDays) * 100 : 0;
+          passed = rate >= (stake.target_value as number);
           evidence = {
             checkins_completed: count,
             total_days: totalDays,
@@ -167,50 +200,53 @@ serve(async (req) => {
           evidence = { error: `Unknown goal type: ${stake.goal_type}` };
       }
 
-      let chargeResult = null;
+      const paymentIntentId = stake.payment_intent_id as string | null;
+      let paymentAction: EvaluationResult["payment_action"] = "skipped";
+      let paymentError: string | null = null;
 
-      // If failed, trigger Stripe charge
-      if (!passed && stake.stripe_payment_method_id && stake.stripe_customer_id) {
-        chargeResult = await chargeStake(
-          stake.stripe_payment_method_id,
-          stake.stripe_customer_id,
-          stake.amount,
-          `TRANSFORMR stake charge: Failed ${stake.goal_type} goal`
-        );
+      if (paymentIntentId) {
+        if (passed) {
+          // Goal achieved — cancel the hold, user keeps their money
+          const result = await cancelStakeHold(paymentIntentId);
+          paymentAction = "cancelled";
+          paymentError = result.error ?? null;
+        } else {
+          // Goal failed — capture the hold, charge the user
+          const result = await captureStakeHold(paymentIntentId);
+          paymentAction = "captured";
+          paymentError = result.error ?? null;
+        }
       }
 
-      // Update stake status
       const { error: updateError } = await supabaseAdmin
-        .from("stakes")
+        .from("stake_goals")
         .update({
           status: passed ? "passed" : "failed",
           evaluated_at: new Date().toISOString(),
           evaluation_evidence: evidence,
-          charge_id: chargeResult?.charge_id || null,
         })
         .eq("id", stake.id);
 
-      // Notify user
       await supabaseAdmin.from("notifications").insert({
         user_id: userId,
         type: passed ? "stake_passed" : "stake_failed",
         title: passed ? "Goal Achieved! Stake Saved" : "Stake Lost",
         body: passed
-          ? `You hit your ${stake.goal_type} goal! Your $${stake.amount} stake is safe.`
-          : `You missed your ${stake.goal_type} goal. $${stake.amount} has been charged.`,
+          ? `You hit your ${stake.goal_type} goal! Your $${stake.stake_amount} stake hold has been released.`
+          : `You missed your ${stake.goal_type} goal. Your $${stake.stake_amount} stake has been captured.`,
         data: { stake_id: stake.id, evidence, passed },
         scheduled_for: new Date().toISOString(),
       });
 
       evaluations.push({
-        stake_id: stake.id,
+        stake_id: stake.id as string,
         user_id: userId,
-        goal_type: stake.goal_type,
+        goal_type: stake.goal_type as string,
         passed,
         evidence,
-        charged: !passed && chargeResult?.success === true,
-        charge_error: chargeResult?.error || null,
-        update_error: updateError?.message || null,
+        payment_action: paymentAction,
+        payment_error: paymentError,
+        update_error: updateError?.message ?? null,
       });
     }
 
@@ -221,18 +257,13 @@ serve(async (req) => {
         evaluations,
         timestamp: new Date().toISOString(),
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({ error: message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

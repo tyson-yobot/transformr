@@ -45,3 +45,14 @@ enabled = true
 
 [edge_runtime]
 enabled = true
+
+[functions.stake-evaluator]
+verify_jwt = true
+
+[functions.ai-monthly-retrospective]
+verify_jwt = false
+
+[cron]
+"stake-evaluator-daily" = { schedule = "0 2 * * *", function = "stake-evaluator" }
+"monthly-retrospective" = { schedule = "0 8 1 * *", function = "ai-monthly-retrospective" }
+"health-roi-report" = { schedule = "0 6 1 * *", function = "ai-correlation" }

@@ -10,17 +10,18 @@ interface StakePaymentResult {
 export async function createStakePayment(
   userId: string,
   amount: number,
-  goalId: string,
-  description: string,
+  stakeId: string,
+  paymentMethodId: string,
 ): Promise<StakePaymentResult> {
-  // Create payment intent via Edge Function
+  // Creates a HOLD (capture_method: manual) — funds are reserved, not charged.
+  // The hold is captured (charged) only if the goal is missed.
   const { data, error } = await supabase.functions.invoke('stripe-webhook', {
     body: {
       action: 'create_stake_payment',
       userId,
-      amount: Math.round(amount * 100), // Convert to cents
-      goalId,
-      description,
+      amount,
+      stakeId,
+      paymentMethodId,
     },
   });
 
@@ -35,32 +36,28 @@ export async function createStakePayment(
   };
 }
 
-export async function chargeStake(
+// Goal FAILED — capture the hold (charge the user)
+export async function captureStake(
   paymentIntentId: string,
-  amount: number,
-  reason: string,
 ): Promise<boolean> {
   const { error } = await supabase.functions.invoke('stripe-webhook', {
     body: {
-      action: 'charge_stake',
+      action: 'capture_stake',
       paymentIntentId,
-      amount: Math.round(amount * 100),
-      reason,
     },
   });
 
   return !error;
 }
 
-export async function refundStake(
+// Goal PASSED — cancel the hold (user keeps their money)
+export async function cancelStakeHold(
   paymentIntentId: string,
-  amount: number,
 ): Promise<boolean> {
   const { error } = await supabase.functions.invoke('stripe-webhook', {
     body: {
-      action: 'refund_stake',
+      action: 'cancel_stake_hold',
       paymentIntentId,
-      amount: Math.round(amount * 100),
     },
   });
 

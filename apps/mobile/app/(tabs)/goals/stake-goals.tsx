@@ -2,6 +2,8 @@
 // TRANSFORMR -- Stake Goals
 // =============================================================================
 
+export const unstable_settings = { lazy: true };
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
@@ -153,21 +155,34 @@ export default function StakeGoalsScreen() {
 
       const newGoal = created as StakeGoal;
 
-      // Create Stripe payment intent to hold the stake
-      const paymentResult = await createStakePayment(
-        user.id,
-        amount,
-        newGoal.id,
-        `Stake: ${newGoalTitle.trim()}`,
-      );
+      // Fetch saved payment method ID from user profile (hold, not charge)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('stripe_payment_method_id')
+        .eq('id', user.id)
+        .single();
+      const paymentMethodId = (profile?.stripe_payment_method_id as string | null) ?? null;
 
-      if (paymentResult.success && paymentResult.paymentIntentId) {
-        // Persist payment intent ID back to the stake goal
-        await supabase
-          .from('stake_goals')
-          .update({ stripe_payment_intent_id: paymentResult.paymentIntentId })
-          .eq('id', newGoal.id);
-        newGoal.stripe_payment_intent_id = paymentResult.paymentIntentId;
+      if (paymentMethodId) {
+        const paymentResult = await createStakePayment(
+          user.id,
+          amount,
+          newGoal.id,
+          paymentMethodId,
+        );
+
+        if (paymentResult.success && paymentResult.paymentIntentId) {
+          // Persist both column names for compatibility
+          await supabase
+            .from('stake_goals')
+            .update({
+              payment_intent_id: paymentResult.paymentIntentId,
+              stripe_payment_intent_id: paymentResult.paymentIntentId,
+              status: 'active',
+            })
+            .eq('id', newGoal.id);
+          newGoal.stripe_payment_intent_id = paymentResult.paymentIntentId;
+        }
       }
 
       setStakeGoals((prev) => [
