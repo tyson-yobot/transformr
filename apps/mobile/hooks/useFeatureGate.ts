@@ -522,6 +522,27 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
 }
 
 // ---------------------------------------------------------------------------
+// Standalone hasAccess helper (usable outside React components)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true if `userTier` grants access to `feature`.
+ * Safe to call outside of React components (no hooks used).
+ */
+export function hasAccess(userTier: SubscriptionTier, feature: FeatureKey): boolean {
+  const gate = FEATURE_GATE_MAP[feature];
+  return tierSatisfies(userTier, gate.requiredTier);
+}
+
+/**
+ * Returns the minimum subscription tier required for `feature`.
+ * Safe to call outside of React components (no hooks used).
+ */
+export function getFeatureRequiredTier(feature: FeatureKey): SubscriptionTier {
+  return FEATURE_GATE_MAP[feature].requiredTier;
+}
+
+// ---------------------------------------------------------------------------
 // Multi-feature convenience hook
 // ---------------------------------------------------------------------------
 
