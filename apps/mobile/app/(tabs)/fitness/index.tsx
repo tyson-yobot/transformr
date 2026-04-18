@@ -32,6 +32,7 @@ import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
+import { SpotifyMiniPlayer } from '@components/ui/SpotifyMiniPlayer';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -126,6 +127,8 @@ export default function FitnessHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
 
   const todayTemplate = (() => {
     const dayOfWeek = new Date().getDay();
@@ -138,7 +141,9 @@ export default function FitnessHomeScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [sessionsRes, prsRes, weightRes] = await Promise.all([
+      setUserId(user.id);
+
+      const [sessionsRes, prsRes, weightRes, profileRes] = await Promise.all([
         supabase
           .from('workout_sessions')
           .select('id, name, completed_at, duration_minutes, total_volume, total_sets')
@@ -158,7 +163,14 @@ export default function FitnessHomeScreen() {
           .eq('user_id', user.id)
           .order('logged_at', { ascending: true })
           .limit(90),
+        supabase
+          .from('profiles')
+          .select('spotify_connected')
+          .eq('id', user.id)
+          .single(),
       ]);
+
+      setSpotifyConnected(!!(profileRes.data?.spotify_connected));
 
       if (sessionsRes.data) {
         const sessions = sessionsRes.data as {
@@ -499,6 +511,13 @@ export default function FitnessHomeScreen() {
           </View>
         </Animated.View>
         </Animated.View>
+
+        {/* Spotify Mini Player — shown when Spotify is connected */}
+        {spotifyConnected && userId && (
+          <View style={{ marginBottom: spacing.lg }}>
+            <SpotifyMiniPlayer userId={userId} />
+          </View>
+        )}
 
         {/* Navigation Cards */}
         <Animated.View style={getEntranceStyle('quickActions')}>

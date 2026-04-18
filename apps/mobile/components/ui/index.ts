@@ -42,3 +42,4 @@ export { AmbientBackground } from './AmbientBackground';
 export { UpgradePrompt } from './UpgradePrompt';
 export { FeatureLockOverlay } from './FeatureLockOverlay';
 export { HistoryCapBanner } from './HistoryCapBanner';
+export { SpotifyMiniPlayer } from './SpotifyMiniPlayer';
