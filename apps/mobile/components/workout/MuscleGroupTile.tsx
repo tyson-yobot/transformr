@@ -9,6 +9,20 @@ import type { BodyPart } from '@components/ui/BodyMap';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+const MUSCLE_CONFIG: Record<string, string> = {
+  chest:     '#EF4444',
+  back:      '#3B82F6',
+  shoulders: '#F97316',
+  biceps:    '#8B5CF6',
+  triceps:   '#A855F7',
+  abs:       '#22D3EE',
+  legs:      '#22C55E',
+  glutes:    '#10B981',
+  cardio:    '#EAB308',
+};
+
+const DEFAULT_ACCENT = '#A855F7';
+
 interface MuscleGroupTileProps {
   muscleGroup: string;
   label: string;
@@ -21,10 +35,11 @@ interface MuscleGroupTileProps {
 export const MuscleGroupTile = memo(function MuscleGroupTile({
   muscleGroup, label, isSelected, onPress, size = 80, style,
 }: MuscleGroupTileProps) {
-  const { colors, typography } = useTheme();
+  const { colors, typography, isDark } = useTheme();
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const parts: BodyPart[] = categoryToBodyParts(muscleGroup);
+  const accent = MUSCLE_CONFIG[muscleGroup.toLowerCase()] ?? DEFAULT_ACCENT;
 
   const handlePressIn = useCallback(() => {
     scale.value = withSpring(0.93, { damping: 12, stiffness: 400 });
@@ -49,21 +64,36 @@ export const MuscleGroupTile = memo(function MuscleGroupTile({
     >
       <View style={{
         width: size, height: size, borderRadius: size / 2,
-        backgroundColor: isSelected ? colors.dim.primary : colors.background.secondary,
-        borderWidth: isSelected ? 2 : 1,
-        borderColor: isSelected ? colors.accent.primary : colors.border.default,
-        shadowColor: isSelected ? colors.accent.primary : 'transparent',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: isSelected ? 0.5 : 0,
-        shadowRadius: isSelected ? 10 : 0,
-        elevation: isSelected ? 6 : 0,
         alignItems: 'center', justifyContent: 'center',
+        backgroundColor: isDark ? 'rgba(22,18,42,0.88)' : 'rgba(255,255,255,0.94)',
+        borderWidth: 1.5,
+        borderColor: isSelected
+          ? accent
+          : isDark
+            ? 'rgba(168,85,247,0.18)'
+            : 'rgba(124,58,237,0.12)',
+        shadowColor: isSelected ? accent : '#A855F7',
+        shadowOffset: { width: 0, height: isSelected ? 6 : 2 },
+        shadowOpacity: isSelected ? 0.45 : 0.12,
+        shadowRadius: isSelected ? 14 : 6,
+        elevation: isSelected ? 8 : 2,
       }}>
-        <BodyMap mode="muscle" highlightPrimary={parts} size={Math.round(size * 0.48)} />
+        {isSelected && (
+          <View style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+            borderRadius: size / 2,
+            backgroundColor: `${accent}15`,
+          }} />
+        )}
+        <BodyMap
+          mode="muscle"
+          highlightPrimary={parts}
+          size={Math.round(size * 0.48)}
+        />
       </View>
       <Text
         style={[typography.tiny, {
-          color: isSelected ? colors.accent.primary : colors.text.secondary,
+          color: isSelected ? accent : colors.text.secondary,
           fontWeight: isSelected ? '600' : '400',
           textAlign: 'center',
           maxWidth: 70,

@@ -14,7 +14,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
@@ -61,11 +60,16 @@ const EQUIPMENT: { value: EquipmentFilter; label: string }[] = [
   { value: 'smith_machine', label: 'Smith Machine' },
 ];
 
+const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  beginner:     { bg: 'rgba(16,185,129,0.12)',  text: '#10B981', border: 'rgba(16,185,129,0.30)'  },
+  intermediate: { bg: 'rgba(245,158,11,0.12)',  text: '#F59E0B', border: 'rgba(245,158,11,0.30)'  },
+  advanced:     { bg: 'rgba(239,68,68,0.12)',   text: '#EF4444', border: 'rgba(239,68,68,0.30)'   },
+};
+
 export default function ExercisesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const navigation = useNavigation();
   const { exercises, fetchExercises, isLoading } = useWorkoutStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,12 +78,6 @@ export default function ExercisesScreen() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <ScreenHelpButton content={SCREEN_HELP.exercisesLibrary} />,
-    });
-  }, [navigation]);
 
   const doFetch = useCallback(() => {
     const category = selectedCategory !== 'all' ? selectedCategory : undefined;
@@ -166,7 +164,24 @@ export default function ExercisesScreen() {
             <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, alignItems: 'center' }}>
               {item.equipment && <Text style={[typography.tiny, { color: colors.text.muted }]}>{item.equipment}</Text>}
               {item.equipment && item.difficulty && <Text style={[typography.tiny, { color: colors.text.muted }]}>·</Text>}
-              {item.difficulty && <Text style={[typography.tiny, { color: colors.text.muted }]}>{item.difficulty}</Text>}
+              {item.difficulty ? (() => {
+                const diffStyle = DIFFICULTY_COLORS[item.difficulty.toLowerCase()];
+                return diffStyle ? (
+                  <View style={{
+                    paddingHorizontal: 7, paddingVertical: 2,
+                    borderRadius: 4,
+                    backgroundColor: diffStyle.bg,
+                    borderWidth: 1,
+                    borderColor: diffStyle.border,
+                  }}>
+                    <Text style={{ fontSize: 10, fontWeight: '600', color: diffStyle.text }}>
+                      {item.difficulty}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={[typography.tiny, { color: colors.text.muted }]}>{item.difficulty}</Text>
+                );
+              })() : null}
             </View>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
@@ -179,8 +194,37 @@ export default function ExercisesScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
+
+      {/* Custom header with back button */}
+      <View style={{
+        paddingTop: insets.top + spacing.sm,
+        paddingBottom: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+      }}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          style={{
+            width: 36, height: 36, borderRadius: 18,
+            backgroundColor: colors.dim.primary,
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Ionicons name="chevron-back" size={22} color={colors.accent.primary} />
+        </Pressable>
+        <Text style={[typography.h2, { color: colors.text.primary, flex: 1 }]}>
+          Exercise Library
+        </Text>
+        <ScreenHelpButton content={SCREEN_HELP.exercisesLibrary} />
+      </View>
+
       {/* Search Bar */}
-      <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
+      <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
         <Input
           placeholder="Search exercises..."
           value={searchQuery}
@@ -194,6 +238,14 @@ export default function ExercisesScreen() {
             ) : undefined
           }
         />
+      </View>
+
+      {/* Muscle Groups section header */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.sm, marginTop: spacing.xs, marginHorizontal: spacing.lg }}>
+        <View style={{ width: 2, height: 14, backgroundColor: colors.accent.primary, borderRadius: 1 }} />
+        <Text style={{ fontSize: 11, fontWeight: '600', letterSpacing: 1.5, textTransform: 'uppercase', color: colors.text.muted }}>
+          Muscle Groups
+        </Text>
       </View>
 
       {/* Category Filter Chips */}
@@ -263,6 +315,17 @@ export default function ExercisesScreen() {
           data={filteredExercises}
           keyExtractor={(item) => item.id}
           renderItem={renderExerciseItem}
+          ListHeaderComponent={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.md }}>
+              <View style={{ width: 2, height: 14, backgroundColor: colors.accent.primary, borderRadius: 1 }} />
+              <Text style={{ fontSize: 11, fontWeight: '600', letterSpacing: 1.5, textTransform: 'uppercase', color: colors.text.muted }}>
+                {selectedCategory !== 'all' ? `${MUSCLE_GROUPS.find(g => g.value === selectedCategory)?.label ?? selectedCategory} Exercises` : 'All Exercises'}
+              </Text>
+              <Text style={{ color: colors.text.muted, fontSize: 11, marginLeft: 'auto' }}>
+                {filteredExercises.length} exercises
+              </Text>
+            </View>
+          }
           removeClippedSubviews={true}
           windowSize={5}
           maxToRenderPerBatch={10}

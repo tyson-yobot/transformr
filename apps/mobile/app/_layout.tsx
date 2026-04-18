@@ -142,7 +142,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
+            <ThemeProvider forceDark>
               <AppStatusBar />
               <Slot />
             </ThemeProvider>

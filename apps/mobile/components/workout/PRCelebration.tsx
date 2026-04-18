@@ -239,18 +239,32 @@ export function PRCelebration({
       ))}
 
       {/* Glow effect behind text */}
+      {/* Outer Animated.View: opacity animation only — no shadow props
+          so Reanimated (Fabric) never passes shadowOffset as a native prop */}
       <Animated.View
         style={[
-          styles.glow,
           {
-            backgroundColor: isIntense ? colors.accent.gold : colors.accent.primary,
+            position: 'absolute',
+            width: 200,
+            height: 200,
             top: SCREEN_HEIGHT / 2 - 120,
             left: SCREEN_WIDTH / 2 - 100,
           },
           glowStyle,
         ]}
         pointerEvents="none"
-      />
+      >
+        <View style={{
+          flex: 1,
+          borderRadius: 100,
+          backgroundColor: isIntense ? colors.accent.gold : colors.accent.primary,
+          shadowColor: '#EAB308', /* brand-ok */
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 1,
+          shadowRadius: 60,
+          elevation: 0,
+        }} />
+      </Animated.View>
 
       {/* Center content */}
       <View style={styles.center}>
@@ -321,17 +335,6 @@ const styles = StyleSheet.create({
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,
-  },
-  glow: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    shadowColor: '#EAB308', /* brand-ok */
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 60,
-    elevation: 0,
   },
   center: {
     flex: 1,
