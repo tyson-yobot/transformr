@@ -50,7 +50,7 @@ export function Button({
   textStyle,
   accessibilityLabel,
 }: ButtonProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, borderRadius, isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -91,13 +91,14 @@ export function Button({
             ...base,
             backgroundColor: 'transparent',
             overflow: 'hidden',
+            // Match the login screen Sign In button shadow exactly:
             shadowColor: colors.accent.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 12,
-            elevation: 8,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: isDark ? 0.50 : 0.28,
+            shadowRadius: 20,
+            elevation: 12,
           },
-          text: { color: colors.text.inverse },
+          text: { color: '#FFFFFF', fontWeight: '700', letterSpacing: 0.5 },
         };
       case 'secondary':
         return {
@@ -123,7 +124,7 @@ export function Button({
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const variantStyles = useMemo(() => getVariantStyles(), [variant, size, colors, spacing, borderRadius]);
+  const variantStyles = useMemo(() => getVariantStyles(), [variant, size, colors, spacing, borderRadius, isDark]);
   const isDisabled = disabled || loading;
   const currentSize = sizeConfig[size];
 

@@ -17,6 +17,8 @@ import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
+import { GlowCard } from '@components/ui/GlowCard';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
@@ -181,6 +183,7 @@ export default function TrajectoryScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}
         showsVerticalScrollIndicator={false}
@@ -240,22 +243,22 @@ export default function TrajectoryScreen() {
         {/* Current vs Optimal Stats */}
         <Animated.View entering={FadeInDown.delay(400)}>
           <View style={[styles.statsRow, { marginTop: spacing.lg, gap: spacing.md }]}>
-            <Card style={{ flex: 1 }}>
+            <GlowCard accentColor={colors.accent.danger} intensity="subtle" style={{ flex: 1 }}>
               <Text style={[typography.tiny, { color: colors.text.muted }]}>Current Path (12mo)</Text>
               <MonoText variant="statSmall" color={colors.accent.danger}>
                 {selectedDomain === 'revenue'
                   ? formatCurrency(currentPath[currentPath.length - 1]?.value ?? 0)
                   : formatNumber(currentPath[currentPath.length - 1]?.value ?? 0, 1)}
               </MonoText>
-            </Card>
-            <Card style={{ flex: 1 }}>
+            </GlowCard>
+            <GlowCard accentColor={colors.accent.success} intensity="subtle" style={{ flex: 1 }}>
               <Text style={[typography.tiny, { color: colors.text.muted }]}>Optimal Path (12mo)</Text>
               <MonoText variant="statSmall" color={colors.accent.success}>
                 {selectedDomain === 'revenue'
                   ? formatCurrency(optimalPath[optimalPath.length - 1]?.value ?? 0)
                   : formatNumber(optimalPath[optimalPath.length - 1]?.value ?? 0, 1)}
               </MonoText>
-            </Card>
+            </GlowCard>
           </View>
         </Animated.View>
 

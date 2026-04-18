@@ -8,7 +8,7 @@ import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-nati
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
-import { Card } from '@components/ui/Card';
+import { GlowCard } from '@components/ui/GlowCard';
 import { useScreenInsight } from '@hooks/useScreenInsight';
 
 interface AIInsightCardProps {
@@ -33,14 +33,20 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
 
   if (isLoading && !insight) {
     return (
-      <Card style={StyleSheet.flatten([styles.card, { backgroundColor: `${colors.accent.cyan}08` }, style])}>
+      <GlowCard
+        accentColor={colors.accent.cyan}
+        intensity="subtle"
+        style={StyleSheet.flatten([styles.card, style])}
+        contentStyle={styles.cardContent}
+        padding={10}
+      >
         <View style={styles.row}>
           <ActivityIndicator size="small" color={colors.accent.cyan} />
           <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.sm }]}>
             Loading AI insight...
           </Text>
         </View>
-      </Card>
+      </GlowCard>
     );
   }
 
@@ -50,15 +56,11 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
 
   return (
     <Animated.View entering={FadeInDown.duration(300)} style={style}>
-      <Card
-        style={StyleSheet.flatten([
-          styles.card,
-          {
-            backgroundColor: `${colors.accent.cyan}08`,
-            borderWidth: 1,
-            borderColor: `${colors.accent.cyan}20`,
-          },
-        ])}
+      <GlowCard
+        accentColor={colors.accent.cyan}
+        intensity="subtle"
+        style={{ borderLeftWidth: 3, borderLeftColor: colors.accent.cyan }}
+        padding={10}
       >
         <View style={styles.row}>
           <Ionicons
@@ -90,16 +92,14 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
             )}
           </Pressable>
         </View>
-      </Card>
+      </GlowCard>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
+  card: {},
+  cardContent: {},
   row: {
     flexDirection: 'row',
     alignItems: 'center',

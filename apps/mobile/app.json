@@ -8,9 +8,7 @@
       "enabled": false,
       "url": "https://u.expo.dev/placeholder"
     },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "icon": "./assets/images/icon.png",
     "scheme": "com.automateai.transformr",
     "userInterfaceStyle": "automatic",

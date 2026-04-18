@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { View, StyleSheet, ViewStyle, useWindowDimensions, Pressable } from 'react-native';
 import { Canvas, RoundedRect, BlurMask } from '@shopify/react-native-skia';
 import Animated, {
-  cancelAnimation, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, interpolate,
+  cancelAnimation, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, interpolate, withSpring,
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
 type GlowIntensity = 'subtle' | 'medium' | 'intense';
@@ -16,24 +17,31 @@ const INTENSITY: Record<GlowIntensity, { blur: number; opacity: number }> = {
 
 interface GlowCardProps {
   children: React.ReactNode;
+  // Legacy prop — prefer accentColor
   glowColor?: string;
+  accentColor?: string;
   intensity?: GlowIntensity;
   animated?: boolean;
   cardBorderRadius?: number;
   padding?: number;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
+  onPress?: () => void;
+  accessibilityLabel?: string;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export function GlowCard({
-  children, glowColor, intensity = 'subtle', animated = false,
-  cardBorderRadius = 16, padding = 16, style, contentStyle,
+  children, glowColor, accentColor, intensity = 'subtle', animated = false,
+  cardBorderRadius = 16, padding = 16, style, contentStyle, onPress, accessibilityLabel,
 }: GlowCardProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { width: sw } = useWindowDimensions();
-  const color = glowColor ?? colors.accent.primary;
+  const color = accentColor ?? glowColor ?? colors.accent.primary;
   const { blur, opacity } = INTENSITY[intensity];
   const pulse = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   useEffect(() => {
     if (!animated) return;
@@ -49,11 +57,28 @@ export function GlowCard({
     !animated ? {} : ({ opacity: interpolate(pulse.value, [0, 1], [opacity * 0.8, opacity]) }),
   );
 
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = useCallback(() => {
+    if (!onPress) return;
+    scale.value = withSpring(0.97, { damping: 14, stiffness: 400 });
+  }, [onPress, scale]);
+
+  const handlePressOut = useCallback(() => {
+    if (!onPress) return;
+    scale.value = withSpring(1.0, { damping: 14, stiffness: 300 });
+  }, [onPress, scale]);
+
   const pad = blur + 4;
 
-  return (
+  // Dark: rgba(22,18,42,0.88) — matches login screen form glass exactly
+  // Light: rgba(255,255,255,0.94) — clean white with shadow
+  const cardBg = isDark ? 'rgba(22,18,42,0.88)' : 'rgba(255,255,255,0.94)';
+
+  const innerContent = (
     <View style={[styles.wrapper, style]}>
-      {/* Only render the Skia canvas when animated=true — static glow uses a simple border instead */}
       {animated ? (
         <Animated.View
           style={[StyleSheet.absoluteFill, { zIndex: 0 }, canvasAnim]}
@@ -75,17 +100,42 @@ export function GlowCard({
         </Animated.View>
       ) : null}
       <View style={[{
-        backgroundColor: colors.background.secondary,
+        backgroundColor: cardBg,
         borderRadius: cardBorderRadius,
         borderWidth: 1,
-        borderColor: `${color}28`,
+        borderColor: isDark ? `rgba(168,85,247,${INTENSITY[intensity].opacity * 0.5})` : `rgba(124,58,237,${INTENSITY[intensity].opacity * 0.3})`,
         padding,
         zIndex: 1,
+        shadowColor: color,
+        shadowOffset: { width: 0, height: isDark ? 8 : 4 },
+        shadowOpacity: isDark ? INTENSITY[intensity].opacity * 0.55 : INTENSITY[intensity].opacity * 0.25,
+        shadowRadius: isDark ? 22 : 12,
+        elevation: isDark ? 8 : 3,
       }, contentStyle]}>
         {children}
       </View>
     </View>
   );
+
+  if (onPress) {
+    return (
+      <AnimatedPressable
+        onPress={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        style={pressStyle}
+      >
+        {innerContent}
+      </AnimatedPressable>
+    );
+  }
+
+  return innerContent;
 }
 
 const styles = StyleSheet.create({ wrapper: { position: 'relative' } });

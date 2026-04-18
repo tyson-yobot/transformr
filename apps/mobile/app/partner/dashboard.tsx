@@ -28,6 +28,7 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { supabase } from '@services/supabase';
 
 interface PartnerStats {
@@ -180,6 +181,7 @@ export default function PartnerDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

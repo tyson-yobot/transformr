@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
+import { GlowCard } from '@components/ui/GlowCard';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
@@ -27,34 +29,33 @@ interface GradeCardProps {
   grade: string | undefined;
 }
 
-function gradeTintColor(gradeStr: string, colors: ReturnType<typeof useTheme>['colors']): string {
-  const g = gradeStr[0] ?? '';
-  if (g === 'A') return `${colors.accent.success}20`;
-  if (g === 'B') return `${colors.accent.info}20`;
-  if (g === 'C') return `${colors.accent.warning}20`;
-  if (g === 'D' || g === 'F') return `${colors.accent.danger}20`;
-  return colors.background.secondary;
-}
 
 function GradeCard({ label, grade }: GradeCardProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const gradeStr = grade ?? '--';
   const color = getGradeColor(gradeStr);
-  const bgColor = gradeTintColor(gradeStr, colors);
+
+  function gradeAccent(g: string): string {
+    const first = g[0] ?? '';
+    if (first === 'A') return colors.accent.success;
+    if (first === 'B') return colors.accent.info;
+    if (first === 'C') return colors.accent.warning;
+    if (first === 'D' || first === 'F') return colors.accent.danger;
+    return colors.accent.primary;
+  }
 
   return (
-    <View
-      style={[styles.gradeCard, {
-        backgroundColor: bgColor,
-        borderRadius: borderRadius.md,
-        padding: spacing.md,
-      }]}
+    <GlowCard
+      accentColor={gradeAccent(gradeStr)}
+      intensity="subtle"
+      style={styles.gradeCard}
+      padding={spacing.md}
     >
       <Text style={[typography.stat, { color, textAlign: 'center' }]}>{gradeStr}</Text>
       <Text style={[typography.tiny, { color: colors.text.muted, textAlign: 'center', marginTop: spacing.xs }]}>
         {label}
       </Text>
-    </View>
+    </GlowCard>
   );
 }
 
@@ -144,6 +145,7 @@ export default function WeeklyReviewScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}
         showsVerticalScrollIndicator={false}

@@ -30,6 +30,7 @@ import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { SectionTile } from '@components/ui/SectionTile';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
@@ -239,6 +240,7 @@ export default function GoalsDashboard() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
+      <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

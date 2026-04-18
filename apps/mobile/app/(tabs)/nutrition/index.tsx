@@ -44,6 +44,7 @@ import type { NutritionLog } from '@app-types/database';
 import { HelpIcon } from '@components/ui/HelpIcon';
 import { GlowCard } from '@components/ui/GlowCard';
 import { SectionTile } from '@components/ui/SectionTile';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
@@ -256,6 +257,7 @@ export default function NutritionHomeScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
+      <PurpleRadialBackground />
       {/* Header */}
       <View
         style={[
@@ -478,7 +480,7 @@ export default function NutritionHomeScreen() {
         {todayLogs.length === 0 && dayOffset === 0 && (
           <View>
             <EmptyState
-              icon={'\u{1F957}'}
+              ionIcon="restaurant-outline"
               title="Nothing logged yet"
               subtitle="Start logging to see your macros"
               actionLabel="Log a Meal"
@@ -567,9 +569,10 @@ export default function NutritionHomeScreen() {
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={[typography.h3, { color: colors.text.primary }]}>
-                  {'\u{1F4A7}'} Water
-                </Text>
+                <View style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: colors.dim.info, alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="water-outline" size={14} color={colors.accent.info} />
+                </View>
+                <Text style={[typography.h3, { color: colors.text.primary }]}>Water</Text>
                 <HelpIcon content={HELP.waterTracker} size={13} />
               </View>
               <MonoText variant="monoCaption" color={colors.text.muted}>
@@ -630,9 +633,12 @@ export default function NutritionHomeScreen() {
         <View>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Text style={[typography.h3, { color: colors.text.primary }]}>
-                {'\u{1F48A}'} Supplements
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: colors.dim.primary, alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="medical-outline" size={14} color={colors.accent.primary} />
+                </View>
+                <Text style={[typography.h3, { color: colors.text.primary }]}>Supplements</Text>
+              </View>
               <Pressable
                 onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/supplements'); }}
                 accessibilityLabel="Manage supplements"

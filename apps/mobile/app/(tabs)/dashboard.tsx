@@ -346,7 +346,11 @@ export default function DashboardScreen() {
   const quickStats = useMemo(
     () => [
       {
-        icon: <Text style={{ fontSize: 18 }}>🔥</Text>,
+        icon: (
+          <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.fire, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="flame" size={18} color={colors.accent.fire} />
+          </View>
+        ),
         label: 'Streak',
         valueNode: <MonoText variant="monoBody" color={colors.accent.fire}>{currentStreak !== null ? `${currentStreak}d` : '—'}</MonoText>,
         value: currentStreak !== null ? `${currentStreak}d` : '—',
@@ -354,7 +358,11 @@ export default function DashboardScreen() {
         accentColor: colors.accent.fire,
       },
       {
-        icon: <Text style={{ fontSize: 18 }}>💪</Text>,
+        icon: (
+          <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.primary, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="barbell" size={18} color={colors.accent.primary} />
+          </View>
+        ),
         label: 'Workouts',
         valueNode: <MonoText variant="monoBody" color={colors.accent.primary}>{String(workoutsThisWeek)}</MonoText>,
         value: String(workoutsThisWeek),
@@ -362,7 +370,11 @@ export default function DashboardScreen() {
         accentColor: colors.accent.primary,
       },
       {
-        icon: <Text style={{ fontSize: 18 }}>🍎</Text>,
+        icon: (
+          <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.success, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="nutrition" size={18} color={colors.accent.success} />
+          </View>
+        ),
         label: 'Calories',
         valueNode: <MonoText variant="monoBody" color={colors.accent.success}>{formatNumber(caloriesToday)}</MonoText>,
         value: formatNumber(caloriesToday),
@@ -370,7 +382,11 @@ export default function DashboardScreen() {
         accentColor: colors.accent.success,
       },
       {
-        icon: <Text style={{ fontSize: 18 }}>⚡</Text>,
+        icon: (
+          <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.cyan, alignItems: 'center', justifyContent: 'center' }}>
+            <Ionicons name="pulse" size={18} color={colors.accent.cyan} />
+          </View>
+        ),
         label: 'Readiness',
         valueNode: <MonoText variant="monoBody" color={readinessColor}>{readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—'}</MonoText>,
         value: readinessScoreDisplay != null ? `${readinessScoreDisplay}%` : '—',
@@ -730,7 +746,11 @@ export default function DashboardScreen() {
               >
                 Workout
               </Text>
-              <Text style={{ fontSize: 20 }}>{workoutDoneToday ? '✅' : '⏳'}</Text>
+              <Ionicons
+                name={workoutDoneToday ? 'checkmark-circle' : 'time-outline'}
+                size={22}
+                color={workoutDoneToday ? colors.accent.success : colors.text.muted}
+              />
               <Text
                 style={[typography.caption, { color: workoutDoneToday ? colors.accent.success : colors.text.muted }]}
                 numberOfLines={1}

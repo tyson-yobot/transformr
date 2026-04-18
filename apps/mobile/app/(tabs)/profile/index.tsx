@@ -36,6 +36,7 @@ import { upgradeModalEvents } from '@hooks/useFeatureGate';
 import { formatNumber } from '@utils/formatters';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { supabase } from '../../../services/supabase';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -410,6 +411,7 @@ export default function ProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
     <StatusBar style="light" backgroundColor="#0C0A15" />
+    <PurpleRadialBackground />
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{

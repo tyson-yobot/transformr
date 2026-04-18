@@ -204,7 +204,7 @@ export default function ChatScreen() {
               {
                 backgroundColor: isUser
                   ? colors.accent.primary
-                  : colors.background.tertiary,
+                  : 'rgba(22,18,42,0.85)',
                 borderTopRightRadius: isUser ? borderRadius.sm : borderRadius.lg,
                 borderTopLeftRadius: isUser ? borderRadius.lg : borderRadius.sm,
                 borderBottomRightRadius: borderRadius.lg,
@@ -212,9 +212,14 @@ export default function ChatScreen() {
                 padding: spacing.md,
                 maxWidth: '85%',
                 borderWidth: isUser ? 0 : 1,
-                borderColor: isUser ? 'transparent' : colors.border.subtle,
-                borderLeftWidth: isUser ? 0 : 2,
+                borderColor: isUser ? 'transparent' : `${colors.accent.cyan}25`,
+                borderLeftWidth: isUser ? 0 : 3,
                 borderLeftColor: isUser ? 'transparent' : colors.accent.cyan,
+                shadowColor: isUser ? colors.accent.primary : colors.accent.cyan,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: isUser ? 0.35 : 0.15,
+                shadowRadius: 12,
+                elevation: isUser ? 6 : 3,
               },
             ]}
           >
