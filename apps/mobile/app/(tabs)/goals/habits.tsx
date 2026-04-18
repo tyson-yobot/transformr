@@ -35,6 +35,8 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { Habit } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type HabitCategory = NonNullable<Habit['category']>;
@@ -191,6 +193,22 @@ export default function HabitTracker() {
   const getNextMilestone = (streak: number): number | null => {
     return STREAK_MILESTONES.find((m) => m > streak) ?? null;
   };
+
+  // Voice command handler for habits domain
+  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+    const cmd = result.command;
+    if (cmd.action === 'complete_habit') {
+      const targetName = (cmd as { habitName: string }).habitName.toLowerCase();
+      const match = habits.find(h => h.name.toLowerCase().includes(targetName));
+      if (match) {
+        void handleHabitComplete(match.id, match.current_streak ?? 0);
+      } else {
+        showToast(`Habit not found: "${(cmd as { habitName: string }).habitName}"`, { type: 'info' });
+      }
+    } else {
+      showToast(result.humanReadable || 'Command received', { type: 'success' });
+    }
+  }, [habits, handleHabitComplete, showToast]);
 
   // Build streak calendar data from 90-day completion history
   const streakCalendarData = useMemo(() => {
@@ -543,6 +561,16 @@ export default function HabitTracker() {
           style={{ marginTop: spacing.xl }}
         />
       </Modal>
+      <VoiceMicButton
+        context={{
+          userId: '',
+          activeScreen: 'habits',
+        }}
+        onCommand={handleVoiceCommand}
+        onError={(msg) => showToast(msg, { type: 'info' })}
+        bottom={100}
+        right={16}
+      />
     </View>
   );
 }

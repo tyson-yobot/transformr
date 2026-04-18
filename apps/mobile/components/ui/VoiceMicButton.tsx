@@ -131,7 +131,7 @@ export function VoiceMicButton({
         onError?.('Microphone permission required. Enable in Settings.');
       }
     }
-  }, [disabled, stopPulse, startPulse, onCommand, onError]);
+  }, [disabled, stopPulse, startPulse, context, onCommand, onError]);
 
   const active = isRecording();
 
@@ -158,7 +158,7 @@ export function VoiceMicButton({
         style={({ pressed }) => [
           styles.button,
           {
-            backgroundColor: active ? colors.feedback.error : colors.accent.primary,
+            backgroundColor: active ? colors.accent.danger : colors.accent.primary,
             opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
           },
         ]}

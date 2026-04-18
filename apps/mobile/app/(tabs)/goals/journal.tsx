@@ -30,6 +30,8 @@ import { supabase } from '@services/supabase';
 import { getJournalResponse } from '@services/ai/journaling';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
+import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const AI_PROMPTS = [
@@ -162,6 +164,15 @@ export default function JournalScreen() {
       setIsSubmitting(false);
     }
   }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt, showToast]);
+
+  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+    const { command } = result;
+    // Voice dictation: unknown commands with rawText become journal entry text
+    if (command.action === 'unknown' && command.rawText) {
+      setEntryText((prev) => prev ? `${prev} ${command.rawText}` : command.rawText);
+      showToast('Voice added', { subtext: 'Transcript appended to entry' });
+    }
+  }, [showToast]);
 
   const handleClearEntry = useCallback(() => {
     setEntryText('');
@@ -402,6 +413,12 @@ export default function JournalScreen() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+      <VoiceMicButton
+        context={{ userId: '', activeScreen: 'journal' }}
+        onCommand={handleVoiceCommand}
+        bottom={100}
+        right={16}
+      />
     </View>
   );
 }

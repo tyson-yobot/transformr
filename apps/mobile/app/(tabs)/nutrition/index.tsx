@@ -52,6 +52,8 @@ import type { CoachmarkStep } from '@components/ui/Coachmark';
 import { HELP } from '../../../constants/helpContent';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
+import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import type { ParsedVoiceCommand } from '@services/voice';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -253,6 +255,28 @@ export default function NutritionHomeScreen() {
   const fabAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: fabScale.value }],
   }));
+
+  // Voice command handler for nutrition domain
+  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+    const cmd = result.command;
+    switch (cmd.action) {
+      case 'log_water':
+        void logWater((cmd as { oz: number }).oz);
+        showToast(`Water logged: ${(cmd as { oz: number }).oz}oz`, { type: 'success' });
+        break;
+      case 'log_food':
+        router.push(`/(tabs)/nutrition/add-food?query=${encodeURIComponent((cmd as { foodName: string }).foodName)}` as never);
+        break;
+      case 'check_macros':
+        showToast(
+          `Calories: ${Math.round(remaining.calories)} remaining`,
+          { subtext: `Protein: ${Math.round(remaining.protein)}g | Carbs: ${Math.round(remaining.carbs)}g | Fat: ${Math.round(remaining.fat)}g`, type: 'info' },
+        );
+        break;
+      default:
+        showToast(result.humanReadable || 'Command received', { type: 'success' });
+    }
+  }, [logWater, router, remaining, showToast]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
@@ -804,6 +828,20 @@ export default function NutritionHomeScreen() {
           </Pressable>
         </View>
       </BottomSheet>
+      <VoiceMicButton
+        context={{
+          userId: profile?.id ?? '',
+          activeScreen: 'nutrition',
+          nutritionContext: {
+            caloriesRemaining: remaining.calories,
+            proteinRemaining: remaining.protein,
+          },
+        }}
+        onCommand={handleVoiceCommand}
+        onError={(msg) => showToast(msg, { type: 'error' })}
+        bottom={100}
+        right={16}
+      />
     </View>
   );
 }
