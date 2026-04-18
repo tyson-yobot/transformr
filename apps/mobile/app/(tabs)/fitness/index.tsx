@@ -109,6 +109,15 @@ const FITNESS_NAV_CARDS = [
     route: '/(tabs)/fitness/mobility',
     a11y: 'Open mobility exercises',
   },
+  {
+    label: 'Marketplace',
+    icon: 'storefront' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#F59E0B',
+    gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
+    description: 'Premium programs & coaching',
+    route: '/(tabs)/fitness/marketplace',
+    a11y: 'Browse program marketplace',
+  },
 ] as const;
 
 export default function FitnessHomeScreen() {
