@@ -36,14 +36,14 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
 
-const MEAL_TYPE_OPTIONS: { value: MealType; label: string; emoji: string }[] = [
-  { value: 'breakfast', label: 'Breakfast', emoji: '\u{1F373}' },
-  { value: 'lunch', label: 'Lunch', emoji: '\u{1F96A}' },
-  { value: 'dinner', label: 'Dinner', emoji: '\u{1F35D}' },
-  { value: 'snack', label: 'Snack', emoji: '\u{1F34E}' },
-  { value: 'shake', label: 'Shake', emoji: '\u{1F964}' },
-  { value: 'pre_workout', label: 'Pre-WO', emoji: '\u{26A1}' },
-  { value: 'post_workout', label: 'Post-WO', emoji: '\u{1F4AA}' },
+const MEAL_TYPE_OPTIONS: { value: MealType; label: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
+  { value: 'breakfast',    label: 'Breakfast', icon: 'sunny-outline',      iconColor: '#F59E0B' },
+  { value: 'lunch',        label: 'Lunch',     icon: 'restaurant-outline',  iconColor: '#22C55E' },
+  { value: 'dinner',       label: 'Dinner',    icon: 'moon-outline',        iconColor: '#8B5CF6' },
+  { value: 'snack',        label: 'Snack',     icon: 'cafe-outline',        iconColor: '#F97316' },
+  { value: 'shake',        label: 'Shake',     icon: 'nutrition-outline',   iconColor: '#22D3EE' },
+  { value: 'pre_workout',  label: 'Pre-WO',    icon: 'flash-outline',       iconColor: '#EAB308' },
+  { value: 'post_workout', label: 'Post-WO',   icon: 'barbell-outline',     iconColor: '#A855F7' },
 ];
 
 export default function AddFoodScreen() {
@@ -217,16 +217,23 @@ export default function AddFoodScreen() {
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    typography.caption,
-                    {
-                      color: mealType === option.value ? '#FFFFFF' : colors.text.secondary, /* brand-ok */
-                    },
-                  ]}
-                >
-                  {option.emoji} {option.label}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Ionicons
+                    name={option.icon}
+                    size={14}
+                    color={mealType === option.value ? '#FFFFFF' : option.iconColor} /* brand-ok */
+                  />
+                  <Text
+                    style={[
+                      typography.caption,
+                      {
+                        color: mealType === option.value ? '#FFFFFF' : colors.text.secondary, /* brand-ok */
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </View>
               </Pressable>
             ))}
           </ScrollView>

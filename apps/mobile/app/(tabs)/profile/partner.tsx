@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Share,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -37,11 +38,12 @@ const PRIVACY_TOGGLES: readonly {
   key: keyof SharedPreferences;
   label: string;
   icon: string;
+  ioniconsName?: keyof typeof Ionicons.glyphMap;
 }[] = [
   { key: 'can_see_weight', label: 'Weight & Body Stats', icon: '⚖️' },
   { key: 'can_see_workouts', label: 'Workouts', icon: '🏋️' },
   { key: 'can_see_nutrition', label: 'Nutrition', icon: '🍎' },
-  { key: 'can_see_habits', label: 'Habits', icon: '✅' },
+  { key: 'can_see_habits', label: 'Habits', icon: '', ioniconsName: 'checkmark-circle-outline' },
   { key: 'can_see_goals', label: 'Goals', icon: '🎯' },
   { key: 'can_see_mood', label: 'Mood & Journal', icon: '😊' },
   { key: 'can_see_business', label: 'Business', icon: '💼' },
@@ -317,9 +319,13 @@ export default function PartnerScreen() {
                     },
                   ]}
                 >
-                  <Text style={{ fontSize: 16, marginRight: spacing.sm }}>
-                    {toggle.icon}
-                  </Text>
+                  {toggle.ioniconsName ? (
+                    <Ionicons name={toggle.ioniconsName} size={16} color={colors.text.secondary} style={{ marginRight: spacing.sm }} />
+                  ) : (
+                    <Text style={{ fontSize: 16, marginRight: spacing.sm }}>
+                      {toggle.icon}
+                    </Text>
+                  )}
                   <Text
                     style={[
                       typography.body,

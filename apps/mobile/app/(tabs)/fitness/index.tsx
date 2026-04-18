@@ -26,6 +26,7 @@ import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
+import { useScreenEntrance } from '@hooks/useScreenEntrance';
 import { formatVolume, formatRelativeTime, formatDuration } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
@@ -33,8 +34,10 @@ import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { LinearGradient } from 'expo-linear-gradient';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
-import { SectionTile } from '@components/ui/SectionTile';
+import { HeroCard } from '@components/ui/HeroCard';
+import { HERO_IMAGES } from '@services/heroImagePreloader';
 
 interface RecentWorkout {
   id: string;
@@ -50,15 +53,65 @@ interface WeightDataPoint {
   weight: number;
 }
 
-const QUICK_ACTIONS = [
-  { label: 'Exercises', iconName: 'search-outline' as const, colorKey: 'primary' as const, route: '/(tabs)/fitness/exercises', a11y: 'Browse exercises' },
-  { label: 'Programs',  iconName: 'calendar-outline' as const, colorKey: 'info' as const,    route: '/(tabs)/fitness/programs',  a11y: 'View programs' },
-  { label: 'Progress',  iconName: 'trending-up-outline' as const, colorKey: 'success' as const, route: '/(tabs)/fitness/progress', a11y: 'View progress' },
-  { label: 'Form Check', iconName: 'videocam-outline' as const, colorKey: 'warning' as const, route: '/(tabs)/fitness/form-check', a11y: 'Form check' },
+const FITNESS_NAV_CARDS = [
+  {
+    label: 'Exercises',
+    icon: 'barbell' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#A855F7',
+    gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
+    description: '100+ exercises with anatomy',
+    route: '/(tabs)/fitness/exercises',
+    a11y: 'Browse exercises',
+  },
+  {
+    label: 'Programs',
+    icon: 'calendar' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#22D3EE',
+    gradient: ['rgba(34,211,238,0.15)', 'rgba(34,211,238,0.05)'] as [string, string],
+    description: 'AI-adaptive training blocks',
+    route: '/(tabs)/fitness/programs',
+    a11y: 'View programs',
+  },
+  {
+    label: 'Progress',
+    icon: 'trending-up' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#22C55E',
+    gradient: ['rgba(34,197,94,0.15)', 'rgba(34,197,94,0.05)'] as [string, string],
+    description: 'Charts, PRs, body metrics',
+    route: '/(tabs)/fitness/progress',
+    a11y: 'View progress',
+  },
+  {
+    label: 'Form Check',
+    icon: 'videocam' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#F59E0B',
+    gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
+    description: 'AI frame-by-frame analysis',
+    route: '/(tabs)/fitness/form-check',
+    a11y: 'Form check with AI',
+  },
+  {
+    label: 'Pain Tracker',
+    icon: 'body' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#EF4444',
+    gradient: ['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.04)'] as [string, string],
+    description: 'Body map logging + AI tips',
+    route: '/(tabs)/fitness/pain-tracker',
+    a11y: 'Open pain tracker',
+  },
+  {
+    label: 'Mobility',
+    icon: 'accessibility' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#8B5CF6',
+    gradient: ['rgba(139,92,246,0.15)', 'rgba(139,92,246,0.05)'] as [string, string],
+    description: 'AI recovery + flexibility',
+    route: '/(tabs)/fitness/mobility',
+    a11y: 'Open mobility exercises',
+  },
 ] as const;
 
 export default function FitnessHomeScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, borderRadius, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
@@ -214,14 +267,10 @@ export default function FitnessHomeScreen() {
     [router],
   );
 
-  const accentForKey = (key: typeof QUICK_ACTIONS[number]['colorKey']) => {
-    switch (key) {
-      case 'primary': return colors.accent.primary;
-      case 'info':    return colors.accent.info;
-      case 'success': return colors.accent.success;
-      case 'warning': return colors.accent.warning;
-    }
-  };
+  // Screen entrance choreography
+  const { getEntranceStyle } = useScreenEntrance({
+    sections: ['header', 'quickActions', 'workoutCard', 'statsRow'],
+  });
 
   const renderRecentWorkout = useCallback(
     ({ item }: { item: RecentWorkout }) => (
@@ -264,7 +313,7 @@ export default function FitnessHomeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -277,7 +326,9 @@ export default function FitnessHomeScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
+        <Animated.View style={getEntranceStyle('header')}>
         <AIInsightCard screenKey="fitness/index" style={{ marginBottom: spacing.md }} />
+        </Animated.View>
 
         {error && (
           <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.danger}15` }}>
@@ -286,8 +337,10 @@ export default function FitnessHomeScreen() {
         )}
 
         {/* Today's Workout */}
+        <Animated.View style={getEntranceStyle('workoutCard')}>
         <Animated.View entering={FadeInDown.delay(0).duration(400)}>
-          <Card variant="elevated" style={{ marginBottom: spacing.lg, borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}>
+          <HeroCard heroImage={HERO_IMAGES.fitness} style={{ marginBottom: spacing.lg, borderRadius: 12 }}>
+          <Card variant="elevated" style={{ borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}>
             <View style={styles.sectionHeader}>
               <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
               <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
@@ -355,9 +408,12 @@ export default function FitnessHomeScreen() {
               </View>
             )}
           </Card>
+          </HeroCard>
+        </Animated.View>
         </Animated.View>
 
         {/* Quick Stats */}
+        <Animated.View style={getEntranceStyle('statsRow')}>
         <Animated.View entering={FadeInDown.delay(50).duration(400)}>
           <View style={[styles.statsRow, { gap: spacing.sm, marginBottom: spacing.lg }]}>
             {/* Weekly Volume */}
@@ -442,29 +498,42 @@ export default function FitnessHomeScreen() {
             </Pressable>
           </View>
         </Animated.View>
+        </Animated.View>
 
-        {/* Quick Actions */}
+        {/* Navigation Cards */}
+        <Animated.View style={getEntranceStyle('quickActions')}>
         <Animated.View
           entering={FadeInDown.delay(100).duration(400)}
-          style={{ marginBottom: spacing.lg }}
         >
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: spacing.sm, paddingRight: spacing.lg }}
-          >
-            {QUICK_ACTIONS.map((action) => (
-              <SectionTile
-                key={action.label}
-                icon={action.iconName}
-                label={action.label}
-                accentColor={accentForKey(action.colorKey)}
-                size="md"
-                onPress={() => router.push(action.route as never)}
-                accessibilityLabel={action.a11y}
-              />
+          <View style={{ marginBottom: spacing.lg }}>
+            {FITNESS_NAV_CARDS.map((card) => (
+              <Pressable
+                key={card.label}
+                onPress={() => { hapticLight(); router.push(card.route as never); }}
+                accessibilityLabel={card.a11y}
+                accessibilityRole="button"
+                style={[
+                  styles.fitnessNavCard,
+                  { backgroundColor: colors.background.secondary, borderColor: colors.border.default },
+                ]}
+              >
+                <LinearGradient
+                  colors={card.gradient}
+                  style={styles.fitnessNavIconWrap}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name={card.icon} size={24} color={card.iconColor} />
+                </LinearGradient>
+                <View style={{ flex: 1 }}>
+                  <Text style={[typography.bodyBold, { color: colors.text.primary }]}>{card.label}</Text>
+                  <Text style={[typography.tiny, { color: colors.text.secondary, marginTop: 2 }]}>{card.description}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+              </Pressable>
             ))}
-          </ScrollView>
+          </View>
+        </Animated.View>
         </Animated.View>
         <HelpBubble id="fitness_programs" message="Follow a program for structured training" position="below" />
 
@@ -562,7 +631,7 @@ export default function FitnessHomeScreen() {
                   { backgroundColor: `${colors.accent.primary}15`, borderRadius: 40 },
                 ]}
               >
-                <Text style={{ fontSize: 40 }}>🏆</Text>
+                <Ionicons name="trophy" size={40} color={colors.accent.gold} />
               </View>
               <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
                 Your journey starts here
@@ -594,35 +663,6 @@ export default function FitnessHomeScreen() {
           )}
         </View>
 
-        {/* More Actions */}
-        <View style={[styles.moreActions, { gap: spacing.sm }]}>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/pain-tracker')}
-            accessibilityLabel="Open pain tracker"
-            style={[
-              styles.moreActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.lg },
-            ]}
-          >
-            <Ionicons name="body-outline" size={24} color={colors.accent.danger} />
-            <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
-              Pain Tracker
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleNavigate('/(tabs)/fitness/mobility')}
-            accessibilityLabel="Open mobility exercises"
-            style={[
-              styles.moreActionBtn,
-              { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.lg },
-            ]}
-          >
-            <Ionicons name="accessibility-outline" size={24} color={colors.accent.info} />
-            <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.sm }]}>
-              Mobility
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
 
       {/* FAB */}
@@ -676,22 +716,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 2,
   },
-  // Quick actions
-  quickActions: {
+  // Fitness nav cards
+  fitnessNavCard: {
     flexDirection: 'row',
-  },
-  quickActionBtn: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 8,
     borderWidth: 1,
-    minHeight: 76,
+    gap: 14,
   },
-  quickActionIconWrap: {
-    width: 36,
-    height: 36,
+  fitnessNavIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   // Today's workout buttons
   primaryButton: {
@@ -732,16 +773,6 @@ const styles = StyleSheet.create({
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // More actions
-  moreActions: {
-    flexDirection: 'row',
-  },
-  moreActionBtn: {
-    flex: 1,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.15)',
   },
   // FAB
   fab: {

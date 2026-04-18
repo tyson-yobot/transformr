@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Screen
 // =============================================================================
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
+import { AnimatedNumber } from '@components/ui/AnimatedNumber';
 import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
 import { QuickActionTile } from '@components/ui/QuickActionTile';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
@@ -49,10 +50,13 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { useBusinessStore } from '@stores/businessStore';
 import { useInsightStore } from '@stores/insightStore';
 import { useCountdown } from '@hooks/useCountdown';
+import { useScreenEntrance } from '@hooks/useScreenEntrance';
 import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
 import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { LogSuccessRipple } from '@components/ui/LogSuccessRipple';
+import type { LogSuccessRippleHandle } from '@components/ui/LogSuccessRipple';
 import { HelpIcon } from '@components/ui/HelpIcon';
 import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
@@ -79,7 +83,7 @@ function MiniSparkline({ data, color, width = 120, height = 40 }: {
 // Main Dashboard Screen
 // ---------------------------------------------------------------------------
 export default function DashboardScreen() {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, borderRadius, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -91,6 +95,9 @@ export default function DashboardScreen() {
   const aiCardRef = React.useRef<View>(null);
   const quickActionsRef = React.useRef<View>(null);
   const statsCardRef = React.useRef<View>(null);
+  const rippleWorkoutRef = useRef<LogSuccessRippleHandle>(null);
+  const rippleMealRef = useRef<LogSuccessRippleHandle>(null);
+  const rippleWeightRef = useRef<LogSuccessRippleHandle>(null);
 
   const measureCoachmarks = React.useCallback(() => {
     const content = COACHMARK_CONTENT.dashboard;
@@ -162,6 +169,11 @@ export default function DashboardScreen() {
   }, [goalStore.goals]);
 
   useCountdown(primaryGoal?.target_date ?? null);
+
+  // Screen entrance choreography
+  const { getEntranceStyle } = useScreenEntrance({
+    sections: ['header', 'quickActions', 'statsGrid', 'aiCard', 'todaysPlan'],
+  });
 
   // Top 3 habits by streak
   const top3Streaks = useMemo(() => {
@@ -414,7 +426,7 @@ export default function DashboardScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
       <AmbientBackground />
-      <StatusBar style="light" backgroundColor="#0C0A15" />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />
       <NoiseOverlay />
       <ScrollView
@@ -451,6 +463,7 @@ export default function DashboardScreen() {
       )}
 
       {/* Greeting */}
+      <Animated.View style={getEntranceStyle('header')}>
       <Animated.View
         entering={FadeInDown.delay(0).duration(800)}
         style={{ marginBottom: spacing.xl }}
@@ -488,33 +501,51 @@ export default function DashboardScreen() {
           })}
         </Text>
       </Animated.View>
+      </Animated.View>
       <HelpBubble id="dashboard_greeting" message="Pull down to refresh your daily briefing" position="below" />
 
       {/* Quick Actions — placed here so they're always above the ChatFAB */}
+      <Animated.View style={getEntranceStyle('quickActions')}>
       <Animated.View entering={FadeInDown.delay(30).duration(400)}>
-        <View ref={quickActionsRef} style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg }}>
-          <QuickActionTile
-            icon="barbell-outline"
-            label="Log Workout"
-            accentColor={colors.accent.primary}
-            dimColor={colors.dim.primary}
-            onPress={() => router.push('/(tabs)/fitness' as never)}
-          />
-          <QuickActionTile
-            icon="restaurant-outline"
-            label="Log Meal"
-            accentColor={colors.accent.success}
-            dimColor={colors.dim.success}
-            onPress={() => router.push('/(tabs)/nutrition/add-food' as never)}
-          />
-          <QuickActionTile
-            icon="scale-outline"
-            label="Log Weight"
-            accentColor={colors.accent.info}
-            dimColor={colors.dim.info}
-            onPress={() => router.push('/(tabs)/profile' as never)}
-          />
+        <View ref={quickActionsRef} style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg, justifyContent: 'center', alignItems: 'stretch' }}>
+          <LogSuccessRipple ref={rippleWorkoutRef}>
+            <QuickActionTile
+              icon="barbell-outline"
+              label="Log Workout"
+              accentColor={colors.accent.primary}
+              dimColor={colors.dim.primary}
+              onPress={() => {
+                rippleWorkoutRef.current?.trigger();
+                router.push('/(tabs)/fitness' as never);
+              }}
+            />
+          </LogSuccessRipple>
+          <LogSuccessRipple ref={rippleMealRef}>
+            <QuickActionTile
+              icon="restaurant-outline"
+              label="Log Meal"
+              accentColor={colors.accent.success}
+              dimColor={colors.dim.success}
+              onPress={() => {
+                rippleMealRef.current?.trigger();
+                router.push('/(tabs)/nutrition/add-food' as never);
+              }}
+            />
+          </LogSuccessRipple>
+          <LogSuccessRipple ref={rippleWeightRef}>
+            <QuickActionTile
+              icon="scale-outline"
+              label="Log Weight"
+              accentColor={colors.accent.info}
+              dimColor={colors.dim.info}
+              onPress={() => {
+                rippleWeightRef.current?.trigger();
+                router.push('/(tabs)/profile' as never);
+              }}
+            />
+          </LogSuccessRipple>
         </View>
+      </Animated.View>
       </Animated.View>
 
       {/* Daily Accountability Card */}
@@ -632,9 +663,11 @@ export default function DashboardScreen() {
       <WeatherCard style={{ marginBottom: spacing.md }} />
 
       {/* AI Insight */}
+      <Animated.View style={getEntranceStyle('aiCard')}>
       <View ref={aiCardRef}>
         <AIInsightCard screenKey="dashboard" style={{ marginBottom: spacing.md }} />
       </View>
+      </Animated.View>
 
       {/* Top Prediction Alert */}
       {topPrediction && (
@@ -711,6 +744,7 @@ export default function DashboardScreen() {
       </Animated.View>
 
       {/* Stats Grid — calories, protein, water, workout */}
+      <Animated.View style={getEntranceStyle('statsGrid')}>
       <Animated.View entering={FadeInDown.delay(110).duration(400)}>
         <View ref={statsCardRef}>
         <Card
@@ -767,6 +801,7 @@ export default function DashboardScreen() {
         </Card>
         </View>
       </Animated.View>
+      </Animated.View>
 
       {/* Top 3 Streaks */}
       {top3Streaks.length > 0 && (
@@ -776,7 +811,8 @@ export default function DashboardScreen() {
             style={{ marginBottom: spacing.lg }}
             header={
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={[typography.h3, { color: colors.text.primary }]}>Top Streaks 🔥</Text>
+                <Ionicons name="flame" size={18} color={colors.accent.fire} />
+                <Text style={[typography.h3, { color: colors.text.primary }]}>Top Streaks</Text>
                 <HelpIcon content={HELP.streakCounter} size={14} />
               </View>
             }
@@ -792,9 +828,12 @@ export default function DashboardScreen() {
                 <Text style={[typography.body, { color: colors.text.primary, flex: 1 }]}>
                   {habit.name}
                 </Text>
-                <MonoText variant="monoBody" color={colors.accent.warning}>
-                  {`🔥 ${habit.current_streak ?? 0}`}
-                </MonoText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                  <Ionicons name="flame" size={14} color={colors.accent.fire} />
+                  <MonoText variant="monoCaption" color={colors.accent.fire}>
+                    {String(habit.current_streak ?? 0)}
+                  </MonoText>
+                </View>
               </View>
             ))}
           </Card>
@@ -802,6 +841,7 @@ export default function DashboardScreen() {
       )}
 
       {/* Today's Plan */}
+      <Animated.View style={getEntranceStyle('todaysPlan')}>
       <Animated.View entering={FadeInDown.delay(150).duration(400)}>
         <Card
           variant="default"
@@ -816,26 +856,30 @@ export default function DashboardScreen() {
           }
         >
           <PlanRow
-            emoji="🏋️"
+            icon="barbell"
+            iconColor={colors.accent.primary}
             label="Workout"
             detail={workoutStore.activeSession ? 'In progress' : 'Scheduled'}
             done={!!workoutStore.activeSession?.completed_at}
           />
           <PlanRow
-            emoji="🍽️"
+            icon="restaurant"
+            iconColor={colors.accent.success}
             label="Meals logged"
             detail={`${nutritionStore.todayLogs.length}/4`}
             done={nutritionStore.todayLogs.length >= 4}
             mono
           />
           <PlanRow
-            emoji="✅"
+            icon="checkmark-circle-outline"
+            iconColor={colors.accent.info}
             label="Habits remaining"
             detail={`${habitsRemaining} left`}
             done={habitsRemaining === 0}
             mono
           />
         </Card>
+      </Animated.View>
       </Animated.View>
 
       {/* Partner Card */}
@@ -1034,9 +1078,10 @@ function StatsCell({
       >
         {label}
       </Text>
-      <MonoText variant="monoBody" color={colors.text.primary} numberOfLines={1} adjustsFontSizeToFit>
-        {formatNumber(logged)}
-      </MonoText>
+      <AnimatedNumber
+        value={logged}
+        style={[typography.monoBody, { color: colors.text.primary }]}
+      />
       <Text
         style={[typography.tiny, { color: colors.text.muted }]}
         numberOfLines={1}
@@ -1049,13 +1094,15 @@ function StatsCell({
 }
 
 function PlanRow({
-  emoji,
+  icon,
+  iconColor,
   label,
   detail,
   done,
   mono = false,
 }: {
-  emoji: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
   label: string;
   detail: string;
   done: boolean;
@@ -1069,7 +1116,7 @@ function PlanRow({
         { paddingVertical: spacing.sm, borderBottomColor: colors.border.subtle },
       ]}
     >
-      <Text style={{ fontSize: 18, marginRight: spacing.sm }}>{emoji}</Text>
+      <Ionicons name={icon} size={20} color={iconColor} style={{ marginRight: spacing.sm }} />
       <Text
         style={[
           typography.body,

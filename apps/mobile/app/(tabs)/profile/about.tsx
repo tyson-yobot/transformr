@@ -15,6 +15,7 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -41,10 +42,12 @@ const TERMS_URL = 'https://transformr.app/terms';
 // ---------------------------------------------------------------------------
 function LinkRow({
   icon,
+  ioniconsName,
   label,
   onPress,
 }: {
-  icon: string;
+  icon?: string;
+  ioniconsName?: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
 }) {
@@ -68,7 +71,11 @@ function LinkRow({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={{ fontSize: 18, marginRight: spacing.md }}>{icon}</Text>
+      {ioniconsName ? (
+        <Ionicons name={ioniconsName} size={18} color={colors.text.secondary} style={{ marginRight: spacing.md }} />
+      ) : (
+        <Text style={{ fontSize: 18, marginRight: spacing.md }}>{icon}</Text>
+      )}
       <Text
         style={[typography.body, { color: colors.text.primary, flex: 1 }]}
       >
@@ -275,7 +282,7 @@ export default function AboutScreen() {
           onPress={() => handleOpenUrl(TERMS_URL)}
         />
         <LinkRow
-          icon="⭐"
+          ioniconsName="star"
           label="Rate the App"
           onPress={handleRateApp}
         />

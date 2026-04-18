@@ -12,6 +12,7 @@ import {
   Alert,
   Share,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFeatureGate } from '@hooks/useFeatureGate';
@@ -36,6 +37,7 @@ interface DataCategory {
   key: string;
   label: string;
   icon: string;
+  ioniconsName?: keyof typeof Ionicons.glyphMap;
   selected: boolean;
 }
 
@@ -79,7 +81,7 @@ export default function DataExportScreen() {
     { key: 'workouts', label: 'Workouts', icon: '🏋️', selected: true },
     { key: 'nutrition', label: 'Nutrition', icon: '🍎', selected: true },
     { key: 'weight', label: 'Weight & Body', icon: '⚖️', selected: true },
-    { key: 'habits', label: 'Habits', icon: '✅', selected: true },
+    { key: 'habits', label: 'Habits', icon: '', ioniconsName: 'checkmark-circle-outline' as keyof typeof Ionicons.glyphMap, selected: true },
     { key: 'sleep', label: 'Sleep', icon: '😴', selected: false },
     { key: 'mood', label: 'Mood & Energy', icon: '😊', selected: false },
     { key: 'business', label: 'Business', icon: '💼', selected: false },
@@ -383,9 +385,13 @@ export default function DataExportScreen() {
                 },
               ]}
             >
-              <Text style={{ fontSize: 18, marginRight: spacing.md }}>
-                {cat.icon}
-              </Text>
+              {cat.ioniconsName ? (
+                <Ionicons name={cat.ioniconsName} size={18} color={colors.text.secondary} style={{ marginRight: spacing.md }} />
+              ) : (
+                <Text style={{ fontSize: 18, marginRight: spacing.md }}>
+                  {cat.icon}
+                </Text>
+              )}
               <Text
                 style={[
                   typography.body,
