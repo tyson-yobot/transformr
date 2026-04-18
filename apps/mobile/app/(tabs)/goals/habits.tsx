@@ -111,7 +111,7 @@ export default function HabitTracker() {
   } = useHabitStore();
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
-  const { isAvailable: canAddHabit, showUpgradeModal } = useFeatureGate('unlimited_habits');
+  const { isAvailable: canAddHabit, showUpgradeModal } = useFeatureGate('habit_tracking_unlimited');
 
   const [refreshing, setRefreshing] = useState(false);
   const [filterCategory, setFilterCategory] = useState<HabitCategory | null>(null);
@@ -330,7 +330,7 @@ export default function HabitTracker() {
               actionLabel="Add First Habit"
               onAction={() => {
                 hapticMedium();
-                if (!canAddHabit && habits.length >= 5) {
+                if (!canAddHabit && habits.length >= 3) {
                   showUpgradeModal();
                 } else {
                   setShowAddModal(true);
@@ -498,7 +498,7 @@ export default function HabitTracker() {
           title="Add Habit"
           onPress={() => {
             hapticMedium();
-            if (!canAddHabit && habits.length >= 5) {
+            if (!canAddHabit && habits.length >= 3) {
               showUpgradeModal();
             } else {
               setShowAddModal(true);
