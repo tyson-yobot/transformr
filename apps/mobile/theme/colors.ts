@@ -135,7 +135,7 @@ export const colors = {
 
   light: {
     background: {
-      primary:        '#F8F7FF',   // Warm lavender white — TRANSFORMR branded
+      primary:        '#F4F2FB',   // Warm lavender white — TRANSFORMR branded
       secondary:      '#FFFFFF',   // Cards: pure white against lavender bg
       tertiary:       '#F3F1FF',   // Elevated surfaces: deeper lavender
       input:          '#FFFFFF',

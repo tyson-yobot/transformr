@@ -62,7 +62,7 @@ export function Card({
   accessibilityLabel,
   accessibilityRole: _accessibilityRole,
 }: CardProps) {
-  const { colors, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius, isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -87,7 +87,7 @@ export function Card({
 
   const effectivePadding = padding ?? spacing.lg;
 
-  const variantStyle = getVariantStyle(variant, colors);
+  const variantStyle = getVariantStyle(variant, colors, isDark);
   const borderAccentStyle: ViewStyle = borderAccent
     ? { borderLeftWidth: 3, borderLeftColor: variantStyle.accentColor }
     : {};
@@ -185,12 +185,21 @@ interface VariantStyle {
 function getVariantStyle(
   variant: CardVariant,
   colors: ReturnType<typeof useTheme>['colors'],
+  isDark: boolean,
 ): VariantStyle {
   switch (variant) {
     case 'elevated':
     case 'featured':
       return {
-        shadow:      colors.shadow.cardStrong,
+        shadow: isDark
+          ? colors.shadow.cardStrong
+          : {
+              shadowColor:   '#7C3AED', // brand purple — light-mode branded shadow
+              shadowOffset:  { width: 0, height: 4 },
+              shadowOpacity: 0.12,
+              shadowRadius:  14,
+              elevation:     6,
+            },
         accentColor: colors.accent.primary,
         glowColor:   colors.glow.purple,
       };
@@ -290,7 +299,17 @@ function getVariantStyle(
     // default — subtle purple glow
     default:
       return {
-        shadow:      colors.shadow.cardSubtle,
+        shadow: isDark
+          ? colors.shadow.cardSubtle
+          : {
+              borderWidth:   1,
+              borderColor:   'rgba(124,58,237,0.09)', // brand purple tint — light-mode depth
+              shadowColor:   '#7C3AED',
+              shadowOffset:  { width: 0, height: 2 },
+              shadowOpacity: 0.07,
+              shadowRadius:  8,
+              elevation:     2,
+            },
         accentColor: colors.accent.primary,
         glowColor:   colors.glow.purpleSoft,
       };
