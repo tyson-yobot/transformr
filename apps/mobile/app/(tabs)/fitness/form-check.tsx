@@ -29,6 +29,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { analyzeExerciseForm } from '@services/ai/formCheck';
 import { supabase } from '@services/supabase';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -47,6 +48,8 @@ export default function FormCheckScreen() {
   const navigation = useNavigation();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
+
+  const formCheckGate = useFeatureGate('ai_form_check');
 
   const [phase, setPhase] = useState<FormCheckPhase>('setup');
   const [countdown, setCountdown] = useState(3);
@@ -123,6 +126,7 @@ export default function FormCheckScreen() {
 
   const handleSubmitForAnalysis = useCallback(async () => {
     if (!videoUri) return;
+    if (!formCheckGate.isAvailable) { setPhase('review'); return; }
     setPhase('analyzing');
 
     try {
@@ -153,7 +157,7 @@ export default function FormCheckScreen() {
       Alert.alert('Error', 'Failed to analyze form. Please try again.');
       setPhase('review');
     }
-  }, [videoUri, selectedExercise]);
+  }, [videoUri, selectedExercise, formCheckGate.isAvailable]);
 
   const handleReset = useCallback(() => {
     setPhase('setup');

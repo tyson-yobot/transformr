@@ -64,6 +64,7 @@ import { HELP } from '../../constants/helpContent';
 import { SCREEN_HELP } from '../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../constants/coachmarkSteps';
 import { supabase } from '../../services/supabase';
+import { useFeatureGate } from '../../hooks/useFeatureGate';
 
 // ---------------------------------------------------------------------------
 // Mini sparkline component for revenue
@@ -123,6 +124,8 @@ export default function DashboardScreen() {
       });
     });
   }, []);
+  const readinessGate = useFeatureGate('readiness_score');
+
   const [readinessScore, setReadinessScore] = useState<number | null>(null);
   const [realWeightData, setRealWeightData] = useState<{ date: string; weight: number }[]>([]);
 
@@ -258,11 +261,13 @@ export default function DashboardScreen() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Readiness score from edge function
-        const { data: readinessData } = await supabase.functions.invoke('readiness-score', {
-          body: { userId: user.id },
-        });
-        if (readinessData?.score != null) setReadinessScore(readinessData.score as number);
+        // Readiness score from edge function — only when gate is available
+        if (readinessGate.isAvailable) {
+          const { data: readinessData } = await supabase.functions.invoke('readiness-score', {
+            body: { userId: user.id },
+          });
+          if (readinessData?.score != null) setReadinessScore(readinessData.score as number);
+        }
 
         // Weight history from weight_logs
         const { data: weightLogs } = await supabase
@@ -318,7 +323,7 @@ export default function DashboardScreen() {
       }
     };
     void loadDashboardData();
-  }, []);
+  }, [readinessGate.isAvailable]);
 
   // Refresh handler
   const onRefresh = useCallback(async () => {

@@ -5,6 +5,8 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -52,6 +54,8 @@ export async function getNextSetRecommendation(
     throw new Error('User must be authenticated to get workout recommendations');
   }
 
+  const userContext: UserAIContext | null = await buildUserAIContext(user.id).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-workout-advisor', {
     body: {
       userId: user.id,
@@ -59,6 +63,7 @@ export async function getNextSetRecommendation(
       exerciseName: params.exerciseName,
       completedSets: params.completedSets,
       userGoal: params.userGoal,
+      userContext,
     },
   });
 

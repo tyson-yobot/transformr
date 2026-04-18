@@ -7,6 +7,8 @@
 // =============================================================================
 
 import { supabase } from '../supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 // ---------------------------------------------------------------------------
 // Types (mirror the Edge Function's interfaces)
@@ -27,6 +29,7 @@ export interface PreviousSet {
 }
 
 export interface NarratorCueRequest {
+  userId: string;
   sessionId: string;
   exerciseName: string;
   setNumber: number;
@@ -56,9 +59,11 @@ export interface NarratorCueResponse {
  * @throws If the Edge Function call fails or returns no data.
  */
 export async function getNarratorCue(request: NarratorCueRequest): Promise<NarratorCueResponse> {
+  const userContext: UserAIContext | null = await buildUserAIContext(request.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke<NarratorCueResponse>(
     'workout-narrator',
-    { body: request },
+    { body: { ...request, userContext } },
   );
 
   if (error) throw error;

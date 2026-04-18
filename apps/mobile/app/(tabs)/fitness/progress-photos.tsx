@@ -31,6 +31,7 @@ import { Badge } from '@components/ui/Badge';
 import { supabase } from '@services/supabase';
 import { uploadProgressPhoto, analyzeProgressPhotos } from '@services/ai/progressPhoto';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { AIProgressPhotoAnalysis } from '@app-types/ai';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -56,6 +57,8 @@ export default function ProgressPhotosScreen() {
   const { colors, typography, spacing, borderRadius, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+
+  const progressPhotoGate = useFeatureGate('ai_progress_photo');
 
   const [photos, setPhotos] = useState<StoredPhoto[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
@@ -136,6 +139,7 @@ export default function ProgressPhotosScreen() {
 
   const handleAnalyze = useCallback(async () => {
     if (!userId || photos.length === 0) return;
+    if (!progressPhotoGate.isAvailable) return;
     hapticLight();
     setAnalyzing(true);
 
@@ -157,7 +161,7 @@ export default function ProgressPhotosScreen() {
     } finally {
       setAnalyzing(false);
     }
-  }, [userId, photos]);
+  }, [userId, photos, progressPhotoGate.isAvailable]);
 
   const ANGLE_OPTIONS: PhotoAngle[] = ['front', 'side', 'back'];
 

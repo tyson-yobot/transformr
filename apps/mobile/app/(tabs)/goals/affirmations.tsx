@@ -36,6 +36,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatDate } from '@utils/formatters';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -173,6 +174,8 @@ export default function AffirmationsScreen() {
   const navigation = useNavigation();
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
+  const affirmationGate = useFeatureGate('ai_daily_affirmation');
+
   const sessionType = getSessionType();
   const [todayAffirmation, setTodayAffirmation] = useState<DailyAffirmation | null>(null);
   const [history, setHistory] = useState<DailyAffirmation[]>([]);
@@ -239,6 +242,7 @@ export default function AffirmationsScreen() {
   }, [loadData]);
 
   const handleGenerate = useCallback(async () => {
+    if (!affirmationGate.isAvailable) return;
     setIsGenerating(true);
     hapticLight();
 
@@ -290,7 +294,7 @@ export default function AffirmationsScreen() {
     } finally {
       setIsGenerating(false);
     }
-  }, [sessionType, loadData, showToast]);
+  }, [sessionType, loadData, showToast, affirmationGate.isAvailable]);
 
   const typeLabel = sessionType === 'morning' ? 'Morning Affirmation'
     : sessionType === 'evening' ? 'Evening Wind-Down'

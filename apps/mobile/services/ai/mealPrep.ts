@@ -3,9 +3,12 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { BudgetMealPrepResponse } from '@app-types/ai';
 
 export interface MealPrepParams {
+  userId?: string;
   macro_targets?: {
     calories: number;
     protein_g: number;
@@ -24,8 +27,13 @@ export interface MealPrepParams {
 export async function generateBudgetMealPrepPlan(
   params: MealPrepParams,
 ): Promise<BudgetMealPrepResponse> {
+  const resolvedUserId = params.userId ?? (await supabase.auth.getUser()).data.user?.id ?? '';
+  const userContext: UserAIContext | null = resolvedUserId
+    ? await buildUserAIContext(resolvedUserId).catch(() => null)
+    : null;
+
   const { data, error } = await supabase.functions.invoke('ai-meal-prep', {
-    body: params,
+    body: { ...params, userContext },
   });
 
   if (error) throw error;

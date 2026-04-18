@@ -396,6 +396,7 @@ export default function WorkoutPlayerScreen() {
       // Include the just-logged set in recentSets (loggedSets state updates after this callback)
       const priorSets = currentExercise.loggedSets.slice(-2);
       getMidWorkoutCoachingTip({
+        userId: activeSession?.user_id ?? '',
         exerciseName: currentExercise.exercise.name,
         setsCompleted: newTotalSets,
         totalVolume: totalVolume + weight * reps,

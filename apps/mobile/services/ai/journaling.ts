@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 interface JournalContext {
   userId: string;
@@ -31,8 +33,10 @@ interface JournalResponse {
 export async function getJournalPrompt(
   context: JournalContext,
 ): Promise<JournalPrompt> {
+  const userContext: UserAIContext | null = await buildUserAIContext(context.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-journal-prompt', {
-    body: { ...context, type: 'prompt' },
+    body: { ...context, type: 'prompt', userContext },
   });
 
   if (error) throw error;
@@ -46,6 +50,8 @@ export async function getJournalResponse(
   struggles: string[],
   gratitude: string[],
 ): Promise<JournalResponse> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-journal-prompt', {
     body: {
       userId,
@@ -54,6 +60,7 @@ export async function getJournalResponse(
       wins,
       struggles,
       gratitude,
+      userContext,
     },
   });
 

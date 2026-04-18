@@ -30,6 +30,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { formatCurrencyDetailed } from '@utils/formatters';
 import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import { generateBudgetGroceryList } from '@services/ai/groceryList';
 import { getWeeklyGroceryBudget } from '@services/ai/mealPrep';
 import type {
@@ -59,6 +60,8 @@ export default function GroceryListScreen() {
       headerRight: () => <ScreenHelpButton content={SCREEN_HELP.groceryListScreen} />,
     });
   }, [navigation]);
+
+  const groceryListGate = useFeatureGate('ai_grocery_list');
 
   const [groceryData, setGroceryData] = useState<BudgetGroceryListResponse | null>(null);
   const [checked, setChecked] = useState<CheckedState>({});
@@ -107,6 +110,7 @@ export default function GroceryListScreen() {
   }
 
   const handleGenerate = useCallback(async () => {
+    if (!groceryListGate.isAvailable) return;
     setIsGenerating(true);
     setError(null);
     hapticMedium();
@@ -127,7 +131,7 @@ export default function GroceryListScreen() {
     } finally {
       setIsGenerating(false);
     }
-  }, [weeklyBudget]);
+  }, [weeklyBudget, groceryListGate.isAvailable]);
 
   const handleToggleItem = useCallback((aisle: string, name: string) => {
     hapticLight();

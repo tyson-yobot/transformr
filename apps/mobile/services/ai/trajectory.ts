@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { AITrajectory } from '@app-types/ai';
 
 interface TrajectoryContext {
@@ -20,8 +22,10 @@ interface TrajectoryContext {
 export async function generateTrajectory(
   context: TrajectoryContext,
 ): Promise<AITrajectory> {
+  const userContext: UserAIContext | null = await buildUserAIContext(context.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-trajectory', {
-    body: context,
+    body: { ...context, userContext },
   });
 
   if (error) throw error;

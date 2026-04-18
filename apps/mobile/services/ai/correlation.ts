@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 interface CorrelationContext {
   userId: string;
@@ -32,8 +34,10 @@ interface CorrelationResult {
 export async function analyzeCorrelations(
   context: CorrelationContext,
 ): Promise<CorrelationResult> {
+  const userContext: UserAIContext | null = await buildUserAIContext(context.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-correlation', {
-    body: context,
+    body: { ...context, userContext },
   });
 
   if (error) throw error;

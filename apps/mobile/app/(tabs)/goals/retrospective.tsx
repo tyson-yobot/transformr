@@ -30,6 +30,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { StatTile } from '@components/ui/StatTile';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -110,6 +111,8 @@ export default function RetrospectiveScreen() {
   const navigation = useNavigation();
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
+  const retroGate = useFeatureGate('ai_retrospective');
+
   const monthOptions = buildMonthOptions();
   const [selectedMonth, setSelectedMonth] = useState(monthOptions[1] ?? getCurrentMonth());
   const [retro, setRetro] = useState<MonthlyRetrospective | null>(null);
@@ -162,6 +165,7 @@ export default function RetrospectiveScreen() {
   }, [selectedMonth, loadRetro]);
 
   const handleGenerate = useCallback(async () => {
+    if (!retroGate.isAvailable) return;
     setIsGenerating(true);
     hapticLight();
 
@@ -181,7 +185,7 @@ export default function RetrospectiveScreen() {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedMonth, showToast]);
+  }, [selectedMonth, showToast, retroGate.isAvailable]);
 
   const keyStats = retro?.key_stats ?? null;
 

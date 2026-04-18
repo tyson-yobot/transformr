@@ -3,6 +3,8 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type {
   ChallengeDefinition,
   ChallengeEnrollment,
@@ -20,12 +22,15 @@ interface ChallengeCoachResponse {
  * Get AI coaching for active challenge based on progress and patterns.
  */
 export async function getChallengeCoaching(
+  userId: string,
   enrollmentId: string,
   challenge: ChallengeDefinition,
   enrollment: ChallengeEnrollment,
   recentLogs: ChallengeDailyLog[],
   timeOfDay: 'morning' | 'afternoon' | 'evening'
 ): Promise<ChallengeCoachResponse> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const completedDays = recentLogs.filter((l) => l.all_tasks_completed).length;
   const missedTasks = recentLogs
     .flatMap((log) => {
@@ -53,6 +58,7 @@ export async function getChallengeCoaching(
       missed_task_frequency: missedFrequency,
       time_of_day: timeOfDay,
       restart_on_failure: challenge.restart_on_failure,
+      userContext,
     },
   });
 
@@ -72,12 +78,15 @@ export async function checkDietCompliance(
   date: string,
   dietRules: Record<string, unknown>
 ): Promise<{ compliant: boolean; violations: string[]; score: number }> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-meal-analysis', {
     body: {
       action: 'diet_compliance',
       user_id: userId,
       date,
       diet_rules: dietRules,
+      userContext,
     },
   });
 
@@ -93,11 +102,14 @@ export async function checkDietCompliance(
  * Called when a restart-on-failure challenge resets.
  */
 export async function generateFailureReflection(
+  userId: string,
   challenge: ChallengeDefinition,
   enrollment: ChallengeEnrollment,
   failedDay: number,
   missedTasks: string[]
 ): Promise<{ reflection: string; strategy: string[] }> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('challenge-coach', {
     body: {
       action: 'failure_reflection',
@@ -106,6 +118,7 @@ export async function generateFailureReflection(
       restart_number: (enrollment.restart_count ?? 0) + 1,
       missed_tasks: missedTasks,
       previous_best_streak: enrollment.current_day,
+      userContext,
     },
   });
 
@@ -123,10 +136,13 @@ export async function generateFailureReflection(
  * Generate challenge completion celebration message.
  */
 export async function generateCompletionMessage(
+  userId: string,
   challenge: ChallengeDefinition,
   enrollment: ChallengeEnrollment,
   totalLogs: ChallengeDailyLog[]
 ): Promise<{ message: string; stats: Record<string, string> }> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const perfectDays = totalLogs.filter((l) => l.all_tasks_completed).length;
   const totalDays = challenge.duration_days;
 
@@ -138,6 +154,7 @@ export async function generateCompletionMessage(
       perfect_days: perfectDays,
       restart_count: enrollment.restart_count ?? 0,
       compliance_rate: Math.round((perfectDays / totalDays) * 100),
+      userContext,
     },
   });
 

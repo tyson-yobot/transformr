@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { AIFormCheckResult } from '@app-types/ai';
 import * as FileSystem from 'expo-file-system';
 
@@ -12,12 +14,15 @@ export async function analyzeExerciseForm(
     encoding: FileSystem.EncodingType.Base64,
   });
 
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-form-check', {
     body: {
       userId,
       video: base64,
       mimeType: 'video/mp4',
       exerciseName,
+      userContext,
     },
   });
 
