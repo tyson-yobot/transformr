@@ -120,6 +120,15 @@ const FITNESS_NAV_CARDS = [
     route: '/(tabs)/fitness/marketplace',
     a11y: 'Browse program marketplace',
   },
+  {
+    label: 'Progress Photos',
+    icon: 'camera-outline' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#EC4899',
+    gradient: ['rgba(236,72,153,0.15)', 'rgba(236,72,153,0.05)'] as [string, string],
+    description: 'Timelapse + AI analysis',
+    route: '/(tabs)/fitness/progress-photos',
+    a11y: 'Open progress photos',
+  },
 ] as const;
 
 export default function FitnessHomeScreen() {
