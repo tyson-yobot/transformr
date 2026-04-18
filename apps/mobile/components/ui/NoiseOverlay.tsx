@@ -7,14 +7,15 @@
 // =============================================================================
 
 import React from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions, Platform } from 'react-native';
 import Svg, { Filter, FeTurbulence, FeColorMatrix, Rect } from 'react-native-svg';
-import { useTheme } from '@theme/index';
 
-function NoiseOverlayComponent() {
+function NoiseOverlayComponent({ opacity = 0.032 }: { opacity?: number }) {
   const { width, height } = useWindowDimensions();
-  const { isDark } = useTheme();
-  const opacity = isDark ? 0.035 : 0.020;
+
+  // SVG filter pipeline (FeTurbulence) is not supported on Android in react-native-svg 15.x.
+  // Silently renders a white rect instead of grain — return null to avoid washed-out screens.
+  if (Platform.OS === 'android') return null;
 
   // react-native-svg filter support varies by version and platform.
   // If FeTurbulence is unavailable, render nothing — no fallback texture needed.
