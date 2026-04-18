@@ -6,6 +6,8 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 export interface HealthROIMetrics {
   consistencyScore: number;        // 0–100: workouts logged / active days
@@ -137,8 +139,10 @@ export async function computeHealthROIReport(
     `Be specific, encouraging, and data-driven. No filler phrases.`,
   ].join(' ');
 
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data: aiData } = await supabase.functions.invoke('ai-chat-coach', {
-    body: { message: prompt, topic: 'general' },
+    body: { message: prompt, topic: 'general', userContext },
   });
 
   const aiNarrative =

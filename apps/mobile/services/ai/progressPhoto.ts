@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { AIProgressPhotoAnalysis } from '@app-types/ai';
 import * as FileSystem from 'expo-file-system';
 
@@ -17,11 +19,14 @@ export async function analyzeProgressPhotos(
     }
   }
 
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-progress-photo', {
     body: {
       userId,
       photos,
       previousAnalysis,
+      userContext,
     },
   });
 

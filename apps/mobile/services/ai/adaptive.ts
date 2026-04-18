@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 interface AdaptiveContext {
   userId: string;
@@ -34,8 +36,10 @@ interface AdaptiveResult {
 export async function getAdaptiveProgram(
   context: AdaptiveContext,
 ): Promise<AdaptiveResult> {
+  const userContext: UserAIContext | null = await buildUserAIContext(context.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-adaptive-program', {
-    body: context,
+    body: { ...context, userContext },
   });
 
   if (error) throw error;

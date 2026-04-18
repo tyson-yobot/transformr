@@ -6,6 +6,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type {
   LabBiomarker,
   LabFileType,
@@ -91,6 +93,8 @@ export async function createLabUpload(
 }
 
 interface InterpretArgs {
+  /** Optional — sourced from auth session when omitted */
+  userId?: string;
   uploadId: string;
   imageBase64: string;
   mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
@@ -101,6 +105,9 @@ interface InterpretArgs {
 export async function interpretLabUpload(
   args: InterpretArgs,
 ): Promise<LabInterpretResponse> {
+  const uid = args.userId ?? (await supabase.auth.getUser()).data.user?.id ?? '';
+  const userContext: UserAIContext | null = await buildUserAIContext(uid).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-lab-interpret', {
     body: {
       upload_id: args.uploadId,
@@ -108,6 +115,7 @@ export async function interpretLabUpload(
       mime_type: args.mimeType,
       collected_at: args.collectedAt ?? null,
       lab_name: args.labName ?? null,
+      userContext,
     },
   });
 

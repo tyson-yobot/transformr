@@ -4,6 +4,8 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type {
   SupplementAdvisorResponse,
   SupplementTiming,
@@ -20,17 +22,23 @@ import type {
 // ---------------------------------------------------------------------------
 
 interface GetRecommendationsArgs {
+  /** Optional — sourced from auth session when omitted */
+  userId?: string;
   budgetMonthly?: number;
   focus?: string;
 }
 
 export async function getSupplementRecommendations(
-  args?: GetRecommendationsArgs,
+  args: GetRecommendationsArgs,
 ): Promise<SupplementAdvisorResponse> {
+  const uid = args.userId ?? (await supabase.auth.getUser()).data.user?.id ?? '';
+  const userContext: UserAIContext | null = await buildUserAIContext(uid).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-supplement', {
     body: {
-      budget_monthly: args?.budgetMonthly,
-      focus: args?.focus,
+      budget_monthly: args.budgetMonthly,
+      focus: args.focus,
+      userContext,
     },
   });
   if (error) throw error;

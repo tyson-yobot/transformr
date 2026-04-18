@@ -3,8 +3,11 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 
 export interface WorkoutGenerationParams {
+  userId: string;
   workout_type?: string;
   target_muscle_groups?: string[];
   available_equipment?: string[];
@@ -57,8 +60,10 @@ export interface PostWorkoutAnalysis {
 export async function generateWorkout(
   params: WorkoutGenerationParams,
 ): Promise<GeneratedWorkout> {
+  const userContext: UserAIContext | null = await buildUserAIContext(params.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-workout-coach', {
-    body: params,
+    body: { ...params, userContext },
   });
 
   if (error) throw error;
@@ -66,10 +71,13 @@ export async function generateWorkout(
 }
 
 export async function analyzePostWorkout(
+  userId: string,
   sessionId: string,
 ): Promise<PostWorkoutAnalysis> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-post-workout', {
-    body: { session_id: sessionId },
+    body: { session_id: sessionId, userContext },
   });
 
   if (error) throw error;
@@ -77,6 +85,7 @@ export async function analyzePostWorkout(
 }
 
 export interface CoachingTipParams {
+  userId: string;
   exerciseName: string;
   setsCompleted: number;
   totalVolume: number;
@@ -94,6 +103,8 @@ export interface CoachingTipResponse {
 export async function getMidWorkoutCoachingTip(
   params: CoachingTipParams,
 ): Promise<CoachingTipResponse> {
+  const userContext: UserAIContext | null = await buildUserAIContext(params.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-workout-coach', {
     body: {
       mode: 'coaching_tip',
@@ -103,6 +114,7 @@ export async function getMidWorkoutCoachingTip(
       elapsed_minutes: params.elapsedMinutes,
       recent_weights: params.recentWeights,
       recent_reps: params.recentReps,
+      userContext,
     },
   });
 

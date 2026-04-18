@@ -3,9 +3,12 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { BudgetGroceryListResponse, TieredMeal } from '@app-types/ai';
 
 export interface GroceryListParams {
+  userId?: string;
   meal_plan: {
     meals: {
       name: string;
@@ -22,8 +25,13 @@ export interface GroceryListParams {
 export async function generateBudgetGroceryList(
   params: GroceryListParams,
 ): Promise<BudgetGroceryListResponse> {
+  const resolvedUserId = params.userId ?? (await supabase.auth.getUser()).data.user?.id ?? '';
+  const userContext: UserAIContext | null = resolvedUserId
+    ? await buildUserAIContext(resolvedUserId).catch(() => null)
+    : null;
+
   const { data, error } = await supabase.functions.invoke('ai-grocery-list', {
-    body: params,
+    body: { ...params, userContext },
   });
 
   if (error) throw error;

@@ -1,4 +1,6 @@
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
+import type { UserAIContext } from './context';
 import type { AIMotivation } from '@app-types/ai';
 
 interface MotivationContext {
@@ -19,8 +21,10 @@ interface MotivationContext {
 export async function getMotivation(
   context: MotivationContext,
 ): Promise<AIMotivation> {
+  const userContext: UserAIContext | null = await buildUserAIContext(context.userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-motivation', {
-    body: context,
+    body: { ...context, userContext },
   });
 
   if (error) throw error;
@@ -28,8 +32,10 @@ export async function getMotivation(
 }
 
 export async function getDailyQuote(userId: string): Promise<string> {
+  const userContext: UserAIContext | null = await buildUserAIContext(userId).catch(() => null);
+
   const { data, error } = await supabase.functions.invoke('ai-motivation', {
-    body: { userId, type: 'daily_quote' },
+    body: { userId, type: 'daily_quote', userContext },
   });
 
   if (error) throw error;
