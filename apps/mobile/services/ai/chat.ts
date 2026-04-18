@@ -5,6 +5,7 @@
 // =============================================================================
 
 import { supabase } from '@services/supabase';
+import { buildUserAIContext } from './context';
 import type {
   ChatConversation,
   ChatMessage,
@@ -21,11 +22,15 @@ interface SendChatMessageArgs {
 export async function sendChatMessage(
   args: SendChatMessageArgs,
 ): Promise<ChatSendResponse> {
+  const { data: { user } } = await supabase.auth.getUser();
+  const userContext = user ? await buildUserAIContext(user.id).catch(() => null) : null;
+
   const { data, error } = await supabase.functions.invoke('ai-chat-coach', {
     body: {
       conversation_id: args.conversationId,
       message: args.message,
       topic: args.topic ?? 'general',
+      user_context: userContext,
     },
   });
 

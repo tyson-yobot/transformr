@@ -55,6 +55,11 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const sevenDaysAgoISO = sevenDaysAgo.toISOString();
 
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const monthStartISO = monthStart.toISOString();
+
   const [
     profileResult,
     workoutsResult,
@@ -68,6 +73,8 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
     supplementsResult,
     labsResult,
     partnerResult,
+    nutritionResult,
+    revenueResult,
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
     supabase
@@ -120,6 +127,17 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
       .eq('user_a', userId)
       .eq('status', 'active')
       .maybeSingle(),
+    supabase
+      .from('nutrition_logs')
+      .select('date, calories, protein, carbs, fat, water_oz')
+      .eq('user_id', userId)
+      .gte('date', sevenDaysAgoISO.split('T')[0])
+      .order('date', { ascending: false }),
+    supabase
+      .from('revenue_logs')
+      .select('amount, logged_at')
+      .eq('user_id', userId)
+      .gte('logged_at', monthStartISO),
   ]);
 
   const profile = profileResult.data;
@@ -130,6 +148,12 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
 
   const workoutDates = new Set((workoutsResult.data ?? []).map((w) => w.started_at.split('T')[0]));
   const focusSessions = focusResult.data ?? [];
+  const revenueByDate = (revenueResult.data ?? []).reduce<Record<string, number>>((acc, r) => {
+    const date = (((r.logged_at as string) ?? '').split('T')[0]) ?? '';
+    if (date) acc[date] = (acc[date] ?? 0) + ((r.amount as number) ?? 0);
+    return acc;
+  }, {});
+  const totalMonthRevenue = Object.values(revenueByDate).reduce((sum, v) => sum + v, 0);
 
   const focusOnTraining = focusSessions
     .filter((f) => workoutDates.has((f.started_at as string).split('T')[0]))
@@ -158,7 +182,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
     },
     last7Days: {
       workouts: (workoutsResult.data ?? []).map((w) => ({
-        date: (w.started_at as string).split('T')[0],
+        date: ((w.started_at as string).split('T')[0]) ?? '',
         templateName: (w.template_name as string) ?? 'Custom',
         volumeLbs: ((w.workout_sets as Array<{ weight: number; reps: number }>) ?? []).reduce(
           (sum, s) => sum + s.weight * s.reps,
@@ -166,14 +190,21 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
         ),
         prsAchieved: 0,
       })),
-      nutrition: [],
+      nutrition: (nutritionResult.data ?? []).map((n) => ({
+        date: n.date as string,
+        calories: (n.calories as number) ?? 0,
+        protein: (n.protein as number) ?? 0,
+        carbs: (n.carbs as number) ?? 0,
+        fat: (n.fat as number) ?? 0,
+        waterOz: (n.water_oz as number) ?? 0,
+      })),
       sleep: (sleepResult.data ?? []).map((s) => ({
         date: s.date as string,
         durationHours: s.duration_hours as number,
         qualityRating: s.quality_rating as number,
       })),
       mood: (moodResult.data ?? []).map((m) => ({
-        date: (m.logged_at as string).split('T')[0],
+        date: ((m.logged_at as string).split('T')[0]) ?? '',
         rating: m.rating as number,
         notes: (m.notes as string) ?? '',
       })),
@@ -182,8 +213,8 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
         score: r.score as number,
       })),
       business: focusSessions.map((f) => ({
-        date: (f.started_at as string).split('T')[0],
-        revenueLogged: 0,
+        date: ((f.started_at as string).split('T')[0]) ?? '',
+        revenueLogged: revenueByDate[(((f.started_at as string) ?? '').split('T')[0]) ?? ''] ?? 0,
         deepWorkHours: ((f.duration_minutes as number) ?? 0) / 60,
       })),
       habits: (habitsResult.data ?? []).map((h) => ({
@@ -231,7 +262,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
       lastUpdated: m.recorded_at as string,
     })),
     businessMetrics: {
-      currentMRR: (profile?.current_mrr as number) ?? 0,
+      currentMRR: totalMonthRevenue > 0 ? totalMonthRevenue : ((profile?.current_mrr as number) ?? 0),
       revenueGoal: (profile?.revenue_goal as number) ?? 0,
       customerCount: (profile?.customer_count as number) ?? 0,
       avgDeepWorkHoursOnTrainingDays:
