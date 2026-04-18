@@ -33,6 +33,8 @@ import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
 import { SpotifyMiniPlayer } from '@components/ui/SpotifyMiniPlayer';
+import { addWorkoutToCalendar } from '@services/calendar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -275,9 +277,25 @@ export default function FitnessHomeScreen() {
     async (templateId: string | null) => {
       await hapticLight();
       await startWorkout(templateId);
+
+      // Calendar sync — add the workout if user has enabled it
+      const calendarEnabled = await AsyncStorage.getItem('calendar_sync_enabled').catch(() => null);
+      if (calendarEnabled === 'true' && templateId) {
+        const template = templates.find((t) => t.id === templateId);
+        if (template) {
+          const start = new Date();
+          await addWorkoutToCalendar({
+            name: template.name,
+            startTime: start,
+            durationMin: template.estimated_duration_minutes ?? 60,
+            notes: template.description ?? '',
+          }).catch(() => undefined);
+        }
+      }
+
       router.push('/(tabs)/fitness/workout-player');
     },
-    [startWorkout, router],
+    [startWorkout, router, templates],
   );
 
   const handleNavigate = useCallback(
