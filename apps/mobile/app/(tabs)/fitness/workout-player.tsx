@@ -39,6 +39,9 @@ import {
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
+import * as Speech from 'expo-speech';
+import { generateNarration, stopSpeaking } from '@services/ai/narrator';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import { VoiceMicButton } from '@components/ui/VoiceMicButton';
 import type { ParsedVoiceCommand } from '@services/voice';
 import { Disclaimer } from '@components/ui/Disclaimer';
@@ -89,6 +92,11 @@ export default function WorkoutPlayerScreen() {
   const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
 
   const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  // AI Workout Narrator — feature gate + readiness-adaptive TTS
+  const narratorGate = useFeatureGate('ai_workout_narrator');
+  // Track whether a PR narration is currently playing (must not be cancelled)
+  const prNarrationActiveRef = useRef(false);
 
   // Header help button
   useEffect(() => {
@@ -403,20 +411,67 @@ export default function WorkoutPlayerScreen() {
         });
     }
 
-    // Show narrator card after set
-    setNarratorText(null); // clear previous so card remounts on next set
+    // Clear previous narrator card so it remounts for the new set
+    setNarratorText(null);
 
     // Start rest timer
     const restDuration = currentExercise.templateExercise?.rest_seconds ?? restTarget;
     setRestSeconds(restDuration);
     setIsResting(true);
 
-    // Show narrator card with a coaching note after each set
-    setNarratorText(
-      result.isPR
-        ? `Personal record! ${weight} lbs x ${reps} reps. Outstanding effort.`
-        : `Set ${currentExercise.loggedSets.length + 1} logged. Rest up — you earned it.`,
-    );
+    // AI Workout Narrator — only for gated users; never interrupts mid-workout with upsells
+    if (narratorGate.isAvailable && activeSession) {
+      const eventType = result.isPR ? 'pr_detected' : 'set_completed';
+
+      // Debounce: cancel current speech unless a PR narration is actively playing
+      if (!prNarrationActiveRef.current) {
+        stopSpeaking();
+      }
+
+      void generateNarration({
+        userId: activeSession.user_id ?? '',
+        eventType,
+        eventContext: {
+          sessionId:     activeSession.id ?? '',
+          exerciseName:  currentExercise.exercise.name,
+          setNumber:     currentExercise.loggedSets.length + 1,
+          repsCompleted: reps,
+          weightUsed:    weight,
+          targetReps:    currentExercise.templateExercise?.target_reps
+                           ? Number(currentExercise.templateExercise.target_reps)
+                           : reps,
+          targetWeight:  currentExercise.templateExercise?.target_weight
+                           ? Number(currentExercise.templateExercise.target_weight)
+                           : weight,
+        },
+        // Readiness score drives TTS rate; default 50 (neutral) when not available
+        readinessScore: 50,
+      }).then((result) => {
+        if (!result.text) return;
+        setNarratorText(result.text);
+
+        if (eventType === 'pr_detected') {
+          prNarrationActiveRef.current = true;
+          stopSpeaking();
+        }
+
+        Speech.speak(result.text, {
+          language: 'en-US',
+          rate: result.speechRate,
+          onDone: () => { prNarrationActiveRef.current = false; },
+          onError: () => { prNarrationActiveRef.current = false; },
+        });
+      }).catch(() => {
+        // Non-fatal — narrator failure must never surface to the user mid-workout
+      });
+    } else {
+      // Fallback text for non-gated users (no audio, just card)
+      setNarratorText(
+        result.isPR
+          ? `Personal record! ${weight} lbs x ${reps} reps. Outstanding effort.`
+          : `Set ${currentExercise.loggedSets.length + 1} logged. Rest up — you earned it.`,
+      );
+    }
 
     // Clear inputs
     setCurrentWeight('');
@@ -436,6 +491,9 @@ export default function WorkoutPlayerScreen() {
     totalVolume,
     elapsedSeconds,
     showToast,
+    narratorGate.isAvailable,
+    activeSession,
+    prNarrationActiveRef,
   ]);
 
   const handleSkipRest = useCallback(() => {
