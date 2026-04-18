@@ -84,7 +84,8 @@ ALWAYS respond with valid JSON in this exact format:
   "confidence": 0.7
 }`;
 
-    const imageContent: any[] = [];
+    type ContentBlock = { type: string; source?: { type: string; media_type: string; data: string }; text?: string };
+    const imageContent: ContentBlock[] = [];
 
     imageContent.push(
       {

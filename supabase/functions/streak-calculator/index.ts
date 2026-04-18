@@ -25,7 +25,7 @@ serve(async (req) => {
 
     if (profilesError) throw profilesError;
 
-    const results: any[] = [];
+    const results: { user_id: string; current_streak?: number; longest_streak?: number; error?: string }[] = [];
     const today = new Date().toISOString().split("T")[0];
 
     for (const profile of profiles || []) {
@@ -52,8 +52,8 @@ serve(async (req) => {
 
       if (checkins && checkins.length > 0) {
         const sortedDates = checkins
-          .filter((c: any) => c.completed)
-          .map((c: any) => c.date)
+          .filter((c: { date: string; completed: boolean }) => c.completed)
+          .map((c: { date: string; completed: boolean }) => c.date)
           .sort()
           .reverse();
 
