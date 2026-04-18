@@ -26,6 +26,7 @@ import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -131,6 +132,8 @@ export default function SupplementScannerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const supplementScannerGate = useFeatureGate('ai_supplement_scanner');
+
   const [step, setStep] = useState<ScannerStep>('capture');
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -158,6 +161,7 @@ export default function SupplementScannerScreen() {
 
   const handleAnalyze = useCallback(async () => {
     if (!imageBase64) return;
+    if (!supplementScannerGate.isAvailable) { setStep('preview'); return; }
     await hapticMedium();
     setStep('analyzing');
 
@@ -176,7 +180,7 @@ export default function SupplementScannerScreen() {
       Alert.alert('Scan Error', msg);
       setStep('preview');
     }
-  }, [imageBase64]);
+  }, [imageBase64, supplementScannerGate.isAvailable]);
 
   const handleAddToStack = useCallback(async () => {
     if (!imageBase64 || savingToStack || savedToStack) return;

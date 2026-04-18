@@ -26,6 +26,7 @@ import { Button } from '@components/ui/Button';
 import { supabase } from '@services/supabase';
 import { computeHealthROIReport, type HealthROIReport } from '@services/ai/healthRoi';
 import { hapticLight } from '@utils/haptics';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 type Window = 30 | 60 | 90;
 
@@ -67,6 +68,8 @@ export default function HealthROIScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
+  const healthRoiGate = useFeatureGate('ai_health_roi');
+
   const [window, setWindow] = useState<Window>(30);
   const [report, setReport] = useState<HealthROIReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,6 +78,7 @@ export default function HealthROIScreen() {
 
   const loadReport = useCallback(async (win: Window) => {
     setError(null);
+    if (!healthRoiGate.isAvailable) { setLoading(false); return; }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
 
@@ -87,7 +91,7 @@ export default function HealthROIScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [healthRoiGate.isAvailable]);
 
   useEffect(() => {
     setLoading(true);

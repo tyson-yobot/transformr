@@ -25,6 +25,7 @@ import { useProfileStore } from '@stores/profileStore';
 import { formatCalories, formatMacro } from '@utils/formatters';
 import { MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import { generateBudgetMealPrepPlan } from '@services/ai/mealPrep';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
@@ -70,6 +71,8 @@ export default function MealPlansScreen() {
     });
   }, [navigation]);
 
+  const mealPrepGate = useFeatureGate('ai_meal_prep');
+
   const [weekPlan, setWeekPlan] = useState<DayPlan[]>(createEmptyWeekPlan);
   const [selectedDay, setSelectedDay] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -97,6 +100,7 @@ export default function MealPlansScreen() {
   }, [currentDayPlan]);
 
   const handleGenerateAIPlan = useCallback(async () => {
+    if (!mealPrepGate.isAvailable) return;
     setIsGenerating(true);
     hapticMedium();
 
@@ -142,7 +146,7 @@ export default function MealPlansScreen() {
     } finally {
       setIsGenerating(false);
     }
-  }, [targets]);
+  }, [targets, mealPrepGate.isAvailable]);
 
   const handleRemoveMeal = useCallback((dayIndex: number, mealId: string) => {
     hapticLight();

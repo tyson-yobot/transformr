@@ -50,6 +50,14 @@ export type FeatureKey =
   | 'apple_health_sync'
   | 'spotify_integration'
   | 'strava_integration'
+  // ── Screen-level AI feature keys ────────────────────────────────
+  | 'ai_posture_analysis'
+  | 'ai_progress_photo'
+  | 'ai_daily_affirmation'
+  | 'ai_health_roi'
+  | 'ai_journal'
+  | 'ai_retrospective'
+  | 'ai_supplement_scanner'
   // ── Extended v2 keys ────────────────────────────────────────────
   | 'workout_logging'
   | 'exercise_library'
@@ -320,6 +328,35 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro to connect Strava.',
   },
 
+  // ── Screen-level AI feature keys ────────────────────────────────
+  ai_posture_analysis: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI posture analysis.',
+  },
+  ai_progress_photo: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI progress photo analysis.',
+  },
+  ai_daily_affirmation: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI-generated daily affirmations.',
+  },
+  ai_health_roi: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for your AI Health ROI report.',
+  },
+  ai_journal: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI journal reflections.',
+  },
+  ai_retrospective: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI monthly retrospective letters.',
+  },
+  ai_supplement_scanner: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro to scan supplement labels with AI.',
+  },
   // ── Extended v2 keys ────────────────────────────────────────────
   workout_logging: { requiredTier: 'free', upgradeMessage: '' },
   exercise_library: { requiredTier: 'free', upgradeMessage: '' },

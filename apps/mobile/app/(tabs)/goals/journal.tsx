@@ -28,6 +28,7 @@ import type { JournalEntry } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '@services/supabase';
 import { getJournalResponse } from '@services/ai/journaling';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { VoiceMicButton } from '@components/ui/VoiceMicButton';
@@ -54,6 +55,8 @@ export default function JournalScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  const journalGate = useFeatureGate('ai_journal');
 
   const [currentPrompt] = useState(
     () => AI_PROMPTS[Math.floor(Math.random() * AI_PROMPTS.length)],
@@ -115,12 +118,14 @@ export default function JournalScreen() {
 
       // Call real AI service — failure here is non-fatal, entry still saves
       let aiText: string | null = null;
-      try {
-        const response = await getJournalResponse(user.id, entryText, winsArr, strugglesArr, gratitudeArr);
-        aiText = response.reflection + (response.encouragement ? `\n\n${response.encouragement}` : '');
-      } catch {
-        // AI unavailable — entry still saves, no fake response shown
-        aiText = null;
+      if (journalGate.isAvailable) {
+        try {
+          const response = await getJournalResponse(user.id, entryText, winsArr, strugglesArr, gratitudeArr);
+          aiText = response.reflection + (response.encouragement ? `\n\n${response.encouragement}` : '');
+        } catch {
+          // AI unavailable — entry still saves, no fake response shown
+          aiText = null;
+        }
       }
 
       const todayStr = new Date().toISOString().split('T')[0];
@@ -163,7 +168,7 @@ export default function JournalScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt, showToast]);
+  }, [entryText, wins, struggles, gratitude, tomorrowFocus, selectedTags, currentPrompt, showToast, journalGate.isAvailable]);
 
   const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
     const { command } = result;

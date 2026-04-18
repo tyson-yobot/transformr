@@ -27,6 +27,7 @@ import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
+import { useFeatureGate } from '@hooks/useFeatureGate';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -145,6 +146,8 @@ export default function PostureCheckScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const postureGate = useFeatureGate('ai_posture_analysis');
+
   const [step, setStep] = useState<PostureStep>('intro');
   const [frontImageBase64, setFrontImageBase64] = useState<string | null>(null);
   const [sideImageBase64, setSideImageBase64] = useState<string | null>(null);
@@ -189,6 +192,7 @@ export default function PostureCheckScreen() {
 
   const runAnalysis = useCallback(
     async (front: string | null, side: string | null) => {
+      if (!postureGate.isAvailable) { setStep('intro'); return; }
       try {
         const viewType = front && side ? 'both' : front ? 'front' : 'side';
         const { data, error } = await supabase.functions.invoke('ai-posture-analysis', {
@@ -210,7 +214,7 @@ export default function PostureCheckScreen() {
         setStep(front ? 'side-photo' : 'front-photo');
       }
     },
-    [],
+    [postureGate.isAvailable],
   );
 
   const handleSkipToTextAnalysis = useCallback(async () => {
