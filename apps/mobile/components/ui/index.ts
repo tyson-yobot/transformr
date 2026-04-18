@@ -39,3 +39,5 @@ export { PurpleRadialBackground } from './PurpleRadialBackground';
 export { EmptyState } from './EmptyState';
 export { NoiseOverlay } from './NoiseOverlay';
 export { AmbientBackground } from './AmbientBackground';
+export { UpgradePrompt } from './UpgradePrompt';
+export { FeatureLockOverlay } from './FeatureLockOverlay';
