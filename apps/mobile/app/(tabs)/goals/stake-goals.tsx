@@ -2,6 +2,9 @@
 // TRANSFORMR -- Stake Goals
 // =============================================================================
 
+export const unstable_settings = { lazy: true };
+
+/* eslint-disable import/first */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
@@ -32,6 +35,7 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '../../../services/supabase';
 import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
+/* eslint-enable import/first */
 
 interface StakeGoalWithDetails extends StakeGoal {
   goalTitle: string;
@@ -39,7 +43,7 @@ interface StakeGoalWithDetails extends StakeGoal {
 }
 
 export default function StakeGoalsScreen() {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const gate = useFeatureGate('stake_goals');
@@ -153,21 +157,34 @@ export default function StakeGoalsScreen() {
 
       const newGoal = created as StakeGoal;
 
-      // Create Stripe payment intent to hold the stake
-      const paymentResult = await createStakePayment(
-        user.id,
-        amount,
-        newGoal.id,
-        `Stake: ${newGoalTitle.trim()}`,
-      );
+      // Fetch saved payment method ID from user profile (hold, not charge)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('stripe_payment_method_id')
+        .eq('id', user.id)
+        .single();
+      const paymentMethodId = (profile?.stripe_payment_method_id as string | null) ?? null;
 
-      if (paymentResult.success && paymentResult.paymentIntentId) {
-        // Persist payment intent ID back to the stake goal
-        await supabase
-          .from('stake_goals')
-          .update({ stripe_payment_intent_id: paymentResult.paymentIntentId })
-          .eq('id', newGoal.id);
-        newGoal.stripe_payment_intent_id = paymentResult.paymentIntentId;
+      if (paymentMethodId) {
+        const paymentResult = await createStakePayment(
+          user.id,
+          amount,
+          newGoal.id,
+          paymentMethodId,
+        );
+
+        if (paymentResult.success && paymentResult.paymentIntentId) {
+          // Persist both column names for compatibility
+          await supabase
+            .from('stake_goals')
+            .update({
+              payment_intent_id: paymentResult.paymentIntentId,
+              stripe_payment_intent_id: paymentResult.paymentIntentId,
+              status: 'active',
+            })
+            .eq('id', newGoal.id);
+          newGoal.stripe_payment_intent_id = paymentResult.paymentIntentId;
+        }
       }
 
       setStakeGoals((prev) => [
@@ -202,7 +219,7 @@ export default function StakeGoalsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

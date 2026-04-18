@@ -40,6 +40,9 @@ import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { supabase } from '../../../services/supabase';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const CALENDAR_SYNC_KEY = 'calendar_sync_enabled';
 
 // ---------------------------------------------------------------------------
 // Appearance segmented control
@@ -345,6 +348,19 @@ export default function ProfileScreen() {
   const { tone: selectedTone, setTone } = useGamificationStyle();
   const tier = useSubscriptionStore((s) => s.tier);
 
+  const [calendarSync, setCalendarSync] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem(CALENDAR_SYNC_KEY)
+      .then((v) => setCalendarSync(v === 'true'))
+      .catch(() => undefined);
+  }, []);
+
+  const handleCalendarToggle = useCallback(async (value: boolean) => {
+    setCalendarSync(value);
+    await AsyncStorage.setItem(CALENDAR_SYNC_KEY, value ? 'true' : 'false');
+  }, []);
+
   // Top streak from habitStore
   const habits = useHabitStore((s) => s.habits);
   const topStreak = useMemo(
@@ -589,6 +605,19 @@ export default function ProfileScreen() {
           }
         />
         <SettingsRow
+          icon="calendar-outline"
+          iconColor={colors.accent.success}
+          label="Calendar Sync"
+          iconBg={colors.dim.success}
+          accessibilityLabel="Toggle calendar sync for workouts"
+          rightElement={
+            <Toggle
+              value={calendarSync}
+              onValueChange={handleCalendarToggle}
+            />
+          }
+        />
+        <SettingsRow
           icon="resize-outline"
           iconColor={colors.accent.primary}
           label="Units"
@@ -636,6 +665,13 @@ export default function ProfileScreen() {
           label="Integrations"
           iconBg={colors.dim.info}
           onPress={() => router.push('/(tabs)/profile/integrations')}
+        />
+        <SettingsRow
+          icon="watch-outline"
+          iconColor={colors.accent.primary}
+          label="Wearables"
+          iconBg={colors.dim.primary}
+          onPress={() => router.push('/(tabs)/profile/wearables' as never)}
         />
       </Animated.View>
 

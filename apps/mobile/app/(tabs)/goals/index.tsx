@@ -72,6 +72,9 @@ const NAV_ITEMS: { route: string; label: string; icon: keyof typeof Ionicons.gly
   { route: '/(tabs)/goals/skills',       label: 'Skills',     icon: 'bulb-outline',             accent: 'gold' },
   { route: '/(tabs)/goals/challenges',   label: 'Challenges', icon: 'trophy-outline',           accent: 'gold' },
   { route: '/(tabs)/goals/stake-goals',  label: 'Stakes',     icon: 'flame-outline',            accent: 'danger' },
+  { route: '/(tabs)/goals/health-roi',   label: 'Health ROI', icon: 'pulse-outline',             accent: 'success' },
+  { route: '/(tabs)/goals/affirmations', label: 'Affirmations', icon: 'sunny-outline',           accent: 'gold' },
+  { route: '/(tabs)/goals/retrospective', label: 'Retrospective', icon: 'time-outline',          accent: 'info' },
 ];
 
 export default function GoalsDashboard() {

@@ -225,6 +225,99 @@ serve(async (req) => {
         );
       }
 
+      // -----------------------------------------------------------------------
+      // Stake hold / capture / cancel — correct UX pattern:
+      // 1. create_stake_payment: holds funds without charging (capture_method: manual)
+      // 2. capture_stake: goal FAILED — capture the hold (charge user)
+      // 3. cancel_stake_hold: goal PASSED — cancel hold (user keeps money)
+      // -----------------------------------------------------------------------
+
+      if (action === "create_stake_payment") {
+        const { userId, stakeId, paymentMethodId } = await req.json();
+        const response = await fetch(
+          "https://api.stripe.com/v1/payment_intents",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              amount: String(Math.round((amount as number) * 100)),
+              currency: "usd",
+              payment_method: paymentMethodId,
+              capture_method: "manual",
+              confirm: "true",
+              "metadata[userId]": userId,
+              "metadata[stakeId]": stakeId,
+              "metadata[type]": "stake_hold",
+              description: `TRANSFORMR stake goal hold — ${stakeId}`,
+            }).toString(),
+          },
+        );
+        const data = await response.json();
+        if (data.error) {
+          return new Response(JSON.stringify({ error: data.error.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(
+          JSON.stringify({ paymentIntentId: data.id, status: data.status }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      if (action === "capture_stake") {
+        const { paymentIntentId } = await req.json();
+        const response = await fetch(
+          `https://api.stripe.com/v1/payment_intents/${paymentIntentId}/capture`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          },
+        );
+        const data = await response.json();
+        if (data.error) {
+          return new Response(JSON.stringify({ error: data.error.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(
+          JSON.stringify({ status: data.status }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      if (action === "cancel_stake_hold") {
+        const { paymentIntentId } = await req.json();
+        const response = await fetch(
+          `https://api.stripe.com/v1/payment_intents/${paymentIntentId}/cancel`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          },
+        );
+        const data = await response.json();
+        if (data.error) {
+          return new Response(JSON.stringify({ error: data.error.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(
+          JSON.stringify({ status: data.status }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
       return new Response(
         JSON.stringify({ error: "Unknown action" }),
         {

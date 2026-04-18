@@ -39,6 +39,8 @@ import {
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
+import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import type { ParsedVoiceCommand } from '@services/voice';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { HelpIcon } from '@components/ui/HelpIcon';
@@ -489,6 +491,40 @@ export default function WorkoutPlayerScreen() {
   }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router, logCaloriesBurned]);
 
   const currentExercise = exercisesWithSets[activeExerciseIndex] ?? null;
+
+  // Voice command handler — processes commands from VoiceMicButton
+  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+    const cmd = result.command;
+    switch (cmd.action) {
+      case 'log_set':
+        setCurrentWeight(String((cmd as { action: string; weight: number }).weight));
+        setCurrentReps(String((cmd as { action: string; reps: number }).reps));
+        showToast(`Ready: ${(cmd as { weight: number }).weight} lbs × ${(cmd as { reps: number }).reps} reps`, { type: 'success' });
+        break;
+      case 'next_exercise':
+        if (activeExerciseIndex < exercisesWithSets.length - 1) {
+          setActiveExerciseIndex(prev => prev + 1);
+        }
+        break;
+      case 'prev_exercise':
+        if (activeExerciseIndex > 0) {
+          setActiveExerciseIndex(prev => prev - 1);
+        }
+        break;
+      case 'start_rest_timer': {
+        const secs = (cmd as { seconds?: number }).seconds ?? 90;
+        setRestSeconds(secs);
+        setIsResting(true);
+        showToast(`Rest timer: ${secs}s`, { type: 'info' });
+        break;
+      }
+      case 'end_workout':
+        setShowMoodModal(true);
+        break;
+      default:
+        showToast(result.humanReadable || 'Command received', { type: 'success' });
+    }
+  }, [activeExerciseIndex, exercisesWithSets.length, showToast]);
 
   if (!activeSession) {
     return (
@@ -1068,6 +1104,23 @@ export default function WorkoutPlayerScreen() {
       type={toast.type}
     />
     <Coachmark screenKey={COACHMARK_KEYS.workoutPlayer} steps={coachmarkSteps} />
+    <VoiceMicButton
+      context={{
+        userId: activeSession?.user_id ?? '',
+        activeScreen: 'workout_player',
+        workoutContext: {
+          currentExercise: currentExercise?.exercise?.name,
+          lastSet: (() => {
+            const ls = currentExercise?.loggedSets?.at(-1);
+            return ls !== undefined ? { weight: ls.weight, reps: ls.reps } : undefined;
+          })(),
+        },
+      }}
+      onCommand={handleVoiceCommand}
+      onError={(msg) => showToast(msg, { type: 'info' })}
+      bottom={120}
+      right={16}
+    />
     </>
   );
 }

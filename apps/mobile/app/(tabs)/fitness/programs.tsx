@@ -31,6 +31,8 @@ import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
+import { addWorkoutToCalendar } from '@services/calendar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { WorkoutTemplate, WorkoutTemplateExercise, Exercise } from '@app-types/database';
 
 interface ProgramWithExercises extends WorkoutTemplate {
@@ -119,9 +121,23 @@ export default function ProgramsScreen() {
     async (templateId: string) => {
       await hapticLight();
       await startWorkout(templateId);
+
+      const calendarEnabled = await AsyncStorage.getItem('calendar_sync_enabled').catch(() => null);
+      if (calendarEnabled === 'true') {
+        const program = programsWithExercises.find((p) => p.id === templateId);
+        if (program) {
+          await addWorkoutToCalendar({
+            name: program.name,
+            startTime: new Date(),
+            durationMin: (program.estimated_duration_minutes as number | null) ?? 60,
+            notes: (program.description as string | null) ?? '',
+          }).catch(() => undefined);
+        }
+      }
+
       router.push('/(tabs)/fitness/workout-player' as never);
     },
-    [startWorkout, router],
+    [startWorkout, router, programsWithExercises],
   );
 
   const handleCreateProgram = useCallback(async () => {

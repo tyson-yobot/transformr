@@ -30,6 +30,8 @@ import type { MoodLog } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { EmptyState } from '@components/ui/EmptyState';
+import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MoodContext = NonNullable<MoodLog['context']>;
@@ -158,6 +160,15 @@ export default function MoodLogger() {
   }, [moodHistory]);
 
   const moodEmoji = MOOD_EMOJIS[mood] ?? '\uD83D\uDE10';
+
+  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+    const { command } = result;
+    if (command.action === 'log_mood') {
+      const clamped = Math.max(1, Math.min(10, command.mood));
+      setMood(clamped);
+      showToast(`Mood set to ${clamped}`, { subtext: 'Tap Log Mood to save' });
+    }
+  }, [showToast]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
@@ -365,6 +376,12 @@ export default function MoodLogger() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+      <VoiceMicButton
+        context={{ userId: '', activeScreen: 'mood' }}
+        onCommand={handleVoiceCommand}
+        bottom={100}
+        right={16}
+      />
     </View>
   );
 }

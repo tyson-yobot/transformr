@@ -32,6 +32,9 @@ import { hapticLight } from '@utils/haptics';
 import type { PersonalRecord } from '@app-types/database';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { supabase } from '@services/supabase';
+import { SpotifyMiniPlayer } from '@components/ui/SpotifyMiniPlayer';
+import { addWorkoutToCalendar } from '@services/calendar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -108,6 +111,24 @@ const FITNESS_NAV_CARDS = [
     route: '/(tabs)/fitness/mobility',
     a11y: 'Open mobility exercises',
   },
+  {
+    label: 'Marketplace',
+    icon: 'storefront' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#F59E0B',
+    gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
+    description: 'Premium programs & coaching',
+    route: '/(tabs)/fitness/marketplace',
+    a11y: 'Browse program marketplace',
+  },
+  {
+    label: 'Progress Photos',
+    icon: 'camera-outline' as keyof typeof Ionicons.glyphMap,
+    iconColor: '#EC4899',
+    gradient: ['rgba(236,72,153,0.15)', 'rgba(236,72,153,0.05)'] as [string, string],
+    description: 'Timelapse + AI analysis',
+    route: '/(tabs)/fitness/progress-photos',
+    a11y: 'Open progress photos',
+  },
 ] as const;
 
 export default function FitnessHomeScreen() {
@@ -126,6 +147,8 @@ export default function FitnessHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
 
   const todayTemplate = (() => {
     const dayOfWeek = new Date().getDay();
@@ -138,7 +161,9 @@ export default function FitnessHomeScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [sessionsRes, prsRes, weightRes] = await Promise.all([
+      setUserId(user.id);
+
+      const [sessionsRes, prsRes, weightRes, profileRes] = await Promise.all([
         supabase
           .from('workout_sessions')
           .select('id, name, completed_at, duration_minutes, total_volume, total_sets')
@@ -158,7 +183,14 @@ export default function FitnessHomeScreen() {
           .eq('user_id', user.id)
           .order('logged_at', { ascending: true })
           .limit(90),
+        supabase
+          .from('profiles')
+          .select('spotify_connected')
+          .eq('id', user.id)
+          .single(),
       ]);
+
+      setSpotifyConnected(!!(profileRes.data?.spotify_connected));
 
       if (sessionsRes.data) {
         const sessions = sessionsRes.data as {
@@ -254,9 +286,25 @@ export default function FitnessHomeScreen() {
     async (templateId: string | null) => {
       await hapticLight();
       await startWorkout(templateId);
+
+      // Calendar sync — add the workout if user has enabled it
+      const calendarEnabled = await AsyncStorage.getItem('calendar_sync_enabled').catch(() => null);
+      if (calendarEnabled === 'true' && templateId) {
+        const template = templates.find((t) => t.id === templateId);
+        if (template) {
+          const start = new Date();
+          await addWorkoutToCalendar({
+            name: template.name,
+            startTime: start,
+            durationMin: template.estimated_duration_minutes ?? 60,
+            notes: template.description ?? '',
+          }).catch(() => undefined);
+        }
+      }
+
       router.push('/(tabs)/fitness/workout-player');
     },
-    [startWorkout, router],
+    [startWorkout, router, templates],
   );
 
   const handleNavigate = useCallback(
@@ -499,6 +547,13 @@ export default function FitnessHomeScreen() {
           </View>
         </Animated.View>
         </Animated.View>
+
+        {/* Spotify Mini Player — shown when Spotify is connected */}
+        {spotifyConnected && userId && (
+          <View style={{ marginBottom: spacing.lg }}>
+            <SpotifyMiniPlayer userId={userId} />
+          </View>
+        )}
 
         {/* Navigation Cards */}
         <Animated.View style={getEntranceStyle('quickActions')}>

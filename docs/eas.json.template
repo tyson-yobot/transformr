@@ -1,0 +1,87 @@
+{
+  "_comment": "TRANSFORMR — EAS Build & Submit Configuration Template",
+  "_instructions": [
+    "1. Copy this file to the root of apps/mobile/ and rename to eas.json",
+    "2. Replace all placeholder values: [YOUR_APPLE_ID], [YOUR_ASC_APP_ID], [YOUR_APPLE_TEAM_ID]",
+    "3. Run: eas login  (authenticate with your Expo account)",
+    "4. Run: eas build:configure  (links this project to EAS)",
+    "5. Development builds: eas build --profile development --platform ios|android",
+    "6. Production: eas build --profile production --platform all",
+    "7. Submit: eas submit --profile production --platform ios|android"
+  ],
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://horqwbfsqqmzdbbafvov.supabase.co",
+        "EXPO_PUBLIC_APP_ENV": "production"
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true,
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium",
+        "image": "latest"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "[YOUR_APPLE_ID]",
+        "ascAppId": "[YOUR_ASC_APP_ID]",
+        "appleTeamId": "[YOUR_APPLE_TEAM_ID]",
+        "bundleIdentifier": "com.automateai.transformr",
+        "language": "en-US",
+        "metadataPath": "./store-metadata/ios"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": false
+      }
+    }
+  }
+}
