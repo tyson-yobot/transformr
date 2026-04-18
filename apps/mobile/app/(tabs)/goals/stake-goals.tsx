@@ -41,7 +41,7 @@ interface StakeGoalWithDetails extends StakeGoal {
 }
 
 export default function StakeGoalsScreen() {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const gate = useFeatureGate('stake_goals');
@@ -217,7 +217,7 @@ export default function StakeGoalsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
