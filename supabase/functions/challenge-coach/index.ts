@@ -113,7 +113,29 @@ serve(async (req) => {
       );
     }
 
-    const challenge = enrollment.challenge_definitions as any;
+    interface CoachChallengeDefinition {
+      id: string;
+      name: string;
+      slug: string;
+      description: string;
+      duration_days: number;
+      category: string;
+      rules: { tasks: { id: string; label: string; type: string }[] };
+      restart_on_failure: boolean;
+      difficulty: string;
+      estimated_daily_time_minutes: number;
+    }
+
+    interface DailyLog {
+      day_number: number;
+      date: string;
+      tasks_completed: Record<string, boolean>;
+      all_tasks_completed: boolean;
+      auto_verified: Record<string, unknown>;
+      notes: string | null;
+    }
+
+    const challenge = enrollment.challenge_definitions as CoachChallengeDefinition;
 
     // 2. Load daily logs for this enrollment
     const { data: dailyLogs } = await supabaseAdmin
@@ -123,17 +145,18 @@ serve(async (req) => {
       .order("day_number", { ascending: true });
 
     // 3. Compute progress stats from daily logs
-    const totalLogged = (dailyLogs || []).length;
-    const completedDays = (dailyLogs || []).filter(
-      (l: any) => l.all_tasks_completed
+    const typedLogs = (dailyLogs || []) as DailyLog[];
+    const totalLogged = typedLogs.length;
+    const completedDays = typedLogs.filter(
+      (l: DailyLog) => l.all_tasks_completed
     ).length;
     const incompleteDays = totalLogged - completedDays;
 
     // Identify which tasks have been missed most
     const taskMissCount: Record<string, number> = {};
     const tasks = challenge.rules?.tasks || [];
-    for (const log of dailyLogs || []) {
-      const tc = log.tasks_completed as Record<string, boolean>;
+    for (const log of typedLogs) {
+      const tc = log.tasks_completed;
       for (const task of tasks) {
         if (!tc[task.id]) {
           taskMissCount[task.id] = (taskMissCount[task.id] || 0) + 1;
@@ -142,12 +165,12 @@ serve(async (req) => {
     }
 
     // Get the last 7 days of logs for recent context
-    const recentLogs = (dailyLogs || []).slice(-7);
+    const recentLogs = typedLogs.slice(-7);
 
     // Determine recent misses (last 7 days)
     const recentMisses: Record<string, number> = {};
     for (const log of recentLogs) {
-      const tc = log.tasks_completed as Record<string, boolean>;
+      const tc = log.tasks_completed;
       for (const task of tasks) {
         if (!tc[task.id]) {
           recentMisses[task.id] = (recentMisses[task.id] || 0) + 1;
@@ -156,7 +179,7 @@ serve(async (req) => {
     }
 
     // 4. Build the task summary for the AI
-    const taskSummary = tasks.map((t: any) => ({
+    const taskSummary = tasks.map((t: { id: string; label: string; type: string }) => ({
       id: t.id,
       label: t.label,
       type: t.type,
@@ -210,7 +233,7 @@ User progress:
 Daily task breakdown:
 ${taskSummary
   .map(
-    (t: any) =>
+    (t: { label: string; type: string; total_misses: number; recent_misses_7d: number }) =>
       `- ${t.label} (${t.type}): missed ${t.total_misses} times total, ${t.recent_misses_7d} times in the last 7 days`
   )
   .join("\n")}
@@ -221,7 +244,7 @@ Incomplete days: ${incompleteDays}
 Last 7 days detail:
 ${recentLogs
   .map(
-    (l: any) =>
+    (l: DailyLog) =>
       `Day ${l.day_number} (${l.date}): ${l.all_tasks_completed ? "ALL COMPLETE" : "INCOMPLETE"} - ${JSON.stringify(l.tasks_completed)}`
   )
   .join("\n")}

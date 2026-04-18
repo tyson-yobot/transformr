@@ -18,10 +18,10 @@ function calculateReadinessScore(params: {
   stress: number | null;
   hrv: number | null;
   rhr: number | null;
-}): { score: number; factors: any; recommendation: string } {
+}): { score: number; factors: Record<string, unknown>; recommendation: string } {
   let totalWeight = 0;
   let weightedSum = 0;
-  const factors: any = {};
+  const factors: Record<string, unknown> = {};
 
   // Sleep duration (0-10 scale, weight: 25%)
   if (params.sleepHours != null) {
@@ -115,11 +115,11 @@ serve(async (req) => {
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("id");
-      userIds = (profiles || []).map((p: any) => p.id);
+      userIds = (profiles || []).map((p: { id: string }) => p.id);
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const results: any[] = [];
+    const results: { user_id: string; score: number; recommendation: string; error?: string }[] = [];
 
     for (const userId of userIds) {
       // Fetch latest sleep log

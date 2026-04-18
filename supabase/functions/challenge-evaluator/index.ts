@@ -27,23 +27,88 @@ interface ChallengeTask {
     | "calories"
     | "protein";
   auto_verify: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 interface ChallengeRules {
   tasks: ChallengeTask[];
-  daily_targets?: Record<string, any>;
+  daily_targets?: Record<string, unknown>;
   rest_pattern?: string;
-  schedule?: Record<string, any>;
-  weekly_plan?: any[];
-  protocols?: any[];
+  schedule?: Record<string, unknown>;
+  weekly_plan?: unknown[];
+  protocols?: unknown[];
   user_selects_protocol?: boolean;
   elimination_list?: string[];
 }
 
 interface VerifyResult {
   completed: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
+}
+
+interface WorkoutSession {
+  id: string;
+  duration_minutes: number | null;
+  started_at: string;
+  completed_at: string | null;
+  name: string | null;
+  total_volume: number | null;
+  total_sets: number | null;
+}
+
+interface WorkoutSet {
+  reps: number | null;
+  duration_seconds: number | null;
+  exercise: { name: string | null; slug: string | null } | null;
+}
+
+interface WaterLog {
+  amount_oz: number | string | null;
+}
+
+interface NutritionLog {
+  id: string;
+  meal_type: string | null;
+  calories: number | string | null;
+  protein: number | string | null;
+  carbs: number | string | null;
+  fat: number | string | null;
+  food_id: string | null;
+  logged_at: string;
+}
+
+interface FocusSession {
+  id: string;
+  actual_duration_minutes: number | null;
+  planned_duration_minutes: number | null;
+  task_description: string | null;
+  category: string | null;
+  completed_at: string | null;
+}
+
+interface MealLogEntry {
+  id: string;
+  logged_at: string;
+  meal_type: string | null;
+}
+
+interface ChallengeDefinition {
+  id: string;
+  name: string;
+  slug: string;
+  duration_days: number;
+  rules: ChallengeRules;
+  restart_on_failure: boolean;
+}
+
+interface EvaluationResult {
+  enrollment_id: string;
+  user_id: string;
+  challenge: string;
+  day: number;
+  status: string;
+  restart_count?: number;
+  missed_tasks?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -125,10 +190,10 @@ serve(async (req) => {
       );
     }
 
-    const results: any[] = [];
+    const results: EvaluationResult[] = [];
 
     for (const enrollment of enrollments) {
-      const challenge = enrollment.challenge_definitions as any;
+      const challenge = enrollment.challenge_definitions as ChallengeDefinition;
       if (!challenge) continue;
 
       const rules: ChallengeRules = challenge.rules;
@@ -138,7 +203,7 @@ serve(async (req) => {
       const userId = enrollment.user_id;
       const currentDay = enrollment.current_day;
       const challengeSlug: string = challenge.slug || "";
-      const userConfig = (enrollment.configuration as Record<string, any>) || {};
+      const userConfig = (enrollment.configuration as Record<string, unknown>) || {};
 
       // ------------------------------------------------------------------
       // C25K: Only 3 run days per week. Auto-complete non-run days.
@@ -227,7 +292,7 @@ serve(async (req) => {
       // Evaluate each task
       // ------------------------------------------------------------------
       const tasksCompleted: Record<string, boolean> = {};
-      const autoVerified: Record<string, any> = {};
+      const autoVerified: Record<string, unknown> = {};
 
       for (const task of tasks) {
         // ----- Manual-verify / checkbox tasks -----
@@ -592,11 +657,11 @@ serve(async (req) => {
 // ---------------------------------------------------------------------------
 
 async function verifyWorkoutTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>,
+  config: Record<string, unknown>,
   rules: ChallengeRules,
   currentDay: number,
   challengeSlug: string,
@@ -616,8 +681,10 @@ async function verifyWorkoutTask(
     return { completed: false, sessions_found: 0, total_minutes: 0 };
   }
 
-  const totalMinutes = sessions.reduce(
-    (sum: number, s: any) => sum + (s.duration_minutes || 0),
+  const typedSessions = sessions as WorkoutSession[];
+
+  const totalMinutes = typedSessions.reduce(
+    (sum: number, s: WorkoutSession) => sum + (s.duration_minutes || 0),
     0
   );
 
@@ -638,14 +705,15 @@ async function verifyWorkoutTask(
         .select("reps, exercise:exercises(name, slug)")
         .in(
           "session_id",
-          sessions.map((s: any) => s.id)
+          typedSessions.map((s: WorkoutSession) => s.id)
         );
 
-      const totalReps = (sets || []).reduce((sum: number, set: any) => {
+      const typedSets = (sets || []) as WorkoutSet[];
+      const totalReps = typedSets.reduce((sum: number, set: WorkoutSet) => {
         const slug = set.exercise?.slug || set.exercise?.name || "";
         if (
-          slug.toLowerCase().includes(config.exercise.replace("_", " ")) ||
-          slug.toLowerCase().includes(config.exercise)
+          slug.toLowerCase().includes((config.exercise as string).replace("_", " ")) ||
+          slug.toLowerCase().includes(config.exercise as string)
         ) {
           return sum + (set.reps || 0);
         }
@@ -672,15 +740,16 @@ async function verifyWorkoutTask(
         .select("duration_seconds, reps, exercise:exercises(name, slug)")
         .in(
           "session_id",
-          sessions.map((s: any) => s.id)
+          typedSessions.map((s: WorkoutSession) => s.id)
         );
 
       let totalHoldSeconds = 0;
-      for (const set of sets || []) {
+      const holdSets = (sets || []) as WorkoutSet[];
+      for (const set of holdSets) {
         const slug = set.exercise?.slug || set.exercise?.name || "";
         if (
-          slug.toLowerCase().includes(config.exercise.replace("_", " ")) ||
-          slug.toLowerCase().includes(config.exercise)
+          slug.toLowerCase().includes((config.exercise as string).replace("_", " ")) ||
+          slug.toLowerCase().includes(config.exercise as string)
         ) {
           totalHoldSeconds += set.duration_seconds || 0;
         }
@@ -689,11 +758,11 @@ async function verifyWorkoutTask(
       // Fallback: if no individual set data, check if a plank-named session
       // has enough total duration
       if (totalHoldSeconds === 0) {
-        for (const session of sessions) {
+        for (const session of typedSessions) {
           const name = (session.name || "").toLowerCase();
           if (
-            name.includes(config.exercise.replace("_", " ")) ||
-            name.includes(config.exercise)
+            name.includes((config.exercise as string).replace("_", " ")) ||
+            name.includes(config.exercise as string)
           ) {
             totalHoldSeconds += (session.duration_minutes || 0) * 60;
           }
@@ -722,8 +791,8 @@ async function verifyWorkoutTask(
 
   if (is75HardDualWorkout && sessions.length >= 2) {
     // Sort sessions by started_at
-    const sorted = [...sessions].sort(
-      (a: any, b: any) =>
+    const sorted = [...typedSessions].sort(
+      (a: WorkoutSession, b: WorkoutSession) =>
         new Date(a.started_at).getTime() - new Date(b.started_at).getTime()
     );
 
@@ -764,7 +833,7 @@ async function verifyWorkoutTask(
         "park",
         "trail",
       ];
-      outdoorMet = sessions.some((s: any) => {
+      outdoorMet = typedSessions.some((s: WorkoutSession) => {
         const name = (s.name || "").toLowerCase();
         return outdoorKeywords.some((kw) => name.includes(kw));
       });
@@ -772,8 +841,8 @@ async function verifyWorkoutTask(
 
     // Check minimum duration
     const minDuration = config.min_duration_minutes || 45;
-    const qualifyingSessions = sessions.filter(
-      (s: any) => (s.duration_minutes || 0) >= minDuration
+    const qualifyingSessions = typedSessions.filter(
+      (s: WorkoutSession) => (s.duration_minutes || 0) >= minDuration
     );
 
     const completed =
@@ -796,8 +865,8 @@ async function verifyWorkoutTask(
   let completed = sessions.length > 0;
 
   if (config.min_duration_minutes) {
-    completed = sessions.some(
-      (s: any) => (s.duration_minutes || 0) >= config.min_duration_minutes
+    completed = typedSessions.some(
+      (s: WorkoutSession) => (s.duration_minutes || 0) >= (config.min_duration_minutes as number)
     );
   }
 
@@ -815,11 +884,11 @@ async function verifyWorkoutTask(
 // ---------------------------------------------------------------------------
 
 async function verifyWaterTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   const { data: waterLogs, error } = await supabase
     .from("water_logs")
@@ -832,8 +901,9 @@ async function verifyWaterTask(
     return { completed: false, total_oz: 0, target_oz: config.min_oz || 0 };
   }
 
-  const totalOz = waterLogs.reduce(
-    (sum: number, w: any) => sum + (Number(w.amount_oz) || 0),
+  const typedWaterLogs = waterLogs as WaterLog[];
+  const totalOz = typedWaterLogs.reduce(
+    (sum: number, w: WaterLog) => sum + (Number(w.amount_oz) || 0),
     0
   );
 
@@ -871,11 +941,11 @@ async function verifyWaterTask(
 // ---------------------------------------------------------------------------
 
 async function verifyNutritionTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>,
+  config: Record<string, unknown>,
   challengeSlug: string,
   rules: ChallengeRules
 ): Promise<VerifyResult> {
@@ -890,18 +960,19 @@ async function verifyNutritionTask(
     return { completed: false, meals_logged: 0 };
   }
 
-  let completed = nutritionLogs.length > 0;
-  const details: Record<string, any> = {
-    meals_logged: nutritionLogs.length,
+  const typedNutritionLogs = nutritionLogs as NutritionLog[];
+  let completed = typedNutritionLogs.length > 0;
+  const details: Record<string, unknown> = {
+    meals_logged: typedNutritionLogs.length,
   };
 
   // Total macros
-  const totalCalories = nutritionLogs.reduce(
-    (sum: number, l: any) => sum + (Number(l.calories) || 0),
+  const totalCalories = typedNutritionLogs.reduce(
+    (sum: number, l: NutritionLog) => sum + (Number(l.calories) || 0),
     0
   );
-  const totalProtein = nutritionLogs.reduce(
-    (sum: number, l: any) => sum + (Number(l.protein) || 0),
+  const totalProtein = typedNutritionLogs.reduce(
+    (sum: number, l: NutritionLog) => sum + (Number(l.protein) || 0),
     0
   );
 
@@ -910,14 +981,14 @@ async function verifyNutritionTask(
 
   // Minimum meal count
   if (config.min_meals) {
-    const mealsOk = nutritionLogs.length >= config.min_meals;
+    const mealsOk = typedNutritionLogs.length >= (config.min_meals as number);
     completed = completed && mealsOk;
     details.min_meals_met = mealsOk;
   }
 
   // Max calorie target
   if (config.max_calories) {
-    const caloriesOk = totalCalories <= config.max_calories;
+    const caloriesOk = totalCalories <= (config.max_calories as number);
     completed = completed && caloriesOk;
     details.max_calories_met = caloriesOk;
   }
@@ -925,7 +996,7 @@ async function verifyNutritionTask(
   // 75 Hard strict diet: flag if fewer than 2 meals logged
   if (challengeSlug === "75-hard") {
     // Unique meal types logged today
-    const mealTypes = new Set(nutritionLogs.map((l: any) => l.meal_type));
+    const mealTypes = new Set(typedNutritionLogs.map((l: NutritionLog) => l.meal_type));
     if (mealTypes.size < 2) {
       details.strict_diet_warning = true;
       details.unique_meal_types = mealTypes.size;
@@ -938,8 +1009,8 @@ async function verifyNutritionTask(
   if (challengeSlug === "whole30" && rules.elimination_list) {
     const eliminatedFoods = rules.elimination_list;
     // Fetch food details for logged items
-    const foodIds = nutritionLogs
-      .map((l: any) => l.food_id)
+    const foodIds = typedNutritionLogs
+      .map((l: NutritionLog) => l.food_id)
       .filter(Boolean);
 
     if (foodIds.length > 0) {
@@ -984,14 +1055,14 @@ async function verifyNutritionTask(
 // ---------------------------------------------------------------------------
 
 async function verifyPhotoTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   today: string,
   todayStart: string,
   todayEnd: string,
   enrollmentId: string,
   currentDay: number,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   // If the photo is only required on specific days, check that
   if (config.required_days && Array.isArray(config.required_days)) {
@@ -1044,7 +1115,7 @@ async function verifyPhotoTask(
     .single();
 
   if (dailyLog?.tasks_completed) {
-    const tc = dailyLog.tasks_completed as Record<string, any>;
+    const tc = dailyLog.tasks_completed as Record<string, unknown>;
     // Check all keys that look like photo tasks
     for (const [key, val] of Object.entries(tc)) {
       if (key.includes("photo") && val === true) {
@@ -1065,11 +1136,11 @@ async function verifyPhotoTask(
 // ---------------------------------------------------------------------------
 
 async function verifyStepsTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   const targetSteps = config.min_steps || 10000;
   const today = todayStart.split("T")[0];
@@ -1141,11 +1212,11 @@ async function verifyStepsTask(
 // ---------------------------------------------------------------------------
 
 async function verifyMeditationTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   const minMinutes = config.min_duration_minutes || config.min_minutes || 5;
 
@@ -1164,8 +1235,9 @@ async function verifyMeditationTask(
     return { completed: false, total_minutes: 0, target_minutes: minMinutes };
   }
 
+  const typedFocusSessions = sessions as FocusSession[];
   // Filter to meditation sessions
-  const meditationSessions = sessions.filter((s: any) => {
+  const meditationSessions = typedFocusSessions.filter((s: FocusSession) => {
     const desc = (s.task_description || "").toLowerCase();
     const cat = (s.category || "").toLowerCase();
     return (
@@ -1179,7 +1251,7 @@ async function verifyMeditationTask(
   });
 
   const totalMinutes = meditationSessions.reduce(
-    (sum: number, s: any) =>
+    (sum: number, s: FocusSession) =>
       sum + (s.actual_duration_minutes || s.planned_duration_minutes || 0),
     0
   );
@@ -1200,12 +1272,12 @@ async function verifyMeditationTask(
 // ---------------------------------------------------------------------------
 
 async function verifyFastingTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>,
-  userConfig: Record<string, any>
+  config: Record<string, unknown>,
+  userConfig: Record<string, unknown>
 ): Promise<VerifyResult> {
   // Determine the fasting protocol from enrollment configuration or task config
   const protocol = userConfig.protocol || config.protocol || "16_8";
@@ -1265,11 +1337,13 @@ async function verifyFastingTask(
     };
   }
 
+  const typedMeals = meals as MealLogEntry[];
+
   // Check that all meals fall within the eating window
   let allWithinWindow = true;
   const violations: string[] = [];
 
-  for (const meal of meals) {
+  for (const meal of typedMeals) {
     const mealTime = new Date(meal.logged_at);
     const mealMinutes = mealTime.getUTCHours() * 60 + mealTime.getUTCMinutes();
 
@@ -1283,8 +1357,8 @@ async function verifyFastingTask(
   }
 
   // Also check the span between first and last meal
-  const firstMealTime = new Date(meals[0].logged_at);
-  const lastMealTime = new Date(meals[meals.length - 1].logged_at);
+  const firstMealTime = new Date(typedMeals[0].logged_at);
+  const lastMealTime = new Date(typedMeals[typedMeals.length - 1].logged_at);
   const eatingSpanHours =
     (lastMealTime.getTime() - firstMealTime.getTime()) / (1000 * 60 * 60);
   const spanWithinLimit = eatingSpanHours <= eatingHours;
@@ -1307,11 +1381,11 @@ async function verifyFastingTask(
 // ---------------------------------------------------------------------------
 
 async function verifyCaloriesTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   const { data: nutritionLogs, error } = await supabase
     .from("nutrition_logs")
@@ -1324,8 +1398,9 @@ async function verifyCaloriesTask(
     return { completed: false, total_calories: 0 };
   }
 
-  const totalCalories = nutritionLogs.reduce(
-    (sum: number, l: any) => sum + (Number(l.calories) || 0),
+  const calorieTypedLogs = nutritionLogs as { calories: number | string | null }[];
+  const totalCalories = calorieTypedLogs.reduce(
+    (sum: number, l: { calories: number | string | null }) => sum + (Number(l.calories) || 0),
     0
   );
 
@@ -1381,11 +1456,11 @@ async function verifyCaloriesTask(
 // ---------------------------------------------------------------------------
 
 async function verifyProteinTask(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   todayStart: string,
   todayEnd: string,
-  config: Record<string, any>
+  config: Record<string, unknown>
 ): Promise<VerifyResult> {
   const { data: nutritionLogs, error } = await supabase
     .from("nutrition_logs")
@@ -1398,8 +1473,9 @@ async function verifyProteinTask(
     return { completed: false, total_protein: 0 };
   }
 
-  const totalProtein = nutritionLogs.reduce(
-    (sum: number, l: any) => sum + (Number(l.protein) || 0),
+  const proteinTypedLogs = nutritionLogs as { protein: number | string | null }[];
+  const totalProtein = proteinTypedLogs.reduce(
+    (sum: number, l: { protein: number | string | null }) => sum + (Number(l.protein) || 0),
     0
   );
 
@@ -1466,15 +1542,15 @@ function isCouchTo5kRunDay(currentDay: number, rules: ChallengeRules): boolean {
 // ===========================================================================
 
 async function upsertDailyLog(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   log: {
     enrollment_id: string;
     user_id: string;
     day_number: number;
     date: string;
-    tasks_completed: Record<string, any>;
+    tasks_completed: Record<string, unknown>;
     all_tasks_completed: boolean;
-    auto_verified: Record<string, any>;
+    auto_verified: Record<string, unknown>;
   }
 ) {
   const { data: existing } = await supabase
@@ -1513,9 +1589,9 @@ async function upsertDailyLog(
 }
 
 async function advanceDay(
-  supabase: any,
-  enrollment: any,
-  challenge: any
+  supabase: ReturnType<typeof createClient>,
+  enrollment: { id: string; current_day: number },
+  challenge: { duration_days: number }
 ) {
   const nextDay = (enrollment.current_day || 1) + 1;
   if (nextDay <= challenge.duration_days) {

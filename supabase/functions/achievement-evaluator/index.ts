@@ -12,7 +12,7 @@ interface AchievementDef {
   name: string;
   description: string;
   category: string;
-  check: (data: any) => boolean;
+  check: (data: Record<string, unknown>) => boolean;
 }
 
 const ACHIEVEMENT_DEFINITIONS: AchievementDef[] = [
@@ -263,10 +263,22 @@ serve(async (req) => {
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("id");
-      userIds = (profiles || []).map((p: any) => p.id);
+      userIds = (profiles || []).map((p: { id: string }) => p.id);
     }
 
-    const newAchievements: any[] = [];
+    type EnrollmentRow = {
+      id: string;
+      status: string;
+      current_day: number;
+      actual_end_date: string | null;
+      restart_count: number | null;
+      partnership_id: string | null;
+      challenge_definitions: { slug: string; duration_days: number; is_system: boolean };
+    };
+    type AchievementRow = { achievement_id: string };
+    type LogRow = { tasks_completed: Record<string, unknown> | null };
+
+    const newAchievements: { user_id: string; achievement_id: string; earned_at: string }[] = [];
 
     for (const userId of userIds) {
       // Fetch user stats
@@ -299,7 +311,7 @@ serve(async (req) => {
       const weightLost = Math.max(0, startWeight - currentWeight);
 
       const earnedIds = new Set(
-        (existingAchievements || []).map((a: any) => a.achievement_id)
+        (existingAchievements || []).map((a: AchievementRow) => a.achievement_id)
       );
 
       // ── Challenge data fetching ─────────────────────────────────────────
@@ -309,23 +321,23 @@ serve(async (req) => {
         .eq("user_id", userId);
 
       const allEnrollments = enrollments || [];
-      const completedEnrollments = allEnrollments.filter((e: any) => e.status === "completed");
+      const completedEnrollments = allEnrollments.filter((e: EnrollmentRow) => e.status === "completed");
 
       // Count enrollments started
       const challengesStarted = allEnrollments.length;
 
       // Check halfway: any enrollment with current_day >= duration_days / 2
       const challengeHalfway = allEnrollments.some(
-        (e: any) => e.current_day >= (e.challenge_definitions.duration_days / 2)
+        ( e: EnrollmentRow) => e.current_day >= (e.challenge_definitions.duration_days / 2)
       );
 
       // Slug-based completions
-      const completedSlugs = new Set(completedEnrollments.map((e: any) => e.challenge_definitions.slug));
+      const completedSlugs = new Set(completedEnrollments.map((e: EnrollmentRow) => e.challenge_definitions.slug));
 
       // 75 Soft: completed with 90%+ daily log compliance
       let challenge75SoftCompleted = false;
       const softEnrollment = completedEnrollments.find(
-        (e: any) => e.challenge_definitions.slug === "75-soft"
+        ( e: EnrollmentRow) => e.challenge_definitions.slug === "75-soft"
       );
       if (softEnrollment) {
         const { count: logCount } = await supabaseAdmin
@@ -340,7 +352,7 @@ serve(async (req) => {
       // Whole30: completed with all daily logs showing compliant_meals
       let challengeWhole30Completed = false;
       const whole30Enrollment = completedEnrollments.find(
-        (e: any) => e.challenge_definitions.slug === "whole30"
+        ( e: EnrollmentRow) => e.challenge_definitions.slug === "whole30"
       );
       if (whole30Enrollment) {
         const { data: whole30Logs } = await supabaseAdmin
@@ -348,29 +360,29 @@ serve(async (req) => {
           .select("tasks_completed")
           .eq("enrollment_id", whole30Enrollment.id);
         challengeWhole30Completed = (whole30Logs || []).length > 0 && (whole30Logs || []).every(
-          (log: any) => log.tasks_completed?.compliant_meals === true
+          (log: LogRow) => log.tasks_completed?.compliant_meals === true
         );
       }
 
       // Challenges completed this year
       const currentYear = new Date().getFullYear();
       const challengesCompletedYear = completedEnrollments.filter(
-        (e: any) => e.actual_end_date && new Date(e.actual_end_date).getFullYear() === currentYear
+        ( e: EnrollmentRow) => e.actual_end_date && new Date(e.actual_end_date).getFullYear() === currentYear
       ).length;
 
       // Restart and complete: any completed enrollment with restart_count > 0
       const challengeRestartComplete = completedEnrollments.some(
-        (e: any) => (e.restart_count || 0) > 0
+        (e: EnrollmentRow) => (e.restart_count || 0) > 0
       );
 
       // Partner challenge: any completed enrollment with partnership_id
       const challengePartnerCompleted = completedEnrollments.some(
-        (e: any) => e.partnership_id != null
+        ( e: EnrollmentRow) => e.partnership_id != null
       );
 
       // Custom challenge: completed enrollment where challenge is_system = false
       const challengeCustomCompleted = completedEnrollments.some(
-        (e: any) => e.challenge_definitions.is_system === false
+        ( e: EnrollmentRow) => e.challenge_definitions.is_system === false
       );
 
       // Plank: check workout_sets for plank exercise with duration >= 300 seconds

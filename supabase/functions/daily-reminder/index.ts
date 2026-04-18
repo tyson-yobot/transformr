@@ -29,7 +29,7 @@ serve(async (req) => {
 
     if (profilesError) throw profilesError;
 
-    const notifications: any[] = [];
+    const notifications: { user_id: string; type: string; title: string; body: string }[] = [];
 
     for (const profile of profiles || []) {
       const prefs = profile.notification_preferences || {};

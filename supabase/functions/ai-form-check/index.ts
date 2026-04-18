@@ -100,7 +100,7 @@ ALWAYS respond with valid JSON in this exact format:
     imageContent.push({
       type: "text",
       text: `Exercise: ${exercise_name || "please identify"}. User experience level: ${user_experience || "unknown"}. Analyze form across all frames.`,
-    } as any);
+    });
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

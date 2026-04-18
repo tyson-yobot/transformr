@@ -34,11 +34,11 @@ serve(async (req) => {
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("id");
-      userIds = (profiles || []).map((p: any) => p.id);
+      userIds = (profiles || []).map((p: { id: string }) => p.id);
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const results: any[] = [];
+    const results: { user_id: string; [key: string]: unknown }[] = [];
 
     for (const userId of userIds) {
       // Fetch all widget data in parallel
@@ -99,8 +99,9 @@ serve(async (req) => {
       ]);
 
       // Calculate macro totals for today
+      interface MacroAcc { calories: number; protein_g: number; carbs_g: number; fat_g: number }
       const macroTotals = (todayMeals || []).reduce(
-        (acc: any, meal: any) => ({
+        (acc: MacroAcc, meal: MacroAcc) => ({
           calories: acc.calories + (meal.calories || 0),
           protein_g: acc.protein_g + (meal.protein_g || 0),
           carbs_g: acc.carbs_g + (meal.carbs_g || 0),

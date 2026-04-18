@@ -468,7 +468,7 @@ serve(async (req) => {
 
       default:
         // Log unhandled events for debugging
-        console.log(`Unhandled Stripe event type: ${event.type}`);
+        console.warn(`Unhandled Stripe event type: ${event.type}`);
     }
 
     return new Response(JSON.stringify({ received: true }), {

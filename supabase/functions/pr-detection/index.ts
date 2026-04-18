@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     const userId = user.id;
-    const detectedPRs: any[] = [];
+    const detectedPRs: { pr_type: string; value: number; label: string; previous_value: number | null }[] = [];
 
     // Check 1RM PR (weight at 1 rep)
     // Estimate 1RM using Epley formula: weight * (1 + reps/30)
@@ -75,7 +75,7 @@ serve(async (req) => {
 
     for (const prCheck of prTypes) {
       const existing = (existingPRs || []).find(
-        (pr: any) => pr.pr_type === prCheck.type
+        (pr: { pr_type: string; value: number }) => pr.pr_type === prCheck.type
       );
 
       const isNewPR = !existing || prCheck.value > existing.value;
