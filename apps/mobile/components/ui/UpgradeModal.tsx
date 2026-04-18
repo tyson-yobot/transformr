@@ -348,7 +348,7 @@ export function UpgradeModal() {
   useEffect(() => {
     upgradeModalEvents.setListener(open);
     return () => {
-      upgradeModalEvents.setListener(() => undefined);
+      upgradeModalEvents.setListener(null);
     };
   }, [open]);
 

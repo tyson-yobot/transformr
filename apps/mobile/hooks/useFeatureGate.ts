@@ -142,7 +142,7 @@ type UpgradeModalListener = (feature: FeatureKey) => void;
 let _listener: UpgradeModalListener | null = null;
 
 export const upgradeModalEvents = {
-  setListener: (fn: UpgradeModalListener) => {
+  setListener: (fn: UpgradeModalListener | null) => {
     _listener = fn;
   },
   emit: (feature: FeatureKey) => {

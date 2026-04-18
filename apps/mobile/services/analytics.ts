@@ -43,11 +43,8 @@ export interface AnalyticsEvents {
 }
 
 export function track<K extends keyof AnalyticsEvents>(
-  event: K,
-  properties: AnalyticsEvents[K],
+  _event: K,
+  _properties: AnalyticsEvents[K],
 ): void {
-  if (__DEV__) {
-    console.warn('[Analytics]', event, properties);
-  }
   // TODO: replace stub with PostHog / Segment / Mixpanel SDK call
 }

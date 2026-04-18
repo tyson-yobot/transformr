@@ -4,14 +4,18 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET_SUBSCRIPTIONS');
 
-const PRICE_TO_TIER: Record<string, string> = {
-  [Deno.env.get('STRIPE_PRICE_PRO_MONTHLY') ?? '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_PRO_ANNUAL') ?? '']: 'pro',
-  [Deno.env.get('STRIPE_PRICE_ELITE_MONTHLY') ?? '']: 'elite',
-  [Deno.env.get('STRIPE_PRICE_ELITE_ANNUAL') ?? '']: 'elite',
-  [Deno.env.get('STRIPE_PRICE_PARTNERS_MONTHLY') ?? '']: 'partners',
-  [Deno.env.get('STRIPE_PRICE_PARTNERS_ANNUAL') ?? '']: 'partners',
-};
+// Filter out empty-string keys that would appear if env vars are missing,
+// preventing privilege escalation when priceId is '' or undefined.
+const PRICE_TO_TIER: Record<string, string> = Object.fromEntries(
+  ([
+    [Deno.env.get('STRIPE_PRICE_PRO_MONTHLY'), 'pro'],
+    [Deno.env.get('STRIPE_PRICE_PRO_ANNUAL'), 'pro'],
+    [Deno.env.get('STRIPE_PRICE_ELITE_MONTHLY'), 'elite'],
+    [Deno.env.get('STRIPE_PRICE_ELITE_ANNUAL'), 'elite'],
+    [Deno.env.get('STRIPE_PRICE_PARTNERS_MONTHLY'), 'partners'],
+    [Deno.env.get('STRIPE_PRICE_PARTNERS_ANNUAL'), 'partners'],
+  ] as [string | undefined, string][]).filter(([key]) => Boolean(key)),
+);
 
 async function verifyStripeSignature(
   payload: string,
@@ -37,11 +41,20 @@ async function verifyStripeSignature(
       key,
       encoder.encode(`${timestamp}.${payload}`),
     );
-    const computedSig = Array.from(new Uint8Array(signatureBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    const expectedSig = sigPart.split('=')[1];
-    return computedSig === expectedSig;
+    const computedBytes = new Uint8Array(signatureBuffer);
+    const expectedHex = sigPart.split('=')[1];
+    // Decode expected hex string to bytes for constant-time comparison
+    const expectedBytes = new Uint8Array(expectedHex.length / 2);
+    for (let i = 0; i < expectedBytes.length; i++) {
+      expectedBytes[i] = parseInt(expectedHex.slice(i * 2, i * 2 + 2), 16);
+    }
+    if (computedBytes.length !== expectedBytes.length) return false;
+    // Constant-time byte comparison — prevents timing oracle attacks
+    let diff = 0;
+    for (let i = 0; i < computedBytes.length; i++) {
+      diff |= computedBytes[i] ^ expectedBytes[i];
+    }
+    return diff === 0;
   } catch {
     return false;
   }
