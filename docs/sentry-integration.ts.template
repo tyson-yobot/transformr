@@ -1,0 +1,190 @@
+/**
+ * TRANSFORMR — Sentry Error Reporting Integration
+ *
+ * Replace SENTRY_DSN_PLACEHOLDER with DSN from:
+ *   sentry.io → Your Project → Settings → Client Keys (DSN)
+ *
+ * Installation:
+ *   npx expo install @sentry/react-native
+ *   npx @sentry/wizard@latest -i reactNative
+ *
+ * Usage:
+ *   1. Call initCrashReporter() in app/_layout.tsx before rendering
+ *   2. Call setUserContext(userId) after successful login
+ *   3. Call clearUserContext() on logout
+ *   4. Wrap useQuery/fetch catch blocks with recordError(err, context)
+ */
+
+import * as Sentry from '@sentry/react-native';
+
+const SENTRY_DSN = 'SENTRY_DSN_PLACEHOLDER';
+const IS_DEV = __DEV__;
+
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
+
+export function initCrashReporter(): void {
+  if (IS_DEV) return; // Don't send dev events to Sentry
+
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: 'production',
+    release: `com.automateai.transformr@1.0.0`,
+
+    // Sample rates — adjust after baseline metrics are collected
+    tracesSampleRate: 0.1,       // 10% of transactions for performance monitoring
+    profilesSampleRate: 0.05,    // 5% of transactions for profiling
+
+    // PII sanitization — never send raw user data
+    beforeSend(event) {
+      return sanitizeEvent(event);
+    },
+
+    // Breadcrumb sanitization
+    beforeBreadcrumb(breadcrumb) {
+      return sanitizeBreadcrumb(breadcrumb);
+    },
+
+    // Integrations
+    integrations: [
+      Sentry.reactNativeTracingIntegration(),
+    ],
+
+    // Ignore low-signal errors
+    ignoreErrors: [
+      'Network request failed',
+      'AbortError',
+      'Load failed',
+    ],
+  });
+}
+
+// ---------------------------------------------------------------------------
+// User context — hashed ID only, no PII
+// ---------------------------------------------------------------------------
+
+/**
+ * Hash a user ID for Sentry context.
+ * We send a deterministic hash, not the raw Supabase UUID,
+ * to avoid transmitting PII to a third-party service.
+ */
+async function hashUserId(userId: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(userId);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+}
+
+export async function setUserContext(userId: string): Promise<void> {
+  const hashedId = await hashUserId(userId);
+  Sentry.setUser({ id: hashedId });
+}
+
+export function clearUserContext(): void {
+  Sentry.setUser(null);
+}
+
+// ---------------------------------------------------------------------------
+// Error recording
+// ---------------------------------------------------------------------------
+
+interface ErrorContext {
+  /** Screen or component where the error occurred */
+  screen?: string;
+  /** Action the user was performing */
+  action?: string;
+  /** Extra key-value metadata (must not contain PII) */
+  extra?: Record<string, unknown>;
+  /** Sentry severity level */
+  level?: Sentry.SeverityLevel;
+}
+
+export function recordError(error: unknown, context?: ErrorContext): void {
+  const err = error instanceof Error ? error : new Error(String(error));
+
+  Sentry.withScope((scope) => {
+    if (context?.screen) scope.setTag('screen', context.screen);
+    if (context?.action) scope.setTag('action', context.action);
+    if (context?.level) scope.setLevel(context.level);
+    if (context?.extra) {
+      Object.entries(context.extra).forEach(([key, value]) => {
+        scope.setExtra(key, value);
+      });
+    }
+    Sentry.captureException(err);
+  });
+
+  // Mirror to console in dev for visibility
+  if (IS_DEV) {
+    console.error('[recordError]', err.message, context);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PII sanitization helpers
+// ---------------------------------------------------------------------------
+
+const PII_PATTERNS: RegExp[] = [
+  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,  // email
+  /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g,                          // phone
+  /\b(?:\d[ -]?){13,16}\b/g,                                  // card numbers
+];
+
+function redactPII(value: string): string {
+  let result = value;
+  for (const pattern of PII_PATTERNS) {
+    result = result.replace(pattern, '[REDACTED]');
+  }
+  return result;
+}
+
+function sanitizeEvent(event: Sentry.Event): Sentry.Event | null {
+  // Remove request bodies (may contain user input)
+  if (event.request?.data) {
+    event.request.data = '[FILTERED]';
+  }
+
+  // Redact PII from exception values
+  if (event.exception?.values) {
+    for (const ex of event.exception.values) {
+      if (ex.value) {
+        ex.value = redactPII(ex.value);
+      }
+    }
+  }
+
+  return event;
+}
+
+function sanitizeBreadcrumb(
+  breadcrumb: Sentry.Breadcrumb,
+): Sentry.Breadcrumb | null {
+  // Drop console breadcrumbs entirely in prod (can contain user data)
+  if (breadcrumb.category === 'console') return null;
+
+  // Redact PII from navigation breadcrumbs
+  if (breadcrumb.category === 'navigation' && breadcrumb.data?.to) {
+    breadcrumb.data.to = redactPII(String(breadcrumb.data.to));
+  }
+
+  return breadcrumb;
+}
+
+// ---------------------------------------------------------------------------
+// Wrap component tree (call in app/_layout.tsx)
+// ---------------------------------------------------------------------------
+
+export const { wrap: withSentryProfiler } = Sentry;
+
+/**
+ * Example usage in app/_layout.tsx:
+ *
+ *   import { initCrashReporter, withSentryProfiler } from '@utils/sentry';
+ *
+ *   initCrashReporter();
+ *
+ *   function RootLayout() { ... }
+ *   export default withSentryProfiler(RootLayout);
+ */
