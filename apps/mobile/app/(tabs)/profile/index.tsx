@@ -637,6 +637,13 @@ export default function ProfileScreen() {
           iconBg={colors.dim.info}
           onPress={() => router.push('/(tabs)/profile/integrations')}
         />
+        <SettingsRow
+          icon="watch-outline"
+          iconColor={colors.accent.primary}
+          label="Wearables"
+          iconBg={colors.dim.primary}
+          onPress={() => router.push('/(tabs)/profile/wearables' as never)}
+        />
       </Animated.View>
 
       <SectionHeader title="Account" danger />
