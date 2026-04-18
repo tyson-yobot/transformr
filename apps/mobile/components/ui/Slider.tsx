@@ -163,20 +163,22 @@ export function Slider({
               fillStyle,
             ]}
           />
-          <Animated.View
-            style={[
-              styles.thumb,
-              {
+          {/* Outer Animated.View: position + scale animation only — no shadow props
+              so Reanimated (Fabric) never passes shadowOffset as a native prop */}
+          <Animated.View style={[styles.thumb, thumbScaleStyle]}>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: THUMB_SIZE / 2,
                 backgroundColor: activeThumbColor,
                 shadowColor: activeTrackColor,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.3,
                 shadowRadius: 4,
                 elevation: 4,
-              },
-              thumbScaleStyle,
-            ]}
-          />
+              }}
+            />
+          </Animated.View>
         </View>
       </GestureDetector>
     </View>

@@ -86,19 +86,22 @@ export function Card({
   }, [onPress]);
 
   const effectivePadding = padding ?? spacing.lg;
-
   const variantStyle = getVariantStyle(variant, colors, isDark);
+
   const borderAccentStyle: ViewStyle = borderAccent
     ? { borderLeftWidth: 3, borderLeftColor: variantStyle.accentColor }
     : {};
 
-  const containerStyle: ViewStyle = {
+  // Visual container — border, background, padding. No shadow props here so
+  // this style is safe to place on Reanimated's AnimatedPressable (Fabric dev
+  // mode warns when shadowOffset is passed as a native prop via Reanimated).
+  const visualStyle: ViewStyle = {
     backgroundColor: colors.background.secondary,
     borderRadius: borderRadius.lg,
     padding: effectivePadding,
     borderWidth: 1,
     borderColor: colors.border.default,
-    ...variantStyle.shadow,
+    ...(variantStyle.borderOverride ?? {}),
     ...borderAccentStyle,
   };
 
@@ -151,22 +154,37 @@ export function Card({
   );
 
   if (onPress) {
+    // Shadow lives on the outer plain View so Reanimated never receives
+    // shadowOffset as a native prop (which triggers warnForStyleProps in Fabric
+    // dev builds). The inner AnimatedPressable carries visual + scale animation.
     return (
-      <AnimatedPressable
-        onPress={handlePress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={[containerStyle, animatedStyle, style]}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
+      <View
+        style={[
+          {
+            borderRadius: borderRadius.lg,
+            backgroundColor: colors.background.secondary, // required for iOS shadow
+            ...variantStyle.shadowProps,
+          },
+          style,
+        ]}
       >
-        {content}
-      </AnimatedPressable>
+        <AnimatedPressable
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={[visualStyle, animatedStyle]}
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel}
+        >
+          {content}
+        </AnimatedPressable>
+      </View>
     );
   }
 
+  // Non-pressable — no Reanimated involved, shadow merged directly.
   return (
-    <View style={[containerStyle, style]}>
+    <View style={[visualStyle, variantStyle.shadowProps, style]}>
       {content}
     </View>
   );
@@ -177,9 +195,14 @@ export function Card({
 // -----------------------------------------------------------------------------
 
 interface VariantStyle {
-  shadow:      ViewStyle;
-  accentColor: string;
-  glowColor:   string;
+  // Shadow/elevation only. MUST stay on plain Views — never on Animated
+  // components (Reanimated passes these as Fabric native props which triggers
+  // warnForStyleProps in dev mode for nested-object properties like shadowOffset).
+  shadowProps:     ViewStyle;
+  // Optional border overrides (e.g. light-mode depth on default variant).
+  borderOverride?: ViewStyle;
+  accentColor:     string;
+  glowColor:       string;
 }
 
 function getVariantStyle(
@@ -191,7 +214,7 @@ function getVariantStyle(
     case 'elevated':
     case 'featured':
       return {
-        shadow: isDark
+        shadowProps: isDark
           ? colors.shadow.cardStrong
           : {
               shadowColor:   '#7C3AED', // brand purple — light-mode branded shadow
@@ -206,7 +229,7 @@ function getVariantStyle(
 
     case 'ai':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.cyan,
           shadowOffset:   { width: 0, height: 4 },
           shadowOpacity:  0.18,
@@ -219,7 +242,7 @@ function getVariantStyle(
 
     case 'success':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.success,
           shadowOffset:   { width: 0, height: 2 },
           shadowOpacity:  0.14,
@@ -232,7 +255,7 @@ function getVariantStyle(
 
     case 'fire':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.fire,
           shadowOffset:   { width: 0, height: 2 },
           shadowOpacity:  0.14,
@@ -245,7 +268,7 @@ function getVariantStyle(
 
     case 'gold':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.gold,
           shadowOffset:   { width: 0, height: 4 },
           shadowOpacity:  0.18,
@@ -258,7 +281,7 @@ function getVariantStyle(
 
     case 'partner':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.pink,
           shadowOffset:   { width: 0, height: 4 },
           shadowOpacity:  0.18,
@@ -271,7 +294,7 @@ function getVariantStyle(
 
     case 'danger':
       return {
-        shadow: {
+        shadowProps: {
           shadowColor:    colors.accent.danger,
           shadowOffset:   { width: 0, height: 2 },
           shadowOpacity:  0.12,
@@ -284,14 +307,14 @@ function getVariantStyle(
 
     case 'flat':
       return {
-        shadow:      {},
+        shadowProps: {},
         accentColor: colors.border.default,
         glowColor:   'transparent',
       };
 
     case 'outlined':
       return {
-        shadow:      {},
+        shadowProps: {},
         accentColor: colors.border.default,
         glowColor:   'transparent',
       };
@@ -299,17 +322,18 @@ function getVariantStyle(
     // default — subtle purple glow
     default:
       return {
-        shadow: isDark
+        shadowProps: isDark
           ? colors.shadow.cardSubtle
           : {
-              borderWidth:   1,
-              borderColor:   'rgba(124,58,237,0.09)', // brand purple tint — light-mode depth
               shadowColor:   '#7C3AED',
               shadowOffset:  { width: 0, height: 2 },
               shadowOpacity: 0.07,
               shadowRadius:  8,
               elevation:     2,
             },
+        borderOverride: isDark
+          ? undefined
+          : { borderWidth: 1, borderColor: 'rgba(124,58,237,0.09)' }, // brand purple tint — light-mode depth
         accentColor: colors.accent.primary,
         glowColor:   colors.glow.purpleSoft,
       };
