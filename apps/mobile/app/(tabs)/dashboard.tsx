@@ -38,6 +38,8 @@ import { QuickStatsRow } from '@components/cards/QuickStatsRow';
 import { WeightChart } from '@components/charts/WeightChart';
 import { SkiaSparkline } from '@components/charts/SkiaSparkline';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { NoiseOverlay } from '@components/ui/NoiseOverlay';
 import { useProfileStore } from '@stores/profileStore';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { useNutritionStore } from '@stores/nutritionStore';
@@ -411,8 +413,10 @@ export default function DashboardScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
+      <NoiseOverlay />
       <ScrollView
         style={styles.container}
         contentContainerStyle={{

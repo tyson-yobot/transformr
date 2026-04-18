@@ -38,3 +38,4 @@ export { GlowCard } from './GlowCard';
 export { PurpleRadialBackground } from './PurpleRadialBackground';
 export { EmptyState } from './EmptyState';
 export { NoiseOverlay } from './NoiseOverlay';
+export { AmbientBackground } from './AmbientBackground';
