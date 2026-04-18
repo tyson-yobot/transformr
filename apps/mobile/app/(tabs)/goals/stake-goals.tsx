@@ -4,6 +4,7 @@
 
 export const unstable_settings = { lazy: true };
 
+/* eslint-disable import/first */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
@@ -34,6 +35,7 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '../../../services/supabase';
 import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
+/* eslint-enable import/first */
 
 interface StakeGoalWithDetails extends StakeGoal {
   goalTitle: string;

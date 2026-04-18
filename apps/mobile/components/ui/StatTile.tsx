@@ -59,6 +59,8 @@ function AnimatedFlame({ color }: { color: string }) {
       cancelAnimation(flameScale);
       cancelAnimation(flameRotation);
     };
+    // flameScale and flameRotation are stable SharedValues
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -111,6 +113,8 @@ export function StatTile({
         withSpring(1.0),
       );
     }
+    // tileScale is a stable SharedValue from useSharedValue
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, showFlame]);
 
   const tileAnimatedStyle = useAnimatedStyle(() => ({

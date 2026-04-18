@@ -269,8 +269,6 @@ export default function ChatScreen() {
     [
       colors.accent.cyan,
       colors.accent.primary,
-      colors.background.tertiary,
-      colors.border.subtle,
       colors.text.primary,
       colors.text.inverse,
       borderRadius.lg,
