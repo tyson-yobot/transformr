@@ -120,6 +120,8 @@ export default function WearablesScreen() {
               style: 'destructive',
               onPress: async () => {
                 setToggling(w.id);
+                // profileConnectedKey is always set when wearable.connected is true
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 await updateProfile({ [w.profileConnectedKey!]: false });
                 setToggling(null);
               },

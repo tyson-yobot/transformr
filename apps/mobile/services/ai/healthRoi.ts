@@ -108,7 +108,7 @@ export async function computeHealthROIReport(
   }, 0);
   const actualCompletions = habits.reduce((sum, h) => {
     const completions = (
-      h.habit_completions as Array<{ completed_date: string }> | null
+      h.habit_completions as { completed_date: string }[] | null
     ) ?? [];
     return sum + completions.filter((c) => c.completed_date >= cutoffDate).length;
   }, 0);

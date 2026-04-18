@@ -120,12 +120,12 @@ async function spotifyFetch<T>(
 
 export async function getWorkoutPlaylists(userId: string): Promise<SpotifyPlaylist[]> {
   interface SpotifyPlaylistsResponse {
-    items: Array<{
+    items: {
       id: string;
       name: string;
-      images: Array<{ url: string }>;
+      images: { url: string }[];
       tracks: { total: number };
-    }>;
+    }[];
   }
 
   const data = await spotifyFetch<SpotifyPlaylistsResponse>(
@@ -176,8 +176,8 @@ export async function getCurrentTrack(userId: string): Promise<SpotifyTrack | nu
       id: string;
       name: string;
       duration_ms: number;
-      artists: Array<{ name: string }>;
-      album: { images: Array<{ url: string }> };
+      artists: { name: string }[];
+      album: { images: { url: string }[] };
     } | null;
   }
 
@@ -226,5 +226,5 @@ export function getPlaylistForWorkoutIntensity(
     intense:  { min: 140, max: 180 },
     cooldown: { min: 70,  max: 100 },
   };
-  return bpmRanges[intensity] ?? bpmRanges.moderate;
+  return bpmRanges[intensity] ?? { min: 120, max: 140 };
 }

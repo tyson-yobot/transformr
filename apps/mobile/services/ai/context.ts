@@ -22,23 +22,23 @@ export interface UserAIContext {
     estimatedHourlyValue: number;
   };
   last7Days: {
-    workouts: Array<{ date: string; templateName: string; volumeLbs: number; prsAchieved: number }>;
-    nutrition: Array<{ date: string; calories: number; protein: number; carbs: number; fat: number; waterOz: number }>;
-    sleep: Array<{ date: string; durationHours: number; qualityRating: number }>;
-    mood: Array<{ date: string; rating: number; notes: string }>;
-    readiness: Array<{ date: string; score: number }>;
-    business: Array<{ date: string; revenueLogged: number; deepWorkHours: number }>;
-    habits: Array<{ habitName: string; completedDates: string[]; currentStreak: number }>;
+    workouts: { date: string; templateName: string; volumeLbs: number; prsAchieved: number }[];
+    nutrition: { date: string; calories: number; protein: number; carbs: number; fat: number; waterOz: number }[];
+    sleep: { date: string; durationHours: number; qualityRating: number }[];
+    mood: { date: string; rating: number; notes: string }[];
+    readiness: { date: string; score: number }[];
+    business: { date: string; revenueLogged: number; deepWorkHours: number }[];
+    habits: { habitName: string; completedDates: string[]; currentStreak: number }[];
   };
   currentStreaks: {
     longestActiveStreak: number;
     habitStreaks: Record<string, number>;
     workoutStreak: number;
   };
-  activeGoals: Array<{ title: string; targetValue: number; currentValue: number; unit: string; deadline: string }>;
-  personalRecords: Array<{ exerciseName: string; weight: number; reps: number; achievedAt: string }>;
-  supplementStack: Array<{ name: string; dose: string; timing: string; evidenceTier: string }>;
-  labMarkers: Array<{ name: string; value: number; unit: string; trend: string; lastUpdated: string }>;
+  activeGoals: { title: string; targetValue: number; currentValue: number; unit: string; deadline: string }[];
+  personalRecords: { exerciseName: string; weight: number; reps: number; achievedAt: string }[];
+  supplementStack: { name: string; dose: string; timing: string; evidenceTier: string }[];
+  labMarkers: { name: string; value: number; unit: string; trend: string; lastUpdated: string }[];
   businessMetrics: {
     currentMRR: number;
     revenueGoal: number;
@@ -184,7 +184,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
       workouts: (workoutsResult.data ?? []).map((w) => ({
         date: ((w.started_at as string).split('T')[0]) ?? '',
         templateName: (w.template_name as string) ?? 'Custom',
-        volumeLbs: ((w.workout_sets as Array<{ weight: number; reps: number }>) ?? []).reduce(
+        volumeLbs: ((w.workout_sets as { weight: number; reps: number }[]) ?? []).reduce(
           (sum, s) => sum + s.weight * s.reps,
           0,
         ),
@@ -220,7 +220,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
       habits: (habitsResult.data ?? []).map((h) => ({
         habitName: h.name as string,
         completedDates: (
-          (h.habit_completions as Array<{ completed_date: string }>) ?? []
+          (h.habit_completions as { completed_date: string }[]) ?? []
         ).map((c) => c.completed_date),
         currentStreak: (h.current_streak as number) ?? 0,
       })),
