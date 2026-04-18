@@ -37,3 +37,4 @@ export type { QuickActionTileProps } from './QuickActionTile';
 export { GlowCard } from './GlowCard';
 export { PurpleRadialBackground } from './PurpleRadialBackground';
 export { EmptyState } from './EmptyState';
+export { NoiseOverlay } from './NoiseOverlay';
