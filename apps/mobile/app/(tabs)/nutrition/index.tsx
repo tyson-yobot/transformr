@@ -838,7 +838,7 @@ export default function NutritionHomeScreen() {
           },
         }}
         onCommand={handleVoiceCommand}
-        onError={(msg) => showToast(msg, { type: 'error' })}
+        onError={(msg) => showToast(msg, { type: 'info' })}
         bottom={100}
         right={16}
       />

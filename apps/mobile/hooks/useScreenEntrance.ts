@@ -14,7 +14,8 @@ import {
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { InteractionManager } from 'react-native';
-import type { SharedValue } from 'react-native-reanimated';
+import type { ViewStyle } from 'react-native';
+import type { SharedValue, AnimatedStyle } from 'react-native-reanimated';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -28,7 +29,7 @@ interface UseScreenEntranceOptions {
 }
 
 interface UseScreenEntranceReturn {
-  getEntranceStyle: (section: string) => ReturnType<typeof useAnimatedStyle>;
+  getEntranceStyle: (section: string) => AnimatedStyle<ViewStyle>;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,7 +85,7 @@ export function useScreenEntrance({
   const entranceStyles = sections.map((_, idx) => {
     const opSV = opacityValues[idx] ?? makeMutable(0);
     const tySV = translateYValues[idx] ?? makeMutable(fromY);
-    return useAnimatedStyle(() => ({
+    return useAnimatedStyle<ViewStyle>(() => ({
       opacity: opSV.value,
       transform: [{ translateY: tySV.value }],
     }));
@@ -177,7 +178,7 @@ export function useScreenEntrance({
   // Fallback animated style — fully visible, used when section name not found
   // -------------------------------------------------------------------------
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const fallbackStyle = useAnimatedStyle(() => ({
+  const fallbackStyle = useAnimatedStyle<ViewStyle>(() => ({
     opacity: 1,
     transform: [{ translateY: 0 }],
   }));
@@ -186,12 +187,12 @@ export function useScreenEntrance({
   // getEntranceStyle — returns pre-created animated style for a section name
   // -------------------------------------------------------------------------
   const getEntranceStyle = useCallback(
-    (section: string): ReturnType<typeof useAnimatedStyle> => {
+    (section: string): AnimatedStyle<ViewStyle> => {
       const idx = sections.indexOf(section);
       if (idx === -1 || entranceStyles[idx] === undefined) {
         return fallbackStyle;
       }
-      return entranceStyles[idx] as ReturnType<typeof useAnimatedStyle>;
+      return entranceStyles[idx] as AnimatedStyle<ViewStyle>;
     },
     [sections, entranceStyles, fallbackStyle],
   );
