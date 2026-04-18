@@ -16,6 +16,10 @@ function NoiseOverlayComponent() {
   const { isDark } = useTheme();
   const opacity = isDark ? 0.035 : 0.020;
 
+  // react-native-svg filter support varies by version and platform.
+  // If FeTurbulence is unavailable, render nothing — no fallback texture needed.
+  if (!FeTurbulence) return null;
+
   return (
     <Svg
       width={width}
