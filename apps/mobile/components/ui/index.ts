@@ -41,3 +41,4 @@ export { NoiseOverlay } from './NoiseOverlay';
 export { AmbientBackground } from './AmbientBackground';
 export { UpgradePrompt } from './UpgradePrompt';
 export { FeatureLockOverlay } from './FeatureLockOverlay';
+export { HistoryCapBanner } from './HistoryCapBanner';

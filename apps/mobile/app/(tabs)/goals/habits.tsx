@@ -201,14 +201,14 @@ export default function HabitTracker() {
       const targetName = (cmd as { habitName: string }).habitName.toLowerCase();
       const match = habits.find(h => h.name.toLowerCase().includes(targetName));
       if (match) {
-        void handleHabitComplete(match.id, match.current_streak ?? 0);
+        void handleComplete(match.id, match.current_streak ?? 0);
       } else {
         showToast(`Habit not found: "${(cmd as { habitName: string }).habitName}"`, { type: 'info' });
       }
     } else {
       showToast(result.humanReadable || 'Command received', { type: 'success' });
     }
-  }, [habits, handleHabitComplete, showToast]);
+  }, [habits, handleComplete, showToast]);
 
   // Build streak calendar data from 90-day completion history
   const streakCalendarData = useMemo(() => {

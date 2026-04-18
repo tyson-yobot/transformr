@@ -82,3 +82,27 @@ DROP TRIGGER IF EXISTS subscriptions_updated_at ON subscriptions;
 CREATE TRIGGER subscriptions_updated_at
   BEFORE UPDATE ON subscriptions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Sync subscription tier changes back to profiles.subscription_tier
+CREATE OR REPLACE FUNCTION sync_subscription_tier_to_profile()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.status IN ('active', 'trialing') THEN
+    UPDATE profiles
+      SET subscription_tier = NEW.tier::TEXT
+      WHERE id = NEW.user_id;
+  ELSIF NEW.status IN ('canceled', 'past_due', 'paused') THEN
+    -- Downgrade to free when subscription lapses
+    UPDATE profiles
+      SET subscription_tier = 'free'
+      WHERE id = NEW.user_id
+        AND subscription_tier = NEW.tier::TEXT;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS subscriptions_sync_profile_tier ON subscriptions;
+CREATE TRIGGER subscriptions_sync_profile_tier
+  AFTER INSERT OR UPDATE OF status, tier ON subscriptions
+  FOR EACH ROW EXECUTE FUNCTION sync_subscription_tier_to_profile();
