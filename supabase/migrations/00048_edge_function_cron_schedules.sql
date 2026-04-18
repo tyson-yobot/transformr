@@ -1,9 +1,10 @@
 -- Schedule edge functions via pg_cron + pg_net.
 -- These replace the [cron] block that was removed from config.toml
 -- (Supabase CLI 2.90+ does not support a top-level [cron] config key).
---
--- Prerequisites: pg_cron and pg_net extensions must be enabled on the project.
--- They are enabled by default on all Supabase hosted projects.
+
+-- Enable required extensions (idempotent)
+create extension if not exists pg_cron with schema pg_catalog;
+create extension if not exists pg_net  with schema extensions;
 
 -- Unschedule first so this migration is idempotent on re-runs.
 select cron.unschedule('stake-evaluator-daily')   where exists (select 1 from cron.job where jobname = 'stake-evaluator-daily');
