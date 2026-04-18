@@ -1,35 +1,62 @@
+// =============================================================================
+// TRANSFORMR -- Spotify Integration Service
+// OAuth + real-time playback control via Supabase edge functions
+// =============================================================================
+
 import { supabase } from './supabase';
 
-// Spotify integration service
-// Uses react-native-spotify-remote for playback control
-
-interface SpotifyPlaylist {
+export interface SpotifyPlaylist {
   id: string;
   name: string;
   imageUrl: string | null;
   trackCount: number;
+  description?: string;
 }
 
-interface SpotifyTrack {
+export interface SpotifyTrack {
   id: string;
   name: string;
   artist: string;
   albumArt: string | null;
   durationMs: number;
+  progressMs?: number;
+  isPlaying?: boolean;
 }
 
-export async function connectSpotify(userId: string): Promise<boolean> {
-  // OAuth flow would be handled here
-  // For now, updates profile to indicate Spotify is connected
-  const { error } = await supabase
-    .from('profiles')
-    .update({ spotify_connected: true })
-    .eq('id', userId);
+export interface SpotifyConnectionStatus {
+  connected: boolean;
+  displayName?: string;
+  imageUrl?: string | null;
+  expiresAt?: number;
+}
 
-  return !error;
+// ---------------------------------------------------------------------------
+// Connection management
+// ---------------------------------------------------------------------------
+
+export async function getSpotifyStatus(): Promise<SpotifyConnectionStatus> {
+  const { data, error } = await supabase.functions.invoke('spotify-oauth', {
+    body: { action: 'status' },
+  });
+  if (error || !data) return { connected: false };
+  return data as SpotifyConnectionStatus;
+}
+
+/** Connect using OAuth auth code from deep link callback */
+export async function connectSpotify(userId: string, authCode?: string): Promise<boolean> {
+  const { data, error } = await supabase.functions.invoke('spotify-oauth', {
+    body: { action: 'connect', user_id: userId, auth_code: authCode ?? null },
+  });
+  if (error || !data?.connected) return false;
+  // Persist spotify_connected flag in profile
+  await supabase.from('profiles').update({ spotify_connected: true }).eq('id', userId);
+  return true;
 }
 
 export async function disconnectSpotify(userId: string): Promise<void> {
+  await supabase.functions.invoke('spotify-oauth', {
+    body: { action: 'disconnect', user_id: userId },
+  });
   await supabase
     .from('profiles')
     .update({
@@ -40,50 +67,89 @@ export async function disconnectSpotify(userId: string): Promise<void> {
     .eq('id', userId);
 }
 
-export function getWorkoutPlaylists(): SpotifyPlaylist[] {
-  // Would fetch from Spotify API using stored access token
-  // Returns curated workout playlists
-  return [];
+// ---------------------------------------------------------------------------
+// Playback — all calls proxied via spotify-playback edge function so the
+// access token never leaves the server.
+// ---------------------------------------------------------------------------
+
+export async function getCurrentTrack(): Promise<SpotifyTrack | null> {
+  const { data, error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'current_track' },
+  });
+  if (error || !data?.track) return null;
+  return data.track as SpotifyTrack;
 }
 
-export function playPlaylist(_playlistId: string): void {
-  // SpotifyRemote.playUri(`spotify:playlist:${playlistId}`)
+export async function getWorkoutPlaylists(): Promise<SpotifyPlaylist[]> {
+  const { data, error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'workout_playlists' },
+  });
+  if (error || !data?.playlists) return [];
+  return data.playlists as SpotifyPlaylist[];
 }
 
-export function pausePlayback(): void {
-  // SpotifyRemote.pause()
+export async function playPlaylist(playlistId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'play', playlist_id: playlistId },
+  });
+  if (error) throw error;
 }
 
-export function resumePlayback(): void {
-  // SpotifyRemote.resume()
-}
-
-export function skipNext(): void {
-  // SpotifyRemote.skipToNext()
-}
-
-export function skipPrevious(): void {
-  // SpotifyRemote.skipToPrevious()
-}
-
-export function getCurrentTrack(): SpotifyTrack | null {
-  // SpotifyRemote.getPlayerState() -> track info
-  return null;
-}
-
-// BPM-based playlist selection
-export function getPlaylistForWorkoutIntensity(
+/** Start playing the best-match workout playlist for the given intensity */
+export async function playWorkoutByIntensity(
   intensity: 'warmup' | 'moderate' | 'intense' | 'cooldown',
-): string | null {
-  // Would return appropriate playlist ID based on BPM ranges
-  const bpmRanges: Record<string, { min: number; max: number }> = {
-    warmup: { min: 90, max: 110 },
-    moderate: { min: 120, max: 140 },
-    intense: { min: 140, max: 180 },
-    cooldown: { min: 70, max: 100 },
-  };
+): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'play_by_intensity', intensity },
+  });
+  if (error) throw error;
+}
 
-  // In production, would query Spotify API for matching playlists
-  void bpmRanges[intensity];
-  return null;
+export async function pausePlayback(): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'pause' },
+  });
+  if (error) throw error;
+}
+
+export async function resumePlayback(): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'resume' },
+  });
+  if (error) throw error;
+}
+
+export async function skipNext(): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'next' },
+  });
+  if (error) throw error;
+}
+
+export async function skipPrevious(): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'previous' },
+  });
+  if (error) throw error;
+}
+
+export async function setVolume(volumePercent: number): Promise<void> {
+  const { error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'volume', volume_percent: Math.max(0, Math.min(100, volumePercent)) },
+  });
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------------------
+// BPM-based playlist selection (kept for backward compat + enhanced)
+// ---------------------------------------------------------------------------
+
+export async function getPlaylistForWorkoutIntensity(
+  intensity: 'warmup' | 'moderate' | 'intense' | 'cooldown',
+): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke('spotify-playback', {
+    body: { action: 'recommend_playlist', intensity },
+  });
+  if (error || !data?.playlist_id) return null;
+  return data.playlist_id as string;
 }
