@@ -101,6 +101,25 @@ describe('calculateDayScore', () => {
     expect(result.score).toBe(95);
   });
 
+  it('assigns sleep score 10 for borderline adequate sleep (6-6.9 hours)', () => {
+    // sleepHours >= 6 but < 7: else if branch → sleepScore = 10
+    const result = calculateDayScore({
+      ...perfectDay,
+      sleepHours: 6.5,
+    });
+    expect(result.breakdown.sleep).toBe(10);
+  });
+
+  it('assigns sleep score below 10 for under 6 hours sleep', () => {
+    // sleepHours < 6: else branch → sleepScore = round(15 * sleepHours/7)
+    const result = calculateDayScore({
+      ...perfectDay,
+      sleepHours: 4,
+    });
+    // 15 * (4/7) = 8.57 → 9
+    expect(result.breakdown.sleep).toBe(9);
+  });
+
   it('handles missing mood data with default score', () => {
     const result = calculateDayScore({
       ...perfectDay,
@@ -164,6 +183,123 @@ describe('calculateDayScore', () => {
     const result = calculateDayScore(perfectDay);
     expect(result.score).toBeGreaterThanOrEqual(0);
     expect(result.score).toBeLessThanOrEqual(100);
+  });
+
+  it('uses 0 calorie accuracy when caloriesTarget is 0', () => {
+    const result = calculateDayScore({
+      ...perfectDay,
+      caloriesTarget: 0,
+      caloriesLogged: 2500,
+    });
+    // calorieAccuracy = 0 → calorie portion = 0; protein portion still full
+    expect(result.breakdown.nutrition).toBeLessThan(20);
+  });
+
+  it('uses 0 protein ratio when proteinTarget is 0', () => {
+    const result = calculateDayScore({
+      ...perfectDay,
+      proteinTarget: 0,
+      proteinLogged: 180,
+    });
+    // proteinRatio = 0 → protein portion = 0; calorie portion still full
+    expect(result.breakdown.nutrition).toBeLessThan(20);
+  });
+
+  it('uses default hydration score of 5 when waterTarget is 0', () => {
+    const result = calculateDayScore({
+      ...perfectDay,
+      waterTarget: 0,
+      waterOz: 0,
+    });
+    expect(result.breakdown.hydration).toBe(5);
+  });
+
+  it('assigns grade C+ for score 75-79', () => {
+    // habits:10 nutrition:16 training:20 sleep:15 hydration:8 mood:3 focus:4 = 76
+    const result = calculateDayScore({
+      habitsCompleted: 2,
+      habitsTotal: 5,
+      caloriesTarget: 2500,
+      caloriesLogged: 2000,
+      proteinTarget: 180,
+      proteinLogged: 150,
+      workoutsCompleted: 1,
+      workoutsPlanned: 1,
+      sleepHours: 8,
+      waterOz: 80,
+      waterTarget: 100,
+      moodAverage: 7,
+      focusHours: 3,
+    });
+    expect(result.score).toBeGreaterThanOrEqual(75);
+    expect(result.score).toBeLessThan(80);
+    expect(result.grade).toBe('C+');
+  });
+
+  it('assigns grade C for score 70-74', () => {
+    // habits:10 nutrition:11 training:20 sleep:15 hydration:8 mood:3 focus:4 = 71
+    const result = calculateDayScore({
+      habitsCompleted: 2,
+      habitsTotal: 5,
+      caloriesTarget: 2500,
+      caloriesLogged: 1250,
+      proteinTarget: 180,
+      proteinLogged: 108,
+      workoutsCompleted: 1,
+      workoutsPlanned: 1,
+      sleepHours: 8,
+      waterOz: 80,
+      waterTarget: 100,
+      moodAverage: 7,
+      focusHours: 3,
+    });
+    expect(result.score).toBeGreaterThanOrEqual(70);
+    expect(result.score).toBeLessThan(75);
+    expect(result.grade).toBe('C');
+  });
+
+  it('assigns grade D+ for score 65-69', () => {
+    // habits:15 nutrition:11 training:10 sleep:15 hydration:8 mood:3 focus:4 = 66
+    const result = calculateDayScore({
+      habitsCompleted: 3,
+      habitsTotal: 5,
+      caloriesTarget: 2500,
+      caloriesLogged: 1250,
+      proteinTarget: 180,
+      proteinLogged: 108,
+      workoutsCompleted: 1,
+      workoutsPlanned: 2,
+      sleepHours: 8,
+      waterOz: 80,
+      waterTarget: 100,
+      moodAverage: 7,
+      focusHours: 3,
+    });
+    expect(result.score).toBeGreaterThanOrEqual(65);
+    expect(result.score).toBeLessThan(70);
+    expect(result.grade).toBe('D+');
+  });
+
+  it('assigns grade D for score 60-64', () => {
+    // habits:15 nutrition:11 training:10 sleep:15 hydration:3 mood:3 focus:4 = 61
+    const result = calculateDayScore({
+      habitsCompleted: 3,
+      habitsTotal: 5,
+      caloriesTarget: 2500,
+      caloriesLogged: 1250,
+      proteinTarget: 180,
+      proteinLogged: 108,
+      workoutsCompleted: 1,
+      workoutsPlanned: 2,
+      sleepHours: 8,
+      waterOz: 30,
+      waterTarget: 100,
+      moodAverage: 7,
+      focusHours: 3,
+    });
+    expect(result.score).toBeGreaterThanOrEqual(60);
+    expect(result.score).toBeLessThan(65);
+    expect(result.grade).toBe('D');
   });
 });
 

@@ -119,6 +119,33 @@ describe('detectPRs', () => {
     expect(durPR).toBeDefined();
     expect(durPR?.value).toBe(90);
   });
+
+  it('does not detect duration PR when existing record is better', () => {
+    const existingPRs = [
+      { exerciseId, recordType: 'max_duration', value: 120 },
+    ];
+    const prs = detectPRs(
+      { exerciseId, weight: 0, reps: 0, durationSeconds: 90 },
+      existingPRs,
+    );
+    const durPR = prs.find((p) => p.recordType === 'max_duration');
+    expect(durPR).toBeUndefined();
+  });
+
+  it('does not check duration PR when durationSeconds is 0 or absent', () => {
+    const prs = detectPRs({ exerciseId, weight: 100, reps: 5 }, []);
+    const durPR = prs.find((p) => p.recordType === 'max_duration');
+    expect(durPR).toBeUndefined();
+  });
+
+  it('detects first-time duration PR when no existing duration record', () => {
+    // currentMaxDuration is undefined → optional chain ?? 0 is taken → durationSeconds > 0 → PR
+    const prs = detectPRs({ exerciseId, weight: 0, reps: 0, durationSeconds: 60 }, []);
+    const durPR = prs.find((p) => p.recordType === 'max_duration');
+    expect(durPR).toBeDefined();
+    expect(durPR?.value).toBe(60);
+    expect(durPR?.previousRecord).toBeNull();
+  });
 });
 
 describe('calculate1RM', () => {

@@ -27,7 +27,7 @@ module.exports = {
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
   },
   roots: ['<rootDir>'],
-  testPathIgnorePatterns: ['/node_modules/', '\\.claude/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.claude/', '/worktrees/'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleDirectories: [
