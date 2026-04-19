@@ -27,6 +27,7 @@ module.exports = {
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
   },
   roots: ['<rootDir>'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.claude/'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleDirectories: [
@@ -35,8 +36,14 @@ module.exports = {
     path.resolve(__dirname, '../../node_modules'),
   ],
   collectCoverageFrom: [
-    'services/calculations/**/*.ts',
+    'services/**/*.ts',
     'utils/**/*.ts',
+    'stores/**/*.ts',
+    'hooks/**/*.ts',
+    'components/**/*.{ts,tsx}',
+    'app/**/*.{ts,tsx}',
     '!**/*.d.ts',
+    '!**/__tests__/**',
+    '!**/node_modules/**',
   ],
 };
