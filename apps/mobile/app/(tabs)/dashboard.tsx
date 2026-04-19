@@ -49,6 +49,8 @@ import { useGoalStore } from '@stores/goalStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useBusinessStore } from '@stores/businessStore';
 import { useInsightStore } from '@stores/insightStore';
+import { useChallengeStore } from '@stores/challengeStore';
+import { ActiveChallengeCard } from '@components/challenges/ActiveChallengeCard';
 import { useCountdown } from '@hooks/useCountdown';
 import { useScreenEntrance } from '@hooks/useScreenEntrance';
 import { formatNumber, formatCurrency, formatRelativeTime } from '@utils/formatters';
@@ -155,6 +157,13 @@ export default function DashboardScreen() {
   const partnerStore = usePartnerStore();
   const businessStore = useBusinessStore();
   const insightStore = useInsightStore();
+  const { activeEnrollment, challengeDefinitions, todayLog: challengeTodayLog } = useChallengeStore();
+
+  // Active challenge definition for dashboard card
+  const activeChallengeDefinition = useMemo(
+    () => challengeDefinitions.find((d) => d.id === activeEnrollment?.challenge_id) ?? null,
+    [challengeDefinitions, activeEnrollment],
+  );
 
   // Top prediction for dashboard
   const topPrediction = useMemo(
@@ -740,6 +749,19 @@ export default function DashboardScreen() {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
           </Pressable>
+        </Animated.View>
+      )}
+
+      {/* Active Challenge Card */}
+      {activeEnrollment && activeChallengeDefinition && (
+        <Animated.View entering={FadeInDown.delay(75).duration(400)}>
+          <ActiveChallengeCard
+            definition={activeChallengeDefinition}
+            enrollment={activeEnrollment}
+            todayLog={challengeTodayLog}
+            onPress={() => router.push('/(tabs)/goals/challenge-active')}
+            style={{ marginBottom: spacing.lg }}
+          />
         </Animated.View>
       )}
 

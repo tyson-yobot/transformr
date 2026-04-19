@@ -33,6 +33,7 @@ interface ChallengeTask {
 interface ChallengeRules {
   tasks: ChallengeTask[];
   daily_targets?: Record<string, unknown>;
+  daily_schedule?: Record<string, unknown>;
   rest_pattern?: string;
   schedule?: Record<string, unknown>;
   weekly_plan?: unknown[];
@@ -208,7 +209,7 @@ serve(async (req) => {
       // ------------------------------------------------------------------
       // C25K: Only 3 run days per week. Auto-complete non-run days.
       // ------------------------------------------------------------------
-      if (challengeSlug === "couch-to-5k") {
+      if (challengeSlug === "c25k" || challengeSlug === "couch-to-5k") {
         const isRunDay = isCouchTo5kRunDay(currentDay, rules);
         if (!isRunDay) {
           await upsertDailyLog(supabaseAdmin, {
@@ -235,10 +236,12 @@ serve(async (req) => {
       }
 
       // ------------------------------------------------------------------
-      // Progressive challenges (squat / plank): check daily_targets
+      // Progressive challenges (squat / plank): check daily_targets or daily_schedule
+      // Seeds use daily_schedule; daily_targets is the legacy key — support both.
       // ------------------------------------------------------------------
-      if (rules.daily_targets) {
-        const dayTarget = rules.daily_targets[String(currentDay)];
+      const progressiveTargets = rules.daily_targets ?? rules.daily_schedule;
+      if (progressiveTargets) {
+        const dayTarget = progressiveTargets[String(currentDay)];
         if (dayTarget === "rest") {
           await upsertDailyLog(supabaseAdmin, {
             enrollment_id: enrollment.id,
@@ -690,9 +693,11 @@ async function verifyWorkoutTask(
 
   // ------------------------------------------------------------------
   // Progressive challenge (squat / plank) — check daily target reps/duration
+  // Seeds use daily_schedule; daily_targets is the legacy key — support both.
   // ------------------------------------------------------------------
-  if (rules.daily_targets && config.exercise) {
-    const dayTarget = rules.daily_targets[String(currentDay)];
+  const progressiveTargetMap = rules.daily_targets ?? rules.daily_schedule;
+  if (progressiveTargetMap && config.exercise) {
+    const dayTarget = progressiveTargetMap[String(currentDay)];
     if (dayTarget === "rest") {
       return { completed: true, reason: "rest_day" };
     }
@@ -897,8 +902,11 @@ async function verifyWaterTask(
     .gte("logged_at", todayStart)
     .lte("logged_at", todayEnd);
 
+  // Seeds use "target_oz"; legacy config may use "min_oz" — accept both.
+  const staticTargetOz = (config.min_oz ?? config.target_oz ?? 0) as number;
+
   if (error || !waterLogs) {
-    return { completed: false, total_oz: 0, target_oz: config.min_oz || 0 };
+    return { completed: false, total_oz: 0, target_oz: staticTargetOz };
   }
 
   const typedWaterLogs = waterLogs as WaterLog[];
@@ -907,7 +915,7 @@ async function verifyWaterTask(
     0
   );
 
-  let targetOz = config.min_oz || 0;
+  let targetOz = staticTargetOz;
 
   // Dynamic target: "bodyweight_lbs_div_2_oz" — half bodyweight in oz
   if (config.formula === "bodyweight_lbs_div_2_oz") {
@@ -1142,7 +1150,8 @@ async function verifyStepsTask(
   todayEnd: string,
   config: Record<string, unknown>
 ): Promise<VerifyResult> {
-  const targetSteps = config.min_steps || 10000;
+  // Seeds use "target_steps"; legacy config may use "min_steps" — accept both.
+  const targetSteps = (config.min_steps ?? config.target_steps ?? 10000) as number;
   const today = todayStart.split("T")[0];
 
   // Check daily_checkins for steps data (stored in the habits or data field)
@@ -1286,14 +1295,24 @@ async function verifyFastingTask(
 
   switch (protocol) {
     case "18_6":
+    case "18:6":
       fastingHours = 18;
       eatingHours = 6;
       break;
     case "20_4":
+    case "20:4":
       fastingHours = 20;
       eatingHours = 4;
       break;
+    case "5_2":
+    case "5:2":
+      // 5:2 means 2 very-low-calorie days per week (~500 cal), not an eating window.
+      // We verify by checking calories on designated restricted days; window logic n/a.
+      fastingHours = 0;
+      eatingHours = 24;
+      break;
     case "16_8":
+    case "16:8":
     default:
       fastingHours = 16;
       eatingHours = 8;
