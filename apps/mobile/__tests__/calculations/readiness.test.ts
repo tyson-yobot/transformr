@@ -97,13 +97,19 @@ describe('calculateReadinessScore', () => {
   });
 
   it('maps score 40-59 to light recommendation', () => {
+    // sleepComponent: round(min(1,6/8)*15 + (3/5)*10) = round(11.25+6) = 17
+    // sorenessComponent: round(20*(1-(6-1)/9)) = round(20*4/9) = 9
+    // stressComponent: round(20*(1-(6-1)/9)) = 9
+    // energyComponent: round(20*((3-1)/9)) = round(4.44) = 4
+    // trainingLoadComponent: 15000/10000=1.5 → 5
+    // total: 17+9+9+4+5 = 44 → 'light'
     const result = calculateReadinessScore({
-      sleepHours: 5,
-      sleepQuality: 2,
-      moodScore: 3,
-      stressLevel: 7,
+      sleepHours: 6,
+      sleepQuality: 3,
+      moodScore: 4,
+      stressLevel: 6,
       energyLevel: 3,
-      sorenessLevel: 7,
+      sorenessLevel: 6,
       workoutsLast3Days: 4,
       totalVolumeLast3Days: 15000,
       avgVolumePer3Days: 10000,

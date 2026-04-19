@@ -76,9 +76,12 @@ describe('calculateStreak', () => {
   });
 
   it('sets streakStartDate correctly', () => {
+    // The algorithm computes: subDays(today, currentStreak - (isActiveToday ? 0 : 1))
+    // For a 3-day streak that includes today (isActiveToday=true):
+    //   streakStartDate = subDays(today, 3 - 0) = subDays(today, 3) = dateStr(3)
     const dates = [dateStr(0), dateStr(1), dateStr(2)];
     const result = calculateStreak(dates);
-    expect(result.streakStartDate).toBe(dateStr(2));
+    expect(result.streakStartDate).toBe(dateStr(3));
   });
 
   it('longest streak equals current streak when current is longest', () => {

@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.tsx?$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(date-fns)/)',
+    'node_modules/(?!(react-native|@react-native|expo|@expo|expo-.*|@expo/.*|react-native-.*|@react-native-.*|@supabase/.*|date-fns)/)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
@@ -22,6 +22,8 @@ module.exports = {
     '^react-native$': '<rootDir>/__mocks__/react-native.js',
     '^react-native-mmkv$': '<rootDir>/__mocks__/react-native-mmkv.js',
     '^expo-haptics$': '<rootDir>/__mocks__/expo-haptics.js',
+    '^expo-web-browser$': '<rootDir>/__mocks__/expo-web-browser.js',
+    '^expo-linking$': '<rootDir>/__mocks__/expo-linking.js',
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
   },
   roots: ['<rootDir>'],
