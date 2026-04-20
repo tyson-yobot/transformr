@@ -552,7 +552,7 @@ export default function WorkoutPlayerScreen() {
           is_outdoor: false, // outdoor flag not tracked at session level; user confirms manually
         }).then((result) => {
           if (!result.compliant && result.violations.length > 0) {
-            showToast('Workout saved', { subtext: result.violations[0] ?? '', type: 'error' });
+            showToast('Workout saved', { subtext: result.violations[0] ?? '', type: 'info' });
           } else if (result.warnings.length > 0) {
             showToast('Workout saved', { subtext: result.warnings[0] ?? '' });
           }
