@@ -164,6 +164,8 @@ export const upgradeModalEvents = {
 
 interface GateDefinition {
   requiredTier: SubscriptionTier;
+  /** When capped, show upgrade to this tier (used for free-preview features). */
+  upgradeTierOnCap?: SubscriptionTier;
   freeLimit?: number;
   freeUnit?: string;
   upgradeMessage: string;
@@ -176,32 +178,37 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: '',
   },
 
-  // Pro — metered
+  // Free preview features — free users get limited access, then upgrade to Pro
   ai_meal_camera: {
-    requiredTier: 'pro',
+    requiredTier: 'free',
+    upgradeTierOnCap: 'pro',
     freeLimit: 5,
-    freeUnit: 'scans/month',
+    freeUnit: 'lifetime scans',
     upgradeMessage: 'Upgrade to Pro for unlimited AI meal camera scans.',
   },
   ai_chat_coach: {
-    requiredTier: 'pro',
-    freeLimit: 10,
+    requiredTier: 'free',
+    upgradeTierOnCap: 'pro',
+    freeLimit: 3,
     freeUnit: 'messages/day',
     upgradeMessage: 'Upgrade to Pro for unlimited AI coaching messages.',
   },
 
   // Pro — ungated (available to pro+elite+partners)
   ghost_mode: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to unlock Ghost Mode and train against your personal records.',
+    requiredTier: 'free',
+    upgradeTierOnCap: 'pro',
+    freeLimit: 3,
+    freeUnit: 'lifetime workouts',
+    upgradeMessage: 'Upgrade to Pro to unlock unlimited Ghost Mode training.',
   },
   ai_insights: {
     requiredTier: 'pro',
     upgradeMessage: 'Upgrade to Pro to unlock AI-powered insights.',
   },
   ai_form_check: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to enable AI form check.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to enable AI form check.',
   },
   ai_adaptive_program: {
     requiredTier: 'pro',
@@ -224,12 +231,12 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro to unlock the AI sleep optimizer.',
   },
   ai_grocery_list: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for AI-generated grocery lists.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for AI-generated grocery lists.',
   },
   ai_meal_prep: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for AI meal prep planning.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for AI meal prep planning.',
   },
   ai_supplement_advisor: {
     requiredTier: 'pro',
@@ -276,20 +283,20 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for AI social content generation.',
   },
   stake_goals: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to stake financial commitments on your goals.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to stake financial commitments on your goals.',
   },
   vision_board: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to unlock your Vision Board.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to unlock your Vision Board.',
   },
   goal_cinema: {
     requiredTier: 'pro',
     upgradeMessage: 'Upgrade to Pro for Goal Cinema visualizations.',
   },
   dashboard_builder: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to customize your dashboard.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to customize your dashboard.',
   },
   data_export: {
     requiredTier: 'pro',
@@ -300,8 +307,8 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for wearable device integrations.',
   },
   nfc_triggers: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to set up NFC triggers.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to set up NFC triggers.',
   },
   smart_notifications: {
     requiredTier: 'pro',
@@ -378,14 +385,15 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for adaptive AI training programs.',
   },
   ai_meal_camera_v2: {
-    requiredTier: 'pro',
+    requiredTier: 'free',
+    upgradeTierOnCap: 'pro',
     freeLimit: 5,
-    freeUnit: 'scans/month',
+    freeUnit: 'lifetime scans',
     upgradeMessage: 'Upgrade to Pro for unlimited AI meal camera scans.',
   },
   restaurant_menu_scanner: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to scan restaurant menus.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to scan restaurant menus.',
   },
   ai_meal_plans_weekly: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI-generated weekly meal plans.' },
   ai_grocery_lists: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI grocery lists.' },
@@ -400,7 +408,7 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
   ai_workout_narrator_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for the AI workout narrator.' },
   context_aware_motivation: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for context-aware motivation.' },
   voice_commands_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for voice commands.' },
-  deep_work_focus_mode: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for Deep Work focus mode.' },
+  deep_work_focus_mode: { requiredTier: 'elite', upgradeMessage: 'Upgrade to Elite for Deep Work focus mode.' },
   ai_journaling_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI journaling.' },
   siri_google_shortcuts: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for Siri & Google shortcuts.' },
   home_screen_widgets: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for home screen widgets.' },
@@ -521,7 +529,8 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
   let isCapped = false;
   let remainingUses: number | null = null;
 
-  if (tierOk && gate.freeLimit !== undefined && usageKey !== undefined) {
+  // Apply usage cap only to free-tier users — paid users get unlimited access.
+  if (tierOk && gate.freeLimit !== undefined && usageKey !== undefined && tier === 'free') {
     const used = usage[usageKey];
     const remaining = gate.freeLimit - used;
     isCapped = remaining <= 0;
@@ -529,6 +538,10 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
   }
 
   const isAvailable = tierOk && !isCapped;
+
+  // When capped, resolve the upgrade tier to show in the paywall prompt.
+  const resolvedRequiredTier: SubscriptionTier =
+    isCapped && gate.upgradeTierOnCap != null ? gate.upgradeTierOnCap : gate.requiredTier;
 
   const trackUsage = () => {
     if (usageKey !== undefined) {
@@ -550,7 +563,7 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
     isAvailable,
     isCapped,
     remainingUses,
-    requiredTier: gate.requiredTier,
+    requiredTier: resolvedRequiredTier,
     upgradeMessage: gate.upgradeMessage,
     trackUsage,
     showUpgradeModal,

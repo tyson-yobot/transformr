@@ -3,6 +3,8 @@
 // =============================================================================
 
 import { useCallback, useEffect, useState } from 'react';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import {
   View,
   Text,
@@ -73,6 +75,8 @@ export default function PartnerScreen() {
     pendingInviteCode,
     setPendingInviteCode,
   } = usePartnerStore();
+
+  const partnerGate = useFeatureGate('partner_features');
 
   const [inviteCode, setInviteCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
@@ -192,6 +196,10 @@ export default function PartnerScreen() {
     can_challenge: true,
     live_sync_enabled: true,
   }) as SharedPreferences;
+
+  if (!partnerGate.isAvailable) {
+    return <GatePromptCard featureKey="partner_features" height={240} />;
+  }
 
   return (
     <ScrollView

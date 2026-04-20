@@ -3,6 +3,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const STRIPE_WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET_SUBSCRIPTIONS');
+const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY');
 
 // Filter out empty-string keys that would appear if env vars are missing,
 // preventing privilege escalation when priceId is '' or undefined.
@@ -93,6 +94,83 @@ serve(async (req) => {
 
   try {
     switch (event.type) {
+      case 'checkout.session.completed': {
+        // A new checkout was completed — Stripe will also fire customer.subscription.created,
+        // but we handle it here as well for immediate tier activation.
+        const session = event.data.object;
+        const subscriptionId: string | null = session.subscription ?? null;
+        if (!subscriptionId) break;
+
+        // Fetch the subscription object to get the price/tier
+        const stripeRes = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+          headers: { Authorization: `Bearer ${Deno.env.get('STRIPE_SECRET_KEY')}` },
+        });
+        const sub = await stripeRes.json();
+        const priceId: string = sub.items?.data?.[0]?.price?.id ?? '';
+        const tier = PRICE_TO_TIER[priceId] ?? 'free';
+
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .eq('stripe_customer_id', sub.customer)
+          .maybeSingle();
+
+        if (!profile) break;
+
+        await supabaseAdmin.from('subscriptions').upsert(
+          {
+            user_id: profile.id,
+            tier,
+            status: sub.status,
+            billing_interval: sub.items?.data?.[0]?.price?.recurring?.interval === 'year'
+              ? 'annual'
+              : 'monthly',
+            stripe_customer_id: sub.customer,
+            stripe_subscription_id: sub.id,
+            stripe_price_id: priceId,
+            current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+            trial_end: sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null,
+            cancel_at_period_end: sub.cancel_at_period_end,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'stripe_subscription_id' },
+        );
+
+        await supabaseAdmin.from('user_feature_gates').upsert(
+          {
+            user_id: profile.id,
+            tier,
+            gates: {},
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' },
+        );
+        break;
+      }
+
+      case 'invoice.paid': {
+        // Subscription renewal — update the current period dates.
+        const invoice = event.data.object;
+        const subscriptionId: string | null = invoice.subscription ?? null;
+        if (!subscriptionId) break;
+
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: 'active',
+            current_period_start: invoice.period_start
+              ? new Date(invoice.period_start * 1000).toISOString()
+              : undefined,
+            current_period_end: invoice.period_end
+              ? new Date(invoice.period_end * 1000).toISOString()
+              : undefined,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('stripe_subscription_id', subscriptionId);
+        break;
+      }
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const sub = event.data.object;

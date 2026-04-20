@@ -38,13 +38,13 @@ const TIER_MONTHLY: Record<UpgradeTier, string> = {
   pro: '$9.99', elite: '$14.99', partners: '$19.99',
 };
 const TIER_ANNUAL_MONTHLY: Record<UpgradeTier, string> = {
-  pro: '$7.50', elite: '$11.25', partners: '$15.00',
+  pro: '$6.67', elite: '$10.00', partners: '$13.33',
 };
 const TIER_ANNUAL_TOTAL: Record<UpgradeTier, string> = {
-  pro: '$89.99', elite: '$134.99', partners: '$179.99',
+  pro: '$79.99', elite: '$119.99', partners: '$159.99',
 };
 const TIER_ANNUAL_SAVINGS: Record<UpgradeTier, string> = {
-  pro: 'save $29.89/yr', elite: 'save $44.89/yr', partners: 'save $59.89/yr',
+  pro: 'save $39.89/yr', elite: 'save $59.89/yr', partners: 'save $79.89/yr',
 };
 
 const TIER_FEATURES: Record<UpgradeTier, string[]> = {
@@ -52,7 +52,7 @@ const TIER_FEATURES: Record<UpgradeTier, string[]> = {
     'AI Adaptive Programming — rewrites your program after every session',
     'AI Meal Camera — snap food, macros log instantly',
     'AI Grocery Lists — weekly shopping from your meal plan',
-    'Unlimited Habits — no 3-habit cap',
+    'Unlimited Habits — no 5-habit cap',
     'Streak Shields — protect your streak once per month',
     'Unlimited Data History — no 7-day cutoff',
     'AI Daily Coaching — personalized cues every morning',
@@ -128,7 +128,7 @@ function ModalContent({ featureKey, onClose }: ModalContentProps) {
     : (tabs[0] ?? 'pro');
 
   const [selectedTab, setSelectedTab] = useState<UpgradeTier>(defaultTab);
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCTA = useCallback(async () => {

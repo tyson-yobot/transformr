@@ -57,7 +57,7 @@ export default function MenuScannerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
-  const gate = useFeatureGate('ai_meal_camera');
+  const gate = useFeatureGate('restaurant_menu_scanner');
 
   useEffect(() => {
     navigation.setOptions({
@@ -174,7 +174,7 @@ export default function MenuScannerScreen() {
   if (!gate.isAvailable) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="ai_meal_camera" height={200} />
+        <GatePromptCard featureKey="restaurant_menu_scanner" height={200} />
       </SafeAreaView>
     );
   }

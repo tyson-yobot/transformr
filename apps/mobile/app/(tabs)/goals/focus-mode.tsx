@@ -3,6 +3,8 @@
 // =============================================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import {
   View,
   Text,
@@ -63,6 +65,8 @@ export default function FocusMode() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+
+  const focusGate = useFeatureGate('deep_work_focus_mode');
 
   useEffect(() => {
     navigation.setOptions({
@@ -235,6 +239,10 @@ export default function FocusMode() {
         return 'Long Break';
     }
   }, [phase]);
+
+  if (!focusGate.isAvailable) {
+    return <GatePromptCard featureKey="deep_work_focus_mode" height={240} />;
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

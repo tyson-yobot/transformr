@@ -330,7 +330,7 @@ export default function HabitTracker() {
               actionLabel="Add First Habit"
               onAction={() => {
                 hapticMedium();
-                if (!canAddHabit && habits.length >= 3) {
+                if (!canAddHabit && habits.length >= 5) {
                   showUpgradeModal();
                 } else {
                   setShowAddModal(true);
@@ -498,7 +498,7 @@ export default function HabitTracker() {
           title="Add Habit"
           onPress={() => {
             hapticMedium();
-            if (!canAddHabit && habits.length >= 3) {
+            if (!canAddHabit && habits.length >= 5) {
               showUpgradeModal();
             } else {
               setShowAddModal(true);

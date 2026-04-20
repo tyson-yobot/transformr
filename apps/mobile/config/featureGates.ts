@@ -206,7 +206,7 @@ export const UPGRADE_TRIGGERS: Partial<Record<FeatureKey, {
   },
   habit_tracking_unlimited: {
     title: 'Unlimited Habits',
-    message: "You've hit the 3-habit limit. Go Pro to track everything that matters.",
+    message: "You've hit the 5-habit limit. Go Pro to track everything that matters.",
     targetTier: 'pro',
     ctaCopy: 'Unlock Pro — Start Transforming',
   },
