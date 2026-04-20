@@ -36,6 +36,7 @@ import {
   generateFailureReflection,
   generateCompletionMessage,
 } from '@services/ai/challengeCoach';
+import { getFullComplianceStatus, type ComplianceResult } from '@services/ai/compliance';
 import { FastingTimer } from '@components/challenges/FastingTimer';
 import { PlankTimer } from '@components/challenges/PlankTimer';
 import { C25KTimer } from '@components/challenges/C25KTimer';
@@ -147,6 +148,7 @@ export default function ChallengeActiveScreen() {
   const [showPhotoGuide,      setShowPhotoGuide]      = useState(false);
   const [failureReflection,   setFailureReflection]   = useState<string | null>(null);
   const [completionMsg,       setCompletionMsg]       = useState<string | null>(null);
+  const [complianceStatus,    setComplianceStatus]    = useState<ComplianceResult | null>(null);
 
   const userIdRef    = useRef<string | null>(null);
   const coachFiredRef = useRef(false);
@@ -253,7 +255,7 @@ export default function ChallengeActiveScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEnrollment?.id, todayDateStr]);
 
-  // Fetch AI coaching card once per session
+  // Fetch AI coaching card and compliance status once per session
   useEffect(() => {
     if (!activeEnrollment || !definition || coachFiredRef.current) return;
     const uid = userIdRef.current;
@@ -261,10 +263,17 @@ export default function ChallengeActiveScreen() {
 
     coachFiredRef.current = true;
     setCoachLoading(true);
+
+    // Coaching and compliance fire concurrently
     void getChallengeCoaching(uid, activeEnrollment.id, definition, activeEnrollment, dailyLogs.slice(-7), timeOfDay)
       .then((res) => setCoachResponse(res as CoachResponse))
       .catch(() => undefined)
       .finally(() => setCoachLoading(false));
+
+    void getFullComplianceStatus(activeEnrollment.id)
+      .then((result) => setComplianceStatus(result))
+      .catch(() => undefined);
+
     // Fire once when uid and definition resolve
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEnrollment?.id, definition?.id]);
@@ -487,6 +496,25 @@ export default function ChallengeActiveScreen() {
                           <Text style={[typography.tiny, { color: colors.text.secondary, flex: 1 }]}>{tip}</Text>
                         </View>
                       ))}
+                    </View>
+                  )}
+                  {complianceStatus?.recommendation && (
+                    <View
+                      style={{
+                        marginTop: spacing.sm,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <Ionicons
+                        name={complianceStatus.compliant ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+                        size={13}
+                        color={complianceStatus.compliant ? colors.accent.success : colors.accent.warning}
+                      />
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                        {complianceStatus.recommendation}
+                      </Text>
                     </View>
                   )}
                 </>

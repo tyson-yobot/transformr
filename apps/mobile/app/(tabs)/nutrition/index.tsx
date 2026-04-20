@@ -54,6 +54,8 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 import { VoiceMicButton } from '@components/ui/VoiceMicButton';
 import type { ParsedVoiceCommand } from '@services/voice';
+import { useChallengeStore } from '@stores/challengeStore';
+import { checkWaterPace } from '@services/ai/compliance';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -101,6 +103,7 @@ export default function NutritionHomeScreen() {
   const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog, foodNameMap } =
     useNutritionStore();
   const { profile } = useProfileStore();
+  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
 
   const cameraGate = useFeatureGate('ai_meal_camera');
   const barcodeGate = useFeatureGate('barcode_scanner');
@@ -108,6 +111,7 @@ export default function NutritionHomeScreen() {
   const [dayOffset, setDayOffset] = useState(0);
   const [fabOpen, setFabOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [waterPacingNote, setWaterPacingNote] = useState<string | null>(null);
 
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
@@ -217,7 +221,15 @@ export default function NutritionHomeScreen() {
     await logWater(oz);
     const newTotal = totalWater + oz;
     showToast('Hydration logged', { subtext: `${Math.round(newTotal)}oz today` });
-  }, [logWater, totalWater, showToast]);
+
+    // If an active challenge has a water task, show pacing info (non-blocking)
+    const activeDef = challengeDefinitions.find((d) => d.id === activeEnrollment?.challenge_id);
+    const hasWaterTask = activeDef?.rules?.tasks?.some((t) => t.type === 'water') ?? false;
+    if (activeEnrollment && hasWaterTask) {
+      void checkWaterPace(activeEnrollment.id, oz, newTotal)
+        .then((result) => setWaterPacingNote(result.recommendation || null));
+    }
+  }, [logWater, totalWater, showToast, activeEnrollment, challengeDefinitions]);
 
   const handleFabToggle = useCallback(() => {
     hapticLight();
@@ -628,6 +640,19 @@ export default function NutritionHomeScreen() {
                 />
               </View>
             </View>
+
+            {waterPacingNote && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm, gap: 6 }}>
+                <Ionicons
+                  name={waterPacingNote.startsWith('Behind') ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                  size={13}
+                  color={waterPacingNote.startsWith('Behind') ? colors.accent.warning : colors.accent.info}
+                />
+                <Text style={[typography.tiny, { color: colors.text.secondary, flex: 1 }]}>
+                  {waterPacingNote}
+                </Text>
+              </View>
+            )}
 
             <View style={[styles.waterButtonRow, { marginTop: spacing.md, gap: spacing.sm }]}>
               {[4, 8, 12, 16].map((oz) => (

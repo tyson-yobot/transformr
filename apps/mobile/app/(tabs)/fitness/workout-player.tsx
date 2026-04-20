@@ -55,6 +55,8 @@ import { HELP } from '../../../constants/helpContent';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
+import { useChallengeStore } from '@stores/challengeStore';
+import { checkWorkoutCompliance } from '@services/ai/compliance';
 
 interface GhostSet {
   exercise_id: string;
@@ -90,6 +92,7 @@ export default function WorkoutPlayerScreen() {
   const logCaloriesBurned = useNutritionStore((s) => s.logCaloriesBurned);
   const pendingExerciseId = useWorkoutStore((s) => s.pendingExerciseId);
   const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
+  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
 
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
@@ -538,6 +541,23 @@ export default function WorkoutPlayerScreen() {
       if (estimatedCalories > 0) {
         await logCaloriesBurned(estimatedCalories, activeSession?.name ?? 'Workout');
       }
+
+      // Challenge compliance check — fire after completing workout (non-blocking)
+      const activeDef = challengeDefinitions.find((d) => d.id === activeEnrollment?.challenge_id);
+      const slug = activeDef?.slug ?? '';
+      if (activeEnrollment && (slug === '75-hard' || slug === '75hard')) {
+        void checkWorkoutCompliance(activeEnrollment.id, {
+          duration_minutes: durationMinutes,
+          started_at: activeSession?.started_at ?? new Date().toISOString(),
+          is_outdoor: false, // outdoor flag not tracked at session level; user confirms manually
+        }).then((result) => {
+          if (!result.compliant && result.violations.length > 0) {
+            showToast('Workout saved', { subtext: result.violations[0] ?? '', type: 'error' });
+          } else if (result.warnings.length > 0) {
+            showToast('Workout saved', { subtext: result.warnings[0] ?? '' });
+          }
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save workout';
       Alert.alert('Save Failed', `${message}\n\nPlease try again.`);
@@ -547,7 +567,7 @@ export default function WorkoutPlayerScreen() {
     router.replace(
       `/(tabs)/fitness/workout-summary?sessionId=${sessionId}` as never,
     );
-  }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router, logCaloriesBurned]);
+  }, [activeSession, moodBefore, moodAfter, totalVolume, totalSets, completeWorkout, router, logCaloriesBurned, activeEnrollment, challengeDefinitions, showToast]);
 
   const currentExercise = exercisesWithSets[activeExerciseIndex] ?? null;
 
