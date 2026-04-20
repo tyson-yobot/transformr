@@ -91,8 +91,8 @@ const s = StyleSheet.create({
     padding: 32,
     gap: 16,
   },
-  title:   { color: '#F8FAFC', fontSize: 20, fontWeight: '700' },
-  sub:     { color: '#94A3B8', fontSize: 14, textAlign: 'center' },
+  title:   { color: '#F0F0FC', fontSize: 20, fontWeight: '700' },
+  sub:     { color: '#9B8FC0', fontSize: 14, textAlign: 'center' },
   btn: {
     marginTop: 8,
     paddingHorizontal: 24,

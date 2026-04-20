@@ -39,9 +39,9 @@ import { useFeatureGate, FeatureKey } from '@hooks/useFeatureGate';
 import type { SubscriptionTier } from '@stores/subscriptionStore';
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  free:     '#94A3B8',
-  pro:      '#6366F1',
-  elite:    '#8B5CF6',
+  free:     '#6B5E8A',
+  pro:      '#A855F7',
+  elite:    '#C084FC',
   partners: '#EC4899',
 };
 

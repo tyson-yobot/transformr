@@ -61,7 +61,7 @@ const CATEGORIES: { key: LeaderboardCategory; label: string }[] = [
 
 const MEDAL_COLORS: Record<number, string> = {
   1: '#EAB308', // gold
-  2: '#94A3B8', // silver
+  2: '#C0C0C0', // silver
   3: '#CD7F32', // bronze
 };
 

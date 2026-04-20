@@ -105,8 +105,8 @@ const FITNESS_NAV_CARDS = [
   {
     label: 'Mobility',
     icon: 'accessibility' as keyof typeof Ionicons.glyphMap,
-    iconColor: '#8B5CF6',
-    gradient: ['rgba(139,92,246,0.15)', 'rgba(139,92,246,0.05)'] as [string, string],
+    iconColor: '#A855F7',
+    gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
     description: 'AI recovery + flexibility',
     route: '/(tabs)/fitness/mobility',
     a11y: 'Open mobility exercises',

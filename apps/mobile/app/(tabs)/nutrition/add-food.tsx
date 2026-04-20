@@ -41,7 +41,7 @@ type MealType = typeof MEAL_TYPES[number];
 const MEAL_TYPE_OPTIONS: { value: MealType; label: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
   { value: 'breakfast',    label: 'Breakfast', icon: 'sunny-outline',      iconColor: '#F59E0B' },
   { value: 'lunch',        label: 'Lunch',     icon: 'restaurant-outline',  iconColor: '#22C55E' },
-  { value: 'dinner',       label: 'Dinner',    icon: 'moon-outline',        iconColor: '#8B5CF6' },
+  { value: 'dinner',       label: 'Dinner',    icon: 'moon-outline',        iconColor: '#A855F7' },
   { value: 'snack',        label: 'Snack',     icon: 'cafe-outline',        iconColor: '#F97316' },
   { value: 'shake',        label: 'Shake',     icon: 'nutrition-outline',   iconColor: '#22D3EE' },
   { value: 'pre_workout',  label: 'Pre-WO',    icon: 'flash-outline',       iconColor: '#EAB308' },

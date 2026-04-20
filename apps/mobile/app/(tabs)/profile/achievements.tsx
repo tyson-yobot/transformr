@@ -33,7 +33,7 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 type Tier = 'all' | 'bronze' | 'silver' | 'gold' | 'diamond';
 
 const TIER_FILTERS: readonly { key: Tier; label: string; color: string }[] = [
-  { key: 'all', label: 'All', color: '#94A3B8' }, /* brand-ok */
+  { key: 'all', label: 'All', color: '#6B5E8A' },
   { key: 'bronze', label: 'Bronze', color: '#CD7F32' }, /* brand-ok */
   { key: 'silver', label: 'Silver', color: '#C0C0C0' }, /* brand-ok */
   { key: 'gold', label: 'Gold', color: '#EAB308' }, /* brand-ok */

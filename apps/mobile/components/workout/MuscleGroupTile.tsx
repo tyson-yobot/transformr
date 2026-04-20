@@ -13,7 +13,7 @@ const MUSCLE_CONFIG: Record<string, string> = {
   chest:     '#EF4444',
   back:      '#3B82F6',
   shoulders: '#F97316',
-  biceps:    '#8B5CF6',
+  biceps:    '#A855F7',
   triceps:   '#A855F7',
   abs:       '#22D3EE',
   legs:      '#22C55E',
@@ -65,7 +65,7 @@ export const MuscleGroupTile = memo(function MuscleGroupTile({
       <View style={{
         width: size, height: size, borderRadius: size / 2,
         alignItems: 'center', justifyContent: 'center',
-        backgroundColor: isDark ? 'rgba(22,18,42,0.88)' : 'rgba(255,255,255,0.94)',
+        backgroundColor: colors.background.glass,
         borderWidth: 1.5,
         borderColor: isSelected
           ? accent
