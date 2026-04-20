@@ -21,8 +21,13 @@ import {
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
+import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { GlowButton } from '../components/ui/GlowButton';
+import { FeatureHighlightRow } from '../components/ui/FeatureHighlightRow';
+import { SectionHeader } from '../components/ui/SectionHeader';
 import { createSubscription, restorePurchase } from '../services/stripe';
 import { useFeatureGate, FeatureKey } from '../hooks/useFeatureGate';
 
@@ -304,8 +309,10 @@ export default function UpgradeScreen() {
         }}
       />
 
+      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <AmbientBackground />
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        style={{ flex: 1 }}
         contentContainerStyle={[
           styles.content,
           {
@@ -426,38 +433,44 @@ export default function UpgradeScreen() {
           </Text>
         ) : null}
 
+        {/* Feature highlights */}
+        <SectionHeader title="What you unlock" style={{ marginTop: spacing.lg }} />
+        <View style={{ marginBottom: spacing.sm }}>
+          <FeatureHighlightRow
+            icon="sparkles"
+            iconColor={colors.accent.cyan}
+            title="Unlimited AI coaching"
+            subtitle="Personalized guidance that knows your data"
+          />
+          <FeatureHighlightRow
+            icon="camera-outline"
+            iconColor={colors.accent.success}
+            title="AI meal camera"
+            subtitle="Snap a photo — macros calculated instantly"
+          />
+          <FeatureHighlightRow
+            icon="pulse-outline"
+            iconColor={colors.accent.primary}
+            title="Readiness score"
+            subtitle="Know when to push hard and when to recover"
+          />
+          <FeatureHighlightRow
+            icon="trending-up-outline"
+            iconColor={colors.accent.gold}
+            title="Trajectory simulator"
+            subtitle="See where you'll be in 30, 60, 90 days"
+          />
+        </View>
+
         {/* CTA button */}
-        <Pressable
+        <GlowButton
+          title={`Upgrade to ${TIER_LABELS[selectedTier]}`}
           onPress={handleUpgrade}
+          loading={isLoadingPurchase}
           disabled={isBusy}
-          style={[
-            styles.ctaButton,
-            {
-              backgroundColor: isBusy
-                ? colors.accent.primaryDark
-                : colors.accent.primary,
-              borderRadius: borderRadius.md,
-              marginTop: spacing.lg,
-              height: 52,
-            },
-          ]}
-          accessibilityLabel={`Upgrade to ${TIER_LABELS[selectedTier]}`}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isBusy, busy: isBusy }}
-        >
-          {isLoadingPurchase ? (
-            <ActivityIndicator color={colors.text.inverse} />
-          ) : (
-            <Text
-              style={[
-                typography.h3,
-                { color: colors.text.inverse, fontWeight: '700' },
-              ]}
-            >
-              {`Upgrade to ${TIER_LABELS[selectedTier]}`}
-            </Text>
-          )}
-        </Pressable>
+          fullWidth
+          style={{ marginTop: spacing.md }}
+        />
 
         {/* Fine print */}
         <Text
@@ -499,6 +512,7 @@ export default function UpgradeScreen() {
           )}
         </Pressable>
       </ScrollView>
+      </View>
     </>
   );
 }

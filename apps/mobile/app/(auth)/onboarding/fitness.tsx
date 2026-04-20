@@ -11,6 +11,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
+import { FeatureHighlightRow } from '@components/ui/FeatureHighlightRow';
+import { SectionHeader } from '@components/ui/SectionHeader';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { hapticLight } from '@utils/haptics';
@@ -260,6 +262,27 @@ export default function FitnessScreen() {
                 );
               })}
             </View>
+
+            {/* What you're unlocking */}
+            <SectionHeader title="What you're unlocking" style={{ marginTop: spacing.xxl }} />
+            <FeatureHighlightRow
+              icon="barbell-outline"
+              iconColor={colors.accent.primary}
+              title="Log workouts in seconds"
+              subtitle="Track sets, reps, and weight with one tap"
+            />
+            <FeatureHighlightRow
+              icon="pulse-outline"
+              iconColor={colors.accent.cyan}
+              title="AI-powered suggestions"
+              subtitle="Personalized workout recommendations"
+            />
+            <FeatureHighlightRow
+              icon="trophy-outline"
+              iconColor={colors.accent.gold}
+              title="Personal records"
+              subtitle="Auto-detected PRs with celebration moments"
+            />
 
             {/* Continue */}
             <Button

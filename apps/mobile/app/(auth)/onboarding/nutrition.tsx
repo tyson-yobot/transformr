@@ -13,6 +13,8 @@ import { Button } from '@components/ui/Button';
 import { Card } from '@components/ui/Card';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
+import { FeatureHighlightRow } from '@components/ui/FeatureHighlightRow';
+import { SectionHeader } from '@components/ui/SectionHeader';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import {
@@ -341,6 +343,27 @@ export default function NutritionScreen() {
               </Pressable>
             );
           })}
+
+          {/* What you're unlocking */}
+          <SectionHeader title="What you're unlocking" style={{ marginTop: spacing.xxl }} />
+          <FeatureHighlightRow
+            icon="camera-outline"
+            iconColor={colors.accent.cyan}
+            title="Snap your meals"
+            subtitle="AI identifies food and calculates macros from a photo"
+          />
+          <FeatureHighlightRow
+            icon="barcode-outline"
+            iconColor={colors.accent.success}
+            title="Scan barcodes"
+            subtitle="Log packaged foods in under 2 seconds"
+          />
+          <FeatureHighlightRow
+            icon="mic-outline"
+            iconColor={colors.accent.primary}
+            title="Voice logging"
+            subtitle="Say what you ate — AI handles the rest"
+          />
 
           {/* Continue */}
           <Button
