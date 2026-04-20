@@ -73,9 +73,7 @@ export function GlowCard({
 
   const pad = blur + 4;
 
-  // Dark: rgba(22,18,42,0.88) — matches login screen form glass exactly
-  // Light: rgba(255,255,255,0.94) — clean white with shadow
-  const cardBg = isDark ? 'rgba(22,18,42,0.88)' : 'rgba(255,255,255,0.94)';
+  const cardBg = colors.background.glass;
 
   const innerContent = (
     <View style={[styles.wrapper, style]}>
