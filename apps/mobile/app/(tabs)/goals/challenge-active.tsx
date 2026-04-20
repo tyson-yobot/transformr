@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Challenge Dashboard
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -29,11 +29,36 @@ import { Modal } from '@components/ui/Modal';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight } from '@utils/haptics';
 import { ShareButton } from '@components/social/ShareButton';
+import { supabase } from '@services/supabase';
+import { verifyDailyTasks } from '@services/calculations/challengeVerification';
+import {
+  getChallengeCoaching,
+  generateFailureReflection,
+  generateCompletionMessage,
+} from '@services/ai/challengeCoach';
+import { getFullComplianceStatus, type ComplianceResult } from '@services/ai/compliance';
+import { FastingTimer } from '@components/challenges/FastingTimer';
+import { PlankTimer } from '@components/challenges/PlankTimer';
+import { C25KTimer } from '@components/challenges/C25KTimer';
+import { MurphWorkout } from '@components/challenges/MurphWorkout';
+import { SavingsCalculator } from '@components/challenges/SavingsCalculator';
+import { ProgressPhotoGuide } from '@components/challenges/ProgressPhotoGuide';
+import { Ionicons } from '@expo/vector-icons';
 import type {
   ChallengeDefinition,
   ChallengeDailyLog,
   ChallengeTask,
 } from '@app-types/database';
+
+// ---------------------------------------------------------------------------
+// Coach response type (mirrors ChallengeCoachResponse in the service)
+// ---------------------------------------------------------------------------
+interface CoachResponse {
+  message:      string;
+  tips:         string[];
+  urgentTasks:  string[];
+  motivation:   string;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -104,17 +129,29 @@ export default function ChallengeActiveScreen() {
     challengeDefinitions,
     todayLog,
     dailyLogs,
+    isLoading,
     logDailyTask,
     completeDailyLog,
     restartChallenge,
     abandonChallenge,
     getTodayProgress,
+    fetchActiveEnrollment,
+    fetchDailyLogs,
   } = useChallengeStore();
 
   // Local state -----------------------------------------------------------
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing,          setRefreshing]          = useState(false);
   const [abandonModalVisible, setAbandonModalVisible] = useState(false);
   const [restartModalVisible, setRestartModalVisible] = useState(false);
+  const [coachResponse,       setCoachResponse]       = useState<CoachResponse | null>(null);
+  const [coachLoading,        setCoachLoading]        = useState(false);
+  const [showPhotoGuide,      setShowPhotoGuide]      = useState(false);
+  const [failureReflection,   setFailureReflection]   = useState<string | null>(null);
+  const [completionMsg,       setCompletionMsg]       = useState<string | null>(null);
+  const [complianceStatus,    setComplianceStatus]    = useState<ComplianceResult | null>(null);
+
+  const userIdRef    = useRef<string | null>(null);
+  const coachFiredRef = useRef(false);
 
   // Derived data ----------------------------------------------------------
   const definition: ChallengeDefinition | null = useMemo(() => {
@@ -167,11 +204,95 @@ export default function ChallengeActiveScreen() {
   const showRestartButton =
     definition?.restart_on_failure && hasMissedDay;
 
+  // Resolve today's date string (YYYY-MM-DD) ------------------------------
+  const todayDateStr = useMemo((): string => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  // Resolve time-of-day for coaching prompt --------------------------------
+  const timeOfDay = useMemo((): 'morning' | 'afternoon' | 'evening' => {
+    const h = new Date().getHours();
+    if (h < 12) return 'morning';
+    if (h < 17) return 'afternoon';
+    return 'evening';
+  }, []);
+
+  // Effects ---------------------------------------------------------------
+
+  // Resolve user ID once on mount
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data }) => {
+      userIdRef.current = data.user?.id ?? null;
+    });
+  }, []);
+
+  // Fetch daily logs on mount so calendar heatmap is populated
+  useEffect(() => {
+    if (activeEnrollment?.id) {
+      void fetchDailyLogs(activeEnrollment.id);
+    }
+  }, [activeEnrollment?.id, fetchDailyLogs]);
+
+  // Run auto-verification once per mount (for auto_verify tasks)
+  useEffect(() => {
+    const autoTasks = tasks.filter((t) => t.auto_verify);
+    if (!activeEnrollment || !userIdRef.current || autoTasks.length === 0) return;
+
+    const verifyAll = async () => {
+      const uid = userIdRef.current;
+      if (!uid) return;
+      const results = await verifyDailyTasks(uid, todayDateStr, autoTasks).catch(() => null);
+      if (!results) return;
+      for (const [taskId, result] of Object.entries(results)) {
+        if (result.verified && !todayLog?.tasks_completed[taskId]) {
+          await logDailyTask(activeEnrollment.id, taskId, true, true).catch(() => undefined);
+        }
+      }
+    };
+    void verifyAll();
+    // tasks length + enrollment id are the reactive deps here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeEnrollment?.id, todayDateStr]);
+
+  // Fetch AI coaching card and compliance status once per session
+  useEffect(() => {
+    if (!activeEnrollment || !definition || coachFiredRef.current) return;
+    const uid = userIdRef.current;
+    if (!uid) return;
+
+    coachFiredRef.current = true;
+    setCoachLoading(true);
+
+    // Coaching and compliance fire concurrently
+    void getChallengeCoaching(uid, activeEnrollment.id, definition, activeEnrollment, dailyLogs.slice(-7), timeOfDay)
+      .then((res) => setCoachResponse(res as CoachResponse))
+      .catch(() => undefined)
+      .finally(() => setCoachLoading(false));
+
+    void getFullComplianceStatus(activeEnrollment.id)
+      .then((result) => setComplianceStatus(result))
+      .catch(() => undefined);
+
+    // Fire once when uid and definition resolve
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeEnrollment?.id, definition?.id]);
+
   // Handlers --------------------------------------------------------------
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
-  }, []);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && activeEnrollment) {
+        await Promise.all([
+          fetchActiveEnrollment(user.id),
+          fetchDailyLogs(activeEnrollment.id),
+        ]);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [activeEnrollment, fetchActiveEnrollment, fetchDailyLogs]);
 
   const handleToggleTask = useCallback(
     async (taskId: string, currentlyCompleted: boolean) => {
@@ -182,9 +303,17 @@ export default function ChallengeActiveScreen() {
   );
 
   const handleCompleteDay = useCallback(async () => {
-    if (!activeEnrollment) return;
+    if (!activeEnrollment || !definition) return;
     await completeDailyLog(activeEnrollment.id);
-  }, [activeEnrollment, completeDailyLog]);
+    // If this was the final day, generate a completion message
+    if (currentDay >= totalDays) {
+      const uid = userIdRef.current;
+      if (uid) {
+        const result = await generateCompletionMessage(uid, definition, activeEnrollment, dailyLogs).catch(() => null);
+        if (result?.message) setCompletionMsg(result.message);
+      }
+    }
+  }, [activeEnrollment, definition, completeDailyLog, currentDay, totalDays, dailyLogs]);
 
   const handleAbandon = useCallback(async () => {
     if (!activeEnrollment) return;
@@ -194,10 +323,18 @@ export default function ChallengeActiveScreen() {
   }, [activeEnrollment, abandonChallenge, router]);
 
   const handleRestart = useCallback(async () => {
-    if (!activeEnrollment) return;
+    if (!activeEnrollment || !definition) return;
+    const uid = userIdRef.current;
+    const missedIds = incompleteTasks.map((t) => t.id);
+    if (uid) {
+      const reflection = await generateFailureReflection(uid, definition, activeEnrollment, currentDay, missedIds).catch(() => null);
+      if (reflection?.reflection) setFailureReflection(reflection.reflection);
+    }
     await restartChallenge(activeEnrollment.id);
     setRestartModalVisible(false);
-  }, [activeEnrollment, restartChallenge]);
+    coachFiredRef.current = false; // allow coaching to reload after restart
+    setComplianceStatus(null);    // clear stale compliance data until new fetch completes
+  }, [activeEnrollment, definition, restartChallenge, incompleteTasks, currentDay]);
 
   // Guard: no active enrollment -------------------------------------------
   if (!activeEnrollment || !definition) {
@@ -301,6 +438,91 @@ export default function ChallengeActiveScreen() {
             )}
           </View>
         </Animated.View>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Failure Reflection (shown after restart)                          */}
+        {/* ----------------------------------------------------------------- */}
+        {failureReflection && (
+          <Animated.View entering={FadeInDown.delay(160)}>
+            <Card variant="ai" style={{ marginBottom: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                <Ionicons name="refresh-circle-outline" size={18} color={colors.accent.primary} style={{ marginRight: spacing.sm, marginTop: 2 }} />
+                <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>
+                  {failureReflection}
+                </Text>
+              </View>
+            </Card>
+          </Animated.View>
+        )}
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Challenge Completion Message                                       */}
+        {/* ----------------------------------------------------------------- */}
+        {completionMsg && (
+          <Animated.View entering={FadeInDown.delay(160)}>
+            <Card variant="success" style={{ marginBottom: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                <Ionicons name="trophy-outline" size={18} color={colors.accent.success} style={{ marginRight: spacing.sm, marginTop: 2 }} />
+                <Text style={[typography.bodyBold, { color: colors.accent.success, flex: 1 }]}>
+                  {completionMsg}
+                </Text>
+              </View>
+            </Card>
+          </Animated.View>
+        )}
+
+        {/* ----------------------------------------------------------------- */}
+        {/* AI Coach Card                                                      */}
+        {/* ----------------------------------------------------------------- */}
+        {(coachLoading || coachResponse) && (
+          <Animated.View entering={FadeInDown.delay(170)}>
+            <Card variant="ai" style={{ marginBottom: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+                <Ionicons name="sparkles-outline" size={16} color={colors.accent.primary} style={{ marginRight: spacing.sm }} />
+                <Text style={[typography.captionBold, { color: colors.accent.primary }]}>Challenge Coach</Text>
+                {coachLoading && !isLoading && (
+                  <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.sm }]}>Thinking…</Text>
+                )}
+              </View>
+              {coachResponse && (
+                <>
+                  <Text style={[typography.body, { color: colors.text.primary, marginBottom: spacing.sm }]}>
+                    {coachResponse.message}
+                  </Text>
+                  {coachResponse.tips.length > 0 && (
+                    <View style={{ marginTop: spacing.xs }}>
+                      {coachResponse.tips.slice(0, 2).map((tip, i) => (
+                        <View key={i} style={{ flexDirection: 'row', marginBottom: 4 }}>
+                          <Text style={[typography.tiny, { color: colors.accent.primary, marginRight: 4 }]}>›</Text>
+                          <Text style={[typography.tiny, { color: colors.text.secondary, flex: 1 }]}>{tip}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                  {complianceStatus?.recommendation && (
+                    <View
+                      style={{
+                        marginTop: spacing.sm,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      <Ionicons
+                        name={complianceStatus.compliant ? 'checkmark-circle-outline' : 'alert-circle-outline'}
+                        size={13}
+                        color={complianceStatus.compliant ? colors.accent.success : colors.accent.warning}
+                      />
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                        {complianceStatus.recommendation}
+                      </Text>
+                    </View>
+                  )}
+                </>
+              )}
+            </Card>
+          </Animated.View>
+        )}
 
         {/* ----------------------------------------------------------------- */}
         {/* Fail Warning                                                       */}
@@ -513,6 +735,113 @@ export default function ChallengeActiveScreen() {
         </Animated.View>
 
         {/* ----------------------------------------------------------------- */}
+        {/* Challenge-Specific Widget                                          */}
+        {/* ----------------------------------------------------------------- */}
+        {definition && (() => {
+          const slug = definition.slug;
+          const cfg = activeEnrollment.configuration ?? {};
+
+          if (slug === 'intermittent-fasting') {
+            const protocol = (cfg.protocol as string) || '16:8';
+            const windowStart = (cfg.eating_window_start as string) || '12:00';
+            return (
+              <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                <FastingTimer
+                  protocol={protocol as import('@components/challenges/FastingTimer').FastingProtocol}
+                  eatingWindowStart={windowStart}
+                />
+              </Animated.View>
+            );
+          }
+
+          if (slug === '30-day-plank') {
+            const rules = definition.rules as Record<string, unknown>;
+            const schedule = (rules.daily_schedule ?? rules.daily_targets ?? {}) as Record<string, number>;
+            const target = schedule[String(currentDay)] ?? 30;
+            return (
+              <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                <PlankTimer
+                  targetSeconds={target}
+                  onComplete={(held) => void logDailyTask(activeEnrollment.id, 'plank', held >= target, true).catch(() => undefined)}
+                />
+              </Animated.View>
+            );
+          }
+
+          if (slug === 'c25k') {
+            const rules = definition.rules as Record<string, unknown>;
+            const schedule = (rules.daily_schedule ?? {}) as Record<string, unknown>;
+            const daySchedule = (schedule[String(currentDay)] ?? {}) as Record<string, unknown>;
+            const intervals = (daySchedule.intervals ?? []) as { type: 'run' | 'walk'; duration: number }[];
+            const week  = Math.ceil(currentDay / 3);
+            const runNo = ((currentDay - 1) % 3) + 1;
+            return (
+              <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                <C25KTimer
+                  weekNumber={week}
+                  runNumber={runNo}
+                  intervals={intervals}
+                  onComplete={() => void logDailyTask(activeEnrollment.id, 'run', true, false).catch(() => undefined)}
+                />
+              </Animated.View>
+            );
+          }
+
+          if (slug === 'murph') {
+            return (
+              <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                <MurphWorkout
+                  weightedVest={(cfg.weighted_vest as boolean) ?? false}
+                  partitioned={(cfg.partitioned as boolean) ?? false}
+                  onComplete={(_secs) => void logDailyTask(activeEnrollment.id, 'murph_complete', true, false)
+                    .then(() => void logDailyTask(activeEnrollment.id, 'murph_time', true, false))
+                    .catch(() => undefined)
+                  }
+                />
+              </Animated.View>
+            );
+          }
+
+          if (slug === 'sober-month') {
+            return (
+              <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                <SavingsCalculator
+                  weeklySpend={(cfg.weekly_spend as number) ?? 50}
+                  dayNumber={currentDay}
+                  totalDays={definition.duration_days}
+                />
+              </Animated.View>
+            );
+          }
+
+          if (slug === '75-hard' || slug === '75-soft' || slug === '75-medium') {
+            const hasPhotoTask = tasks.some((t) => t.type === 'photo');
+            if (hasPhotoTask) {
+              return (
+                <Animated.View entering={FadeInDown.delay(350)} style={{ marginBottom: spacing.lg }}>
+                  <Pressable
+                    onPress={() => { hapticLight(); setShowPhotoGuide(true); }}
+                    style={[
+                      styles.photoRow,
+                      { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, padding: spacing.md },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Take today's progress photo"
+                  >
+                    <Ionicons name="camera-outline" size={20} color={colors.accent.primary} />
+                    <Text style={[typography.bodyBold, { color: colors.accent.primary, marginLeft: spacing.sm }]}>
+                      Take Today's Progress Photo
+                    </Text>
+                  </Pressable>
+                </Animated.View>
+              );
+            }
+          }
+
+          return null;
+        })()}
+
+        {/* ----------------------------------------------------------------- */}
         {/* Action Buttons                                                     */}
         {/* ----------------------------------------------------------------- */}
         <Animated.View entering={FadeInDown.delay(400)}>
@@ -668,6 +997,21 @@ export default function ChallengeActiveScreen() {
           style={{ marginTop: spacing.md }}
         />
       </Modal>
+
+      {/* ------------------------------------------------------------------- */}
+      {/* Progress Photo Guide Modal                                           */}
+      {/* ------------------------------------------------------------------- */}
+      <ProgressPhotoGuide
+        visible={showPhotoGuide}
+        onClose={() => setShowPhotoGuide(false)}
+        onPhotoTaken={(uri) => {
+          setShowPhotoGuide(false);
+          if (activeEnrollment) {
+            void logDailyTask(activeEnrollment.id, 'progress_photo', true, false).catch(() => undefined);
+          }
+          void uri; // uri available for future upload integration
+        }}
+      />
     </View>
   );
 }
@@ -722,6 +1066,10 @@ const styles = StyleSheet.create({
     height: 10,
   },
   abandonButton: {
+    alignItems: 'center',
+  },
+  photoRow: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   footerRow: {

@@ -1,6 +1,14 @@
 import { supabase } from './supabase';
 import type { SubscriptionTier } from '../stores/subscriptionStore';
 
+// eslint-disable-next-line expo/no-dynamic-env-var
+const _stripeKey = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
+const isStripeConfigured =
+  Boolean(_stripeKey) &&
+  !_stripeKey.includes('your-') &&
+  !_stripeKey.includes('xxxxx') &&
+  _stripeKey.startsWith('pk_');
+
 interface StakePaymentResult {
   success: boolean;
   paymentIntentId: string | null;
@@ -13,6 +21,9 @@ export async function createStakePayment(
   stakeId: string,
   paymentMethodId: string,
 ): Promise<StakePaymentResult> {
+  if (!isStripeConfigured) {
+    return { success: false, paymentIntentId: null, error: 'Payment system coming soon' };
+  }
   // Creates a HOLD (capture_method: manual) — funds are reserved, not charged.
   // The hold is captured (charged) only if the goal is missed.
   const { data, error } = await supabase.functions.invoke('stripe-webhook', {

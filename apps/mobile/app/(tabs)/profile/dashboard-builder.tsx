@@ -39,6 +39,7 @@ const WIDGET_ICONS: Record<string, string> = {
   partner_activity: '👫',
   business_revenue: '💰',
   finance_overview: '📊',
+  active_challenge: '🏆',
 };
 
 const SIZE_LABELS: Record<string, string> = {

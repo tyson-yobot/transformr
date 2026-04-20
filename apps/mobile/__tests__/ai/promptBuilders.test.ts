@@ -123,9 +123,18 @@ describe('AI Coach service', () => {
 
       expect(mockInvoke).toHaveBeenCalledTimes(1);
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: coachContext,
+        body: expect.objectContaining(coachContext),
       });
       expect(result).toEqual(mockCoachResponse);
+    });
+
+    it('includes userContext in the request body', async () => {
+      mockInvoke.mockResolvedValueOnce({ data: mockCoachResponse, error: null });
+
+      await getAICoaching(coachContext);
+
+      const callBody = (mockInvoke.mock.calls[0] as [string, { body: Record<string, unknown> }])[1].body;
+      expect(callBody).toHaveProperty('userContext');
     });
 
     it('passes partial context when optional fields are omitted', async () => {
@@ -138,7 +147,7 @@ describe('AI Coach service', () => {
       await getAICoaching(partialContext);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: partialContext,
+        body: expect.objectContaining(partialContext),
       });
     });
 
@@ -163,7 +172,7 @@ describe('AI Coach service', () => {
       const result = await getMorningBriefing('user-123');
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: { userId: 'user-123', type: 'morning_briefing' },
+        body: expect.objectContaining({ userId: 'user-123', type: 'morning_briefing' }),
       });
       expect(result).toBe('Good morning! Today is leg day.');
     });
@@ -191,7 +200,7 @@ describe('AI Coach service', () => {
       const result = await getEveningReflection('user-789');
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: { userId: 'user-789', type: 'evening_reflection' },
+        body: expect.objectContaining({ userId: 'user-789', type: 'evening_reflection' }),
       });
       expect(result).toBe('Great day! You crushed your protein goal.');
     });
@@ -222,12 +231,12 @@ describe('AI Coach service', () => {
       const result = await getWorkoutAdvice('user-123', 45, ['chest', 'triceps']);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           type: 'workout_advice',
           readinessScore: 45,
           musclesSore: ['chest', 'triceps'],
-        },
+        }),
       });
       expect(result).toEqual(adviceResponse);
     });
@@ -246,12 +255,12 @@ describe('AI Coach service', () => {
       await getWorkoutAdvice('user-123', 95, []);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-coach', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           type: 'workout_advice',
           readinessScore: 95,
           musclesSore: [],
-        },
+        }),
       });
     });
 
@@ -304,11 +313,11 @@ describe('AI Meal Camera service', () => {
         { encoding: FileSystem.EncodingType.Base64 },
       );
       expect(mockInvoke).toHaveBeenCalledWith('ai-meal-analysis', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           image: 'bW9ja2VkLWJhc2U2NC1jb250ZW50',
           mimeType: 'image/jpeg',
-        },
+        }),
       });
       expect(result).toEqual(mealAnalysis);
     });
@@ -359,12 +368,12 @@ describe('AI Meal Camera service', () => {
       );
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-menu-scan', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           image: 'bW9ja2VkLWJhc2U2NC1jb250ZW50',
           mimeType: 'image/jpeg',
           restaurantName: 'Chipotle',
-        },
+        }),
       });
       expect(result).toEqual(menuAnalysis);
     });
@@ -375,12 +384,11 @@ describe('AI Meal Camera service', () => {
       await analyzeMenuPhoto('file:///photos/menu.jpg', 'user-123');
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-menu-scan', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           image: 'bW9ja2VkLWJhc2U2NC1jb250ZW50',
           mimeType: 'image/jpeg',
-          restaurantName: undefined,
-        },
+        }),
       });
     });
 
@@ -432,7 +440,7 @@ describe('AI Motivation service', () => {
       const result = await getMotivation(motivationContext);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-motivation', {
-        body: motivationContext,
+        body: expect.objectContaining(motivationContext),
       });
       expect(result).toEqual(mockMotivation);
     });
@@ -492,7 +500,7 @@ describe('AI Motivation service', () => {
       const result = await getDailyQuote('user-123');
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-motivation', {
-        body: { userId: 'user-123', type: 'daily_quote' },
+        body: expect.objectContaining({ userId: 'user-123', type: 'daily_quote' }),
       });
       expect(result).toBe('The only bad workout is the one that did not happen.');
     });
@@ -541,12 +549,12 @@ describe('AI Form Check service', () => {
         { encoding: FileSystem.EncodingType.Base64 },
       );
       expect(mockInvoke).toHaveBeenCalledWith('ai-form-check', {
-        body: {
+        body: expect.objectContaining({
           userId: 'user-123',
           video: 'bW9ja2VkLWJhc2U2NC1jb250ZW50',
           mimeType: 'video/mp4',
           exerciseName: 'Barbell Squat',
-        },
+        }),
       });
       expect(result).toEqual(formResult);
     });
@@ -625,7 +633,7 @@ describe('AI Trajectory service', () => {
       const result = await generateTrajectory(trajectoryContext);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-trajectory', {
-        body: trajectoryContext,
+        body: expect.objectContaining(trajectoryContext),
       });
       expect(result).toEqual(mockTrajectory);
     });
@@ -647,7 +655,7 @@ describe('AI Trajectory service', () => {
       await generateTrajectory(noBusinessCtx);
 
       expect(mockInvoke).toHaveBeenCalledWith('ai-trajectory', {
-        body: noBusinessCtx,
+        body: expect.objectContaining(noBusinessCtx),
       });
     });
 

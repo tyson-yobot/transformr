@@ -66,7 +66,23 @@ export async function getChallengeCoaching(
     throw new Error(`Challenge coaching failed: ${error.message}`);
   }
 
-  return data as ChallengeCoachResponse;
+  // Edge Function returns { message, suggestions, focus_area, motivation_level, ... }
+  // Map to the ChallengeCoachResponse shape expected by consuming screens.
+  const raw = data as {
+    message?: string;
+    suggestions?: string[];
+    focus_area?: string;
+    motivation_level?: string;
+    risk_of_failure?: string;
+    milestone_note?: string | null;
+  };
+
+  return {
+    message:      raw.message ?? '',
+    tips:         Array.isArray(raw.suggestions) ? raw.suggestions : [],
+    urgentTasks:  raw.focus_area ? [raw.focus_area] : [],
+    motivation:   raw.motivation_level ?? 'medium',
+  } satisfies ChallengeCoachResponse;
 }
 
 /**

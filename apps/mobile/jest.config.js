@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.tsx?$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(date-fns)/)',
+    'node_modules/(?!(react-native|@react-native|expo|@expo|expo-.*|@expo/.*|react-native-.*|@react-native-.*|@supabase/.*|date-fns)/)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
@@ -22,9 +22,12 @@ module.exports = {
     '^react-native$': '<rootDir>/__mocks__/react-native.js',
     '^react-native-mmkv$': '<rootDir>/__mocks__/react-native-mmkv.js',
     '^expo-haptics$': '<rootDir>/__mocks__/expo-haptics.js',
+    '^expo-web-browser$': '<rootDir>/__mocks__/expo-web-browser.js',
+    '^expo-linking$': '<rootDir>/__mocks__/expo-linking.js',
     '^@supabase/supabase-js$': '<rootDir>/__mocks__/@supabase/supabase-js.js',
   },
   roots: ['<rootDir>'],
+  testPathIgnorePatterns: ['/node_modules/', '/.claude/', '/worktrees/'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleDirectories: [
@@ -33,8 +36,14 @@ module.exports = {
     path.resolve(__dirname, '../../node_modules'),
   ],
   collectCoverageFrom: [
-    'services/calculations/**/*.ts',
+    'services/**/*.ts',
     'utils/**/*.ts',
+    'stores/**/*.ts',
+    'hooks/**/*.ts',
+    'components/**/*.{ts,tsx}',
+    'app/**/*.{ts,tsx}',
     '!**/*.d.ts',
+    '!**/__tests__/**',
+    '!**/node_modules/**',
   ],
 };

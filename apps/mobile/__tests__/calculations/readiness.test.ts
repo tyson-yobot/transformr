@@ -97,13 +97,19 @@ describe('calculateReadinessScore', () => {
   });
 
   it('maps score 40-59 to light recommendation', () => {
+    // sleepComponent: round(min(1,6/8)*15 + (3/5)*10) = round(11.25+6) = 17
+    // sorenessComponent: round(20*(1-(6-1)/9)) = round(20*4/9) = 9
+    // stressComponent: round(20*(1-(6-1)/9)) = 9
+    // energyComponent: round(20*((3-1)/9)) = round(4.44) = 4
+    // trainingLoadComponent: 15000/10000=1.5 → 5
+    // total: 17+9+9+4+5 = 44 → 'light'
     const result = calculateReadinessScore({
-      sleepHours: 5,
-      sleepQuality: 2,
-      moodScore: 3,
-      stressLevel: 7,
+      sleepHours: 6,
+      sleepQuality: 3,
+      moodScore: 4,
+      stressLevel: 6,
       energyLevel: 3,
-      sorenessLevel: 7,
+      sorenessLevel: 6,
       workoutsLast3Days: 4,
       totalVolumeLast3Days: 15000,
       avgVolumePer3Days: 10000,
@@ -114,7 +120,7 @@ describe('calculateReadinessScore', () => {
   });
 
   it('calculates training load component based on volume ratio', () => {
-    // Low load ratio (well rested)
+    // Low load ratio (well rested, <= 0.5)
     const rested = calculateReadinessScore({
       sleepHours: null, sleepQuality: null, moodScore: null,
       stressLevel: null, energyLevel: null, sorenessLevel: null,
@@ -124,7 +130,37 @@ describe('calculateReadinessScore', () => {
     });
     expect(rested.trainingLoadComponent).toBe(15);
 
-    // High load ratio (overreaching)
+    // Moderate load ratio (0.5-1.0) => 12 points
+    const moderate = calculateReadinessScore({
+      sleepHours: null, sleepQuality: null, moodScore: null,
+      stressLevel: null, energyLevel: null, sorenessLevel: null,
+      workoutsLast3Days: 2,
+      totalVolumeLast3Days: 8000,
+      avgVolumePer3Days: 10000, // 0.8 ratio => 12 points
+    });
+    expect(moderate.trainingLoadComponent).toBe(12);
+
+    // Moderate-high load ratio (1.0-1.3) => 8 points
+    const moderateHigh = calculateReadinessScore({
+      sleepHours: null, sleepQuality: null, moodScore: null,
+      stressLevel: null, energyLevel: null, sorenessLevel: null,
+      workoutsLast3Days: 3,
+      totalVolumeLast3Days: 12000,
+      avgVolumePer3Days: 10000, // 1.2 ratio => 8 points
+    });
+    expect(moderateHigh.trainingLoadComponent).toBe(8);
+
+    // High load ratio (1.3-1.6) => 5 points
+    const high = calculateReadinessScore({
+      sleepHours: null, sleepQuality: null, moodScore: null,
+      stressLevel: null, energyLevel: null, sorenessLevel: null,
+      workoutsLast3Days: 4,
+      totalVolumeLast3Days: 14000,
+      avgVolumePer3Days: 10000, // 1.4 ratio => 5 points
+    });
+    expect(high.trainingLoadComponent).toBe(5);
+
+    // High load ratio (overreaching, > 1.6) => 2 points
     const overreached = calculateReadinessScore({
       sleepHours: null, sleepQuality: null, moodScore: null,
       stressLevel: null, energyLevel: null, sorenessLevel: null,
@@ -133,6 +169,16 @@ describe('calculateReadinessScore', () => {
       avgVolumePer3Days: 10000, // 2.0 ratio => 2 points
     });
     expect(overreached.trainingLoadComponent).toBe(2);
+
+    // Default (avgVolumePer3Days = 0) => 10 points
+    const noHistory = calculateReadinessScore({
+      sleepHours: null, sleepQuality: null, moodScore: null,
+      stressLevel: null, energyLevel: null, sorenessLevel: null,
+      workoutsLast3Days: 0,
+      totalVolumeLast3Days: 0,
+      avgVolumePer3Days: 0,
+    });
+    expect(noHistory.trainingLoadComponent).toBe(10);
   });
 
   it('returns score between 1 and 100', () => {
@@ -165,6 +211,28 @@ describe('calculateReadinessScore', () => {
     });
     expect(result.explanation).toBeTruthy();
     expect(typeof result.explanation).toBe('string');
+  });
+
+  it('includes minor note in go_hard explanation when a component is slightly low', () => {
+    // sleepComponent = round(min(1,4/8)*15 + (1/5)*10) = round(7.5+2) = 10 < 12 → flag
+    // sorenessComponent: sorenessLevel=1 → 20, stressComponent: stressLevel=1 → 20
+    // energyComponent: energyLevel=10 → 20, trainingLoadComponent: 0/10000=0 → 15
+    // score = 10+20+20+20+15 = 85 ≥ 80 → go_hard with "Minor note: sleep quality is low"
+    const result = calculateReadinessScore({
+      sleepHours: 4,
+      sleepQuality: 1,
+      moodScore: 10,
+      stressLevel: 1,
+      energyLevel: 10,
+      sorenessLevel: 1,
+      workoutsLast3Days: 0,
+      totalVolumeLast3Days: 0,
+      avgVolumePer3Days: 10000,
+    });
+    expect(result.score).toBeGreaterThanOrEqual(80);
+    expect(result.recommendation).toBe('go_hard');
+    expect(result.explanation).toContain('Minor note');
+    expect(result.explanation).toContain('sleep quality is low');
   });
 });
 

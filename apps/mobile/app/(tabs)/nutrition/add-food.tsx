@@ -27,12 +27,14 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Skeleton } from '@components/ui/Skeleton';
 import { useNutritionStore } from '@stores/nutritionStore';
 import { useProfileStore } from '@stores/profileStore';
+import { useChallengeStore } from '@stores/challengeStore';
 import { MEAL_TYPES, MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Food } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { checkFoodBeforeLogging, type ComplianceResult } from '@services/ai/compliance';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -55,6 +57,7 @@ export default function AddFoodScreen() {
 
   const { searchResults, isLoading, searchFoods, logFood } = useNutritionStore();
   const { profile } = useProfileStore();
+  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,6 +67,30 @@ export default function AddFoodScreen() {
   );
   const [quantity, setQuantity] = useState(1);
   const [isLogging, setIsLogging] = useState(false);
+
+  // Compliance pre-screen — runs when a food is selected and a diet challenge is active
+  const [complianceResult, setComplianceResult] = useState<ComplianceResult | null>(null);
+  const [complianceLoading, setComplianceLoading] = useState(false);
+
+  // The active challenge definition (joined from store)
+  const activeDef = useMemo(
+    () => challengeDefinitions.find((d) => d.id === activeEnrollment?.challenge_id) ?? null,
+    [challengeDefinitions, activeEnrollment]
+  );
+
+  // Whether the active challenge has diet-based compliance rules
+  const hasDietRules = useMemo(() => {
+    if (!activeDef) return false;
+    const slug = activeDef.slug;
+    return (
+      slug === 'whole30' ||
+      slug === '75-hard' ||
+      slug === '75hard' ||
+      slug === 'intermittent-fasting' ||
+      Boolean(activeDef.rules?.elimination_list?.length) ||
+      Boolean(activeDef.rules?.fasting_protocol)
+    );
+  }, [activeDef]);
 
   // Manual entry fields
   const [manualMode, setManualMode] = useState(false);
@@ -106,7 +133,16 @@ export default function AddFoodScreen() {
     setSelectedFood(food);
     setQuantity(1);
     setManualMode(false);
-  }, []);
+    setComplianceResult(null);
+
+    // Fire compliance pre-screen if a diet challenge is active
+    if (activeEnrollment && hasDietRules) {
+      setComplianceLoading(true);
+      void checkFoodBeforeLogging(activeEnrollment.id, { name: food.name })
+        .then((result) => setComplianceResult(result))
+        .finally(() => setComplianceLoading(false));
+    }
+  }, [activeEnrollment, hasDietRules]);
 
   const handleQuantityChange = useCallback((delta: number) => {
     hapticLight();
@@ -357,6 +393,63 @@ export default function AddFoodScreen() {
                   </Pressable>
                 </View>
               </View>
+
+              {/* Challenge compliance badge */}
+              {(complianceLoading || complianceResult) && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: spacing.md,
+                    paddingVertical: spacing.xs,
+                    paddingHorizontal: spacing.sm,
+                    borderRadius: borderRadius.md,
+                    backgroundColor: complianceLoading
+                      ? `${colors.background.tertiary}`
+                      : complianceResult?.compliant
+                        ? `${colors.accent.success}18`
+                        : `${colors.accent.danger}18`,
+                  }}
+                >
+                  <Ionicons
+                    name={
+                      complianceLoading
+                        ? 'hourglass-outline'
+                        : complianceResult?.compliant
+                          ? 'checkmark-circle-outline'
+                          : 'warning-outline'
+                    }
+                    size={14}
+                    color={
+                      complianceLoading
+                        ? colors.text.muted
+                        : complianceResult?.compliant
+                          ? colors.accent.success
+                          : colors.accent.danger
+                    }
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={[
+                      typography.tiny,
+                      {
+                        color: complianceLoading
+                          ? colors.text.muted
+                          : complianceResult?.compliant
+                            ? colors.accent.success
+                            : colors.accent.danger,
+                        flex: 1,
+                      },
+                    ]}
+                  >
+                    {complianceLoading
+                      ? 'Checking compliance…'
+                      : complianceResult?.compliant
+                        ? complianceResult.recommendation || 'Compliant ✓'
+                        : (complianceResult?.violations[0] ?? 'May not comply with challenge rules')}
+                  </Text>
+                </View>
+              )}
 
               {/* Macro Preview */}
               <View style={[styles.macroPreview, { marginTop: spacing.lg, gap: spacing.md }]}>

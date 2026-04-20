@@ -154,7 +154,7 @@ describe('authStore — signIn', () => {
     });
 
     const state = useAuthStore.getState();
-    expect(state.error).toBe('Invalid login credentials');
+    expect(state.error).toBe('Incorrect email or password. Please try again.');
     expect(state.session).toBeNull();
     expect(state.user).toBeNull();
     expect(state.loading).toBe(false);
@@ -170,9 +170,9 @@ describe('authStore — signIn', () => {
       await useAuthStore.getState().signIn('a@b.com', 'pw');
     });
 
-    // The store throws the error object from Supabase; since it is not
-    // instanceof Error, the catch block should fall back to "Sign in failed".
-    expect(useAuthStore.getState().error).toBe('Sign in failed');
+    // signIn processes the error through its inline message mapper.
+    // A non-standard error object with a message property passes through as-is.
+    expect(useAuthStore.getState().error).toBe('something weird');
   });
 
   it('handles network error during sign in', async () => {
@@ -205,11 +205,11 @@ describe('authStore — signUp', () => {
     expect(state.user).toEqual(mockUser);
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
-    expect(mockSignUp).toHaveBeenCalledWith({
+    expect(mockSignUp).toHaveBeenCalledWith(expect.objectContaining({
       email: 'new@transformr.app',
       password: 'Str0ng!Pass',
-      options: { data: { display_name: 'New User' } },
-    });
+      options: expect.objectContaining({ data: { display_name: 'New User' } }),
+    }));
   });
 
   it('stores error when email is already taken', async () => {
@@ -222,7 +222,7 @@ describe('authStore — signUp', () => {
       await useAuthStore.getState().signUp('taken@transformr.app', 'pass', 'Name');
     });
 
-    expect(useAuthStore.getState().error).toBe('User already registered');
+    expect(useAuthStore.getState().error).toBe('An account with this email already exists. Try signing in.');
     expect(useAuthStore.getState().session).toBeNull();
   });
 
@@ -307,7 +307,10 @@ describe('authStore — resetPassword', () => {
     const state = useAuthStore.getState();
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
-    expect(mockResetPasswordForEmail).toHaveBeenCalledWith('test@transformr.app');
+    expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
+      'test@transformr.app',
+      expect.objectContaining({ redirectTo: expect.any(String) }),
+    );
   });
 
   it('stores error when reset password fails', async () => {
