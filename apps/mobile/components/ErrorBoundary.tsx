@@ -33,7 +33,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    // TODO (Session S9): wire to crashReporter.recordError(error, { componentStack: info.componentStack })
     console.error('[ErrorBoundary]', error.message, info.componentStack);
     this.props.onError?.(error, info);
   }

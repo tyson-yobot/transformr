@@ -1,8 +1,8 @@
 // =============================================================================
 // TRANSFORMR — Analytics Service
 //
-// Stub implementation. All events are logged in __DEV__ only.
-// Replace stub body with real SDK calls when analytics provider is wired up.
+// Events are logged in __DEV__ mode.
+// Wire a PostHog / Segment / Mixpanel SDK here when the provider is chosen.
 // =============================================================================
 
 import type { SubscriptionTier } from '@stores/subscriptionStore';
@@ -43,8 +43,10 @@ export interface AnalyticsEvents {
 }
 
 export function track<K extends keyof AnalyticsEvents>(
-  _event: K,
-  _properties: AnalyticsEvents[K],
+  event: K,
+  properties: AnalyticsEvents[K],
 ): void {
-  // TODO: replace stub with PostHog / Segment / Mixpanel SDK call
+  if (__DEV__) {
+    console.log('[Analytics]', event, properties);
+  }
 }
