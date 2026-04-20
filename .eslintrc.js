@@ -17,4 +17,20 @@ module.exports = {
     'no-var': 'error',
   },
   ignorePatterns: ['node_modules/', 'dist/', '.expo/', 'coverage/'],
+  overrides: [
+    {
+      files: [
+        '**/__tests__/**/*.ts',
+        '**/__tests__/**/*.tsx',
+        '**/*.test.ts',
+        '**/*.test.tsx',
+      ],
+      env: { jest: true },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+        'import/first': 'off',
+      },
+    },
+  ],
 };

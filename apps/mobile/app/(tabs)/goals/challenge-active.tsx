@@ -333,6 +333,7 @@ export default function ChallengeActiveScreen() {
     await restartChallenge(activeEnrollment.id);
     setRestartModalVisible(false);
     coachFiredRef.current = false; // allow coaching to reload after restart
+    setComplianceStatus(null);    // clear stale compliance data until new fetch completes
   }, [activeEnrollment, definition, restartChallenge, incompleteTasks, currentDay]);
 
   // Guard: no active enrollment -------------------------------------------
