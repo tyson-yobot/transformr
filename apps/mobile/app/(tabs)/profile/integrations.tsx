@@ -181,6 +181,10 @@ export default function IntegrationsScreen() {
           // Spotify requires the Spotify iOS/Android SDK or Web OAuth
           const redirectUrl = Linking.createURL('integrations/spotify');
           const clientId = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID ?? '';
+          if (!clientId || clientId.includes('your-') || clientId.includes('xxxxx')) {
+            Alert.alert('Coming Soon', 'Spotify integration coming soon.');
+            return;
+          }
           const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=user-read-currently-playing%20user-read-playback-state`;
           const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
           if (result.type === 'success') {
