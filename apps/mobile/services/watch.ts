@@ -1,6 +1,36 @@
-// eslint-disable-next-line import/no-unresolved -- optional native module, installed at build time
-import { sendMessage, watchEvents, getReachability } from 'react-native-watch-connectivity';
-import type { WatchMessage } from 'react-native-watch-connectivity';
+import { Platform } from 'react-native';
+
+// react-native-watch-connectivity is an iOS-only native module.
+// On Android (and when the module is not installed), we provide safe no-op stubs
+// so that callers can import without platform checks.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type WatchMessage = Record<string, any>;
+
+interface WatchConnectivity {
+  sendMessage: (message: Record<string, unknown>, reply: () => void, error: () => void) => void;
+  watchEvents: { on: (event: string, handler: (msg: WatchMessage) => void) => () => void };
+  getReachability: () => Promise<boolean>;
+}
+
+const noopConnectivity: WatchConnectivity = {
+  sendMessage: () => {},
+  watchEvents: { on: () => () => {} },
+  getReachability: () => Promise.resolve(false),
+};
+
+let connectivity: WatchConnectivity = noopConnectivity;
+
+if (Platform.OS === 'ios') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('react-native-watch-connectivity') as WatchConnectivity;
+    connectivity = mod;
+  } catch {
+    // Module not installed — keep noop stubs
+  }
+}
+
+const { sendMessage, watchEvents, getReachability } = connectivity;
 
 interface WatchWorkoutData {
   exerciseName: string;

@@ -4,8 +4,22 @@
 // Uses expo-calendar with graceful fallback if permissions are denied.
 // =============================================================================
 
-import * as ExpoCalendar from 'expo-calendar';
 import { Platform } from 'react-native';
+
+// expo-calendar requires a native module that may not be available in all builds.
+// Use lazy import to avoid crashing when the module is missing.
+type ExpoCalendarModule = typeof import('expo-calendar');
+let _calendar: ExpoCalendarModule | null = null;
+
+async function getCalendarModule(): Promise<ExpoCalendarModule | null> {
+  if (_calendar) return _calendar;
+  try {
+    _calendar = await import('expo-calendar');
+    return _calendar;
+  } catch {
+    return null;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Public interfaces
@@ -25,6 +39,9 @@ export interface CalendarEvent {
 
 async function getDefaultCalendarId(): Promise<string | null> {
   try {
+    const ExpoCalendar = await getCalendarModule();
+    if (!ExpoCalendar) return null;
+
     if (Platform.OS === 'ios') {
       const defaultCalendar = await ExpoCalendar.getDefaultCalendarAsync();
       return defaultCalendar?.id ?? null;
@@ -55,6 +72,8 @@ async function getDefaultCalendarId(): Promise<string | null> {
  */
 export async function requestCalendarPermissions(): Promise<boolean> {
   try {
+    const ExpoCalendar = await getCalendarModule();
+    if (!ExpoCalendar) return false;
     const { status } = await ExpoCalendar.requestCalendarPermissionsAsync();
     return status === 'granted';
   } catch {
@@ -77,6 +96,9 @@ export async function addWorkoutToCalendar(workout: {
   notes?: string;
 }): Promise<string | null> {
   try {
+    const ExpoCalendar = await getCalendarModule();
+    if (!ExpoCalendar) return null;
+
     const { status } = await ExpoCalendar.getCalendarPermissionsAsync();
     if (status !== 'granted') {
       const granted = await requestCalendarPermissions();
@@ -114,6 +136,9 @@ export async function addWorkoutToCalendar(workout: {
  */
 export async function getUpcomingWorkouts(days = 7): Promise<CalendarEvent[]> {
   try {
+    const ExpoCalendar = await getCalendarModule();
+    if (!ExpoCalendar) return [];
+
     const { status } = await ExpoCalendar.getCalendarPermissionsAsync();
     if (status !== 'granted') return [];
 
@@ -172,6 +197,8 @@ export async function getUpcomingWorkouts(days = 7): Promise<CalendarEvent[]> {
  */
 export async function removeCalendarEvent(eventId: string): Promise<void> {
   try {
+    const ExpoCalendar = await getCalendarModule();
+    if (!ExpoCalendar) return;
     await ExpoCalendar.deleteEventAsync(eventId);
   } catch {
     // Event may already be deleted
