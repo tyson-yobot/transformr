@@ -34,7 +34,7 @@ import {
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
-  beginner:     '#22c55e',
+  beginner:     '#10B981',
   intermediate: '#f59e0b',
   advanced:     '#ef4444',
 };

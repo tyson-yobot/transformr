@@ -116,7 +116,7 @@ export function formatOz(oz: number): string {
 // Grade formatting
 export function getGradeColor(grade: string): string {
   const gradeColors: Record<string, string> = {
-    'A+': '#22C55E', A: '#22C55E',
+    'A+': '#10B981', A: '#10B981',
     'B+': '#3B82F6', B: '#3B82F6',
     'C+': '#F59E0B', C: '#F59E0B',
     'D+': '#F97316', D: '#F97316',
