@@ -11,13 +11,13 @@ export const colors = {
       tertiary:       '#1E1838',   // Surface Light
       input:          '#16122A',   // Input fields
       elevated:       '#2D2450',   // Elevated surfaces
-      glass:          'rgba(22,18,42,0.92)',
-      overlay:        'rgba(12,10,21,0.80)',
+      glass:          'rgba(22,18,42,0.88)',
+      overlay:        'rgba(0,0,0,0.6)',
       // Legacy aliases kept for backwards compat:
       surface:        '#16122A',
       surfaceElevated:'#1E1838',
-      surfaceHover:   '#261F45',
-      alt:            '#110E20',
+      surfaceHover:   '#271F48',
+      alt:            '#08060E',
     },
     text: {
       primary:   '#F0F0FC',
@@ -45,10 +45,12 @@ export const colors = {
       successDim:    'rgba(16,185,129,0.12)',
       warningDim:    'rgba(245,158,11,0.12)',
       dangerDim:     'rgba(239,68,68,0.12)',
+      infoDim:       'rgba(59,130,246,0.12)',
       fireDim:       'rgba(249,115,22,0.12)',
       goldDim:       'rgba(234,179,8,0.12)',
       pinkDim:       'rgba(236,72,153,0.12)',
       purpleGlow:    'rgba(168,85,247,0.25)',
+      primaryMuted:  'rgba(168,85,247,0.15)',
       // Subtle aliases (same opacity as Dim — semantic naming)
       primarySubtle: 'rgba(168,85,247,0.12)',
       successSubtle: 'rgba(16,185,129,0.12)',
@@ -135,13 +137,13 @@ export const colors = {
 
   light: {
     background: {
-      primary:        '#F4F2FB',   // Warm lavender white — TRANSFORMR branded
+      primary:        '#F8F7FF',   // Purple-tinted off-white — TRANSFORMR branded
       secondary:      '#FFFFFF',   // Cards: pure white against lavender bg
-      tertiary:       '#F3F1FF',   // Elevated surfaces: deeper lavender
+      tertiary:       '#F0EDF8',   // Elevated surfaces: warmer lavender
       input:          '#FFFFFF',
-      elevated:       '#DDD6FE',   // Highest elevation: violet tint
-      glass:          'rgba(255,255,255,0.92)',
-      overlay:        'rgba(109,40,217,0.08)',
+      elevated:       '#EDE9FE',   // Highest elevation: violet tint
+      glass:          'rgba(255,255,255,0.85)',
+      overlay:        'rgba(0,0,0,0.4)',
       // Legacy aliases
       surface:        '#FFFFFF',
       surfaceElevated:'#EDE9FE',
@@ -149,10 +151,10 @@ export const colors = {
       alt:            '#F0EBFF',
     },
     text: {
-      primary:   '#1A0A2E',   // Deep purple-black — warmer than pure black
-      secondary: '#4C3575',   // Medium purple-gray
-      muted:     '#8B7BAE',   // Soft purple-gray
-      inverse:   '#F7F5FF',
+      primary:   '#1A1530',   // Deep purple-black — warmer than pure black
+      secondary: '#4A3F6B',   // Medium purple-gray
+      muted:     '#7B6FA0',   // Soft purple-gray
+      inverse:   '#F0F0FC',
       link:      '#7C3AED',
     },
     accent: {
@@ -173,10 +175,12 @@ export const colors = {
       successDim:    'rgba(5,150,105,0.08)',
       warningDim:    'rgba(217,119,6,0.08)',
       dangerDim:     'rgba(220,38,38,0.08)',
+      infoDim:       'rgba(37,99,235,0.08)',
       fireDim:       'rgba(234,88,12,0.08)',
       goldDim:       'rgba(202,138,4,0.08)',
       pinkDim:       'rgba(219,39,119,0.08)',
       purpleGlow:    'rgba(124,58,237,0.15)',
+      primaryMuted:  'rgba(124,58,237,0.15)',
       primarySubtle: 'rgba(124,58,237,0.08)',
       successSubtle: 'rgba(5,150,105,0.08)',
       cyanSubtle:    'rgba(8,145,178,0.08)',
@@ -187,9 +191,9 @@ export const colors = {
       pinkSubtle:    'rgba(219,39,119,0.08)',
     },
     border: {
-      default: '#D8D0F0',   // Purple-tinted border
+      default: '#DDD8F0',   // Purple-tinted border
       light:   '#C8C2DC',
-      subtle:  '#EDE9FE',   // Very soft purple
+      subtle:  '#F0EDF8',   // Very soft purple
       focus:   '#7C3AED',
       glow:    'rgba(124,58,237,0.15)',
       error:   '#DC2626',
@@ -305,10 +309,12 @@ interface AccentColors {
   readonly successDim:     string;
   readonly warningDim:     string;
   readonly dangerDim:      string;
+  readonly infoDim:        string;
   readonly fireDim:        string;
   readonly goldDim:        string;
   readonly pinkDim:        string;
   readonly purpleGlow:     string;
+  readonly primaryMuted:   string;
   // Subtle aliases (semantic naming — same opacity)
   readonly primarySubtle:  string;
   readonly successSubtle:  string;

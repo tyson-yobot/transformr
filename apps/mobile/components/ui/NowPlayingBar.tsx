@@ -132,7 +132,7 @@ export function NowPlayingBar({ paused = false, onError }: NowPlayingBarProps) {
           <Image source={{ uri: track.albumArt }} style={styles.albumArt} />
         ) : (
           <View style={[styles.albumArt, { backgroundColor: colors.background.tertiary, justifyContent: 'center', alignItems: 'center' }]}>
-            <Ionicons name="musical-notes" size={16} color={colors.text.tertiary} />
+            <Ionicons name="musical-notes" size={16} color={colors.text.muted} />
           </View>
         )}
       </Animated.View>
