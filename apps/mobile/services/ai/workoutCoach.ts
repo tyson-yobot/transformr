@@ -121,3 +121,62 @@ export async function getMidWorkoutCoachingTip(
   if (error) throw error;
   return data as CoachingTipResponse;
 }
+
+// ---------------------------------------------------------------------------
+// Workout Narrator — real-time narration for 5 training events
+// ---------------------------------------------------------------------------
+
+export type NarratorEventType =
+  | 'workout_start'
+  | 'set_logged'
+  | 'pr_detected'
+  | 'midpoint'
+  | 'workout_complete';
+
+export interface NarratorParams {
+  event: NarratorEventType;
+  exerciseName?: string;
+  setsCompleted?: number;
+  totalVolume?: number;
+  elapsedMinutes?: number;
+  isPR?: boolean;
+  prWeight?: number;
+  prReps?: number;
+  totalExercises?: number;
+  completedExercises?: number;
+  moodBefore?: number;
+  coachingTone?: 'drill_sergeant' | 'motivational' | 'balanced' | 'calm';
+  templateName?: string;
+  weight?: number;
+  reps?: number;
+}
+
+export interface NarratorResponse {
+  narration: string;
+  event: NarratorEventType;
+}
+
+export async function getNarratorMessage(params: NarratorParams): Promise<NarratorResponse> {
+  const { data, error } = await supabase.functions.invoke('ai-workout-narrator', {
+    body: {
+      event: params.event,
+      exercise_name: params.exerciseName,
+      sets_completed: params.setsCompleted,
+      total_volume: params.totalVolume,
+      elapsed_minutes: params.elapsedMinutes,
+      is_pr: params.isPR,
+      pr_weight: params.prWeight,
+      pr_reps: params.prReps,
+      total_exercises: params.totalExercises,
+      completed_exercises: params.completedExercises,
+      mood_before: params.moodBefore,
+      coaching_tone: params.coachingTone,
+      template_name: params.templateName,
+      weight: params.weight,
+      reps: params.reps,
+    },
+  });
+
+  if (error) throw error;
+  return data as NarratorResponse;
+}

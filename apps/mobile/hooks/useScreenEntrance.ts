@@ -82,14 +82,12 @@ export function useScreenEntrance({
   //   nutrition  → 4 sections
   // We create exactly as many animated styles as sections.length.
   /* eslint-disable react-hooks/rules-of-hooks */
-  const entranceStyles = sections.map((_, idx) => {
-    const opSV = opacityValues[idx] ?? makeMutable(0);
-    const tySV = translateYValues[idx] ?? makeMutable(fromY);
-    return useAnimatedStyle<ViewStyle>(() => ({
-      opacity: opSV.value,
-      transform: [{ translateY: tySV.value }],
-    }));
-  });
+  const entranceStyles = sections.map((_, idx) =>
+    useAnimatedStyle<ViewStyle>(() => ({
+      opacity: opacityValues[idx]!.value,
+      transform: [{ translateY: translateYValues[idx]!.value }],
+    })),
+  );
   /* eslint-enable react-hooks/rules-of-hooks */
 
   // -------------------------------------------------------------------------
@@ -98,8 +96,8 @@ export function useScreenEntrance({
   useEffect(() => {
     if (reducedMotion) {
       sections.forEach((_, idx) => {
-        (opacityValues[idx] ?? makeMutable(0)).value = 1;
-        (translateYValues[idx] ?? makeMutable(0)).value = 0;
+        opacityValues[idx]!.value = 1;
+        translateYValues[idx]!.value = 0;
       });
     }
     // Only run when reducedMotion changes
@@ -123,11 +121,11 @@ export function useScreenEntrance({
       interactionRef.current = InteractionManager.runAfterInteractions(() => {
         sections.forEach((_, idx) => {
           const id = setTimeout(() => {
-            (opacityValues[idx] ?? makeMutable(0)).value = withTiming(1, {
+            opacityValues[idx]!.value = withTiming(1, {
               duration,
               easing: Easing.out(Easing.cubic),
             });
-            (translateYValues[idx] ?? makeMutable(fromY)).value = withTiming(0, {
+            translateYValues[idx]!.value = withTiming(0, {
               duration,
               easing: Easing.out(Easing.cubic),
             });
@@ -148,10 +146,10 @@ export function useScreenEntrance({
 
         // Cancel in-flight animations and reset to hidden state
         sections.forEach((_, idx) => {
-          cancelAnimation(opacityValues[idx] ?? makeMutable(0));
-          cancelAnimation(translateYValues[idx] ?? makeMutable(fromY));
-          (opacityValues[idx] ?? makeMutable(0)).value = 0;
-          (translateYValues[idx] ?? makeMutable(fromY)).value = fromY;
+          cancelAnimation(opacityValues[idx]!);
+          cancelAnimation(translateYValues[idx]!);
+          opacityValues[idx]!.value = 0;
+          translateYValues[idx]!.value = fromY;
         });
       };
       // sections, staggerMs, duration, fromY are stable (constant arrays/numbers)
@@ -167,8 +165,8 @@ export function useScreenEntrance({
       interactionRef.current?.cancel();
       timeoutIds.current.forEach((id) => clearTimeout(id));
       sections.forEach((_, idx) => {
-        cancelAnimation(opacityValues[idx] ?? makeMutable(0));
-        cancelAnimation(translateYValues[idx] ?? makeMutable(fromY));
+        cancelAnimation(opacityValues[idx]!);
+        cancelAnimation(translateYValues[idx]!);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -38,12 +38,14 @@ import {
 } from '@utils/formatters';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
-import { getMidWorkoutCoachingTip } from '@services/ai/workoutCoach';
+import { getMidWorkoutCoachingTip, getNarratorMessage } from '@services/ai/workoutCoach';
 import * as Speech from 'expo-speech';
 import { generateNarration, stopSpeaking } from '@services/ai/narrator';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { VoiceMicButton } from '@components/ui/VoiceMicButton';
+import { NowPlayingBar } from '@components/ui/NowPlayingBar';
 import type { ParsedVoiceCommand } from '@services/voice';
+import { playWorkoutByIntensity } from '@services/spotify';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { HelpIcon } from '@components/ui/HelpIcon';
@@ -174,6 +176,9 @@ export default function WorkoutPlayerScreen() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerStartedOnceRef = useRef(false);
+  const midpointFiredRef = useRef(false);
+  const spotifyStartedRef = useRef(false);
 
   // Consume pendingExerciseId set by exercise-detail "Add to Workout"
   useFocusEffect(
@@ -243,6 +248,46 @@ export default function WorkoutPlayerScreen() {
       if (restTimerRef.current) clearInterval(restTimerRef.current);
     };
   }, [isResting, restSeconds]);
+
+  // Spotify auto-play — start intense workout playlist when timer first starts
+  useEffect(() => {
+    if (!timerRunning || spotifyStartedRef.current || !activeSession) return;
+    spotifyStartedRef.current = true;
+    playWorkoutByIntensity('intense').catch(() => {/* Spotify optional */});
+  }, [timerRunning, activeSession]);
+
+  // Event 1: Workout start narration — fires once when timer first starts
+  useEffect(() => {
+    if (!timerRunning || timerStartedOnceRef.current || !activeSession) return;
+    timerStartedOnceRef.current = true;
+    getNarratorMessage({
+      event: 'workout_start',
+      templateName: activeSession.name ?? undefined,
+      moodBefore,
+    })
+      .then((res) => setNarratorText(res.narration))
+      .catch(() => {
+        setNarratorText(`Session started. ${activeSession.name ?? 'Workout'} — let's get to work.`);
+      });
+  }, [timerRunning, activeSession, moodBefore]);
+
+  // Event 4: Midpoint narration — fires when reaching the halfway exercise
+  useEffect(() => {
+    if (!activeSession || exercisesWithSets.length < 2 || midpointFiredRef.current || totalSets === 0) return;
+    const halfway = Math.floor(exercisesWithSets.length / 2);
+    if (activeExerciseIndex < halfway) return;
+    midpointFiredRef.current = true;
+    getNarratorMessage({
+      event: 'midpoint',
+      setsCompleted: totalSets,
+      totalVolume,
+      elapsedMinutes: Math.floor(elapsedSeconds / 60),
+      totalExercises: exercisesWithSets.length,
+      completedExercises: activeExerciseIndex,
+    })
+      .then((res) => setNarratorText(res.narration))
+      .catch(() => {});
+  }, [activeExerciseIndex, exercisesWithSets.length, totalSets, totalVolume, elapsedSeconds, activeSession]);
 
   // Load exercises for the template
   useEffect(() => {
@@ -423,7 +468,14 @@ export default function WorkoutPlayerScreen() {
     setRestSeconds(restDuration);
     setIsResting(true);
 
-    // AI Workout Narrator — only for gated users; never interrupts mid-workout with upsells
+    // AI Workout Narrator — gated users get full TTS; others get text card only
+    // Immediate static fallback while AI loads
+    setNarratorText(
+      result.isPR
+        ? `New PR — ${weight} lbs × ${reps} reps on ${currentExercise.exercise.name}.`
+        : `Set ${currentExercise.loggedSets.length + 1} done. Rest, then go again.`,
+    );
+
     if (narratorGate.isAvailable && activeSession) {
       const eventType = result.isPR ? 'pr_detected' : 'set_completed';
 
@@ -450,18 +502,18 @@ export default function WorkoutPlayerScreen() {
         },
         // Readiness score drives TTS rate; default 50 (neutral) when not available
         readinessScore: 50,
-      }).then((result) => {
-        if (!result.text) return;
-        setNarratorText(result.text);
+      }).then((narResult) => {
+        if (!narResult.text) return;
+        setNarratorText(narResult.text);
 
         if (eventType === 'pr_detected') {
           prNarrationActiveRef.current = true;
           stopSpeaking();
         }
 
-        Speech.speak(result.text, {
+        Speech.speak(narResult.text, {
           language: 'en-US',
-          rate: result.speechRate,
+          rate: narResult.speechRate,
           onDone: () => { prNarrationActiveRef.current = false; },
           onError: () => { prNarrationActiveRef.current = false; },
         });
@@ -469,12 +521,22 @@ export default function WorkoutPlayerScreen() {
         // Non-fatal — narrator failure must never surface to the user mid-workout
       });
     } else {
-      // Fallback text for non-gated users (no audio, just card)
-      setNarratorText(
-        result.isPR
-          ? `Personal record! ${weight} lbs x ${reps} reps. Outstanding effort.`
-          : `Set ${currentExercise.loggedSets.length + 1} logged. Rest up — you earned it.`,
-      );
+      // Non-gated: fetch text narration (no TTS)
+      const narratorEvent = result.isPR ? 'pr_detected' : 'set_logged';
+      getNarratorMessage({
+        event: narratorEvent,
+        exerciseName: currentExercise.exercise.name,
+        setsCompleted: newTotalSets,
+        totalVolume: totalVolume + weight * reps,
+        elapsedMinutes: Math.floor(elapsedSeconds / 60),
+        isPR: result.isPR,
+        prWeight: result.isPR ? weight : undefined,
+        prReps: result.isPR ? reps : undefined,
+        weight,
+        reps,
+      })
+        .then((res) => setNarratorText(res.narration))
+        .catch(() => {/* keep static fallback */});
     }
 
     // Clear inputs
@@ -511,8 +573,17 @@ export default function WorkoutPlayerScreen() {
       Alert.alert('No Sets Logged', 'Log at least one set before completing.');
       return;
     }
+    // Event 5: Workout complete narration (non-blocking — shows before mood modal)
+    getNarratorMessage({
+      event: 'workout_complete',
+      setsCompleted: totalSets,
+      totalVolume,
+      elapsedMinutes: Math.floor(elapsedSecondsRef.current / 60),
+    })
+      .then((res) => setNarratorText(res.narration))
+      .catch(() => {});
     setShowMoodModal(true);
-  }, [totalSets]);
+  }, [totalSets, totalVolume]);
 
   const handleFinishWithMood = useCallback(async () => {
     setShowMoodModal(false);
@@ -575,35 +646,38 @@ export default function WorkoutPlayerScreen() {
   const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
     const cmd = result.command;
     switch (cmd.action) {
-      case 'log_set':
-        setCurrentWeight(String((cmd as { action: string; weight: number }).weight));
-        setCurrentReps(String((cmd as { action: string; reps: number }).reps));
-        showToast(`Ready: ${(cmd as { weight: number }).weight} lbs × ${(cmd as { reps: number }).reps} reps`, { type: 'success' });
+      case 'log_set': {
+        const c = cmd as { action: string; weight: number; reps: number };
+        setCurrentWeight(String(c.weight));
+        setCurrentReps(String(c.reps));
+        showToast(`Ready: ${c.weight} lbs × ${c.reps} reps`, { type: 'success' });
         break;
+      }
       case 'next_exercise':
         if (activeExerciseIndex < exercisesWithSets.length - 1) {
-          setActiveExerciseIndex(prev => prev + 1);
+          setActiveExerciseIndex((prev) => prev + 1);
         }
         break;
       case 'prev_exercise':
         if (activeExerciseIndex > 0) {
-          setActiveExerciseIndex(prev => prev - 1);
+          setActiveExerciseIndex((prev) => prev - 1);
         }
         break;
       case 'start_rest_timer': {
-        const secs = (cmd as { seconds?: number }).seconds ?? 90;
+        const c = cmd as { action: string; seconds?: number };
+        const secs = c.seconds ?? 90;
         setRestSeconds(secs);
         setIsResting(true);
         showToast(`Rest timer: ${secs}s`, { type: 'info' });
         break;
       }
       case 'end_workout':
-        setShowMoodModal(true);
+        void handleCompleteWorkout();
         break;
       default:
-        showToast(result.humanReadable || 'Command received', { type: 'success' });
+        if (result.humanReadable) showToast(result.humanReadable, { type: 'success' });
     }
-  }, [activeExerciseIndex, exercisesWithSets.length, showToast]);
+  }, [activeExerciseIndex, exercisesWithSets.length, showToast, handleCompleteWorkout]);
 
   if (!activeSession) {
     return (
@@ -683,6 +757,14 @@ export default function WorkoutPlayerScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {/* Spotify Now Playing */}
+      {timerRunning && (
+        <NowPlayingBar
+          paused={isResting}
+          onError={() => {/* non-fatal */}}
+        />
+      )}
 
       {/* Rest Timer Overlay */}
       {isResting && (
