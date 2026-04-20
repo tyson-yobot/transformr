@@ -10,8 +10,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { COMPLIANCE_PREAMBLE } from '../_shared/compliance.ts';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-const AI_MODEL_VISION = 'claude-sonnet-4-6';
-const AI_MODEL_TEXT = 'claude-haiku-4-5-20251001';
+const AI_MODEL_VISION = 'claude-sonnet-4-20250514';
+const AI_MODEL_TEXT = 'claude-sonnet-4-20250514';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
