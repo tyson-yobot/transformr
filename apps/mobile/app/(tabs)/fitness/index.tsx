@@ -78,8 +78,8 @@ const FITNESS_NAV_CARDS = [
   {
     label: 'Progress',
     icon: 'trending-up' as keyof typeof Ionicons.glyphMap,
-    iconColor: '#22C55E',
-    gradient: ['rgba(34,197,94,0.15)', 'rgba(34,197,94,0.05)'] as [string, string],
+    iconColor: '#10B981',
+    gradient: ['rgba(16,185,129,0.15)', 'rgba(16,185,129,0.05)'] as [string, string],
     description: 'Charts, PRs, body metrics',
     route: '/(tabs)/fitness/progress',
     a11y: 'View progress',

@@ -16,7 +16,7 @@ const MUSCLE_CONFIG: Record<string, string> = {
   biceps:    '#A855F7',
   triceps:   '#A855F7',
   abs:       '#22D3EE',
-  legs:      '#22C55E',
+  legs:      '#10B981',
   glutes:    '#10B981',
   cardio:    '#EAB308',
 };

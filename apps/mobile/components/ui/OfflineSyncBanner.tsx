@@ -49,7 +49,7 @@ export function OfflineSyncBanner() {
 
   const getBannerColor = (): string => {
     if (!isOnline) return '#F59E0B';
-    return '#22C55E';
+    return '#10B981';
   };
 
   if (!shouldShow) return null;
