@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +27,9 @@ import { Badge } from '@components/ui/Badge';
 import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { EmptyState } from '@components/ui/EmptyState';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { SectionHeader } from '@components/ui/SectionHeader';
+import { GlassSkeleton } from '@components/ui/GlassSkeleton';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { formatDuration } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -40,6 +44,42 @@ interface ProgramWithExercises extends WorkoutTemplate {
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Accent color per program type for left stripe differentiation
+function getProgramAccentColor(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('push') || lower.includes('pull') || lower.includes('ppl'))
+    return '#A855F7'; // purple
+  if (lower.includes('upper') || lower.includes('lower'))
+    return '#7E22CE'; // indigo
+  if (lower.includes('full body') || lower.includes('fullbody'))
+    return '#22D3EE'; // teal
+  if (lower.includes('couple') || lower.includes('partner'))
+    return '#EC4899'; // pink
+  if (lower.includes('leg'))
+    return '#A855F7'; // purple (PPL family)
+  return '#A855F7'; // default purple
+}
+
+// Icon per program type
+function getProgramIcon(name: string): keyof typeof Ionicons.glyphMap {
+  const lower = name.toLowerCase();
+  if (lower.includes('push') || lower.includes('chest') || lower.includes('bench'))
+    return 'fitness-outline';
+  if (lower.includes('pull') || lower.includes('back'))
+    return 'arrow-down-outline';
+  if (lower.includes('leg') || lower.includes('squat'))
+    return 'walk-outline';
+  if (lower.includes('upper'))
+    return 'body-outline';
+  if (lower.includes('lower'))
+    return 'walk-outline';
+  if (lower.includes('full'))
+    return 'barbell-outline';
+  if (lower.includes('cardio') || lower.includes('run'))
+    return 'heart-outline';
+  return 'barbell-outline';
+}
 
 export default function ProgramsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -194,8 +234,10 @@ export default function ProgramsScreen() {
   );
 
   const renderProgram = useCallback(
-    ({ item }: { item: ProgramWithExercises }) => {
+    ({ item, index }: { item: ProgramWithExercises; index: number }) => {
       const isExpanded = expandedProgramId === item.id;
+      const accentColor = getProgramAccentColor(item.name);
+      const programIcon = getProgramIcon(item.name);
 
       const difficultyColor =
         item.difficulty === 'beginner'
@@ -207,14 +249,27 @@ export default function ProgramsScreen() {
               : null;
 
       return (
+        <Animated.View entering={FadeInDown.delay(index * 50).duration(400)}>
         <Card
-          style={{ marginBottom: spacing.sm, borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}
+          style={{ marginBottom: spacing.sm, borderLeftWidth: 3, borderLeftColor: accentColor }}
           onPress={() => {
             setExpandedProgramId(isExpanded ? null : item.id);
             hapticLight();
           }}
         >
           <View style={styles.programHeader}>
+            {/* Program type icon */}
+            <View style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              backgroundColor: `${accentColor}1F`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: spacing.sm,
+            }}>
+              <Ionicons name={programIcon} size={20} color={accentColor} />
+            </View>
             <View style={{ flex: 1 }}>
               <View style={styles.nameRow}>
                 <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -272,7 +327,11 @@ export default function ProgramsScreen() {
                 <View style={styles.metaItem}>
                   <Ionicons name="barbell-outline" size={14} color={colors.text.muted} />
                   <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
-                    <Text style={typography.monoCaption}>{item.exercises.length}</Text> exercises
+                    {item.exercises.length > 0 ? (
+                      <><Text style={typography.monoCaption}>{item.exercises.length}</Text> exercises</>
+                    ) : (
+                      'Tap to add exercises'
+                    )}
                   </Text>
                 </View>
                 {item.day_of_week !== null && item.day_of_week !== undefined && (
@@ -365,6 +424,7 @@ export default function ProgramsScreen() {
             </View>
           )}
         </Card>
+        </Animated.View>
       );
     },
     [
@@ -382,9 +442,10 @@ export default function ProgramsScreen() {
   if (loading) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
-        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.sm }} />
-        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.sm }} />
-        <Skeleton variant="card" height={120} />
+        <AmbientBackground />
+        <GlassSkeleton preset="card" style={{ marginBottom: spacing.sm }} />
+        <GlassSkeleton preset="card" style={{ marginBottom: spacing.sm }} />
+        <GlassSkeleton preset="card" />
       </View>
     );
   }
@@ -392,6 +453,7 @@ export default function ProgramsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
+      <AmbientBackground />
       {error && (
         <Card
           style={{
@@ -429,7 +491,7 @@ export default function ProgramsScreen() {
         }
       />
 
-      {/* Create Program FAB */}
+      {/* Create Program FAB — glass with glow */}
       <Pressable
         onPress={() => {
           hapticLight();
@@ -440,12 +502,14 @@ export default function ProgramsScreen() {
         style={[
           styles.fab,
           {
-            backgroundColor: colors.accent.primary,
+            backgroundColor: 'rgba(168,85,247,0.88)',
             shadowColor: colors.accent.primary,
+            shadowOpacity: 0.5,
+            shadowRadius: 16,
           },
         ]}
       >
-        <Ionicons name="add" size={28} color={colors.text.inverse} />
+        <Ionicons name="add" size={28} color="#FFFFFF" />
       </Pressable>
 
       {/* Create Program Modal */}
