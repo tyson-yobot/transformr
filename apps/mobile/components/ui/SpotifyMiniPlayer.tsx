@@ -28,7 +28,7 @@ export function SpotifyMiniPlayer({ userId }: Props) {
   const [track, setTrack] = useState<SpotifyTrack | null>(null);
 
   const refresh = useCallback(async () => {
-    const current = await getCurrentTrack(userId).catch(() => null);
+    const current = await getCurrentTrack().catch(() => null);
     setTrack(current);
   }, [userId]);
 
@@ -41,20 +41,20 @@ export function SpotifyMiniPlayer({ userId }: Props) {
   const handlePlayPause = useCallback(async () => {
     if (!track) return;
     if (track.isPlaying) {
-      await pausePlayback(userId).catch(() => undefined);
+      await pausePlayback().catch(() => undefined);
     } else {
-      await resumePlayback(userId).catch(() => undefined);
+      await resumePlayback().catch(() => undefined);
     }
     await refresh();
   }, [track, userId, refresh]);
 
   const handleNext = useCallback(async () => {
-    await skipNext(userId).catch(() => undefined);
+    await skipNext().catch(() => undefined);
     setTimeout(() => { void refresh(); }, 500);
   }, [userId, refresh]);
 
   const handlePrev = useCallback(async () => {
-    await skipPrevious(userId).catch(() => undefined);
+    await skipPrevious().catch(() => undefined);
     setTimeout(() => { void refresh(); }, 500);
   }, [userId, refresh]);
 
