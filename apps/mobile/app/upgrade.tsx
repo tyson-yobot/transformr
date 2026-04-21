@@ -21,7 +21,6 @@ import {
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { AmbientBackground } from '../components/ui/AmbientBackground';

@@ -22,7 +22,7 @@ let connectivity: WatchConnectivity = noopConnectivity;
 
 if (Platform.OS === 'ios') {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const mod = require('react-native-watch-connectivity') as WatchConnectivity;
     connectivity = mod;
   } catch {

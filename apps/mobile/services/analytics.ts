@@ -43,8 +43,8 @@ export interface AnalyticsEvents {
 }
 
 export function track<K extends keyof AnalyticsEvents>(
-  event: K,
-  properties: AnalyticsEvents[K],
+  _event: K,
+  _properties: AnalyticsEvents[K],
 ): void {
   // Analytics event tracked (production: sent to backend, dev: no-op)
 }
