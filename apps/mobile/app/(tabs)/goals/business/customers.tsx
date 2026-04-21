@@ -23,6 +23,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { formatCurrency, formatNumber } from '@utils/formatters';
 import type { Customer } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
+import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '../../../../services/supabase';
 import { useBusinessStore } from '@stores/businessStore';
 
@@ -42,6 +43,8 @@ export default function CustomersScreen() {
   const businessId = businesses[0]?.id ?? null;
 
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<CustomerStatus | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState('');
@@ -49,18 +52,31 @@ export default function CustomersScreen() {
   const [newPlan, setNewPlan] = useState('');
   const [newMrr, setNewMrr] = useState('');
 
-  useEffect(() => {
-    if (!businessId) return;
-    const fetchCustomers = async () => {
-      const { data } = await supabase
+  const fetchCustomers = useCallback(async () => {
+    if (!businessId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      setError(null);
+      setLoading(true);
+      const { data, error: fetchErr } = await supabase
         .from('customers')
         .select('*')
         .eq('business_id', businessId)
         .order('created_at', { ascending: false });
+      if (fetchErr) throw fetchErr;
       if (data) setCustomers(data as Customer[]);
-    };
-    void fetchCustomers();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load customers.');
+    } finally {
+      setLoading(false);
+    }
   }, [businessId]);
+
+  useEffect(() => {
+    void fetchCustomers();
+  }, [fetchCustomers]);
 
   const filteredCustomers = useMemo(
     () =>
@@ -128,6 +144,32 @@ export default function CustomersScreen() {
       case 'churned': return 'danger';
     }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={120} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={error}
+          actionLabel="Retry"
+          onAction={() => { void fetchCustomers(); }}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

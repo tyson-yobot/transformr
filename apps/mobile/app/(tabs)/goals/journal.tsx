@@ -26,6 +26,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { formatDate } from '@utils/formatters';
 import type { JournalEntry } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
+import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
 import { getJournalResponse } from '@services/ai/journaling';
 import { useFeatureGate } from '@hooks/useFeatureGate';
@@ -71,6 +72,7 @@ export default function JournalScreen() {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
   const [showPastEntries, setShowPastEntries] = useState(false);
+  const [isLoadingEntries, setIsLoadingEntries] = useState(true);
 
   useEffect(() => {
     navigation.setOptions({
@@ -80,15 +82,19 @@ export default function JournalScreen() {
 
   useEffect(() => {
     const fetchEntries = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: false })
-        .limit(30);
-      if (data) setPastEntries(data as JournalEntry[]);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+          .from('journal_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false })
+          .limit(30);
+        if (data) setPastEntries(data as JournalEntry[]);
+      } finally {
+        setIsLoadingEntries(false);
+      }
     };
     void fetchEntries();
   }, []);
@@ -204,6 +210,14 @@ export default function JournalScreen() {
         showsVerticalScrollIndicator={false}
       >
         <AIInsightCard screenKey="goals/journal" style={{ marginBottom: spacing.md }} />
+
+        {isLoadingEntries && (
+          <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+            <Skeleton variant="card" height={80} />
+            <Skeleton variant="card" height={120} />
+            <Skeleton variant="card" height={80} />
+          </View>
+        )}
 
         {/* AI Prompt */}
         <Animated.View entering={FadeInDown.delay(100)}>

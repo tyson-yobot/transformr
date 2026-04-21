@@ -29,6 +29,8 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Modal } from '@components/ui/Modal';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
+import { Skeleton } from '@components/ui/Skeleton';
+import { EmptyState } from '@components/ui/EmptyState';
 import { useGoalStore } from '@stores/goalStore';
 import { supabase } from '../../../services/supabase';
 import { hapticSuccess, hapticMedium, hapticLight } from '@utils/haptics';
@@ -99,6 +101,8 @@ export default function GoalDetailScreen() {
   const goal = goals.find((g) => g.id === id) ?? null;
 
   // ── State ──
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [milestones, setMilestones] = useState<GoalMilestone[]>([]);
   const [progressLogs, setProgressLogs] = useState<ProgressLog[]>([]);
   const [progressInput, setProgressInput] = useState('');
@@ -125,11 +129,12 @@ export default function GoalDetailScreen() {
   }, [navigation]);
 
   // ── Load data ──
-  useEffect(() => {
+  const loadGoalData = useCallback(async () => {
     if (!id) return;
-
-    const load = async () => {
-      const [{ data: ms }, { data: logs }] = await Promise.all([
+    try {
+      setDataError(null);
+      setDataLoading(true);
+      const [{ data: ms, error: msErr }, { data: logs, error: logsErr }] = await Promise.all([
         supabase
           .from('goal_milestones')
           .select('*')
@@ -142,11 +147,20 @@ export default function GoalDetailScreen() {
           .order('logged_at', { ascending: true })
           .limit(30),
       ]);
+      if (msErr) throw msErr;
+      if (logsErr) throw logsErr;
       if (ms) setMilestones(ms as GoalMilestone[]);
       if (logs) setProgressLogs(logs as ProgressLog[]);
-    };
-    void load();
+    } catch (err: unknown) {
+      setDataError(err instanceof Error ? err.message : 'Failed to load goal details.');
+    } finally {
+      setDataLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    void loadGoalData();
+  }, [loadGoalData]);
 
   // ── Load AI coaching for this goal ──
   useEffect(() => {
@@ -377,6 +391,33 @@ export default function GoalDetailScreen() {
   }, [goal, router]);
 
   // ── Guard ──
+  if (dataLoading && !goal) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={140} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={80} />
+      </View>
+    );
+  }
+
+  if (dataError && !goal) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={dataError}
+          actionLabel="Retry"
+          onAction={() => { void loadGoalData(); }}
+        />
+      </View>
+    );
+  }
+
   if (!goal) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>

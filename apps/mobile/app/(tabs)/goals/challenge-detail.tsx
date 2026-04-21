@@ -26,6 +26,7 @@ import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
 import { DetailSkeleton } from '@components/ui/ScreenSkeleton';
+import { EmptyState } from '@components/ui/EmptyState';
 import { useChallengeStore } from '@stores/challengeStore';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
@@ -135,6 +136,8 @@ export default function ChallengeDetailScreen() {
     isLoading,
   } = useChallengeStore();
 
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => <ScreenHelpButton content={SCREEN_HELP.challengeDetailScreen} />,
@@ -144,7 +147,15 @@ export default function ChallengeDetailScreen() {
   // Fetch definitions if store is empty
   useEffect(() => {
     if (challengeDefinitions.length === 0) {
-      fetchChallengeDefinitions();
+      const doFetch = async () => {
+        try {
+          setFetchError(null);
+          await fetchChallengeDefinitions();
+        } catch (err: unknown) {
+          setFetchError(err instanceof Error ? err.message : 'Failed to load challenge details.');
+        }
+      };
+      void doFetch();
     }
   }, [challengeDefinitions.length, fetchChallengeDefinitions]);
 
@@ -224,12 +235,29 @@ export default function ChallengeDetailScreen() {
     weeklyAlcoholSpend,
   ]);
 
-  // ---- Loading / Not Found ----
+  // ---- Loading / Not Found / Error ----
   if (isLoading && !definition) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
         <DetailSkeleton />
+      </View>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={fetchError}
+          actionLabel="Retry"
+          onAction={() => {
+            setFetchError(null);
+            void fetchChallengeDefinitions();
+          }}
+        />
       </View>
     );
   }

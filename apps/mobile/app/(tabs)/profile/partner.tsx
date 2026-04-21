@@ -25,6 +25,7 @@ import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
 import { Toggle } from '@components/ui/Toggle';
 import { Badge } from '@components/ui/Badge';
+import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
@@ -199,6 +200,17 @@ export default function PartnerScreen() {
 
   if (!partnerGate.isAvailable) {
     return <GatePromptCard featureKey="partner_features" height={240} />;
+  }
+
+  if (isLoading && !partnership) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={80} />
+      </View>
+    );
   }
 
   return (

@@ -32,6 +32,7 @@ import { HelpBubble } from '@components/ui/HelpBubble';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { EmptyState } from '@components/ui/EmptyState';
+import { Skeleton } from '@components/ui/Skeleton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
@@ -187,7 +188,14 @@ export default function SleepTracker() {
       >
         <AIInsightCard screenKey="goals/sleep" style={{ marginBottom: spacing.md }} />
 
-        {sleepHistory.length === 0 && !isLoading ? (
+        {isLoading ? (
+          <View style={{ gap: spacing.md }}>
+            <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+            <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+            <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+            <Skeleton variant="card" height={120} />
+          </View>
+        ) : sleepHistory.length === 0 ? (
           <EmptyState
             ionIcon="moon-outline"
             title="Sleep is where you grow"

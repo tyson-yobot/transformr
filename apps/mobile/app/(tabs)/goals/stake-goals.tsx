@@ -29,6 +29,7 @@ import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { Chip } from '@components/ui/Chip';
+import { Skeleton } from '@components/ui/Skeleton';
 import { hapticSuccess, hapticMedium } from '@utils/haptics';
 import { formatCurrency } from '@utils/formatters';
 import { EmptyState } from '@components/ui/EmptyState';
@@ -259,17 +260,18 @@ export default function StakeGoalsScreen() {
         </Animated.View>
 
         {isLoading ? (
-          <Card>
-            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-              Loading stakes…
-            </Text>
-          </Card>
+          <View style={{ gap: spacing.md }}>
+            <Skeleton variant="card" height={120} />
+            <Skeleton variant="card" height={120} />
+          </View>
         ) : loadError ? (
-          <Card>
-            <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>
-              {loadError}
-            </Text>
-          </Card>
+          <EmptyState
+            ionIcon="alert-circle-outline"
+            title="Something went wrong"
+            subtitle={loadError}
+            actionLabel="Retry"
+            onAction={() => { void fetchStakeGoals(); }}
+          />
         ) : (
           <>
             {stakeGoals

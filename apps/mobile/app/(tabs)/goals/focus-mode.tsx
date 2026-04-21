@@ -28,6 +28,7 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { EmptyState } from '@components/ui/EmptyState';
+import { Skeleton } from '@components/ui/Skeleton';
 import { formatTimerDisplay } from '@utils/formatters';
 import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
@@ -84,20 +85,25 @@ export default function FocusMode() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [productivityRating, setProductivityRating] = useState(7);
   const [sessionHistory, setSessionHistory] = useState<SessionRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const sessionStartRef = useRef<string>(new Date().toISOString());
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
+    try {
+      setHistoryError(null);
+      setHistoryLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase
+      const { data, error: fetchErr } = await supabase
         .from('focus_sessions')
         .select('*')
         .eq('user_id', user.id)
         .order('started_at', { ascending: false })
         .limit(10);
+      if (fetchErr) throw fetchErr;
       if (data) {
         const sessions = (data as FocusSession[]).map((s) => ({
           task: s.task_description ?? 'Untitled session',
@@ -109,9 +115,16 @@ export default function FocusMode() {
         }));
         setSessionHistory(sessions);
       }
-    };
-    void fetchHistory();
+    } catch (err: unknown) {
+      setHistoryError(err instanceof Error ? err.message : 'Failed to load session history.');
+    } finally {
+      setHistoryLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void fetchHistory();
+  }, [fetchHistory]);
 
   const totalDuration = POMODORO_DURATIONS[phase];
   const progress = 1 - timeRemaining / totalDuration;
@@ -391,8 +404,29 @@ export default function FocusMode() {
           </Card>
         </Animated.View>
 
+        {/* Session History Loading */}
+        {historyLoading && sessionHistory.length === 0 && (
+          <View style={{ marginTop: spacing.xl }}>
+            <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+            <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+            <Skeleton variant="card" height={80} />
+          </View>
+        )}
+
+        {/* Session History Error */}
+        {historyError && (
+          <EmptyState
+            ionIcon="alert-circle-outline"
+            title="Something went wrong"
+            subtitle={historyError}
+            actionLabel="Retry"
+            onAction={() => { void fetchHistory(); }}
+            style={{ paddingVertical: 24 }}
+          />
+        )}
+
         {/* Session History Empty State */}
-        {sessionHistory.length === 0 && (
+        {!historyLoading && !historyError && sessionHistory.length === 0 && (
           <EmptyState
             ionIcon="timer-outline"
             title="No sessions yet"

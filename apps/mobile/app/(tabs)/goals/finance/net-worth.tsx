@@ -17,6 +17,7 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { Skeleton } from '@components/ui/Skeleton';
+import { EmptyState } from '@components/ui/EmptyState';
 import { Sparkline } from '@components/charts/Sparkline';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatDate } from '@utils/formatters';
@@ -24,7 +25,7 @@ import { formatCurrency, formatDate } from '@utils/formatters';
 export default function NetWorthScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { accounts, netWorthHistory, isLoading, fetchAccounts } = useFinanceStore();
+  const { accounts, netWorthHistory, isLoading, error, fetchAccounts } = useFinanceStore();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -76,6 +77,34 @@ export default function NetWorthScreen() {
           <Skeleton variant="card" height={200} />
           <Skeleton variant="card" height={120} />
         </View>
+      </View>
+    );
+  }
+
+  if (error && accounts.length === 0) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={error}
+          actionLabel="Retry"
+          onAction={() => { fetchAccounts(); }}
+        />
+      </View>
+    );
+  }
+
+  if (!isLoading && accounts.length === 0 && netWorthHistory.length === 0) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <EmptyState
+          ionIcon="wallet-outline"
+          title="No accounts yet"
+          subtitle="Add your accounts to track your net worth over time and watch your wealth grow."
+        />
       </View>
     );
   }

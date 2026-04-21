@@ -22,6 +22,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { Modal } from '@components/ui/Modal';
 import { Skeleton } from '@components/ui/Skeleton';
+import { EmptyState } from '@components/ui/EmptyState';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
@@ -36,7 +37,7 @@ const BUDGET_CATEGORIES = [
 export default function BudgetsScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const { budgets, isLoading, fetchBudgets } = useFinanceStore();
+  const { budgets, isLoading, error, fetchBudgets } = useFinanceStore();
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -137,6 +138,21 @@ export default function BudgetsScreen() {
     );
   }
 
+  if (error && budgets.length === 0) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={error}
+          actionLabel="Retry"
+          onAction={() => { fetchBudgets(); }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <ScrollView
@@ -212,11 +228,13 @@ export default function BudgetsScreen() {
         })}
 
         {budgets.length === 0 && (
-          <Card>
-            <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
-              No budgets set for this month. Create one to start tracking!
-            </Text>
-          </Card>
+          <EmptyState
+            ionIcon="pie-chart-outline"
+            title="No budgets yet"
+            subtitle="No budgets set for this month. Create one to start tracking your spending!"
+            actionLabel="Add Budget"
+            onAction={() => { resetForm(); setShowAddModal(true); }}
+          />
         )}
 
         <Button

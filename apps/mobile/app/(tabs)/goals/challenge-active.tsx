@@ -44,6 +44,7 @@ import { MurphWorkout } from '@components/challenges/MurphWorkout';
 import { SavingsCalculator } from '@components/challenges/SavingsCalculator';
 import { ProgressPhotoGuide } from '@components/challenges/ProgressPhotoGuide';
 import { Ionicons } from '@expo/vector-icons';
+import { Skeleton } from '@components/ui/Skeleton';
 import type {
   ChallengeDefinition,
   ChallengeDailyLog,
@@ -335,6 +336,19 @@ export default function ChallengeActiveScreen() {
     coachFiredRef.current = false; // allow coaching to reload after restart
     setComplianceStatus(null);    // clear stale compliance data until new fetch completes
   }, [activeEnrollment, definition, restartChallenge, incompleteTasks, currentDay]);
+
+  // Guard: loading state ---------------------------------------------------
+  if (isLoading && !activeEnrollment) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={120} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={80} />
+      </View>
+    );
+  }
 
   // Guard: no active enrollment -------------------------------------------
   if (!activeEnrollment || !definition) {

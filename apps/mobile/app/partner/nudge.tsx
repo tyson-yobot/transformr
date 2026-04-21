@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Input } from '@components/ui/Input';
+import { Skeleton } from '@components/ui/Skeleton';
 import { usePartnerStore } from '@stores/partnerStore';
 import { hapticSuccess } from '@utils/haptics';
 import type { PartnerNudge } from '@app-types/database';
@@ -48,7 +49,7 @@ const PREBUILT_NUDGES: PrebuiltNudge[] = [
 export default function NudgeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { partnership, partnerProfile, sendNudge } = usePartnerStore();
+  const { partnership, partnerProfile, sendNudge, isLoading } = usePartnerStore();
 
   const [customMessage, setCustomMessage] = useState('');
   const [sentMessage, setSentMessage] = useState<string | null>(null);
@@ -84,6 +85,17 @@ export default function NudgeScreen() {
       setIsSending(false);
     }
   }, [customMessage, sendNudge, isSending]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <Skeleton variant="card" height={80} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={200} style={{ marginBottom: spacing.md }} />
+        <Skeleton variant="card" height={120} />
+      </View>
+    );
+  }
 
   if (!partnership || !partnerProfile) {
     return (

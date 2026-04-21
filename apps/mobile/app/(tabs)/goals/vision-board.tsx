@@ -27,6 +27,7 @@ import { Modal } from '@components/ui/Modal';
 import { Input } from '@components/ui/Input';
 import { hapticSuccess, hapticLight } from '@utils/haptics';
 import { EmptyState } from '@components/ui/EmptyState';
+import { Skeleton } from '@components/ui/Skeleton';
 import type { VisionBoardItem } from '@app-types/database';
 import { supabase } from '../../../services/supabase';
 
@@ -60,21 +61,33 @@ export default function VisionBoard() {
   }, [navigation]);
 
   const [items, setItems] = useState<VisionBoardItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<VisionCategory | null>(null);
 
-  useEffect(() => {
-    const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
+    try {
+      setFetchError(null);
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase
+      const { data, error: err } = await supabase
         .from('vision_board_items')
         .select('*')
         .eq('user_id', user.id)
         .order('sort_order');
+      if (err) throw err;
       if (data) setItems(data as VisionBoardItem[]);
-    };
-    void fetchItems();
+    } catch (err: unknown) {
+      setFetchError(err instanceof Error ? err.message : 'Failed to load vision board.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void fetchItems();
+  }, [fetchItems]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCategory, setNewCategory] = useState<VisionCategory>('personal');
@@ -139,6 +152,34 @@ export default function VisionBoard() {
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <GatePromptCard featureKey="vision_board" height={200} />
       </SafeAreaView>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <Skeleton variant="card" height={40} style={{ marginBottom: spacing.lg }} />
+        <View style={[styles.grid, { gap: GRID_GAP }]}>
+          <Skeleton variant="card" height={TILE_SIZE} style={{ width: TILE_SIZE }} />
+          <Skeleton variant="card" height={TILE_SIZE} style={{ width: TILE_SIZE }} />
+          <Skeleton variant="card" height={TILE_SIZE} style={{ width: TILE_SIZE }} />
+          <Skeleton variant="card" height={TILE_SIZE} style={{ width: TILE_SIZE }} />
+        </View>
+      </View>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <EmptyState
+          ionIcon="alert-circle-outline"
+          title="Something went wrong"
+          subtitle={fetchError}
+          actionLabel="Retry"
+          onAction={() => { void fetchItems(); }}
+        />
+      </View>
     );
   }
 
