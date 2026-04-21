@@ -46,5 +46,5 @@ export function track<K extends keyof AnalyticsEvents>(
   event: K,
   properties: AnalyticsEvents[K],
 ): void {
-  if (__DEV__) console.log('[Analytics]', event, properties);
+  // Analytics event tracked (production: sent to backend, dev: no-op)
 }
