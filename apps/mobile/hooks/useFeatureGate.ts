@@ -129,7 +129,12 @@ export type FeatureKey =
   | 'partner_reactions'
   | 'shared_vision_board'
   | 'couples_weekly_review'
-  | 'partner_data_permissions';
+  | 'partner_data_permissions'
+  | 'advanced_analytics'
+  | 'priority_ai'
+  | 'pain_tracker'
+  | 'mobility_recovery'
+  | 'skill_tracker';
 
 export interface FeatureGateResult {
   isAvailable: boolean;
@@ -197,10 +202,10 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
   // Pro — ungated (available to pro+elite+partners)
   ghost_mode: {
     requiredTier: 'free',
-    upgradeTierOnCap: 'pro',
+    upgradeTierOnCap: 'elite',
     freeLimit: 3,
     freeUnit: 'lifetime workouts',
-    upgradeMessage: 'Upgrade to Pro to unlock unlimited Ghost Mode training.',
+    upgradeMessage: 'Upgrade to Elite to unlock unlimited Ghost Mode training.',
   },
   ai_insights: {
     requiredTier: 'pro',
@@ -215,32 +220,32 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for adaptive AI training programs.',
   },
   ai_trajectory_simulator: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to use the AI trajectory simulator.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to use the AI trajectory simulator.',
   },
   ai_weekly_report: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for weekly AI progress reports.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for weekly AI progress reports.',
   },
   ai_journal_prompt: {
     requiredTier: 'pro',
     upgradeMessage: 'Upgrade to Pro for personalized AI journal prompts.',
   },
   ai_sleep_optimizer: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to unlock the AI sleep optimizer.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to unlock the AI sleep optimizer.',
   },
   ai_grocery_list: {
-    requiredTier: 'elite',
-    upgradeMessage: 'Upgrade to Elite for AI-generated grocery lists.',
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI-generated grocery lists.',
   },
   ai_meal_prep: {
-    requiredTier: 'elite',
-    upgradeMessage: 'Upgrade to Elite for AI meal prep planning.',
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for AI meal prep planning.',
   },
   ai_supplement_advisor: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for AI supplement recommendations.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for AI supplement recommendations.',
   },
   ai_workout_narrator: {
     requiredTier: 'pro',
@@ -252,11 +257,11 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
   },
   unlimited_habits: {
     requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for unlimited habit tracking.',
+    upgradeMessage: 'Free accounts are limited to 3 habits. Upgrade to Pro for unlimited habit tracking.',
   },
   unlimited_programs: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to create unlimited training programs.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to create unlimited training programs.',
   },
   progress_photos_unlimited: {
     requiredTier: 'pro',
@@ -279,8 +284,8 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro to compete on community leaderboards.',
   },
   social_content_gen: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for AI social content generation.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for AI social content generation.',
   },
   stake_goals: {
     requiredTier: 'elite',
@@ -299,8 +304,8 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Elite to customize your dashboard.',
   },
   data_export: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro to export your data.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite to export your data.',
   },
   wearable_integrations: {
     requiredTier: 'pro',
@@ -341,8 +346,8 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for AI posture analysis.',
   },
   ai_progress_photo: {
-    requiredTier: 'pro',
-    upgradeMessage: 'Upgrade to Pro for AI progress photo analysis.',
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for AI progress photo analysis.',
   },
   ai_daily_affirmation: {
     requiredTier: 'pro',
@@ -392,13 +397,13 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
     upgradeMessage: 'Upgrade to Pro for unlimited AI meal camera scans.',
   },
   restaurant_menu_scanner: {
-    requiredTier: 'elite',
-    upgradeMessage: 'Upgrade to Elite to scan restaurant menus.',
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro to scan restaurant menus.',
   },
   ai_meal_plans_weekly: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI-generated weekly meal plans.' },
   ai_grocery_lists: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI grocery lists.' },
   batch_cook_meal_prep: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for batch cook meal prep.' },
-  habit_tracking_unlimited: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for unlimited habit tracking.' },
+  habit_tracking_unlimited: { requiredTier: 'pro', upgradeMessage: 'Free accounts are limited to 3 habits. Upgrade to Pro for unlimited habit tracking.' },
   streak_shields: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro to earn streak shields.' },
   data_history_unlimited: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for unlimited data history.' },
   ai_daily_coaching: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for daily AI coaching.' },
@@ -408,7 +413,7 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
   ai_workout_narrator_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for the AI workout narrator.' },
   context_aware_motivation: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for context-aware motivation.' },
   voice_commands_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for voice commands.' },
-  deep_work_focus_mode: { requiredTier: 'elite', upgradeMessage: 'Upgrade to Elite for Deep Work focus mode.' },
+  deep_work_focus_mode: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for Deep Work focus mode.' },
   ai_journaling_v2: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for AI journaling.' },
   siri_google_shortcuts: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for Siri & Google shortcuts.' },
   home_screen_widgets: { requiredTier: 'pro', upgradeMessage: 'Upgrade to Pro for home screen widgets.' },
@@ -454,6 +459,28 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
   shared_vision_board: { requiredTier: 'partners', upgradeMessage: 'Upgrade to Partners for shared vision board.' },
   couples_weekly_review: { requiredTier: 'partners', upgradeMessage: 'Upgrade to Partners for couples weekly review.' },
   partner_data_permissions: { requiredTier: 'partners', upgradeMessage: 'Upgrade to Partners for partner data permissions.' },
+
+  // Elite — advanced
+  advanced_analytics: {
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for advanced analytics across all domains.',
+  },
+  priority_ai: {
+    requiredTier: 'elite',
+    upgradeMessage: 'Upgrade to Elite for priority AI response times.',
+  },
+  pain_tracker: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro to track and manage pain points.',
+  },
+  mobility_recovery: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for guided mobility & recovery sessions.',
+  },
+  skill_tracker: {
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for skill & knowledge tracking.',
+  },
 
   // Elite
   business_tracking: {

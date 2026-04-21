@@ -18,6 +18,8 @@ import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -72,6 +74,7 @@ export default function MobilityScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const mobilityGate = useFeatureGate('mobility_recovery');
 
   const [routines, setRoutines] = useState<MobilityRoutine[]>([]);
   const [activeRoutine, setActiveRoutine] = useState<MobilityRoutine | null>(null);
@@ -327,6 +330,15 @@ export default function MobilityScreen() {
   const isRoutineComplete = activeRoutine
     ? completedCount >= activeRoutine.exercises.length
     : false;
+
+  if (!mobilityGate.isAvailable) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <GatePromptCard featureKey="mobility_recovery" height={240} />
+      </View>
+    );
+  }
 
   if (loading) {
     return (

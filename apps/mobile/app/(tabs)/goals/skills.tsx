@@ -17,6 +17,8 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -42,6 +44,7 @@ export default function SkillsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const skillGate = useFeatureGate('skill_tracker');
 
   useEffect(() => {
     navigation.setOptions({
@@ -393,6 +396,15 @@ export default function SkillsScreen() {
       )}
     </View>
   );
+
+  if (!skillGate.isAvailable) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <GatePromptCard featureKey="skill_tracker" height={240} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>

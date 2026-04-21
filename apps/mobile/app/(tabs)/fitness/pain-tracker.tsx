@@ -13,6 +13,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { useFeatureGate } from '@hooks/useFeatureGate';
+import { GatePromptCard } from '@components/ui/GatePromptCard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -60,6 +62,7 @@ export default function PainTrackerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const painGate = useFeatureGate('pain_tracker');
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,6 +165,15 @@ export default function PainTrackerScreen() {
     if (!selectedPart) return [];
     return painLogs.filter((log) => log.body_part === selectedPart);
   }, [selectedPart, painLogs]);
+
+  if (!painGate.isAvailable) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <GatePromptCard featureKey="pain_tracker" height={240} />
+      </View>
+    );
+  }
 
   if (loading) {
     return (

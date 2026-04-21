@@ -122,7 +122,7 @@ export function getGradeColor(grade: string): string {
     'D+': '#F97316', D: '#F97316',
     F: '#EF4444',
   };
-  return gradeColors[grade] ?? '#94A3B8';
+  return gradeColors[grade] ?? '#9B8FC0';
 }
 
 // Date input formatting — auto-inserts / as the user types MM/DD/YYYY

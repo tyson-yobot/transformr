@@ -38,9 +38,9 @@ import { useFeatureGate, FeatureKey } from '../hooks/useFeatureGate';
 type UpgradeTier = 'pro' | 'elite' | 'partners';
 
 const TIER_PRICES: Record<UpgradeTier, { monthly: string; annual: string }> = {
-  pro:      { monthly: '$9.99',  annual: '$8.29'  },
-  elite:    { monthly: '$19.99', annual: '$16.59' },
-  partners: { monthly: '$29.99', annual: '$24.91' },
+  pro:      { monthly: '$9.99',  annual: '$6.67'  },
+  elite:    { monthly: '$14.99', annual: '$10.00' },
+  partners: { monthly: '$19.99', annual: '$13.33' },
 };
 
 const TIER_FEATURES: Record<UpgradeTier, string[]> = {
@@ -386,8 +386,8 @@ export default function UpgradeScreen() {
           ]}
           accessibilityLabel={
             isAnnual
-              ? 'Annual billing selected, save 17%'
-              : 'Switch to annual billing and save 17%'
+              ? 'Annual billing selected, save 33%'
+              : 'Switch to annual billing and save 33%'
           }
           accessibilityRole="switch"
           accessibilityState={{ checked: isAnnual }}
@@ -411,7 +411,7 @@ export default function UpgradeScreen() {
             >
               Annual billing{' '}
               <Text style={{ color: colors.accent.success, fontWeight: '700' }}>
-                (save 17%)
+                (save 33%)
               </Text>
             </Text>
           </View>

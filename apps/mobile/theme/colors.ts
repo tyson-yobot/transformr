@@ -123,7 +123,7 @@ export const colors = {
       ai:         ['#A855F7', '#22D3EE'] as [string, string],
       fire:       ['#F97316', '#EAB308'] as [string, string],
       success:    ['#10B981', '#059669'] as [string, string],
-      partner:    ['#EC4899', '#8B5CF6'] as [string, string],
+      partner:    ['#EC4899', '#A855F7'] as [string, string],
       cardHeader: ['rgba(168,85,247,0.12)', 'rgba(168,85,247,0.0)'] as [string, string],
       overlay:    ['rgba(12,10,21,0)', 'rgba(12,10,21,0.95)'] as [string, string],
     },
