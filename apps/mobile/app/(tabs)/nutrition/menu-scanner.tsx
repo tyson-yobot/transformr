@@ -11,10 +11,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +33,8 @@ import { analyzeMenuPhoto } from '@services/ai/mealCamera';
 import { supabase } from '../../../services/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -173,9 +175,14 @@ export default function MenuScannerScreen() {
   // Feature gate check (must be after all hooks)
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="restaurant_menu_scanner" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="restaurant_menu_scanner"
+          title="Menu Scanner"
+          description="Point your camera at any restaurant menu for instant macro breakdowns."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -205,6 +212,8 @@ export default function MenuScannerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       {stage === 'capture' && (
         <>
           <CameraView

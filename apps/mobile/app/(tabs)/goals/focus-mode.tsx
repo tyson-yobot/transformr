@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { StatusBar } from 'expo-status-bar';
@@ -33,6 +34,8 @@ import { formatTimerDisplay } from '@utils/formatters';
 import { hapticSuccess, hapticMedium, hapticWarning } from '@utils/haptics';
 import type { FocusSession } from '@app-types/database';
 import { supabase } from '../../../services/supabase';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type FocusCategory = NonNullable<FocusSession['category']>;
 
@@ -66,6 +69,7 @@ export default function FocusMode() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const router = useRouter();
 
   const focusGate = useFeatureGate('deep_work_focus_mode');
 
@@ -254,11 +258,22 @@ export default function FocusMode() {
   }, [phase]);
 
   if (!focusGate.isAvailable) {
-    return <GatePromptCard featureKey="deep_work_focus_mode" height={240} />;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="deep_work_focus_mode"
+          title="Deep Work Focus"
+          description="Distraction-free focus sessions that block notifications and track your deep work streaks."
+          onGoBack={() => router.back()}
+        />
+      </View>
+    );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

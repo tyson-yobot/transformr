@@ -12,13 +12,13 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
@@ -30,6 +30,8 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import type { VisionBoardItem } from '@app-types/database';
 import { supabase } from '../../../services/supabase';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type VisionCategory = NonNullable<VisionBoardItem['category']>;
 
@@ -149,9 +151,14 @@ export default function VisionBoard() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="vision_board" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="vision_board"
+          title="Vision Board"
+          description="Create a visual identity board built from your goals — see the future you're building."
+          onGoBack={() => navigation.goBack()}
+        />
+      </View>
     );
   }
 
@@ -247,6 +254,8 @@ export default function VisionBoard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

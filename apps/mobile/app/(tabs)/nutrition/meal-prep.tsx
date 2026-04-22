@@ -14,9 +14,9 @@ import {
   Alert,
 } from 'react-native';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -43,6 +43,8 @@ import type {
 import type { MealPrepParams } from '@services/ai/mealPrep';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
@@ -182,10 +184,15 @@ export default function MealPrepScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="ai_meal_prep" height={200} />
-      </SafeAreaView>
+        <FeatureLockOverlay
+          featureKey="ai_meal_prep"
+          title="AI Meal Prep"
+          description="Get personalized weekly meal prep plans optimized for your macros and preferences."
+          onGoBack={() => navigation.goBack()}
+        />
+      </View>
     );
   }
 
@@ -289,6 +296,8 @@ export default function MealPrepScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}

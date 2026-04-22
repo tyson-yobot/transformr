@@ -14,7 +14,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -27,8 +27,11 @@ import { supabase } from '@services/supabase';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import type { NfcTrigger } from '@app-types/database';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Available NFC actions
@@ -56,6 +59,7 @@ const NFC_ACTIONS: NfcAction[] = [
 export default function NfcSetupScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const navigation = useNavigation();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const gate = useFeatureGate('nfc_triggers');
 
@@ -214,14 +218,21 @@ export default function NfcSetupScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="nfc_triggers" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="nfc_triggers"
+          title="NFC Triggers"
+          description="Tap NFC tags to automatically start workouts, log meals, or trigger routines."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,

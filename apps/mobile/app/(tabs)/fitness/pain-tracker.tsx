@@ -9,12 +9,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -31,6 +32,8 @@ import { formatRelativeTime } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { PainLog } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type PainType = 'sharp' | 'dull' | 'aching' | 'burning' | 'tingling' | 'stiffness';
 
@@ -62,6 +65,7 @@ export default function PainTrackerScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const router = useRouter();
   const painGate = useFeatureGate('pain_tracker');
 
   const [painLogs, setPainLogs] = useState<PainLog[]>([]);
@@ -168,9 +172,14 @@ export default function PainTrackerScreen() {
 
   if (!painGate.isAvailable) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="pain_tracker" height={240} />
+        <FeatureLockOverlay
+          featureKey="pain_tracker"
+          title="Pain Tracker"
+          description="Track and manage pain points to optimize your training around injuries and recovery."
+          onGoBack={() => router.back()}
+        />
       </View>
     );
   }
@@ -186,6 +195,8 @@ export default function PainTrackerScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

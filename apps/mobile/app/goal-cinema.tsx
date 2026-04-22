@@ -11,9 +11,9 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, {
   cancelAnimation,
   FadeIn,
@@ -33,6 +33,8 @@ import { useProfileStore } from '@stores/profileStore';
 import { useGoalStore } from '@stores/goalStore';
 import { formatNumber, formatPercentage, formatCountdown, formatWeight } from '@utils/formatters';
 import { hapticLight } from '@utils/haptics';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import type { WeightLog } from '@app-types/database';
 import { supabase } from '@services/supabase';
 
@@ -207,9 +209,14 @@ export default function GoalCinemaScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="goal_cinema" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="goal_cinema"
+          title="Goal Cinema"
+          description="Watch your goals come to life with cinematic visualizations that keep you inspired."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -224,6 +231,8 @@ export default function GoalCinemaScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       {/* Slide Content */}
       <View style={styles.slideContainer}>
         {currentSlide && (

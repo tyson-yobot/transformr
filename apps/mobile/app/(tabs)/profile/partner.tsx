@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import {
   View,
   Text,
@@ -31,8 +31,11 @@ import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess, hapticWarning } from '@utils/haptics';
 import type { SharedPreferences } from '@app-types/database';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Privacy toggle keys
@@ -59,6 +62,7 @@ const PRIVACY_TOGGLES: readonly {
 export default function PartnerScreen() {
   const { colors, typography, spacing } = useTheme();
   const navigation = useNavigation();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -197,7 +201,16 @@ export default function PartnerScreen() {
   }) as SharedPreferences;
 
   if (!partnerGate.isAvailable) {
-    return <GatePromptCard featureKey="partner_features" height={240} />;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="partner_features"
+          title="Partner Features"
+          description="Connect with your accountability partner for shared streaks, live sync workouts, and nudges."
+          onGoBack={() => router.back()}
+        />
+      </View>
+    );
   }
 
   if (isLoading && !partnership) {
@@ -227,6 +240,8 @@ export default function PartnerScreen() {
         />
       }
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {isLinked && partnerProfile ? (
         <>
           {/* Current Partner Card */}

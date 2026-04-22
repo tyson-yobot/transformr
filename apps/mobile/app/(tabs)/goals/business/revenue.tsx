@@ -3,6 +3,7 @@
 // =============================================================================
 
 import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -25,7 +26,9 @@ import { hapticSuccess } from '@utils/haptics';
 import type { RevenueLog } from '@app-types/database';
 import { EmptyState } from '@components/ui/EmptyState';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type RevenueType = NonNullable<RevenueLog['type']>;
 
@@ -40,6 +43,7 @@ const REVENUE_TYPES: { key: RevenueType; label: string }[] = [
 export default function RevenueScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
   const businesses = useBusinessStore((s) => s.businesses);
   const revenueData = useBusinessStore((s) => s.revenueData);
@@ -88,15 +92,22 @@ export default function RevenueScreen() {
 
   if (!hasBusinessTracking) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="business_tracking" height={200} />
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <FeatureLockOverlay
+          featureKey="business_tracking"
+          title="Revenue Tracking"
+          description="Visualize revenue trends and correlate business performance with your wellbeing data."
+          onGoBack={() => router.back()}
+        />
       </View>
     );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

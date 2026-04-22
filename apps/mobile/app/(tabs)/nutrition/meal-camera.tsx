@@ -11,13 +11,15 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -176,9 +178,14 @@ export default function MealCameraScreen() {
   // Feature gate check (must be after all hooks)
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="ai_meal_camera" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="ai_meal_camera"
+          title="AI Meal Camera"
+          description="Snap a photo of any meal and get instant, accurate macro calculations powered by AI."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -218,6 +225,8 @@ export default function MealCameraScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ActionToast message={toast.message} subtext={toast.subtext} visible={toast.visible} onHide={hideToast} type={toast.type} />
       <HelpBubble id="meal_camera" message="Point at your plate for AI calorie estimates" position="above" />
       {stage === 'capture' && (

@@ -13,13 +13,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useTheme } from '@theme/index';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -32,6 +33,8 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { MonoText } from '@components/ui/MonoText';
 import { supabase } from '@services/supabase';
 import type { MobilitySession } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 interface StretchExercise {
   id: string;
@@ -74,6 +77,7 @@ export default function MobilityScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const router = useRouter();
   const mobilityGate = useFeatureGate('mobility_recovery');
 
   const [routines, setRoutines] = useState<MobilityRoutine[]>([]);
@@ -333,9 +337,14 @@ export default function MobilityScreen() {
 
   if (!mobilityGate.isAvailable) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="mobility_recovery" height={240} />
+        <FeatureLockOverlay
+          featureKey="mobility_recovery"
+          title="Guided Mobility"
+          description="Follow guided mobility and recovery sessions designed to complement your training."
+          onGoBack={() => router.back()}
+        />
       </View>
     );
   }
@@ -354,6 +363,8 @@ export default function MobilityScreen() {
   if (activeRoutine) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -576,6 +587,8 @@ export default function MobilityScreen() {
   // Routine selection view
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

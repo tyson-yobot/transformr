@@ -12,16 +12,18 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { GlowCard } from '@components/ui/GlowCard';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { Chip } from '@components/ui/Chip';
@@ -179,17 +181,21 @@ export default function TrajectoryScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </Pressable>
-        <GatePromptCard featureKey="ai_trajectory_simulator" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="ai_trajectory_simulator"
+          title="AI Trajectory Simulator"
+          description="Compare your current path against your optimal future — across weight, fitness, and revenue."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}

@@ -18,7 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -31,6 +31,8 @@ import { hapticLight, hapticSuccess, hapticMedium } from '@utils/haptics';
 import { EmptyState } from '@components/ui/EmptyState';
 import type { Skill, Book, Course } from '@app-types/database';
 import { supabase } from '@services/supabase';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type ActiveTab = 'skills' | 'books' | 'courses';
 
@@ -399,15 +401,22 @@ export default function SkillsScreen() {
 
   if (!skillGate.isAvailable) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="skill_tracker" height={240} />
+        <FeatureLockOverlay
+          featureKey="skill_tracker"
+          title="Skill Tracker"
+          description="Track your skills and knowledge growth alongside your physical transformation."
+          onGoBack={() => navigation.goBack()}
+        />
       </View>
     );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

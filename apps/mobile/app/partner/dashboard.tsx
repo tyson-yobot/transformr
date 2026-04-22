@@ -10,11 +10,11 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -29,6 +29,8 @@ import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { supabase } from '@services/supabase';
 
 interface PartnerStats {
@@ -148,10 +150,15 @@ export default function PartnerDashboard() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="partner_features" height={200} />
-      </SafeAreaView>
+        <FeatureLockOverlay
+          featureKey="partner_features"
+          title="Partner Dashboard"
+          description="See your partner's streaks, check-ins, and progress — train together, stay accountable."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -185,6 +192,8 @@ export default function PartnerDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

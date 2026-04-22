@@ -26,12 +26,14 @@ import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Chip } from '@components/ui/Chip';
 import { Disclaimer } from '@components/ui/Disclaimer';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { UpgradePrompt } from '@components/ui/UpgradePrompt';
 import { useChatStore } from '@stores/chatStore';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { ChatMessage, ChatTopic } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const TOPICS: { id: ChatTopic; label: string; icon: string }[] = [
   { id: 'general', label: 'General', icon: 'chatbubble-ellipses-outline' },
@@ -373,6 +375,8 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {/* Header */}
       <View
         style={[
@@ -589,7 +593,7 @@ export default function ChatScreen() {
             borderTopColor: colors.border.subtle,
           }}
         >
-          <GatePromptCard featureKey="ai_chat_coach" height={100} />
+          <UpgradePrompt feature="ai_chat_coach" lockedMessage="Upgrade to Pro for unlimited AI coaching messages." />
         </View>
       ) : (
         <View

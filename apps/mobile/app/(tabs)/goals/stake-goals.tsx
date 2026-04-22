@@ -13,13 +13,13 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -36,6 +36,8 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { supabase } from '../../../services/supabase';
 import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 /* eslint-enable import/first */
 
 interface StakeGoalWithDetails extends StakeGoal {
@@ -212,14 +214,21 @@ export default function StakeGoalsScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="stake_goals" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="stake_goals"
+          title="Stake Goals"
+          description="Put real financial stakes on your goals — commit money to charity if you miss your targets."
+          onGoBack={() => navigation.goBack()}
+        />
+      </View>
     );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

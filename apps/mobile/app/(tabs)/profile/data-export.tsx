@@ -13,13 +13,15 @@ import {
   Share,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -214,9 +216,14 @@ export default function DataExportScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="data_export" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="data_export"
+          title="Data Export"
+          description="Export your complete training, nutrition, and health data in multiple formats."
+          onGoBack={() => navigation.goBack()}
+        />
+      </View>
     );
   }
 
@@ -230,6 +237,8 @@ export default function DataExportScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {/* Export Format */}
       <Animated.View entering={FadeInDown.duration(400)}>
         <Text

@@ -11,13 +11,15 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -176,14 +178,21 @@ export default function DashboardBuilderScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="dashboard_builder" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="dashboard_builder"
+          title="Dashboard Builder"
+          description="Drag and drop to create your perfect dashboard layout with the stats that matter most."
+          onGoBack={() => navigation.goBack()}
+        />
+      </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,

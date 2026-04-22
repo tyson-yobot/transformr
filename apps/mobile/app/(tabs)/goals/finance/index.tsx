@@ -10,14 +10,14 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../../constants/screenHelp';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -28,6 +28,8 @@ import { formatCurrency, formatCurrencyDetailed, formatDate } from '@utils/forma
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { EmptyState } from '@components/ui/EmptyState';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 export default function FinanceDashboard() {
   const { colors, typography, spacing } = useTheme();
@@ -105,9 +107,14 @@ export default function FinanceDashboard() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-        <GatePromptCard featureKey="finance_tracking" height={200} />
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <FeatureLockOverlay
+          featureKey="finance_tracking"
+          title="Finance Tracker"
+          description="Track your personal finances alongside your fitness — body and wallet in one app."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -127,6 +134,8 @@ export default function FinanceDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

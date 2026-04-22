@@ -17,9 +17,9 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -33,6 +33,8 @@ import { useLabsStore } from '@stores/labsStore';
 import { useAuthStore } from '@stores/authStore';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type PickedAsset = {
   uri: string;
@@ -184,10 +186,15 @@ export default function LabUploadScreen() {
 
   if (!gate.isAvailable) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="lab_scanner" height={200} />
-      </SafeAreaView>
+        <FeatureLockOverlay
+          featureKey="lab_scanner"
+          title="Lab Scanner"
+          description="Upload blood work and lab results for AI-powered health insights and recommendations."
+          onGoBack={() => router.back()}
+        />
+      </View>
     );
   }
 
@@ -198,6 +205,8 @@ export default function LabUploadScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View

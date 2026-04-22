@@ -29,7 +29,7 @@ import {
 import { hapticLight } from '@utils/haptics';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { GatePromptCard } from '@components/ui/GatePromptCard';
+import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { HelpIcon } from '@components/ui/HelpIcon';
 import { EmptyState } from '@components/ui/EmptyState';
@@ -38,6 +38,8 @@ import { Coachmark } from '@components/ui/Coachmark';
 import { SCREEN_HELP } from '../../../../constants/screenHelp';
 import { HELP } from '../../../../constants/helpContent';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../../constants/coachmarkSteps';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -116,15 +118,22 @@ export default function BusinessDashboard() {
 
   if (!hasBusinessTracking) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
-        <GatePromptCard featureKey="business_tracking" height={200} />
+      <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <StatusBar style="light" backgroundColor="#0C0A15" />
+        <FeatureLockOverlay
+          featureKey="business_tracking"
+          title="Business Tracker"
+          description="Monitor revenue, customers, and milestones alongside your training data."
+          onGoBack={() => router.back()}
+        />
       </View>
     );
   }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ActionToast
         message={toast.message}
         subtext={toast.subtext}
