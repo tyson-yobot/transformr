@@ -385,6 +385,10 @@ export default function LabsHistoryScreen() {
           data={uploads}
           renderItem={renderItem}
           keyExtractor={(u) => u.id}
+          removeClippedSubviews
+          windowSize={7}
+          maxToRenderPerBatch={8}
+          initialNumToRender={10}
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,

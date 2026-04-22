@@ -2,7 +2,7 @@
 // TRANSFORMR -- Exercise Library Screen
 // =============================================================================
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -70,22 +70,33 @@ export default function ExercisesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { exercises, fetchExercises, isLoading } = useWorkoutStore();
+  const exercises = useWorkoutStore((s) => s.exercises);
+  const fetchExercises = useWorkoutStore((s) => s.fetchExercises);
+  const isLoading = useWorkoutStore((s) => s.isLoading);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentFilter>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce search input to avoid firing API calls on every keystroke
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [searchQuery]);
 
   const doFetch = useCallback(() => {
     const category = selectedCategory !== 'all' ? selectedCategory : undefined;
     const equipment = selectedEquipment !== 'all' ? selectedEquipment : undefined;
-    const search = searchQuery.trim() || undefined;
+    const search = debouncedSearch.trim() || undefined;
     const hasFilters = category !== undefined || equipment !== undefined || search !== undefined;
     return fetchExercises(hasFilters ? { category, equipment, search } : undefined);
-  }, [selectedCategory, selectedEquipment, searchQuery, fetchExercises]);
+  }, [selectedCategory, selectedEquipment, debouncedSearch, fetchExercises]);
 
   useEffect(() => {
     doFetch();

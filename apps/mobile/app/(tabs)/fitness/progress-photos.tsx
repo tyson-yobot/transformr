@@ -281,6 +281,10 @@ export default function ProgressPhotosScreen() {
               data={[...photos].reverse()}
               horizontal
               showsHorizontalScrollIndicator={false}
+              removeClippedSubviews
+              windowSize={5}
+              maxToRenderPerBatch={6}
+              initialNumToRender={5}
               contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.sm }}
               keyExtractor={(item) => item.name}
               renderItem={({ item }) => (

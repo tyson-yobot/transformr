@@ -451,6 +451,10 @@ export default function ChatHistoryScreen() {
           keyExtractor={(fi, idx) =>
             fi.kind === 'header' ? `header-${fi.label}-${idx}` : fi.conversation.id
           }
+          removeClippedSubviews
+          windowSize={7}
+          maxToRenderPerBatch={10}
+          initialNumToRender={15}
           contentContainerStyle={{
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,

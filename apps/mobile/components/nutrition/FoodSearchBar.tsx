@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,7 @@ interface FoodSearchBarProps {
 
 const DEBOUNCE_MS = 350;
 
-export function FoodSearchBar({
+export const FoodSearchBar = React.memo(function FoodSearchBar({
   onSearch,
   onSelectFood,
   onBarcodeScan,
@@ -313,6 +313,10 @@ export function FoodSearchBar({
             renderItem={renderFoodItem}
             keyExtractor={keyExtractor}
             keyboardShouldPersistTaps="handled"
+            removeClippedSubviews
+            windowSize={5}
+            maxToRenderPerBatch={8}
+            initialNumToRender={10}
             style={styles.resultsList}
             ListEmptyComponent={
               <View style={[styles.emptyState, { padding: spacing.xl }]}>
@@ -330,7 +334,7 @@ export function FoodSearchBar({
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
