@@ -64,6 +64,16 @@ google-play-service-account.json
 # Claude Code
 .claude/
 
+# Data files
+*.csv
+*.xml
+
+# Logs directory
+C:\dev\logs/
+
+# Root-level images (not assets/)
+/*.png
+
 # Misc
 *.log
 npm-debug.log*
