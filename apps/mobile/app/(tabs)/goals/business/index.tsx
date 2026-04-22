@@ -45,8 +45,9 @@ export default function BusinessDashboard() {
   const router = useRouter();
   const navigation = useNavigation();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
-  const { businesses, fetchBusinesses, getMonthlyMetrics } =
-    useBusinessStore();
+  const businesses = useBusinessStore((s) => s.businesses);
+  const fetchBusinesses = useBusinessStore((s) => s.fetchBusinesses);
+  const getMonthlyMetrics = useBusinessStore((s) => s.getMonthlyMetrics);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);

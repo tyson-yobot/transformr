@@ -37,7 +37,8 @@ const REACTIONS = [
 export default function LiveWorkoutScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { partnership, partnerProfile } = usePartnerStore();
+  const partnership = usePartnerStore((s) => s.partnership);
+  const partnerProfile = usePartnerStore((s) => s.partnerProfile);
   const myProfile = useProfileStore((s) => s.profile);
 
   const [mySets, setMySets] = useState<LiveWorkoutSync[]>([]);

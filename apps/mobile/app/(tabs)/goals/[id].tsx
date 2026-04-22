@@ -96,7 +96,9 @@ export default function GoalDetailScreen() {
   const navigation = useNavigation();
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { goals, updateGoalProgress, updateGoal } = useGoalStore();
+  const goals = useGoalStore((s) => s.goals);
+  const updateGoalProgress = useGoalStore((s) => s.updateGoalProgress);
+  const updateGoal = useGoalStore((s) => s.updateGoal);
 
   const goal = goals.find((g) => g.id === id) ?? null;
 

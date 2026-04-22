@@ -126,7 +126,8 @@ export default function ChallengeBuilderScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { createCustomChallenge, isLoading } = useChallengeStore();
+  const createCustomChallenge = useChallengeStore((s) => s.createCustomChallenge);
+  const isLoading = useChallengeStore((s) => s.isLoading);
 
   // Form state
   const [name, setName] = useState('');

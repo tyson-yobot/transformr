@@ -129,12 +129,10 @@ export default function ChallengeDetailScreen() {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const {
-    challengeDefinitions,
-    enrollInChallenge,
-    fetchChallengeDefinitions,
-    isLoading,
-  } = useChallengeStore();
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
+  const enrollInChallenge = useChallengeStore((s) => s.enrollInChallenge);
+  const fetchChallengeDefinitions = useChallengeStore((s) => s.fetchChallengeDefinitions);
+  const isLoading = useChallengeStore((s) => s.isLoading);
 
   const [fetchError, setFetchError] = useState<string | null>(null);
 

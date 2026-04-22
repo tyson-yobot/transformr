@@ -3,11 +3,19 @@ import { useHabitStore } from '@stores/habitStore';
 import { useAuthStore } from '@stores/authStore';
 
 export function useHabits() {
-  const store = useHabitStore();
-  const fetchHabits = useHabitStore((s) => s.fetchHabits);
   const habits = useHabitStore((s) => s.habits);
   const todayCompletions = useHabitStore((s) => s.todayCompletions);
-  const { user } = useAuthStore();
+  const allCompletions = useHabitStore((s) => s.allCompletions);
+  const overallStreak = useHabitStore((s) => s.overallStreak);
+  const isLoading = useHabitStore((s) => s.isLoading);
+  const error = useHabitStore((s) => s.error);
+  const fetchHabits = useHabitStore((s) => s.fetchHabits);
+  const completeHabit = useHabitStore((s) => s.completeHabit);
+  const createHabit = useHabitStore((s) => s.createHabit);
+  const getStreakData = useHabitStore((s) => s.getStreakData);
+  const clearError = useHabitStore((s) => s.clearError);
+  const reset = useHabitStore((s) => s.reset);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (user?.id) {
@@ -26,7 +34,18 @@ export function useHabits() {
   }, [habits, todayCompletions]);
 
   return {
-    ...store,
+    habits,
+    todayCompletions,
+    allCompletions,
+    overallStreak,
+    isLoading,
+    error,
+    fetchHabits,
+    completeHabit,
+    createHabit,
+    getStreakData,
+    clearError,
+    reset,
     todayProgress,
   };
 }

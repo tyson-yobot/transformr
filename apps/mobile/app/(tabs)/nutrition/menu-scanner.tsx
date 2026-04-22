@@ -65,7 +65,7 @@ export default function MenuScannerScreen() {
     });
   }, [navigation]);
 
-  const { logFood } = useNutritionStore();
+  const logFood = useNutritionStore((s) => s.logFood);
   const [permission, requestPermission] = useCameraPermissions();
 
   const [stage, setStage] = useState<ScanStage>('capture');

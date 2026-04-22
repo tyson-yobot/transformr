@@ -100,10 +100,17 @@ export default function NutritionHomeScreen() {
   const navigation = useNavigation();
 
   const { todayMacros } = useNutrition();
-  const { todayLogs, waterLogs, supplements, supplementLogs, logWater, fetchTodayNutrition, deleteLog, foodNameMap } =
-    useNutritionStore();
-  const { profile } = useProfileStore();
-  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
+  const todayLogs = useNutritionStore((s) => s.todayLogs);
+  const waterLogs = useNutritionStore((s) => s.waterLogs);
+  const supplements = useNutritionStore((s) => s.supplements);
+  const supplementLogs = useNutritionStore((s) => s.supplementLogs);
+  const logWater = useNutritionStore((s) => s.logWater);
+  const fetchTodayNutrition = useNutritionStore((s) => s.fetchTodayNutrition);
+  const deleteLog = useNutritionStore((s) => s.deleteLog);
+  const foodNameMap = useNutritionStore((s) => s.foodNameMap);
+  const profile = useProfileStore((s) => s.profile);
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
 
   const cameraGate = useFeatureGate('ai_meal_camera');
   const barcodeGate = useFeatureGate('barcode_scanner');

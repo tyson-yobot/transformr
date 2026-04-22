@@ -65,7 +65,7 @@ export default function MealCameraScreen() {
     });
   }, [navigation]);
 
-  const { logFood } = useNutritionStore();
+  const logFood = useNutritionStore((s) => s.logFood);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
   const [permission, requestPermission] = useCameraPermissions();
 

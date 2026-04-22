@@ -343,7 +343,9 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
 
   const profile = useProfileStore((s) => s.profile);
-  const settings = useSettingsStore();
+  const voiceEnabled = useSettingsStore((s) => s.voiceEnabled);
+  const narratorEnabled = useSettingsStore((s) => s.narratorEnabled);
+  const updateSetting = useSettingsStore((s) => s.updateSetting);
   const signOut = useAuthStore((s) => s.signOut);
   const { tone: selectedTone, setTone } = useGamificationStyle();
   const tier = useSubscriptionStore((s) => s.tier);
@@ -584,8 +586,8 @@ export default function ProfileScreen() {
           accessibilityLabel="Toggle voice commands"
           rightElement={
             <Toggle
-              value={settings.voiceEnabled}
-              onValueChange={(v) => settings.updateSetting('voiceEnabled', v)}
+              value={voiceEnabled}
+              onValueChange={(v) => updateSetting('voiceEnabled', v)}
             />
           }
         />
@@ -597,9 +599,9 @@ export default function ProfileScreen() {
           accessibilityLabel="Toggle narrator"
           rightElement={
             <Toggle
-              value={settings.narratorEnabled}
+              value={narratorEnabled}
               onValueChange={(v) =>
-                settings.updateSetting('narratorEnabled', v)
+                updateSetting('narratorEnabled', v)
               }
             />
           }

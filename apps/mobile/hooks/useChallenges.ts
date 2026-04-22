@@ -3,16 +3,26 @@ import { useChallengeStore } from '@stores/challengeStore';
 import { useAuthStore } from '@stores/authStore';
 
 export function useChallenges() {
-  const store = useChallengeStore();
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const enrollments = useChallengeStore((s) => s.enrollments);
+  const dailyLogs = useChallengeStore((s) => s.dailyLogs);
+  const todayLog = useChallengeStore((s) => s.todayLog);
+  const isLoading = useChallengeStore((s) => s.isLoading);
+  const error = useChallengeStore((s) => s.error);
   const fetchChallengeDefinitions = useChallengeStore((s) => s.fetchChallengeDefinitions);
   const fetchEnrollments = useChallengeStore((s) => s.fetchEnrollments);
   const fetchActiveEnrollment = useChallengeStore((s) => s.fetchActiveEnrollment);
+  const fetchDailyLogs = useChallengeStore((s) => s.fetchDailyLogs);
   const enrollInChallengeStore = useChallengeStore((s) => s.enrollInChallenge);
-  const todayLog = useChallengeStore((s) => s.todayLog);
-  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
-  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
-  const enrollments = useChallengeStore((s) => s.enrollments);
-  const { user } = useAuthStore();
+  const logDailyTask = useChallengeStore((s) => s.logDailyTask);
+  const completeDailyLog = useChallengeStore((s) => s.completeDailyLog);
+  const abandonChallenge = useChallengeStore((s) => s.abandonChallenge);
+  const restartChallenge = useChallengeStore((s) => s.restartChallenge);
+  const createCustomChallenge = useChallengeStore((s) => s.createCustomChallenge);
+  const clearError = useChallengeStore((s) => s.clearError);
+  const reset = useChallengeStore((s) => s.reset);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     fetchChallengeDefinitions();
@@ -72,7 +82,24 @@ export function useChallenges() {
   );
 
   return {
-    ...store,
+    challengeDefinitions,
+    activeEnrollment,
+    enrollments,
+    dailyLogs,
+    todayLog,
+    isLoading,
+    error,
+    fetchChallengeDefinitions,
+    fetchEnrollments,
+    fetchActiveEnrollment,
+    fetchDailyLogs,
+    logDailyTask,
+    completeDailyLog,
+    abandonChallenge,
+    restartChallenge,
+    createCustomChallenge,
+    clearError,
+    reset,
     todayProgress,
     challengeProgress,
     activeChallenge,

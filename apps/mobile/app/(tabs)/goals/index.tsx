@@ -75,6 +75,8 @@ const NAV_ITEMS: { route: string; label: string; icon: keyof typeof Ionicons.gly
   { route: '/(tabs)/goals/health-roi',   label: 'Health ROI', icon: 'pulse-outline',             accent: 'success' },
   { route: '/(tabs)/goals/affirmations', label: 'Affirmations', icon: 'sunny-outline',           accent: 'gold' },
   { route: '/(tabs)/goals/retrospective', label: 'Retrospective', icon: 'time-outline',          accent: 'info' },
+  { route: '/(tabs)/goals/community',    label: 'Community',  icon: 'people-outline',            accent: 'cyan' },
+  { route: '/(tabs)/goals/insights',     label: 'Insights',   icon: 'analytics-outline',         accent: 'info' },
 ];
 
 export default function GoalsDashboard() {
@@ -82,7 +84,11 @@ export default function GoalsDashboard() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
-  const { goals, isLoading, fetchGoals, createGoal, updateGoal } = useGoalStore();
+  const goals = useGoalStore((s) => s.goals);
+  const isLoading = useGoalStore((s) => s.isLoading);
+  const fetchGoals = useGoalStore((s) => s.fetchGoals);
+  const createGoal = useGoalStore((s) => s.createGoal);
+  const updateGoal = useGoalStore((s) => s.updateGoal);
 
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
@@ -579,6 +585,28 @@ export default function GoalsDashboard() {
             ))}
           </Animated.View>
         )}
+
+        {/* Weekly Review */}
+        <Animated.View entering={FadeInDown.delay(650)}>
+          <Card
+            variant="outlined"
+            style={{ marginTop: spacing.xl, paddingVertical: spacing.lg, paddingHorizontal: spacing.lg }}
+            onPress={() => router.push('/weekly-review' as Href)}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <Ionicons name="calendar-outline" size={24} color={colors.accent.primary} />
+              <View style={{ flex: 1 }}>
+                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                  Weekly Review
+                </Text>
+                <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                  See your weekly performance grade and AI analysis
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+            </View>
+          </Card>
+        </Animated.View>
 
         <View style={{ height: 80 }} />
       </ScrollView>

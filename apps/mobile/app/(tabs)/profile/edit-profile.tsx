@@ -57,7 +57,9 @@ export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const router = useRouter();
-  const { profile, updateProfile, isLoading } = useProfileStore();
+  const profile = useProfileStore((s) => s.profile);
+  const updateProfile = useProfileStore((s) => s.updateProfile);
+  const isLoading = useProfileStore((s) => s.isLoading);
 
   useEffect(() => {
     navigation.setOptions({

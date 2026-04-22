@@ -37,7 +37,10 @@ const BUDGET_CATEGORIES = [
 export default function BudgetsScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const { budgets, isLoading, error, fetchBudgets } = useFinanceStore();
+  const budgets = useFinanceStore((s) => s.budgets);
+  const isLoading = useFinanceStore((s) => s.isLoading);
+  const error = useFinanceStore((s) => s.error);
+  const fetchBudgets = useFinanceStore((s) => s.fetchBudgets);
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);

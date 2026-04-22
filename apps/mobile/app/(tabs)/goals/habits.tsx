@@ -100,15 +100,13 @@ export default function HabitTracker() {
   const navigation = useNavigation();
   const { isDrillSergeant, isMotivational, style: gamStyle } = useGamificationStyle();
   const isIntense = isDrillSergeant || isMotivational;
-  const {
-    habits,
-    todayCompletions,
-    allCompletions,
-    isLoading,
-    fetchHabits,
-    completeHabit,
-    createHabit,
-  } = useHabitStore();
+  const habits = useHabitStore((s) => s.habits);
+  const todayCompletions = useHabitStore((s) => s.todayCompletions);
+  const allCompletions = useHabitStore((s) => s.allCompletions);
+  const isLoading = useHabitStore((s) => s.isLoading);
+  const fetchHabits = useHabitStore((s) => s.fetchHabits);
+  const completeHabit = useHabitStore((s) => s.completeHabit);
+  const createHabit = useHabitStore((s) => s.createHabit);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const { isAvailable: canAddHabit, showUpgradeModal } = useFeatureGate('habit_tracking_unlimited');

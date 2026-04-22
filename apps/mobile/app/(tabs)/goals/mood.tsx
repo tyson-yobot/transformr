@@ -56,8 +56,11 @@ export default function MoodLogger() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { todayMood, moodHistory, isLoading, logMood, fetchMoodHistory } =
-    useMoodStore();
+  const todayMood = useMoodStore((s) => s.todayMood);
+  const moodHistory = useMoodStore((s) => s.moodHistory);
+  const isLoading = useMoodStore((s) => s.isLoading);
+  const logMood = useMoodStore((s) => s.logMood);
+  const fetchMoodHistory = useMoodStore((s) => s.fetchMoodHistory);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);

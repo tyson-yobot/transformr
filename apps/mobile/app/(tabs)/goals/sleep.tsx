@@ -42,8 +42,11 @@ export default function SleepTracker() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { lastSleep, sleepHistory, isLoading, fetchSleepHistory, logSleep } =
-    useSleepStore();
+  const lastSleep = useSleepStore((s) => s.lastSleep);
+  const sleepHistory = useSleepStore((s) => s.sleepHistory);
+  const isLoading = useSleepStore((s) => s.isLoading);
+  const fetchSleepHistory = useSleepStore((s) => s.fetchSleepHistory);
+  const logSleep = useSleepStore((s) => s.logSleep);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [refreshing, setRefreshing] = useState(false);

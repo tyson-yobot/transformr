@@ -25,7 +25,11 @@ import { formatCurrency, formatDate } from '@utils/formatters';
 export default function NetWorthScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { accounts, netWorthHistory, isLoading, error, fetchAccounts } = useFinanceStore();
+  const accounts = useFinanceStore((s) => s.accounts);
+  const netWorthHistory = useFinanceStore((s) => s.netWorthHistory);
+  const isLoading = useFinanceStore((s) => s.isLoading);
+  const error = useFinanceStore((s) => s.error);
+  const fetchAccounts = useFinanceStore((s) => s.fetchAccounts);
 
   const [refreshing, setRefreshing] = useState(false);
 

@@ -11,7 +11,21 @@ interface ExistingPR {
 }
 
 export function useWorkout() {
-  const store = useWorkoutStore();
+  const activeSession = useWorkoutStore((s) => s.activeSession);
+  const templates = useWorkoutStore((s) => s.templates);
+  const exercises = useWorkoutStore((s) => s.exercises);
+  const isLoading = useWorkoutStore((s) => s.isLoading);
+  const error = useWorkoutStore((s) => s.error);
+  const pendingExerciseId = useWorkoutStore((s) => s.pendingExerciseId);
+  const startWorkout = useWorkoutStore((s) => s.startWorkout);
+  const logSet = useWorkoutStore((s) => s.logSet);
+  const completeWorkout = useWorkoutStore((s) => s.completeWorkout);
+  const fetchTemplates = useWorkoutStore((s) => s.fetchTemplates);
+  const fetchExercises = useWorkoutStore((s) => s.fetchExercises);
+  const getGhostData = useWorkoutStore((s) => s.getGhostData);
+  const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
+  const clearError = useWorkoutStore((s) => s.clearError);
+  const reset = useWorkoutStore((s) => s.reset);
 
   const logSetWithPRDetection = useCallback(
     async (exerciseId: string, setData: { weight: number; reps: number; durationSeconds?: number; rpe?: number }) => {
@@ -41,7 +55,7 @@ export function useWorkout() {
       );
 
       // Log the set
-      await store.logSet(exerciseId, setData);
+      await logSet(exerciseId, setData);
 
       // If PR detected, trigger celebration
       if (prs.length > 0) {
@@ -51,11 +65,25 @@ export function useWorkout() {
 
       return { prs: [], isPR: false };
     },
-    [store],
+    [logSet],
   );
 
   return {
-    ...store,
+    activeSession,
+    templates,
+    exercises,
+    isLoading,
+    error,
+    pendingExerciseId,
+    startWorkout,
+    logSet,
+    completeWorkout,
+    fetchTemplates,
+    fetchExercises,
+    getGhostData,
+    setPendingExerciseId,
+    clearError,
+    reset,
     logSetWithPRDetection,
   };
 }

@@ -55,7 +55,8 @@ export default function GoalCinemaScreen() {
   const router = useRouter();
   const gate = useFeatureGate('goal_cinema');
   const profile = useProfileStore((s) => s.profile);
-  const { goals, milestones } = useGoalStore();
+  const goals = useGoalStore((s) => s.goals);
+  const milestones = useGoalStore((s) => s.milestones);
 
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

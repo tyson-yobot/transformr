@@ -147,17 +147,42 @@ export default function DashboardScreen() {
   const [recentAchievements, setRecentAchievements] = useState<{ id: string; title: string; icon: string; tier: 'bronze' | 'silver' | 'gold' | 'platinum' }[]>([]);
   const [workoutsThisWeekCount, setWorkoutsThisWeekCount] = useState<number | null>(null);
 
-  // Stores
+  // Stores — targeted selectors to prevent unnecessary re-renders
   const profile = useProfileStore((s) => s.profile);
   const fetchProfile = useProfileStore((s) => s.fetchProfile);
-  const workoutStore = useWorkoutStore();
-  const nutritionStore = useNutritionStore();
-  const habitStore = useHabitStore();
-  const goalStore = useGoalStore();
-  const partnerStore = usePartnerStore();
-  const businessStore = useBusinessStore();
-  const insightStore = useInsightStore();
-  const { activeEnrollment, challengeDefinitions, todayLog: challengeTodayLog } = useChallengeStore();
+
+  const activeSession = useWorkoutStore((s) => s.activeSession);
+  const fetchTemplates = useWorkoutStore((s) => s.fetchTemplates);
+
+  const todayLogs = useNutritionStore((s) => s.todayLogs);
+  const waterLogs = useNutritionStore((s) => s.waterLogs);
+  const fetchTodayNutrition = useNutritionStore((s) => s.fetchTodayNutrition);
+
+  const habits = useHabitStore((s) => s.habits);
+  const todayCompletions = useHabitStore((s) => s.todayCompletions);
+  const overallStreak = useHabitStore((s) => s.overallStreak);
+  const fetchHabits = useHabitStore((s) => s.fetchHabits);
+
+  const goals = useGoalStore((s) => s.goals);
+  const fetchGoals = useGoalStore((s) => s.fetchGoals);
+
+  const partnerProfile = usePartnerStore((s) => s.partnerProfile);
+  const partnership = usePartnerStore((s) => s.partnership);
+  const fetchPartnership = usePartnerStore((s) => s.fetchPartnership);
+
+  const businesses = useBusinessStore((s) => s.businesses);
+  const revenueData = useBusinessStore((s) => s.revenueData);
+  const fetchBusinesses = useBusinessStore((s) => s.fetchBusinesses);
+
+  const predictions = useInsightStore((s) => s.predictions);
+  const proactiveMessages = useInsightStore((s) => s.proactiveMessages);
+  const fetchAll = useInsightStore((s) => s.fetchAll);
+  const dismissMessage = useInsightStore((s) => s.dismissMessage);
+  const acknowledgePrediction = useInsightStore((s) => s.acknowledgePrediction);
+
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
+  const challengeTodayLog = useChallengeStore((s) => s.todayLog);
 
   // Active challenge definition for dashboard card
   const activeChallengeDefinition = useMemo(
@@ -167,18 +192,18 @@ export default function DashboardScreen() {
 
   // Top prediction for dashboard
   const topPrediction = useMemo(
-    () => insightStore.predictions[0] ?? null,
-    [insightStore.predictions],
+    () => predictions[0] ?? null,
+    [predictions],
   );
 
   // Primary countdown -- uses the first active goal with a target date
   const primaryGoal = useMemo(() => {
     const now = new Date();
-    const goalsWithDates = goalStore.goals.filter(
+    const goalsWithDates = goals.filter(
       (g) => g.status === 'active' && g.target_date && new Date(g.target_date) > now,
     );
     return goalsWithDates[0] ?? null;
-  }, [goalStore.goals]);
+  }, [goals]);
 
   useCountdown(primaryGoal?.target_date ?? null);
 
@@ -189,38 +214,38 @@ export default function DashboardScreen() {
 
   // Top 3 habits by streak
   const top3Streaks = useMemo(() => {
-    return habitStore.habits
+    return habits
       .filter((h) => h.is_active !== false && (h.current_streak ?? 0) > 0)
       .sort((a, b) => (b.current_streak ?? 0) - (a.current_streak ?? 0))
       .slice(0, 3);
-  }, [habitStore.habits]);
+  }, [habits]);
 
   // Streak from computed overallStreak (consecutive days with ≥1 completion).
   // Null before first fetch — renders as '—' in UI.
-  const currentStreak: number | null = habitStore.overallStreak;
+  const currentStreak: number | null = overallStreak;
 
   // Workouts this week — real completed session count from Supabase
   const workoutsThisWeek = workoutsThisWeekCount ?? 0;
 
   // Calories today
   const caloriesToday = useMemo(() => {
-    return nutritionStore.todayLogs.reduce((sum, log) => sum + (log.calories ?? 0), 0);
-  }, [nutritionStore.todayLogs]);
+    return todayLogs.reduce((sum, log) => sum + (log.calories ?? 0), 0);
+  }, [todayLogs]);
 
   // Protein today
   const proteinToday = useMemo(() => {
-    return nutritionStore.todayLogs.reduce((sum, log) => sum + (log.protein ?? 0), 0);
-  }, [nutritionStore.todayLogs]);
+    return todayLogs.reduce((sum, log) => sum + (log.protein ?? 0), 0);
+  }, [todayLogs]);
 
   // Water today (oz)
   const waterOzToday = useMemo(() => {
-    return nutritionStore.waterLogs.reduce((sum, log) => sum + (log.amount_oz ?? 0), 0);
-  }, [nutritionStore.waterLogs]);
+    return waterLogs.reduce((sum, log) => sum + (log.amount_oz ?? 0), 0);
+  }, [waterLogs]);
 
   // Workout done today
   const workoutDoneToday = useMemo(() => {
-    return !!workoutStore.activeSession?.completed_at;
-  }, [workoutStore.activeSession]);
+    return !!activeSession?.completed_at;
+  }, [activeSession]);
 
   // Null until the edge function returns a real value — renders as '—' in UI
   const readinessScoreDisplay = readinessScore;
@@ -234,20 +259,20 @@ export default function DashboardScreen() {
 
   // Latest accountability message from AI coach
   const accountabilityMessage = useMemo(() => {
-    const msgs = insightStore.proactiveMessages.filter(
+    const msgs = proactiveMessages.filter(
       (m) =>
         m.category.startsWith('accountability_') &&
         !m.is_dismissed,
     );
     return msgs[0] ?? null;
-  }, [insightStore.proactiveMessages]);
+  }, [proactiveMessages]);
 
   // Habits remaining today
   const habitsRemaining = useMemo(() => {
-    const totalActive = habitStore.habits.filter((h) => h.is_active !== false).length;
-    const completedToday = habitStore.todayCompletions.length;
+    const totalActive = habits.filter((h) => h.is_active !== false).length;
+    const completedToday = todayCompletions.length;
     return Math.max(0, totalActive - completedToday);
-  }, [habitStore.habits, habitStore.todayCompletions]);
+  }, [habits, todayCompletions]);
 
   // Weight data for sparkline — real data when available, profile fallback otherwise
   const weightData = useMemo(() => {
@@ -258,10 +283,10 @@ export default function DashboardScreen() {
   }, [realWeightData, profile?.current_weight]);
 
   // Revenue sparkline data
-  const revenueData = useMemo(() => {
-    if (businessStore.businesses.length === 0) return [];
-    return businessStore.revenueData.slice(-7).map((r) => ({ value: r.amount }));
-  }, [businessStore.businesses, businessStore.revenueData]);
+  const revenueSparkline = useMemo(() => {
+    if (businesses.length === 0) return [];
+    return revenueData.slice(-7).map((r) => ({ value: r.amount }));
+  }, [businesses, revenueData]);
 
   // Load dashboard-specific data from Supabase
   useEffect(() => {
@@ -341,16 +366,16 @@ export default function DashboardScreen() {
     await hapticLight();
     await Promise.allSettled([
       fetchProfile(),
-      goalStore.fetchGoals(),
-      habitStore.fetchHabits(),
-      nutritionStore.fetchTodayNutrition(),
-      workoutStore.fetchTemplates(),
-      partnerStore.fetchPartnership(),
-      businessStore.fetchBusinesses(),
-      insightStore.fetchAll(),
+      fetchGoals(),
+      fetchHabits(),
+      fetchTodayNutrition(),
+      fetchTemplates(),
+      fetchPartnership(),
+      fetchBusinesses(),
+      fetchAll(),
     ]);
     setRefreshing(false);
-  }, [fetchProfile, goalStore, habitStore, nutritionStore, workoutStore, partnerStore, businessStore, insightStore]);
+  }, [fetchProfile, fetchGoals, fetchHabits, fetchTodayNutrition, fetchTemplates, fetchPartnership, fetchBusinesses, fetchAll]);
 
   // Initial fetch — timeout ensures skeleton never hangs if network is unavailable
   useEffect(() => {
@@ -658,7 +683,7 @@ export default function DashboardScreen() {
               <Pressable
                 onPress={() => {
                   void hapticLight();
-                  void insightStore.dismissMessage(accountabilityMessage.id);
+                  void dismissMessage(accountabilityMessage.id);
                 }}
                 style={{ padding: spacing.xs }}
                 accessibilityRole="button"
@@ -694,7 +719,7 @@ export default function DashboardScreen() {
             confidence={topPrediction.confidence}
             actionLabel={topPrediction.action_label}
             actionRoute={topPrediction.action_route}
-            onDismiss={() => void insightStore.acknowledgePrediction(topPrediction.id)}
+            onDismiss={() => void acknowledgePrediction(topPrediction.id)}
             style={{ marginBottom: spacing.md }}
           />
         </Animated.View>
@@ -886,15 +911,15 @@ export default function DashboardScreen() {
             icon="barbell"
             iconColor={colors.accent.primary}
             label="Workout"
-            detail={workoutStore.activeSession ? 'In progress' : 'Scheduled'}
-            done={!!workoutStore.activeSession?.completed_at}
+            detail={activeSession ? 'In progress' : 'Scheduled'}
+            done={!!activeSession?.completed_at}
           />
           <PlanRow
             icon="restaurant"
             iconColor={colors.accent.success}
             label="Meals logged"
-            detail={`${nutritionStore.todayLogs.length}/4`}
-            done={nutritionStore.todayLogs.length >= 4}
+            detail={`${todayLogs.length}/4`}
+            done={todayLogs.length >= 4}
             mono
           />
           <PlanRow
@@ -910,7 +935,7 @@ export default function DashboardScreen() {
       </Animated.View>
 
       {/* Partner Card */}
-      {partnerStore.partnerProfile && (
+      {partnerProfile && (
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <Card
             variant="partner"
@@ -933,13 +958,13 @@ export default function DashboardScreen() {
                 <Text
                   style={[typography.bodyBold, { color: colors.text.primary }]}
                 >
-                  {partnerStore.partnerProfile.display_name}
+                  {partnerProfile.display_name}
                 </Text>
                 <Text
                   style={[typography.caption, { color: colors.text.secondary }]}
                 >
                   Joint streak:{' '}
-                  <MonoText variant="monoCaption">{partnerStore.partnership?.joint_streak ?? 0}</MonoText> days
+                  <MonoText variant="monoCaption">{partnership?.joint_streak ?? 0}</MonoText> days
                 </Text>
               </View>
               <Text style={[typography.caption, { color: colors.accent.primary }]}>
@@ -971,7 +996,7 @@ export default function DashboardScreen() {
       )}
 
       {/* Revenue Sparkline */}
-      {revenueData.length > 0 && (
+      {revenueSparkline.length > 0 && (
         <Animated.View entering={FadeInDown.delay(300).duration(400)}>
           <Card
             variant="default"
@@ -995,14 +1020,14 @@ export default function DashboardScreen() {
                   ]}
                 >
                   {formatCurrency(
-                    revenueData.reduce((s, r) => s + r.value, 0),
+                    revenueSparkline.reduce((s, r) => s + r.value, 0),
                   )}
                 </Text>
               </View>
             }
           >
             <MiniSparkline
-              data={revenueData}
+              data={revenueSparkline}
               color={colors.accent.success}
               width={280}
               height={48}

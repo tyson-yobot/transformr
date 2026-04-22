@@ -24,7 +24,7 @@ export function useGeofence() {
   const [enabled, setEnabled] = useState(false);
   const [triggers, setTriggers] = useState<GeofenceTrigger[]>([]);
   const [hasPermission, setHasPermission] = useState(false);
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
 
   const enableGeofencing = useCallback(async (geofences: GeofenceTrigger[]) => {
     const granted = await requestLocationPermissions();

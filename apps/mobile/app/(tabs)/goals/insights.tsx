@@ -30,15 +30,13 @@ export default function InsightsScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const {
-    predictions,
-    proactiveMessages,
-    isLoading,
-    error,
-    fetchAll,
-    acknowledgePrediction,
-    dismissMessage,
-  } = useInsightStore();
+  const predictions = useInsightStore((s) => s.predictions);
+  const proactiveMessages = useInsightStore((s) => s.proactiveMessages);
+  const isLoading = useInsightStore((s) => s.isLoading);
+  const error = useInsightStore((s) => s.error);
+  const fetchAll = useInsightStore((s) => s.fetchAll);
+  const acknowledgePrediction = useInsightStore((s) => s.acknowledgePrediction);
+  const dismissMessage = useInsightStore((s) => s.dismissMessage);
 
   useEffect(() => {
     navigation.setOptions({

@@ -43,7 +43,11 @@ export default function PartnerDashboard() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const gate = useFeatureGate('partner_features');
-  const { partnership, partnerProfile, isLoading, fetchPartnership, sendNudge } = usePartnerStore();
+  const partnership = usePartnerStore((s) => s.partnership);
+  const partnerProfile = usePartnerStore((s) => s.partnerProfile);
+  const isLoading = usePartnerStore((s) => s.isLoading);
+  const fetchPartnership = usePartnerStore((s) => s.fetchPartnership);
+  const sendNudge = usePartnerStore((s) => s.sendNudge);
   const myProfile = useProfileStore((s) => s.profile);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -287,6 +291,7 @@ export default function PartnerDashboard() {
           <View style={{ marginTop: spacing.xl, gap: spacing.md }}>
             <Button title="Start Live Workout" onPress={() => { hapticLight(); router.push('/partner/live-workout'); }} accessibilityLabel="Start live workout with partner" fullWidth />
             <Button title="Active Challenges" onPress={() => { hapticLight(); router.push('/partner/challenges'); }} accessibilityLabel="View active partner challenges" variant="secondary" fullWidth />
+            <Button title="Send a Nudge" onPress={() => { hapticLight(); router.push('/partner/nudge'); }} accessibilityLabel="Send a nudge to your partner" variant="outline" fullWidth />
             <NudgeButton onSendNudge={(type, message) => { void sendNudge(type, message ?? ''); }} />
           </View>
         </Animated.View>

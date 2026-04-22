@@ -46,8 +46,11 @@ const CATEGORY_OPTIONS: { key: TxCategory; label: string }[] = [
 export default function TransactionsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { accounts, transactions, isLoading, fetchAccounts, logTransaction } =
-    useFinanceStore();
+  const accounts = useFinanceStore((s) => s.accounts);
+  const transactions = useFinanceStore((s) => s.transactions);
+  const isLoading = useFinanceStore((s) => s.isLoading);
+  const fetchAccounts = useFinanceStore((s) => s.fetchAccounts);
+  const logTransaction = useFinanceStore((s) => s.logTransaction);
 
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);

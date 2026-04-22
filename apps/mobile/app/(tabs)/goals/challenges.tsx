@@ -70,16 +70,14 @@ export default function ChallengesScreen() {
     });
   }, [navigation]);
 
-  const {
-    challengeDefinitions,
-    activeEnrollment,
-    enrollments,
-    todayLog,
-    isLoading,
-    fetchChallengeDefinitions,
-    fetchActiveEnrollment,
-    fetchEnrollments,
-  } = useChallengeStore();
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const enrollments = useChallengeStore((s) => s.enrollments);
+  const todayLog = useChallengeStore((s) => s.todayLog);
+  const isLoading = useChallengeStore((s) => s.isLoading);
+  const fetchChallengeDefinitions = useChallengeStore((s) => s.fetchChallengeDefinitions);
+  const fetchActiveEnrollment = useChallengeStore((s) => s.fetchActiveEnrollment);
+  const fetchEnrollments = useChallengeStore((s) => s.fetchEnrollments);
 
   // Fetch data on mount
   useEffect(() => {

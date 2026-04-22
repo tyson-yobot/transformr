@@ -40,7 +40,7 @@ export default function SavedMealsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { logFood } = useNutritionStore();
+  const logFood = useNutritionStore((s) => s.logFood);
 
   useEffect(() => {
     navigation.setOptions({

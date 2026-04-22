@@ -55,9 +55,13 @@ export default function AddFoodScreen() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ meal?: string; editId?: string }>();
 
-  const { searchResults, isLoading, searchFoods, logFood } = useNutritionStore();
-  const { profile } = useProfileStore();
-  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
+  const searchResults = useNutritionStore((s) => s.searchResults);
+  const isLoading = useNutritionStore((s) => s.isLoading);
+  const searchFoods = useNutritionStore((s) => s.searchFoods);
+  const logFood = useNutritionStore((s) => s.logFood);
+  const profile = useProfileStore((s) => s.profile);
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 
   const [searchQuery, setSearchQuery] = useState('');

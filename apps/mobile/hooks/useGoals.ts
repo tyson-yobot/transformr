@@ -3,10 +3,17 @@ import { useGoalStore } from '@stores/goalStore';
 import { useAuthStore } from '@stores/authStore';
 
 export function useGoals() {
-  const store = useGoalStore();
-  const fetchGoals = useGoalStore((s) => s.fetchGoals);
   const goals = useGoalStore((s) => s.goals);
-  const { user } = useAuthStore();
+  const milestones = useGoalStore((s) => s.milestones);
+  const isLoading = useGoalStore((s) => s.isLoading);
+  const error = useGoalStore((s) => s.error);
+  const fetchGoals = useGoalStore((s) => s.fetchGoals);
+  const createGoal = useGoalStore((s) => s.createGoal);
+  const updateGoal = useGoalStore((s) => s.updateGoal);
+  const updateGoalProgress = useGoalStore((s) => s.updateGoalProgress);
+  const clearError = useGoalStore((s) => s.clearError);
+  const reset = useGoalStore((s) => s.reset);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     if (user?.id) {
@@ -30,7 +37,16 @@ export function useGoals() {
   }, [activeGoals]);
 
   return {
-    ...store,
+    goals,
+    milestones,
+    isLoading,
+    error,
+    fetchGoals,
+    createGoal,
+    updateGoal,
+    updateGoalProgress,
+    clearError,
+    reset,
     activeGoals,
     goalsByCategory,
   };

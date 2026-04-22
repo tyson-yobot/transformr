@@ -62,7 +62,7 @@ export default function MealPlansScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { profile } = useProfileStore();
+  const profile = useProfileStore((s) => s.profile);
   const router = useRouter();
 
   useEffect(() => {

@@ -35,8 +35,12 @@ export default function FinanceDashboard() {
   const router = useRouter();
   const navigation = useNavigation();
   const gate = useFeatureGate('finance_tracking');
-  const { accounts, transactions, netWorthHistory, isLoading, error, fetchAccounts } =
-    useFinanceStore();
+  const accounts = useFinanceStore((s) => s.accounts);
+  const transactions = useFinanceStore((s) => s.transactions);
+  const netWorthHistory = useFinanceStore((s) => s.netWorthHistory);
+  const isLoading = useFinanceStore((s) => s.isLoading);
+  const error = useFinanceStore((s) => s.error);
+  const fetchAccounts = useFinanceStore((s) => s.fetchAccounts);
 
   const [refreshing, setRefreshing] = useState(false);
 

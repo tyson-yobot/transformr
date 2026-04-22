@@ -49,7 +49,10 @@ const PREBUILT_NUDGES: PrebuiltNudge[] = [
 export default function NudgeScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { partnership, partnerProfile, sendNudge, isLoading } = usePartnerStore();
+  const partnership = usePartnerStore((s) => s.partnership);
+  const partnerProfile = usePartnerStore((s) => s.partnerProfile);
+  const sendNudge = usePartnerStore((s) => s.sendNudge);
+  const isLoading = usePartnerStore((s) => s.isLoading);
 
   const [customMessage, setCustomMessage] = useState('');
   const [sentMessage, setSentMessage] = useState<string | null>(null);

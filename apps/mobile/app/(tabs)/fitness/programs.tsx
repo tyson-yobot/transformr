@@ -84,7 +84,9 @@ export default function ProgramsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
-  const { fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
+  const fetchTemplates = useWorkoutStore((s) => s.fetchTemplates);
+  const startWorkout = useWorkoutStore((s) => s.startWorkout);
+  const isLoading = useWorkoutStore((s) => s.isLoading);
 
   const [programsWithExercises, setProgramsWithExercises] = useState<ProgramWithExercises[]>([]);
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(null);

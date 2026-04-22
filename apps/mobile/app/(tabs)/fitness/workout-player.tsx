@@ -94,7 +94,8 @@ export default function WorkoutPlayerScreen() {
   const logCaloriesBurned = useNutritionStore((s) => s.logCaloriesBurned);
   const pendingExerciseId = useWorkoutStore((s) => s.pendingExerciseId);
   const setPendingExerciseId = useWorkoutStore((s) => s.setPendingExerciseId);
-  const { activeEnrollment, challengeDefinitions } = useChallengeStore();
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
 
   const { toast, show: showToast, hide: hideToast } = useActionToast();
 

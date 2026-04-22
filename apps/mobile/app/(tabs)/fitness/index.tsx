@@ -136,7 +136,10 @@ export default function FitnessHomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigation = useNavigation();
-  const { templates, fetchTemplates, startWorkout, isLoading } = useWorkoutStore();
+  const templates = useWorkoutStore((s) => s.templates);
+  const fetchTemplates = useWorkoutStore((s) => s.fetchTemplates);
+  const startWorkout = useWorkoutStore((s) => s.startWorkout);
+  const isLoading = useWorkoutStore((s) => s.isLoading);
 
   const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkout[]>([]);
   const [personalRecords, setPersonalRecords] = useState<PersonalRecord[]>([]);

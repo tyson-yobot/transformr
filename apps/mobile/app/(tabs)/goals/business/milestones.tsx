@@ -31,7 +31,7 @@ import type { BusinessMilestone } from '@app-types/database';
 export default function MilestonesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { businesses } = useBusinessStore();
+  const businesses = useBusinessStore((s) => s.businesses);
 
   const [milestones, setMilestones] = useState<BusinessMilestone[]>([]);
   const [isLoading, setIsLoading] = useState(true);

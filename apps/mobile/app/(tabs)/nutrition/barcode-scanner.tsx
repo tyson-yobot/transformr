@@ -65,8 +65,8 @@ export default function BarcodeScannerScreen() {
     });
   }, [navigation]);
 
-  const { logFood } = useNutritionStore();
-  const { profile } = useProfileStore();
+  const logFood = useNutritionStore((s) => s.logFood);
+  const profile = useProfileStore((s) => s.profile);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
   const [permission, requestPermission] = useCameraPermissions();
 

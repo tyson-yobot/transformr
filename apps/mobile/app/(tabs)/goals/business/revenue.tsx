@@ -41,8 +41,11 @@ export default function RevenueScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const { isAvailable: hasBusinessTracking } = useFeatureGate('business_tracking');
-  const { businesses, revenueData, isLoading, logRevenue, getMonthlyMetrics } =
-    useBusinessStore();
+  const businesses = useBusinessStore((s) => s.businesses);
+  const revenueData = useBusinessStore((s) => s.revenueData);
+  const isLoading = useBusinessStore((s) => s.isLoading);
+  const logRevenue = useBusinessStore((s) => s.logRevenue);
+  const getMonthlyMetrics = useBusinessStore((s) => s.getMonthlyMetrics);
 
   const [amount, setAmount] = useState('');
   const [revenueType, setRevenueType] = useState<RevenueType>('subscription');

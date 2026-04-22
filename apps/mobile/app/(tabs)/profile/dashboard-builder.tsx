@@ -63,12 +63,10 @@ export default function DashboardBuilderScreen() {
     });
   }, [navigation]);
 
-  const {
-    layout,
-    isLoading,
-    saveLayout,
-    resetToDefault,
-  } = useDashboardStore();
+  const layout = useDashboardStore((s) => s.layout);
+  const isLoading = useDashboardStore((s) => s.isLoading);
+  const saveLayout = useDashboardStore((s) => s.saveLayout);
+  const resetToDefault = useDashboardStore((s) => s.resetToDefault);
 
   const [widgets, setWidgets] = useState(layout);
   const [hasChanges, setHasChanges] = useState(false);

@@ -41,7 +41,8 @@ const CHALLENGE_TYPES: { key: ChallengeType; label: string }[] = [
 export default function PartnerChallengesScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
-  const { partnership, partnerProfile } = usePartnerStore();
+  const partnership = usePartnerStore((s) => s.partnership);
+  const partnerProfile = usePartnerStore((s) => s.partnerProfile);
   const myProfile = useProfileStore((s) => s.profile);
 
   const [challenges, setChallenges] = useState<PartnerChallenge[]>([]);

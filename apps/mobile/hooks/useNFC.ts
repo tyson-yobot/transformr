@@ -16,7 +16,7 @@ export function useNFC() {
   const [supported, setSupported] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [triggers, setTriggers] = useState<NfcTrigger[]>([]);
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
   const router = useRouter();
 
   useEffect(() => {

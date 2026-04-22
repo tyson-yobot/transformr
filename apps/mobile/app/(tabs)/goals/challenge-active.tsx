@@ -125,20 +125,18 @@ export default function ChallengeActiveScreen() {
   }, [navigation]);
 
   // Store -----------------------------------------------------------------
-  const {
-    activeEnrollment,
-    challengeDefinitions,
-    todayLog,
-    dailyLogs,
-    isLoading,
-    logDailyTask,
-    completeDailyLog,
-    restartChallenge,
-    abandonChallenge,
-    getTodayProgress,
-    fetchActiveEnrollment,
-    fetchDailyLogs,
-  } = useChallengeStore();
+  const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
+  const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
+  const todayLog = useChallengeStore((s) => s.todayLog);
+  const dailyLogs = useChallengeStore((s) => s.dailyLogs);
+  const isLoading = useChallengeStore((s) => s.isLoading);
+  const logDailyTask = useChallengeStore((s) => s.logDailyTask);
+  const completeDailyLog = useChallengeStore((s) => s.completeDailyLog);
+  const restartChallenge = useChallengeStore((s) => s.restartChallenge);
+  const abandonChallenge = useChallengeStore((s) => s.abandonChallenge);
+  const getTodayProgress = useChallengeStore((s) => s.getTodayProgress);
+  const fetchActiveEnrollment = useChallengeStore((s) => s.fetchActiveEnrollment);
+  const fetchDailyLogs = useChallengeStore((s) => s.fetchDailyLogs);
 
   // Local state -----------------------------------------------------------
   const [refreshing,          setRefreshing]          = useState(false);
