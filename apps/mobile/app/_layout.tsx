@@ -2,7 +2,7 @@
 // TRANSFORMR -- Root Layout
 // =============================================================================
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { Linking, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Slot } from 'expo-router';
@@ -18,6 +18,7 @@ import { useAuthStore } from '@stores/authStore';
 import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
+import { SplashOverlay } from '@components/SplashOverlay';
 
 // Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
 // All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
@@ -59,6 +60,7 @@ function AppStatusBar() {
 export default function RootLayout() {
   const listenToAuthChanges = useAuthStore((s) => s.listenToAuthChanges);
   useOfflineSync();
+  const [showSplash, setShowSplash] = useState(true);
 
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('@assets/fonts/Inter-Regular.ttf'),
@@ -129,7 +131,10 @@ export default function RootLayout() {
 
   const onLayoutReady = useCallback(async () => {
     if (fontsLoaded) {
+      // Hide the native splash immediately — our custom branded overlay takes over
       await SplashScreen.hideAsync();
+      // Show the branded splash overlay briefly, then fade out
+      setTimeout(() => setShowSplash(false), 1800);
     }
   }, [fontsLoaded]);
 
@@ -142,9 +147,10 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY} merchantIdentifier="merchant.com.automateai.transformr">
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider forceDark>
+            <ThemeProvider>
               <AppStatusBar />
               <Slot />
+              <SplashOverlay visible={showSplash} />
             </ThemeProvider>
           </QueryClientProvider>
         </StripeProvider>

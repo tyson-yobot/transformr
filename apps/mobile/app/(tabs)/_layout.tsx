@@ -10,6 +10,7 @@ import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatFAB } from '@components/ui/ChatFAB';
 import { UpgradeModal } from '@components/ui/UpgradeModal';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 interface TabIconProps {
   routeName: string;
@@ -88,6 +89,7 @@ export default function TabsLayout() {
 
   return (
     <View style={{ flex: 1 }}>
+      <AmbientBackground />
       <Tabs
         screenOptions={{
           headerShown: false,
