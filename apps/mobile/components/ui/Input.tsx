@@ -27,7 +27,7 @@ interface InputProps extends Omit<TextInputProps, 'style'> {
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
-export function Input({
+export const Input = React.memo(function Input({
   label,
   error,
   leftIcon,
@@ -127,7 +127,7 @@ export function Input({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {},

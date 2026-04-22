@@ -9,7 +9,7 @@ export interface MonoTextProps extends TextProps {
   children?: React.ReactNode;
 }
 
-export function MonoText({
+export const MonoText = React.memo(function MonoText({
   children,
   variant = 'monoBody',
   color,
@@ -32,4 +32,4 @@ export function MonoText({
       {children}
     </Text>
   );
-}
+});

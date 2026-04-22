@@ -36,7 +36,7 @@ interface ButtonProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function Button({
+export const Button = React.memo(function Button({
   title,
   onPress,
   variant = 'primary',
@@ -181,7 +181,7 @@ export function Button({
       )}
     </AnimatedPressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

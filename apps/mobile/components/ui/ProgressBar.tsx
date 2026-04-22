@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -18,7 +18,7 @@ interface ProgressBarProps {
   animationDuration?: number;
 }
 
-export function ProgressBar({
+export const ProgressBar = React.memo(function ProgressBar({
   progress,
   label,
   showPercentage = false,
@@ -98,7 +98,7 @@ export function ProgressBar({
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {},

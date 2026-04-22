@@ -4,7 +4,7 @@
 // Shows a progress ring, mini task checklist, and day progress.
 // =============================================================================
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,7 +30,7 @@ export interface ActiveChallengeCardProps {
 // Component
 // -----------------------------------------------------------------------------
 
-export function ActiveChallengeCard({
+export const ActiveChallengeCard = React.memo(function ActiveChallengeCard({
   definition,
   enrollment,
   todayLog,
@@ -173,7 +173,7 @@ export function ActiveChallengeCard({
       </Card>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card:          { paddingLeft: 12 },

@@ -93,7 +93,7 @@ interface StatTileProps {
 // StatTile
 // ---------------------------------------------------------------------------
 
-export function StatTile({
+export const StatTile = React.memo(function StatTile({
   label,
   value,
   unit,
@@ -163,4 +163,4 @@ export function StatTile({
       )}
     </Animated.View>
   );
-}
+});

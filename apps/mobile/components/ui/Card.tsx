@@ -49,7 +49,7 @@ interface CardProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function Card({
+export const Card = React.memo(function Card({
   children,
   variant = 'default',
   header,
@@ -188,7 +188,7 @@ export function Card({
       {content}
     </View>
   );
-}
+});
 
 // -----------------------------------------------------------------------------
 // Variant resolver — returns shadow + accent color + glow overlay color

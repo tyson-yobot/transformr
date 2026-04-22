@@ -3,6 +3,7 @@
 // Warm, encouraging empty state for data screens.
 // =============================================================================
 
+import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +21,7 @@ interface EmptyStateProps {
   style?: ViewStyle;
 }
 
-export function EmptyState({ icon, ionIcon, accentColor, title, subtitle, actionLabel, onAction, style }: EmptyStateProps) {
+export const EmptyState = React.memo(function EmptyState({ icon, ionIcon, accentColor, title, subtitle, actionLabel, onAction, style }: EmptyStateProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const accent = accentColor ?? colors.accent.primary;
 
@@ -85,7 +86,7 @@ export function EmptyState({ icon, ionIcon, accentColor, title, subtitle, action
       )}
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

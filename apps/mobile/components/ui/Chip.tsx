@@ -19,7 +19,7 @@ interface ChipProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function Chip({
+export const Chip = React.memo(function Chip({
   label,
   selected = false,
   onPress,
@@ -86,7 +86,7 @@ export function Chip({
       </Text>
     </AnimatedPressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -142,7 +142,7 @@ function RpeSlider({
   );
 }
 
-export function SetLogger({
+export const SetLogger = React.memo(function SetLogger({
   setNumber,
   weight,
   reps,
@@ -393,7 +393,7 @@ export function SetLogger({
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   outerWrap: {

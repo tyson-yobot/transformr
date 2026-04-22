@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, ViewStyle, DimensionValue } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -21,7 +21,7 @@ interface SkeletonProps {
   style?: ViewStyle;
 }
 
-export function Skeleton({
+export const Skeleton = React.memo(function Skeleton({
   variant = 'text',
   width,
   height,
@@ -85,7 +85,7 @@ export function Skeleton({
       accessibilityLabel="Loading"
     />
   );
-}
+});
 
 const styles = StyleSheet.create({
   base: {

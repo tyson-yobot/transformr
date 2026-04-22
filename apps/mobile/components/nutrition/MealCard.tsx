@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -60,7 +60,7 @@ function formatTime(dateStr: string | undefined): string {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export function MealCard({
+export const MealCard = React.memo(function MealCard({
   log,
   foodName,
   onEdit,
@@ -265,7 +265,7 @@ export function MealCard({
       </GestureDetector>
     </View>
   );
-}
+});
 
 interface MacroChipProps {
   label: string;

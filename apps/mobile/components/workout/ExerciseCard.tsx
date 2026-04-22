@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -51,7 +51,7 @@ const equipmentLabels: Record<string, string> = {
   other: 'Other',
 };
 
-export function ExerciseCard({
+export const ExerciseCard = React.memo(function ExerciseCard({
   exercise,
   targetSets,
   targetReps,
@@ -281,7 +281,7 @@ export function ExerciseCard({
       ) : null}
     </AnimatedPressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {},

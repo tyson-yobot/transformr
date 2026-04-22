@@ -4,6 +4,7 @@
 // confidence indicator, action button, and dismiss control.
 // =============================================================================
 
+import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -46,7 +47,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   general: 'sparkles',
 };
 
-export function PredictionAlert({
+export const PredictionAlert = React.memo(function PredictionAlert({
   title,
   body,
   severity,
@@ -130,7 +131,7 @@ export function PredictionAlert({
       </Card>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {},

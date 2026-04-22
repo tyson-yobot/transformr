@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '@theme/index';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -37,7 +38,7 @@ function getCalorieColor(consumed: number, target: number, accentColors: { succe
   return accentColors.warning;
 }
 
-export function MacroSummary({ consumed, targets, style }: MacroSummaryProps) {
+export const MacroSummary = React.memo(function MacroSummary({ consumed, targets, style }: MacroSummaryProps) {
   const { colors, typography, spacing } = useTheme();
 
   const caloriesRemaining = Math.max(0, targets.calories - consumed.calories);
@@ -145,7 +146,7 @@ export function MacroSummary({ consumed, targets, style }: MacroSummaryProps) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {},

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle, ImageSourcePropType } from 'react-native';
 import { useTheme } from '@theme/index';
 
@@ -34,7 +34,7 @@ const INDICATOR_SIZE: Record<AvatarSize, number> = {
   xl: 20,
 };
 
-export function Avatar({
+export const Avatar = React.memo(function Avatar({
   source,
   name,
   size = 'md',
@@ -135,7 +135,7 @@ export function Avatar({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

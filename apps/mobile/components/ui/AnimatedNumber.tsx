@@ -28,7 +28,7 @@ interface AnimatedNumberProps {
   overshoot?: boolean;
 }
 
-export function AnimatedNumber({
+export const AnimatedNumber = React.memo(function AnimatedNumber({
   value,
   formatFn,
   style,
@@ -73,4 +73,4 @@ export function AnimatedNumber({
       defaultValue={fmt(value)}
     />
   );
-}
+});

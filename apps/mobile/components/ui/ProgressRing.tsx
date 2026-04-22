@@ -22,7 +22,7 @@ interface ProgressRingProps {
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export function ProgressRing({
+export const ProgressRing = React.memo(function ProgressRing({
   progress,
   size = 120,
   strokeWidth = 10,
@@ -90,7 +90,7 @@ export function ProgressRing({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

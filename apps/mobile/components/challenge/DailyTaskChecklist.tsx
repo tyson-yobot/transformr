@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -124,7 +124,7 @@ function TaskRow({ task, isCompleted, isAutoVerified, onToggle, index }: TaskRow
   );
 }
 
-export function DailyTaskChecklist({
+export const DailyTaskChecklist = React.memo(function DailyTaskChecklist({
   tasks,
   completedTasks,
   autoVerified,
@@ -160,7 +160,7 @@ export function DailyTaskChecklist({
       ))}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {},

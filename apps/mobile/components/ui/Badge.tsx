@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '@theme/index';
 
@@ -12,7 +13,7 @@ interface BadgeProps {
   style?: ViewStyle;
 }
 
-export function Badge({
+export const Badge = React.memo(function Badge({
   label,
   variant = 'default',
   size = 'md',
@@ -81,7 +82,7 @@ export function Badge({
       </Text>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

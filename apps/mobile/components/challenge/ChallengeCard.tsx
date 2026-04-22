@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
@@ -38,7 +39,7 @@ const categoryIcons: Record<ChallengeCategory, string> = {
   custom: '\uD83C\uDFAF',
 };
 
-export function ChallengeCard({ challenge, onPress, isActive = false }: ChallengeCardProps) {
+export const ChallengeCard = React.memo(function ChallengeCard({ challenge, onPress, isActive = false }: ChallengeCardProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
 
   const difficulty = challenge.difficulty ?? 'intermediate';
@@ -178,7 +179,7 @@ export function ChallengeCard({ challenge, onPress, isActive = false }: Challeng
       </Card>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   activeOverlay: {

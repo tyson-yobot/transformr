@@ -95,7 +95,7 @@ function StatCell({ item }: { item: StatItem }) {
   );
 }
 
-export function QuickStatsRow({ stats, style }: QuickStatsRowProps) {
+export const QuickStatsRow = React.memo(function QuickStatsRow({ stats, style }: QuickStatsRowProps) {
   const { spacing } = useTheme();
 
   return (
@@ -105,7 +105,7 @@ export function QuickStatsRow({ stats, style }: QuickStatsRowProps) {
       ))}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {

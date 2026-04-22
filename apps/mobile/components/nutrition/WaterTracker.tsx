@@ -99,7 +99,7 @@ function WaterGlassVisualization({
   );
 }
 
-export function WaterTracker({
+export const WaterTracker = React.memo(function WaterTracker({
   logs,
   dailyGoalOz,
   onAddWater,
@@ -248,7 +248,7 @@ export function WaterTracker({
       ) : null}
     </View>
   );
-}
+});
 
 interface QuickAddButtonProps {
   label: string;

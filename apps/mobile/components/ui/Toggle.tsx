@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -24,7 +24,7 @@ const TRACK_HEIGHT = 32;
 const THUMB_SIZE = 26;
 const THUMB_MARGIN = 3;
 
-export function Toggle({
+export const Toggle = React.memo(function Toggle({
   value,
   onValueChange,
   label,
@@ -100,7 +100,7 @@ export function Toggle({
       </Animated.View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

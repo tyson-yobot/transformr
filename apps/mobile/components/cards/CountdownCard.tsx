@@ -130,7 +130,7 @@ function Separator() {
   );
 }
 
-export function CountdownCard({
+export const CountdownCard = React.memo(function CountdownCard({
   title,
   emoji,
   targetDate,
@@ -234,7 +234,7 @@ export function CountdownCard({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

@@ -4,6 +4,7 @@
 // via useScreenInsight, shows shimmer while loading, and allows refresh.
 // =============================================================================
 
+import React from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,7 +28,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   general: 'sparkles',
 };
 
-export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
+export const AIInsightCard = React.memo(function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
   const { colors, typography, spacing } = useTheme();
   const { insight, category, isLoading, refresh } = useScreenInsight(screenKey);
 
@@ -95,7 +96,7 @@ export function AIInsightCard({ screenKey, style }: AIInsightCardProps) {
       </GlowCard>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {},
