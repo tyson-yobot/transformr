@@ -68,6 +68,14 @@ export default function FormCheckScreen() {
     });
   }, [navigation]);
 
+  // Cleanup timers on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (recordingRef.current) clearInterval(recordingRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
+
   const handleStartRecording = useCallback(async () => {
     setPhase('recording');
     setRecordingDuration(0);
