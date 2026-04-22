@@ -1,11 +1,4 @@
-import {
-  requestRecordingPermissionsAsync,
-  setAudioModeAsync,
-  RecordingPresets,
-  AudioModule,
-  type RecordingOptions,
-} from 'expo-audio';
-import type { AudioRecorder } from 'expo-audio';
+import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { supabase } from '@/services/supabase';
 
@@ -164,36 +157,34 @@ export async function parseVoiceCommandAI(
   }
 }
 
-let recorder: AudioRecorder | null = null;
+let recording: Audio.Recording | null = null;
 
 export async function startRecording(): Promise<void> {
-  await requestRecordingPermissionsAsync();
-  await setAudioModeAsync({
-    allowsRecording: true,
-    playsInSilentMode: true,
+  await Audio.requestPermissionsAsync();
+  await Audio.setAudioModeAsync({
+    allowsRecordingIOS: true,
+    playsInSilentModeIOS: true,
   });
 
-  const preset = RecordingPresets.HIGH_QUALITY as RecordingOptions;
-  // eslint-disable-next-line import/namespace -- AudioRecorder is a runtime constructor on the native module
-  const newRecorder: AudioRecorder = new AudioModule.AudioRecorder(preset);
-  await newRecorder.prepareToRecordAsync();
-  newRecorder.record();
-  recorder = newRecorder;
+  const { recording: newRecording } = await Audio.Recording.createAsync(
+    Audio.RecordingOptionsPresets.HIGH_QUALITY,
+  );
+  recording = newRecording;
 }
 
 export async function stopRecording(): Promise<string | null> {
-  if (!recorder) return null;
+  if (!recording) return null;
 
-  await recorder.stop();
-  await setAudioModeAsync({ allowsRecording: false });
+  await recording.stopAndUnloadAsync();
+  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-  const uri = recorder.uri;
-  recorder = null;
+  const uri = recording.getURI();
+  recording = null;
   return uri;
 }
 
 export function isRecording(): boolean {
-  return recorder !== null;
+  return recording !== null;
 }
 
 // Transcribe a recorded audio URI to text via the cloud transcription edge function

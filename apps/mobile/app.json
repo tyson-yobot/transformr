@@ -9,7 +9,7 @@
       "url": "https://u.expo.dev/placeholder"
     },
     "runtimeVersion": "1.0.0",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/transformr-icon.png",
     "scheme": "com.automateai.transformr",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -23,6 +23,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.automateai.transformr",
+      "icon": "./assets/icons/transformr-icon.png",
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "TRANSFORMR uses the camera for meal photos, barcode scanning, progress photos, and exercise form checks.",
@@ -48,7 +49,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/icons/transformr-icon.png",
         "backgroundColor": "#0C0A15"
       },
       "package": "com.automateai.transformr",
@@ -77,8 +78,7 @@
       "expo-location",
       "expo-local-authentication",
       "expo-secure-store",
-      "expo-audio",
-      "expo-video",
+      "expo-av",
       "expo-file-system",
       [
         "expo-font",
