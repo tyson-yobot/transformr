@@ -52,7 +52,7 @@ const TIER_FEATURES: Record<UpgradeTier, string[]> = {
     'AI Adaptive Programming — rewrites your program after every session',
     'AI Meal Camera — snap food, macros log instantly',
     'AI Grocery Lists — weekly shopping from your meal plan',
-    'Unlimited Habits — no 5-habit cap',
+    'Unlimited Habits — no 3-habit cap',
     'Streak Shields — protect your streak once per month',
     'Unlimited Data History — no 7-day cutoff',
     'AI Daily Coaching — personalized cues every morning',
