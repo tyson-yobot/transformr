@@ -5,6 +5,78 @@ All agents working in this repository MUST follow these rules without exception.
 
 ---
 
+## LOCKED FILES — DO NOT MODIFY
+
+These files are production-locked. NO Claude Code session may
+modify, overwrite, refactor, or "improve" them under ANY
+circumstances. The ONLY exception is if Tyson explicitly says
+"unlock the splash screen" or "unlock the login screen."
+
+### Splash Screen — LOCKED
+- File: components/SplashOverlay.tsx
+- Background: gym-hero.jpg (same as login screen)
+- Logo: icon.png from assets/images/
+- Text: "TRANSFORMR" title, tagline, "By Automate AI"
+- DO NOT CHANGE THE ICON
+- DO NOT CHANGE THE BACKGROUND
+- DO NOT CHANGE ANY STYLING
+
+### Login Screen — LOCKED
+- File: app/(auth)/login.tsx
+- Background: gym-hero.jpg
+- Logo: same as splash screen
+- DO NOT MODIFY THIS FILE
+
+### App Icon — LOCKED
+- Source: assets/icons/transformr-icon.png
+- Referenced in app.json icon fields
+- DO NOT replace with any other icon file
+
+### Rules
+- "Update all screens" EXCLUDES these files
+- "Fix all components" EXCLUDES these files
+- "Modernize the UI" EXCLUDES these files
+- Any prompt that would touch these files: SKIP and move on
+
+---
+
+## ABSOLUTE CONSTRAINTS — NEVER VIOLATE
+
+These rules apply to EVERY Claude Code session, EVERY task, EVERY
+prompt, with ZERO exceptions unless Tyson explicitly overrides them
+in the current session.
+
+### No Removal / No Regression Rule
+- NEVER remove any functionality, feature, screen, component,
+  hook, store, service, Edge Function, or enhancement
+- NEVER downgrade, simplify, or reduce any part of the app
+- NEVER change UI styling, design, layout, colors, or visual
+  appearance unless Tyson explicitly requests the change
+- NEVER replace a working implementation with a simpler one
+- NEVER delete code that is currently in use
+- NEVER comment out working code
+- If a task says "fix X" that means fix X, not remove X
+- If a task says "update all screens" that means enhance them,
+  not strip them down
+- Changes must be ADDITIVE or CORRECTIVE, never SUBTRACTIVE
+- When in doubt: ADD, don't remove. ENHANCE, don't simplify.
+
+### No Workarounds Rule
+- NEVER use LogBox.ignoreLogs, console.log suppression, or any
+  error-hiding technique
+- NEVER use @ts-ignore, @ts-expect-error, or 'any' types
+- NEVER write stubs, placeholders, TODOs, or "coming soon"
+- NEVER triage an issue as "non-blocking" or "do later"
+- Every issue gets the REAL production fix immediately
+
+### Process-Safety Rule
+- NEVER run taskkill, Stop-Process, kill, pkill, or any
+  process-killing command
+- Tyson runs parallel Claude Code sessions — killing processes
+  destroys active work
+
+---
+
 ## SECTION 1 — NEVER TOUCH LIST
 
 These categories of files and actions are permanently off-limits.
