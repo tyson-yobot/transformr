@@ -32,6 +32,8 @@ import {
   type Program,
 } from '@services/commerce';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   beginner:     '#10B981',
@@ -107,6 +109,8 @@ export default function MarketplaceScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
 
       {/* Header */}

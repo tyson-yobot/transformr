@@ -32,6 +32,8 @@ import { MEAL_TYPES, MACRO_COLORS } from '@utils/constants';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import type { Food } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { checkFoodBeforeLogging, type ComplianceResult } from '@services/ai/compliance';
@@ -201,6 +203,8 @@ export default function AddFoodScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={100}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}

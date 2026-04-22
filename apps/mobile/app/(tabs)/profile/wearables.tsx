@@ -28,6 +28,8 @@ import { useProfileStore } from '@stores/profileStore';
 import { isWatchReachable } from '@services/watch';
 import { hapticLight } from '@utils/haptics';
 import { formatRelativeTime } from '@utils/formatters';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 interface WearableConfig {
   id: 'appleWatch' | 'garmin' | 'fitbit';
@@ -157,6 +159,8 @@ export default function WearablesScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
 
       {/* Header */}

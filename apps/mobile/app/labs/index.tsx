@@ -23,6 +23,8 @@ import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { useLabsStore } from '@stores/labsStore';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import type { LabUpload, LabUploadStatus } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 
@@ -300,6 +302,8 @@ export default function LabsHistoryScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
       {/* Header */}

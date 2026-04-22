@@ -35,6 +35,8 @@ import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { VoiceMicButton } from '@components/ui/VoiceMicButton';
 import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -197,6 +199,8 @@ export default function JournalScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}

@@ -25,6 +25,8 @@ import { formatSetDisplay } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { LiveWorkoutSync } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const REACTIONS = [
   { emoji: '\uD83D\uDD25', label: 'Fire' },
@@ -183,6 +185,8 @@ export default function LiveWorkoutScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

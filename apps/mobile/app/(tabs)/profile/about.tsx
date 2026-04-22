@@ -23,6 +23,8 @@ import { hapticLight } from '@utils/haptics';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -146,6 +148,8 @@ export default function AboutScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {/* App Icon & Version */}
       <Animated.View entering={FadeInDown.duration(400)}>
         <View style={[styles.heroSection, { marginBottom: spacing.xl }]}>

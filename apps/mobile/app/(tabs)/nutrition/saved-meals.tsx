@@ -30,6 +30,8 @@ import { supabase } from '../../../services/supabase';
 import type { SavedMeal } from '@app-types/database';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -164,6 +166,8 @@ export default function SavedMealsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}

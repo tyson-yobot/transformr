@@ -28,6 +28,8 @@ import type {
   LabBiomarker,
 } from '@app-types/ai';
 import { hapticLight } from '@utils/haptics';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const CATEGORY_LABEL: Record<BiomarkerCategory, string> = {
   metabolic: 'Metabolic',
@@ -237,6 +239,8 @@ export default function LabDetailScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {renderHeader()}
 
       <ScrollView

@@ -28,6 +28,8 @@ import { formatDate } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { PartnerChallenge } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type ChallengeType = NonNullable<PartnerChallenge['challenge_type']>;
 
@@ -164,6 +166,8 @@ export default function PartnerChallengesScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

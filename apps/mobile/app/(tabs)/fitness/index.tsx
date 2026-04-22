@@ -39,6 +39,8 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { HeroCard } from '@components/ui/HeroCard';
 import { HERO_IMAGES } from '@services/heroImagePreloader';
 
@@ -364,6 +366,8 @@ export default function FitnessHomeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />
       <ScrollView

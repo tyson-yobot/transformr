@@ -32,6 +32,8 @@ import { supabase } from '@services/supabase';
 import type { Exercise } from '@app-types/database';
 import { MuscleGroupTile } from '@components/workout/MuscleGroupTile';
 import { ExerciseThumbnail } from '@components/workout/ExerciseThumbnail';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type CategoryFilter = Exercise['category'] | 'all';
 type EquipmentFilter = Exercise['equipment'] | 'all';
@@ -204,6 +206,8 @@ export default function ExercisesScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
 
       {/* Custom header with back button */}

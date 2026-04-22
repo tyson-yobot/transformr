@@ -26,6 +26,8 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '../../../../services/supabase';
 import { useBusinessStore } from '@stores/businessStore';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type CustomerStatus = NonNullable<Customer['status']>;
 
@@ -173,6 +175,8 @@ export default function CustomersScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

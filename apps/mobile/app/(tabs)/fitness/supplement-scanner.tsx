@@ -27,6 +27,8 @@ import { Badge } from '@components/ui/Badge';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -227,6 +229,8 @@ export default function SupplementScannerScreen() {
   if (step === 'capture') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -349,6 +353,8 @@ export default function SupplementScannerScreen() {
   if (step === 'preview') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -444,6 +450,8 @@ export default function SupplementScannerScreen() {
   if (step === 'results' && result) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

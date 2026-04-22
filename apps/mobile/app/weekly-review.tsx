@@ -19,6 +19,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
 import { GlowCard } from '@components/ui/GlowCard';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
@@ -158,6 +160,8 @@ export default function WeeklyReviewScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <PurpleRadialBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}

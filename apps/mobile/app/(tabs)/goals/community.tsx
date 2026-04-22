@@ -26,6 +26,8 @@ import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { CommunityLeaderboard } from '@components/community/CommunityLeaderboard';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -217,6 +219,8 @@ export default function CommunityScreen() {
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: colors.background.primary }]} edges={['bottom']}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

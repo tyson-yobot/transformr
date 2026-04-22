@@ -27,6 +27,8 @@ import { supabase } from '@services/supabase';
 import { computeHealthROIReport, type HealthROIReport } from '@services/ai/healthRoi';
 import { hapticLight } from '@utils/haptics';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type Window = 30 | 60 | 90;
 
@@ -124,6 +126,8 @@ export default function HealthROIScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
 
       {/* Header */}

@@ -25,6 +25,8 @@ import { Badge } from '@components/ui/Badge';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { PredictionAlert } from '@components/cards/PredictionAlert';
 import { useInsightStore } from '@stores/insightStore';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 export default function InsightsScreen() {
   const { colors, typography, spacing } = useTheme();
@@ -64,6 +66,8 @@ export default function InsightsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}

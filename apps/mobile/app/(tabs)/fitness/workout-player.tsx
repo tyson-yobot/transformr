@@ -57,6 +57,8 @@ import { HELP } from '../../../constants/helpContent';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 import type { Exercise, WorkoutTemplateExercise } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useChallengeStore } from '@stores/challengeStore';
 import { checkWorkoutCompliance } from '@services/ai/compliance';
 
@@ -698,6 +700,8 @@ export default function WorkoutPlayerScreen() {
   return (
     <>
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Top Bar: Timer + Volume */}
       <View

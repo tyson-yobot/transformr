@@ -33,6 +33,8 @@ import { uploadProgressPhoto, analyzeProgressPhotos } from '@services/ai/progres
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { AIProgressPhotoAnalysis } from '@app-types/ai';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const THUMB_SIZE = (SCREEN_WIDTH - 48) / 3;
@@ -167,6 +169,8 @@ export default function ProgressPhotosScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
 
       {/* Header */}

@@ -24,6 +24,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { AmbientBackground } from '../components/ui/AmbientBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { GlowButton } from '../components/ui/GlowButton';
 import { FeatureHighlightRow } from '../components/ui/FeatureHighlightRow';
 import { SectionHeader } from '../components/ui/SectionHeader';
@@ -309,6 +310,7 @@ export default function UpgradeScreen() {
       />
 
       <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
       <AmbientBackground />
       <ScrollView
         style={{ flex: 1 }}

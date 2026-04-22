@@ -21,6 +21,8 @@ import { EmptyState } from '@components/ui/EmptyState';
 import { Sparkline } from '@components/charts/Sparkline';
 import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrency, formatDate } from '@utils/formatters';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 export default function NetWorthScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -115,6 +117,8 @@ export default function NetWorthScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

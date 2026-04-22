@@ -40,6 +40,8 @@ import type {
 } from '@app-types/ai';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 interface CheckedState {
@@ -269,6 +271,8 @@ export default function GroceryListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={{  padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

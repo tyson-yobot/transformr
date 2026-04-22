@@ -28,6 +28,8 @@ import { formatCurrency } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import type { Budget } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const BUDGET_CATEGORIES = [
   'food', 'housing', 'transportation', 'entertainment', 'health',
@@ -158,6 +160,8 @@ export default function BudgetsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

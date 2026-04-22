@@ -44,6 +44,8 @@ import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type GoalCategory = NonNullable<Goal['category']>;
 
@@ -248,6 +250,8 @@ export default function GoalsDashboard() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
       <ScrollView

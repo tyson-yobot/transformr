@@ -24,6 +24,8 @@ import { useFinanceStore } from '@stores/financeStore';
 import { formatCurrencyDetailed, formatDate, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticSuccess } from '@utils/haptics';
 import type { FinanceTransaction } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type TxCategory = NonNullable<FinanceTransaction['category']>;
 
@@ -138,6 +140,8 @@ export default function TransactionsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}

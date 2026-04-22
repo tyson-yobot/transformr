@@ -27,6 +27,8 @@ import { supabase } from '@services/supabase';
 import { useWorkoutStore } from '@stores/workoutStore';
 import type { Exercise, PersonalRecord, WorkoutSet } from '@app-types/database';
 import { BodyMap } from '@components/ui/BodyMap';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { musclesToBodyParts } from '@utils/muscleMapping';
 import type { BodyPart } from '@components/ui/BodyMap';
 
@@ -186,6 +188,8 @@ export default function ExerciseDetailScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

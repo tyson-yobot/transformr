@@ -21,6 +21,8 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { MonoText } from '@components/ui/MonoText';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useDailyBriefing } from '@hooks/useDailyBriefing';
 import { useSettingsStore } from '@stores/settingsStore';
 
@@ -85,6 +87,8 @@ export default function DailyBriefingScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <PurpleRadialBackground />
       {/* ================================================================= */}
       {/* Section 1 -- Greeting + Countdown                                 */}

@@ -32,6 +32,8 @@ import { HelpBubble } from '@components/ui/HelpBubble';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type MealType = typeof MEAL_TYPES[number];
@@ -208,6 +210,8 @@ export default function BarcodeScannerScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <ActionToast message={toast.message} subtext={toast.subtext} visible={toast.visible} onHide={hideToast} type={toast.type} />
       <HelpBubble id="barcode_scan" message="Scan any food barcode to auto-fill nutrition" position="above" />
       {stage === 'scanning' && (

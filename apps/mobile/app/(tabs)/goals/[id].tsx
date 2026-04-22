@@ -36,6 +36,8 @@ import { supabase } from '../../../services/supabase';
 import { hapticSuccess, hapticMedium, hapticLight } from '@utils/haptics';
 import { formatDate, formatNumber, formatCountdown, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import type { GoalMilestone } from '@app-types/database';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -442,6 +444,8 @@ export default function GoalDetailScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}

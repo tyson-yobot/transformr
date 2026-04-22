@@ -25,6 +25,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useChatStore } from '@stores/chatStore';
 import type { ChatConversation, ChatTopic } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const TOPIC_ICONS: Record<ChatTopic, keyof typeof Ionicons.glyphMap> = {
   general: 'chatbubble-ellipses-outline',
@@ -361,6 +363,8 @@ export default function ChatHistoryScreen() {
         { backgroundColor: colors.background.primary },
       ]}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       {/* Header */}
       <View

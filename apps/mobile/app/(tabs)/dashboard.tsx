@@ -40,6 +40,7 @@ import { WeightChart } from '@components/charts/WeightChart';
 import { SkiaSparkline } from '@components/charts/SkiaSparkline';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { NoiseOverlay } from '@components/ui/NoiseOverlay';
 import { useProfileStore } from '@stores/profileStore';
 import { useWorkoutStore } from '@stores/workoutStore';
@@ -464,6 +465,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <ScreenBackground />
       <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />

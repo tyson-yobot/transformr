@@ -34,6 +34,8 @@ import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 const isValidTime = (t: string): boolean => /^\d{1,2}:\d{2}$/.test(t);
@@ -170,6 +172,8 @@ export default function SleepTracker() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}

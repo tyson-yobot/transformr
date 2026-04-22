@@ -26,6 +26,8 @@ import type { NotificationPreferences } from '@app-types/database';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Default prefs
@@ -293,6 +295,8 @@ export default function NotificationsSettingsScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       {/* Global Toggle */}
       <Animated.View entering={FadeInDown.duration(400)}>
         <Card variant="elevated" style={{ marginBottom: spacing.xl }}>

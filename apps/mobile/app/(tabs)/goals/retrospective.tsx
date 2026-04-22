@@ -31,6 +31,8 @@ import { StatTile } from '@components/ui/StatTile';
 import { supabase } from '@services/supabase';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -191,6 +193,8 @@ export default function RetrospectiveScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ActionToast
         message={toast.message}

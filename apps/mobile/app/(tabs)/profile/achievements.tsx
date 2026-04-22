@@ -26,6 +26,8 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { ShareButton } from '@components/social/ShareButton';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -173,6 +175,8 @@ export default function AchievementsScreen() {
         <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <AIInsightCard screenKey="profile/achievements" style={{ marginBottom: spacing.md }} />
 
       {/* Summary */}

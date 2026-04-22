@@ -28,6 +28,8 @@ import { ProgressRing } from '@components/ui/ProgressRing';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -241,6 +243,8 @@ export default function PostureCheckScreen() {
   if (step === 'intro') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -349,6 +353,8 @@ export default function PostureCheckScreen() {
   if (step === 'front-photo') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -498,6 +504,8 @@ export default function PostureCheckScreen() {
   if (step === 'side-photo') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -687,6 +695,8 @@ export default function PostureCheckScreen() {
 
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

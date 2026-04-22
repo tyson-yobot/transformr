@@ -30,6 +30,8 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { analyzeExerciseForm } from '@services/ai/formCheck';
 import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -205,6 +207,8 @@ export default function FormCheckScreen() {
   if (phase === 'setup') {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
@@ -423,6 +427,8 @@ export default function FormCheckScreen() {
   if (phase === 'results' && analysisResult) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
+        <ScreenBackground />
+        <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}

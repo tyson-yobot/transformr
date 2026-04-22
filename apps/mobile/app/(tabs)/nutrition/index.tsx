@@ -45,6 +45,8 @@ import { HelpIcon } from '@components/ui/HelpIcon';
 import { GlowCard } from '@components/ui/GlowCard';
 import { SectionTile } from '@components/ui/SectionTile';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
@@ -299,6 +301,8 @@ export default function NutritionHomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <ScreenBackground />
+      <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
       {/* Header */}
