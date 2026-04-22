@@ -82,12 +82,14 @@ export function useScreenEntrance({
   //   nutrition  → 4 sections
   // We create exactly as many animated styles as sections.length.
   /* eslint-disable react-hooks/rules-of-hooks */
-  const entranceStyles = sections.map((_, idx) =>
-    useAnimatedStyle<ViewStyle>(() => ({
-      opacity: opacityValues[idx]!.value,
-      transform: [{ translateY: translateYValues[idx]!.value }],
-    })),
-  );
+  const entranceStyles = sections.map((_, idx) => {
+    const opRef = opacityValues[idx];
+    const tyRef = translateYValues[idx];
+    return useAnimatedStyle<ViewStyle>(() => ({
+      opacity: opRef ? opRef.value : 0,
+      transform: [{ translateY: tyRef ? tyRef.value : 0 }],
+    }));
+  });
   /* eslint-enable react-hooks/rules-of-hooks */
 
   // -------------------------------------------------------------------------
@@ -96,8 +98,10 @@ export function useScreenEntrance({
   useEffect(() => {
     if (reducedMotion) {
       sections.forEach((_, idx) => {
-        opacityValues[idx]!.value = 1;
-        translateYValues[idx]!.value = 0;
+        const opRef = opacityValues[idx];
+        const tyRef = translateYValues[idx];
+        if (opRef) opRef.value = 1;
+        if (tyRef) tyRef.value = 0;
       });
     }
     // Only run when reducedMotion changes
@@ -121,14 +125,20 @@ export function useScreenEntrance({
       interactionRef.current = InteractionManager.runAfterInteractions(() => {
         sections.forEach((_, idx) => {
           const id = setTimeout(() => {
-            opacityValues[idx]!.value = withTiming(1, {
-              duration,
-              easing: Easing.out(Easing.cubic),
-            });
-            translateYValues[idx]!.value = withTiming(0, {
-              duration,
-              easing: Easing.out(Easing.cubic),
-            });
+            const opRef = opacityValues[idx];
+            const tyRef = translateYValues[idx];
+            if (opRef) {
+              opRef.value = withTiming(1, {
+                duration,
+                easing: Easing.out(Easing.cubic),
+              });
+            }
+            if (tyRef) {
+              tyRef.value = withTiming(0, {
+                duration,
+                easing: Easing.out(Easing.cubic),
+              });
+            }
           }, idx * staggerMs);
           timeoutIds.current.push(id);
         });
@@ -146,10 +156,10 @@ export function useScreenEntrance({
 
         // Cancel in-flight animations and reset to hidden state
         sections.forEach((_, idx) => {
-          cancelAnimation(opacityValues[idx]!);
-          cancelAnimation(translateYValues[idx]!);
-          opacityValues[idx]!.value = 0;
-          translateYValues[idx]!.value = fromY;
+          const opRef = opacityValues[idx];
+          const tyRef = translateYValues[idx];
+          if (opRef) { cancelAnimation(opRef); opRef.value = 0; }
+          if (tyRef) { cancelAnimation(tyRef); tyRef.value = fromY; }
         });
       };
       // sections, staggerMs, duration, fromY are stable (constant arrays/numbers)
@@ -165,8 +175,10 @@ export function useScreenEntrance({
       interactionRef.current?.cancel();
       timeoutIds.current.forEach((id) => clearTimeout(id));
       sections.forEach((_, idx) => {
-        cancelAnimation(opacityValues[idx]!);
-        cancelAnimation(translateYValues[idx]!);
+        const opRef = opacityValues[idx];
+        const tyRef = translateYValues[idx];
+        if (opRef) cancelAnimation(opRef);
+        if (tyRef) cancelAnimation(tyRef);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

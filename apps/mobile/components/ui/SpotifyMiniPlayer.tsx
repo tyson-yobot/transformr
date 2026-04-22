@@ -23,14 +23,14 @@ interface Props {
   userId: string;
 }
 
-export function SpotifyMiniPlayer({ userId }: Props) {
+export function SpotifyMiniPlayer({ userId: _userId }: Props) {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const [track, setTrack] = useState<SpotifyTrack | null>(null);
 
   const refresh = useCallback(async () => {
     const current = await getCurrentTrack().catch(() => null);
     setTrack(current);
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     void refresh();
@@ -46,17 +46,17 @@ export function SpotifyMiniPlayer({ userId }: Props) {
       await resumePlayback().catch(() => undefined);
     }
     await refresh();
-  }, [track, userId, refresh]);
+  }, [track, refresh]);
 
   const handleNext = useCallback(async () => {
     await skipNext().catch(() => undefined);
     setTimeout(() => { void refresh(); }, 500);
-  }, [userId, refresh]);
+  }, [refresh]);
 
   const handlePrev = useCallback(async () => {
     await skipPrevious().catch(() => undefined);
     setTimeout(() => { void refresh(); }, 500);
-  }, [userId, refresh]);
+  }, [refresh]);
 
   if (!track) return null;
 

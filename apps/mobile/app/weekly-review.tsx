@@ -7,10 +7,13 @@ import {
   View,
   Text,
   ScrollView,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -62,6 +65,7 @@ function GradeCard({ label, grade }: GradeCardProps) {
 export default function WeeklyReviewScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const [review, setReview] = useState<WeeklyReview | null>(null);
   const [previousReview, setPreviousReview] = useState<WeeklyReview | null>(null);
@@ -110,6 +114,9 @@ export default function WeeklyReviewScreen() {
       <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={{ padding: spacing.lg, paddingTop: insets.top + spacing.lg, gap: spacing.md }}>
+          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ marginBottom: spacing.sm }}>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </Pressable>
           <Skeleton variant="card" height={80} />
           <Skeleton variant="card" height={120} />
           <Skeleton variant="card" height={200} />
@@ -121,6 +128,9 @@ export default function WeeklyReviewScreen() {
   if (error && !review) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ position: 'absolute', top: insets.top + spacing.md, left: spacing.lg }}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </Pressable>
         <Text style={[typography.h2, { color: colors.accent.danger, textAlign: 'center' }]}>
           Could not load review
         </Text>
@@ -134,6 +144,9 @@ export default function WeeklyReviewScreen() {
   if (!review) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ position: 'absolute', top: insets.top + spacing.md, left: spacing.lg }}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </Pressable>
         <EmptyState
           ionIcon="calendar-outline"
           title="No Weekly Review Yet"
@@ -150,6 +163,11 @@ export default function WeeklyReviewScreen() {
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Back button */}
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ marginBottom: spacing.sm }}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </Pressable>
+
         {/* Header */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>

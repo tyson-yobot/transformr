@@ -7,11 +7,14 @@ import {
   View,
   Text,
   ScrollView,
+  Pressable,
   Alert,
   StyleSheet,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { GatePromptCard } from '@components/ui/GatePromptCard';
 import { useTheme } from '@theme/index';
@@ -72,6 +75,7 @@ function generateProjection(
 export default function TrajectoryScreen() {
   const { colors, typography, spacing } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const gate = useFeatureGate('ai_trajectory_simulator');
   const profile = useProfileStore((s) => s.profile);
   const [selectedDomain, setSelectedDomain] = useState<TrajectoryDomain>('weight');
@@ -176,6 +180,9 @@ export default function TrajectoryScreen() {
   if (!gate.isAvailable) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </Pressable>
         <GatePromptCard featureKey="ai_trajectory_simulator" height={200} />
       </SafeAreaView>
     );
@@ -188,6 +195,11 @@ export default function TrajectoryScreen() {
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingTop: insets.top + spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Back button */}
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ marginBottom: spacing.sm }}>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </Pressable>
+
         <Animated.View entering={FadeInDown.delay(100)}>
           <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>
             AI Trajectory Simulator
