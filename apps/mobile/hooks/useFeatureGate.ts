@@ -1,140 +1,12 @@
 // =============================================================================
 // TRANSFORMR — Feature Gate Hook
+// Imports FeatureKey from config/featureGates.ts (single source of truth).
 // =============================================================================
 
+import { useRouter } from 'expo-router';
 import { useSubscriptionStore, SubscriptionTier } from '../stores/subscriptionStore';
-
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
-
-export type FeatureKey =
-  | 'ai_meal_camera'
-  | 'barcode_scanner'
-  | 'ghost_mode'
-  | 'ai_chat_coach'
-  | 'ai_insights'
-  | 'ai_form_check'
-  | 'ai_adaptive_program'
-  | 'ai_trajectory_simulator'
-  | 'ai_weekly_report'
-  | 'ai_journal_prompt'
-  | 'ai_sleep_optimizer'
-  | 'ai_grocery_list'
-  | 'ai_meal_prep'
-  | 'ai_supplement_advisor'
-  | 'ai_workout_narrator'
-  | 'ai_correlation'
-  | 'unlimited_habits'
-  | 'unlimited_programs'
-  | 'progress_photos_unlimited'
-  | 'ai_progress_analysis'
-  | 'readiness_score'
-  | 'partner_features'
-  | 'partner_live_sync'
-  | 'challenge_center_full'
-  | 'community_leaderboards'
-  | 'social_content_gen'
-  | 'stake_goals'
-  | 'business_tracking'
-  | 'finance_tracking'
-  | 'vision_board'
-  | 'goal_cinema'
-  | 'dashboard_builder'
-  | 'data_export'
-  | 'wearable_integrations'
-  | 'nfc_triggers'
-  | 'smart_notifications'
-  | 'weather_intelligence'
-  | 'lab_scanner'
-  | 'apple_health_sync'
-  | 'spotify_integration'
-  | 'strava_integration'
-  // ── Screen-level AI feature keys ────────────────────────────────
-  | 'ai_posture_analysis'
-  | 'ai_progress_photo'
-  | 'ai_daily_affirmation'
-  | 'ai_health_roi'
-  | 'ai_journal'
-  | 'ai_retrospective'
-  | 'ai_supplement_scanner'
-  // ── Extended v2 keys ────────────────────────────────────────────
-  | 'workout_logging'
-  | 'exercise_library'
-  | 'ai_adaptive_programming'
-  | 'ghost_mode_training'
-  | 'ai_form_check_video'
-  | 'apple_watch_companion'
-  | 'unlimited_workout_history'
-  | 'manual_food_logging'
-  | 'barcode_scanner_v2'
-  | 'ai_meal_camera_v2'
-  | 'restaurant_menu_scanner'
-  | 'ai_meal_plans_weekly'
-  | 'ai_grocery_lists'
-  | 'batch_cook_meal_prep'
-  | 'saved_meals'
-  | 'weight_logging'
-  | 'ai_progress_photo_analysis'
-  | 'readiness_score_basic'
-  | 'readiness_score_detailed'
-  | 'ai_sleep_optimizer_v2'
-  | 'injury_prevention_tracker'
-  | 'guided_mobility'
-  | 'daily_readiness_score'
-  | 'habit_tracking_limited'
-  | 'habit_tracking_unlimited'
-  | 'streak_tracking'
-  | 'streak_shields'
-  | 'goal_setting'
-  | 'data_history_7day'
-  | 'data_history_unlimited'
-  | 'ai_daily_coaching'
-  | 'ai_trajectory_simulator_v2'
-  | 'ai_weekly_report_v2'
-  | 'ai_journal_prompts'
-  | 'ai_supplement_advisor_v2'
-  | 'body_business_correlation_basic'
-  | 'body_business_correlation_full'
-  | 'mood_performance_correlation_weekly'
-  | 'mood_performance_correlation_daily'
-  | 'ai_vision_board'
-  | 'ai_workout_narrator_v2'
-  | 'context_aware_motivation'
-  | 'voice_commands_v2'
-  | 'deep_work_focus_mode'
-  | 'ai_journaling_v2'
-  | 'siri_google_shortcuts'
-  | 'nfc_geofence_triggers_v2'
-  | 'dashboard_default'
-  | 'dashboard_builder_v2'
-  | 'home_screen_widgets'
-  | 'community_challenges_view'
-  | 'community_challenges_join'
-  | 'leaderboards_v2'
-  | 'auto_generated_social_content'
-  | 'stake_goals_v2'
-  | 'personal_finance_tracker'
-  | 'business_revenue_tracker'
-  | 'business_milestone_tracker'
-  | 'skill_knowledge_tracker'
-  | 'spotify_integration_v2'
-  | 'partner_linking'
-  | 'partner_dashboard_v2'
-  | 'couples_live_sync_workout'
-  | 'joint_streaks'
-  | 'partner_nudges'
-  | 'partner_challenges'
-  | 'partner_activity_feed'
-  | 'partner_reactions'
-  | 'shared_vision_board'
-  | 'couples_weekly_review'
-  | 'partner_data_permissions'
-  | 'advanced_analytics'
-  | 'priority_ai'
-  | 'pain_tracker'
-  | 'mobility_recovery'
-  | 'skill_tracker';
+import type { FeatureKey } from '../config/featureGates';
+export type { FeatureKey };
 
 export interface FeatureGateResult {
   isAvailable: boolean;
@@ -484,12 +356,12 @@ const FEATURE_GATE_MAP: Record<FeatureKey, GateDefinition> = {
 
   // Elite
   business_tracking: {
-    requiredTier: 'elite',
-    upgradeMessage: 'Upgrade to Elite to track your business metrics inside TRANSFORMR.',
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro to track your business metrics inside TRANSFORMR.',
   },
   finance_tracking: {
-    requiredTier: 'elite',
-    upgradeMessage: 'Upgrade to Elite for personal finance tracking.',
+    requiredTier: 'pro',
+    upgradeMessage: 'Upgrade to Pro for personal finance tracking.',
   },
 
   // Partners
@@ -548,6 +420,7 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
   const tier = useSubscriptionStore((s) => s.tier);
   const usage = useSubscriptionStore((s) => s.usage);
   const incrementUsage = useSubscriptionStore((s) => s.incrementUsage);
+  const router = useRouter();
 
   const gate = FEATURE_GATE_MAP[feature];
   const tierOk = tierSatisfies(tier, gate.requiredTier);
@@ -577,12 +450,12 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
   };
 
   const showUpgradeModal = () => {
-    upgradeModalEvents.emit(feature);
+    router.push({ pathname: '/upgrade', params: { feature } });
   };
 
   const checkAndPrompt = () => {
     if (isAvailable) return true;
-    upgradeModalEvents.emit(feature);
+    router.push({ pathname: '/upgrade', params: { feature } });
     return false;
   };
 
