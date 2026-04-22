@@ -1,9 +1,21 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-jest.mock('expo-av', () => ({
-  Audio: { Sound: { createAsync: jest.fn().mockResolvedValue({ sound: { playAsync: jest.fn(), unloadAsync: jest.fn() } }) }, setAudioModeAsync: jest.fn() },
-  Video: () => null,
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => ({
+    volume: 1,
+    play: jest.fn(),
+    remove: jest.fn(),
+  })),
+  setAudioModeAsync: jest.fn(),
+}));
+jest.mock('expo-video', () => ({
+  VideoView: () => null,
+  useVideoPlayer: jest.fn(() => ({
+    loop: false,
+    play: jest.fn(),
+    pause: jest.fn(),
+  })),
 }));
 jest.mock('@components/ui/VoiceMicButton', () => ({ VoiceMicButton: () => null }));
 jest.mock('@services/voice', () => ({

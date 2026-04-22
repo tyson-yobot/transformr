@@ -10,12 +10,12 @@ jest.mock('expo-haptics', () => ({
   NotificationFeedbackType: { Success: 'success' },
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
 }));
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn().mockResolvedValue({ sound: { unloadAsync: jest.fn() } }),
-    },
-  },
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => ({
+    volume: 1,
+    play: jest.fn(),
+    remove: jest.fn(),
+  })),
 }));
 jest.mock('react-native-svg', () => {
   const { View } = require('react-native');

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
-import { Video, ResizeMode } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import Animated, {
   cancelAnimation,
   useSharedValue,
@@ -45,6 +45,11 @@ export function FormCheckRecorder({
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>('back');
+
+  const videoPlayer = useVideoPlayer(videoUri ?? '', (player) => {
+    player.loop = true;
+    player.play();
+  });
 
   const cameraRef = useRef<CameraView>(null);
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -233,13 +238,11 @@ export function FormCheckRecorder({
           style,
         ]}
       >
-        <Video
-          source={{ uri: videoUri }}
+        <VideoView
+          player={videoPlayer}
           style={styles.videoPreview}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          shouldPlay
+          nativeControls
+          contentFit="contain"
         />
         <View style={[styles.reviewActions, { padding: spacing.lg, gap: spacing.md }]}>
           <Pressable
