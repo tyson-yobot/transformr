@@ -76,7 +76,6 @@ export async function writeNfcTag(text: string): Promise<boolean> {
     const records = [nfc.Ndef.textRecord(text)];
     await nfc.NfcManager.writeNdefMessage(records);
     return true;
-    return false;
   } catch {
     return false;
   } finally {

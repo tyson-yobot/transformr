@@ -22,7 +22,7 @@ export async function createStakePayment(
   paymentMethodId: string,
 ): Promise<StakePaymentResult> {
   if (!isStripeConfigured) {
-    return { success: false, paymentIntentId: null, error: 'Payment system coming soon' };
+    return { success: false, paymentIntentId: null, error: 'Payment processing is not configured. Please check your Stripe setup in the environment variables.' };
   }
   // Creates a HOLD (capture_method: manual) — funds are reserved, not charged.
   // The hold is captured (charged) only if the goal is missed.

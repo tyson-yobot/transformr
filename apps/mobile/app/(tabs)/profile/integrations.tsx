@@ -24,6 +24,8 @@ import * as Linking from 'expo-linking';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
 
 // ---------------------------------------------------------------------------
 // Integration definitions
@@ -182,7 +184,10 @@ export default function IntegrationsScreen() {
           const redirectUrl = Linking.createURL('integrations/spotify');
           const clientId = process.env.EXPO_PUBLIC_SPOTIFY_CLIENT_ID ?? '';
           if (!clientId || clientId.includes('your-') || clientId.includes('xxxxx')) {
-            Alert.alert('Coming Soon', 'Spotify integration coming soon.');
+            Alert.alert(
+              'Spotify Not Configured',
+              'Spotify integration requires a valid client ID. Set EXPO_PUBLIC_SPOTIFY_CLIENT_ID in your environment to enable Spotify workout integration.',
+            );
             return;
           }
           const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=user-read-currently-playing%20user-read-playback-state`;
@@ -194,7 +199,7 @@ export default function IntegrationsScreen() {
             Alert.alert('Connected', 'Spotify is now linked.');
           }
         } else {
-          Alert.alert('Integration Pending', `${integration.name} integration is in progress. Check for updates soon.`);
+          Alert.alert('Setup Required', `${integration.name} integration requires additional configuration. Check your environment variables and ensure the required API credentials are set.`);
         }
       } finally {
         setConnecting(null);
@@ -213,6 +218,8 @@ export default function IntegrationsScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <ScreenBackground />
+      <AmbientBackground />
       <Animated.View entering={FadeInDown.duration(400)}>
         <Text
           style={[

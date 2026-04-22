@@ -1,10 +1,19 @@
 import { useState, useCallback } from 'react';
-import { startRecording, stopRecording, isRecording as checkRecording, parseVoiceCommand } from '@services/voice';
+import {
+  startRecording,
+  stopRecording,
+  isRecording as checkRecording,
+  parseVoiceCommand,
+  parseVoiceCommandAI,
+  transcribeAudio,
+} from '@services/voice';
+import type { ParsedVoiceCommand, VoiceContext } from '@services/voice';
 
-export function useVoice() {
+export function useVoice(context?: VoiceContext) {
   const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [lastCommand, setLastCommand] = useState<ReturnType<typeof parseVoiceCommand> | null>(null);
+  const [lastCommand, setLastCommand] = useState<ParsedVoiceCommand | null>(null);
+  const [lastTranscript, setLastTranscript] = useState<string | null>(null);
 
   const startListening = useCallback(async () => {
     try {
@@ -22,9 +31,23 @@ export function useVoice() {
       const uri = await stopRecording();
 
       if (uri) {
-        // In production, this would send audio to a speech-to-text service
-        // For now, we simulate with a placeholder
-        const command = parseVoiceCommand('');
+        // Transcribe the recorded audio to text via the cloud edge function
+        const transcript = await transcribeAudio(uri);
+        setLastTranscript(transcript);
+
+        if (!transcript) {
+          setLastCommand(null);
+          return null;
+        }
+
+        // Parse the transcript: first try fast local regex, then fall back to AI NLU
+        let command: ParsedVoiceCommand;
+        if (context) {
+          command = await parseVoiceCommandAI(transcript, context);
+        } else {
+          command = parseVoiceCommand(transcript);
+        }
+
         setLastCommand(command);
         return command;
       }
@@ -34,12 +57,13 @@ export function useVoice() {
     } finally {
       setProcessing(false);
     }
-  }, []);
+  }, [context]);
 
   return {
     recording,
     processing,
     lastCommand,
+    lastTranscript,
     startListening,
     stopListening,
     isRecording: checkRecording,
