@@ -150,11 +150,15 @@ export default function LoginScreen() {
             <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.brandBlock}>
               {/* Double-glow title */}
               <View style={{ alignItems: 'center' }}>
-                <Text style={[styles.heroTitle, styles.heroTitleGlow]}>TRANSFORMR</Text>
-                <Text style={styles.heroTitle}>TRANSFORMR</Text>
+                <Text style={[styles.heroTitle, styles.heroTitleGlow]}>
+                  TRANSFORM<Text style={{ color: 'rgba(236,72,153,0.3)' }}>R</Text>
+                </Text>
+                <Text style={styles.heroTitle}>
+                  TRANSFORM<Text style={{ color: '#EC4899' /* brand pink */ }}>R</Text>
+                </Text>
               </View>
               <Text style={styles.tagline}>
-                Every rep. Every meal. Every dollar. Every day.
+                Transform Everything.
               </Text>
             </Animated.View>
 
@@ -207,23 +211,25 @@ export default function LoginScreen() {
               </Pressable>
 
               {/* Sign In Button */}
-              <Pressable
-                onPress={() => { void hapticMedium(); void handleSignIn(); }}
-                disabled={loading}
-                accessibilityLabel="Sign in to your account"
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.signInBtn,
-                  pressed && styles.signInBtnPressed,
-                  loading && { opacity: 0.8 },
-                ]}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Text style={styles.signInBtnText}>Sign In</Text>
-                )}
-              </Pressable>
+              <View style={styles.signInBtnWrapper}>
+                <Pressable
+                  onPress={() => { void hapticMedium(); void handleSignIn(); }}
+                  disabled={loading}
+                  accessibilityLabel="Sign in to your account"
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.signInBtn,
+                    pressed && styles.signInBtnPressed,
+                    loading && { opacity: 0.8 },
+                  ]}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <Text style={styles.signInBtnText}>Sign In</Text>
+                  )}
+                </Pressable>
+              </View>
             </Animated.View>
 
             {/* Divider */}
@@ -376,18 +382,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   forgotText: { fontSize: 13, color: '#C084FC' /* brand-ok */, fontWeight: '500' },
-  // Sign In button
-  signInBtn: {
-    backgroundColor: '#A855F7' /* brand-ok */,
+  // Sign In button — shadow on wrapper View (Fabric: shadow props on Pressable function style cause warnForStyleProps)
+  signInBtnWrapper: {
     borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
     marginBottom: 20,
     shadowColor: '#A855F7' /* brand-ok */,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 12,
+  },
+  signInBtn: {
+    backgroundColor: '#A855F7' /* brand-ok */,
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: 'rgba(192,132,252,0.3)',
   },

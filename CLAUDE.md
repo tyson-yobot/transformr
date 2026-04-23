@@ -15,17 +15,20 @@ circumstances. The ONLY exception is if Tyson explicitly says
 ### Splash Screen — LOCKED
 - File: components/SplashOverlay.tsx
 - Background: gym-hero.jpg (same as login screen)
-- Logo: icon.png from assets/images/
-- Text: "TRANSFORMR" title, tagline, "By Automate AI"
+- Logo: transformr-favicon-.png from assets/icons/ (transparent)
+- Text: "TRANSFORMR" title (pink R #EC4899), "Transform Everything." tagline, "By Automate AI"
 - DO NOT CHANGE THE ICON
 - DO NOT CHANGE THE BACKGROUND
 - DO NOT CHANGE ANY STYLING
+- Last updated: 2026-04-23 — tagline → "Transform Everything.", wordmark with pink R
 
 ### Login Screen — LOCKED
 - File: app/(auth)/login.tsx
 - Background: gym-hero.jpg
-- Logo: same as splash screen
+- Logo: same as splash screen (transparent favicon)
+- Text: TRANSFORMR wordmark with pink R (#EC4899), "Transform Everything." tagline
 - DO NOT MODIFY THIS FILE
+- Last updated: 2026-04-23 — tagline → "Transform Everything.", wordmark with pink R
 
 ### App Icon — LOCKED
 - Source: assets/icons/transformr-icon.png

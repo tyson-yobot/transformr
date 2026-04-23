@@ -79,11 +79,15 @@ export function SplashOverlay({ visible }: SplashOverlayProps) {
         {/* TRANSFORMR title with glow — matches login screen */}
         <View style={styles.brandBlock}>
           <View style={{ alignItems: 'center' }}>
-            <Text style={[styles.heroTitle, styles.heroTitleGlow]}>TRANSFORMR</Text>
-            <Text style={styles.heroTitle}>TRANSFORMR</Text>
+            <Text style={[styles.heroTitle, styles.heroTitleGlow]}>
+              TRANSFORM<Text style={{ color: 'rgba(236,72,153,0.3)' }}>R</Text>
+            </Text>
+            <Text style={styles.heroTitle}>
+              TRANSFORM<Text style={{ color: '#EC4899' /* brand pink */ }}>R</Text>
+            </Text>
           </View>
           <Text style={styles.tagline}>
-            Every rep. Every meal. Every dollar. Every day.
+            Transform Everything.
           </Text>
         </View>
       </View>
