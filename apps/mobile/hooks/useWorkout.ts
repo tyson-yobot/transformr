@@ -41,7 +41,7 @@ export function useWorkout() {
           .eq('exercise_id', exerciseId);
 
         if (data) {
-          existingPRs = data.map((pr) => ({
+          existingPRs = data.map((pr: { exercise_id: string; record_type: string; value: number }) => ({
             exerciseId: pr.exercise_id as string,
             recordType: pr.record_type as string,
             value: pr.value as number,

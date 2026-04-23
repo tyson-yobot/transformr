@@ -146,21 +146,21 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
     ? Math.max(0, Math.ceil((new Date(goalDeadline).getTime() - Date.now()) / 86400000))
     : 0;
 
-  const workoutDates = new Set((workoutsResult.data ?? []).map((w) => w.started_at.split('T')[0]));
+  const workoutDates = new Set((workoutsResult.data ?? []).map((w: Record<string, unknown>) => (w.started_at as string).split('T')[0]));
   const focusSessions = focusResult.data ?? [];
-  const revenueByDate = (revenueResult.data ?? []).reduce<Record<string, number>>((acc, r) => {
+  const revenueByDate: Record<string, number> = (revenueResult.data ?? []).reduce<Record<string, number>>((acc: Record<string, number>, r: Record<string, unknown>) => {
     const date = (((r.logged_at as string) ?? '').split('T')[0]) ?? '';
     if (date) acc[date] = (acc[date] ?? 0) + ((r.amount as number) ?? 0);
     return acc;
   }, {});
-  const totalMonthRevenue = Object.values(revenueByDate).reduce((sum, v) => sum + v, 0);
+  const totalMonthRevenue = Object.values(revenueByDate).reduce<number>((sum, v) => sum + v, 0);
 
   const focusOnTraining = focusSessions
-    .filter((f) => workoutDates.has((f.started_at as string).split('T')[0]))
-    .reduce((sum, f) => sum + ((f.duration_minutes as number) ?? 0) / 60, 0);
+    .filter((f: Record<string, unknown>) => workoutDates.has((f.started_at as string).split('T')[0]))
+    .reduce((sum: number, f: Record<string, unknown>) => sum + ((f.duration_minutes as number) ?? 0) / 60, 0);
   const focusOnRest = focusSessions
-    .filter((f) => !workoutDates.has((f.started_at as string).split('T')[0]))
-    .reduce((sum, f) => sum + ((f.duration_minutes as number) ?? 0) / 60, 0);
+    .filter((f: Record<string, unknown>) => !workoutDates.has((f.started_at as string).split('T')[0]))
+    .reduce((sum: number, f: Record<string, unknown>) => sum + ((f.duration_minutes as number) ?? 0) / 60, 0);
   const trainingDayCount = workoutDates.size;
   const restDayCount = Math.max(1, 7 - trainingDayCount);
 
@@ -181,7 +181,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
       estimatedHourlyValue: (profile?.estimated_hourly_value as number) ?? 50,
     },
     last7Days: {
-      workouts: (workoutsResult.data ?? []).map((w) => ({
+      workouts: (workoutsResult.data ?? []).map((w: Record<string, unknown>) => ({
         date: ((w.started_at as string).split('T')[0]) ?? '',
         templateName: (w.template_name as string) ?? 'Custom',
         volumeLbs: ((w.workout_sets as { weight: number; reps: number }[]) ?? []).reduce(
@@ -190,7 +190,7 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
         ),
         prsAchieved: 0,
       })),
-      nutrition: (nutritionResult.data ?? []).map((n) => ({
+      nutrition: (nutritionResult.data ?? []).map((n: Record<string, unknown>) => ({
         date: n.date as string,
         calories: (n.calories as number) ?? 0,
         protein: (n.protein as number) ?? 0,
@@ -198,26 +198,26 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
         fat: (n.fat as number) ?? 0,
         waterOz: (n.water_oz as number) ?? 0,
       })),
-      sleep: (sleepResult.data ?? []).map((s) => ({
+      sleep: (sleepResult.data ?? []).map((s: Record<string, unknown>) => ({
         date: s.date as string,
         durationHours: s.duration_hours as number,
         qualityRating: s.quality_rating as number,
       })),
-      mood: (moodResult.data ?? []).map((m) => ({
+      mood: (moodResult.data ?? []).map((m: Record<string, unknown>) => ({
         date: ((m.logged_at as string).split('T')[0]) ?? '',
         rating: m.rating as number,
         notes: (m.notes as string) ?? '',
       })),
-      readiness: (readinessResult.data ?? []).map((r) => ({
+      readiness: (readinessResult.data ?? []).map((r: Record<string, unknown>) => ({
         date: r.date as string,
         score: r.score as number,
       })),
-      business: focusSessions.map((f) => ({
+      business: focusSessions.map((f: Record<string, unknown>) => ({
         date: ((f.started_at as string).split('T')[0]) ?? '',
         revenueLogged: revenueByDate[(((f.started_at as string) ?? '').split('T')[0]) ?? ''] ?? 0,
         deepWorkHours: ((f.duration_minutes as number) ?? 0) / 60,
       })),
-      habits: (habitsResult.data ?? []).map((h) => ({
+      habits: (habitsResult.data ?? []).map((h: Record<string, unknown>) => ({
         habitName: h.name as string,
         completedDates: (
           (h.habit_completions as { completed_date: string }[]) ?? []
@@ -228,33 +228,33 @@ export async function buildUserAIContext(userId: string): Promise<UserAIContext>
     currentStreaks: {
       longestActiveStreak: Math.max(
         0,
-        ...((habitsResult.data ?? []).map((h) => (h.current_streak as number) ?? 0)),
+        ...((habitsResult.data ?? []).map((h: Record<string, unknown>) => (h.current_streak as number) ?? 0)),
       ),
       habitStreaks: Object.fromEntries(
-        (habitsResult.data ?? []).map((h) => [h.name as string, (h.current_streak as number) ?? 0]),
+        (habitsResult.data ?? []).map((h: Record<string, unknown>) => [h.name as string, (h.current_streak as number) ?? 0]),
       ),
       workoutStreak: (profile?.workout_streak as number) ?? 0,
     },
-    activeGoals: (goalsResult.data ?? []).map((g) => ({
+    activeGoals: (goalsResult.data ?? []).map((g: Record<string, unknown>) => ({
       title: g.title as string,
       targetValue: g.target_value as number,
       currentValue: (g.current_value as number) ?? 0,
       unit: g.unit as string,
       deadline: g.deadline as string,
     })),
-    personalRecords: (prsResult.data ?? []).map((r) => ({
+    personalRecords: (prsResult.data ?? []).map((r: Record<string, unknown>) => ({
       exerciseName: ((r.exercises as { name: string } | null)?.name) ?? '',
       weight: r.weight as number,
       reps: r.reps as number,
       achievedAt: r.achieved_at as string,
     })),
-    supplementStack: (supplementsResult.data ?? []).map((s) => ({
+    supplementStack: (supplementsResult.data ?? []).map((s: Record<string, unknown>) => ({
       name: s.name as string,
       dose: s.dose as string,
       timing: s.timing as string,
       evidenceTier: (s.evidence_tier as string) ?? 'C',
     })),
-    labMarkers: (labsResult.data ?? []).map((m) => ({
+    labMarkers: (labsResult.data ?? []).map((m: Record<string, unknown>) => ({
       name: m.marker_name as string,
       value: m.value as number,
       unit: m.unit as string,

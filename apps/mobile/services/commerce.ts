@@ -44,7 +44,7 @@ export async function getUserPurchases(userId: string): Promise<string[]> {
     .eq('user_id', userId)
     .eq('status', 'completed');
 
-  return (data ?? []).map((r) => r.program_id as string);
+  return (data ?? []).map((r: { program_id: string }) => r.program_id as string);
 }
 
 export async function checkProgramAccess(userId: string, programId: string): Promise<boolean> {

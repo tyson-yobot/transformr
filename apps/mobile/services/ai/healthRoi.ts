@@ -72,7 +72,7 @@ export async function computeHealthROIReport(
 
   // Active days (distinct workout dates)
   const activeDates = new Set(
-    workouts.map((w) => ((w.started_at as string) ?? '').split('T')[0]),
+    workouts.map((w: Record<string, unknown>) => ((w.started_at as string) ?? '').split('T')[0]),
   );
   const activeDays = activeDates.size;
 
@@ -81,12 +81,12 @@ export async function computeHealthROIReport(
 
   // Calories burned estimate (avg 5 kcal/min per session)
   const estimatedCaloriesBurned = workouts.reduce(
-    (sum, w) => sum + ((w.duration_minutes as number | null) ?? 0) * 5,
+    (sum: number, w: Record<string, unknown>) => sum + ((w.duration_minutes as number | null) ?? 0) * 5,
     0,
   );
 
   // Nutrition adherence: days within 10% of calorie target
-  const adherentDays = nutritionLogs.filter((n) => {
+  const adherentDays = nutritionLogs.filter((n: Record<string, unknown>) => {
     const cal = (n.calories as number | null) ?? 0;
     return Math.abs(cal - calorieTarget) / calorieTarget <= 0.1;
   }).length;
@@ -97,18 +97,18 @@ export async function computeHealthROIReport(
   // Sleep quality (0–10 scale from DB, convert to 0–100)
   const sleepQuality = sleepLogs.length > 0
     ? Math.round(
-        (sleepLogs.reduce((sum, s) => sum + ((s.quality_rating as number | null) ?? 0), 0) /
+        (sleepLogs.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.quality_rating as number | null) ?? 0), 0) /
           sleepLogs.length) *
           10,
       )
     : 0;
 
   // Habit completion rate
-  const expectedCompletions = habits.reduce((sum, h) => {
+  const expectedCompletions = habits.reduce((sum: number, h: Record<string, unknown>) => {
     const freq = (h.target_frequency_per_week as number | null) ?? 7;
     return sum + Math.round((freq / 7) * windowDays);
   }, 0);
-  const actualCompletions = habits.reduce((sum, h) => {
+  const actualCompletions = habits.reduce((sum: number, h: Record<string, unknown>) => {
     const completions = (
       h.habit_completions as { completed_date: string }[] | null
     ) ?? [];

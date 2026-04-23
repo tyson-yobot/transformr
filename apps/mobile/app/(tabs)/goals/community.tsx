@@ -114,7 +114,7 @@ export default function CommunityScreen() {
     }
 
     // Fetch participant counts and user's participation status
-    const challengeIds = challengeData.map((c) => c.id);
+    const challengeIds = challengeData.map((c) => String((c as Record<string, unknown>).id));
 
     const { data: participantsData } = await supabase
       .from('challenge_participants')
@@ -124,20 +124,21 @@ export default function CommunityScreen() {
     const participantsByChallenge = new Map<string, { count: number; userProgress: number | null; isJoined: boolean }>();
 
     for (const cId of challengeIds) {
-      const participants = (participantsData ?? []).filter((p) => p.challenge_id === cId);
-      const userParticipant = participants.find((p) => p.user_id === user.id);
+      const participants = (participantsData ?? []).filter((p) => (p as Record<string, unknown>).challenge_id === cId);
+      const userParticipant = participants.find((p) => (p as Record<string, unknown>).user_id === user.id);
       participantsByChallenge.set(cId, {
         count: participants.length,
-        userProgress: userParticipant?.current_progress ?? null,
+        userProgress: (userParticipant as Record<string, unknown> | undefined)?.current_progress as number | null ?? null,
         isJoined: !!userParticipant,
       });
     }
 
     setChallenges(
       challengeData.map((c) => {
-        const info = participantsByChallenge.get(c.id);
+        const row = c as Record<string, unknown>;
+        const info = participantsByChallenge.get(row.id as string);
         return {
-          ...c,
+          ...(row as Omit<CommunityChallenge, 'participant_count' | 'is_joined' | 'current_progress'>),
           participant_count: info?.count ?? 0,
           is_joined: info?.isJoined ?? false,
           current_progress: info?.userProgress ?? null,

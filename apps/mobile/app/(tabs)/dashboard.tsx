@@ -313,7 +313,7 @@ export default function DashboardScreen() {
           .limit(14);
         if (weightLogs && weightLogs.length > 0) {
           setRealWeightData(
-            weightLogs.map((w) => ({
+            weightLogs.map((w: { logged_at: string; weight_lbs: number }) => ({
               date: (w.logged_at as string).split('T')[0] ?? '',
               weight: w.weight_lbs as number,
             })),
@@ -341,7 +341,7 @@ export default function DashboardScreen() {
           .limit(3);
         if (achievements && achievements.length > 0) {
           setRecentAchievements(
-            achievements.map((a) => {
+            achievements.map((a: { id: string; achievement: unknown }) => {
               const raw = a.achievement;
               const ach = (Array.isArray(raw) ? raw[0] : raw) as { title?: string; icon?: string; tier?: string } | null;
               return {

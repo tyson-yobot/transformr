@@ -167,18 +167,18 @@ export function CommunityLeaderboard({
 
       if (data) {
         // Fetch display names for participant user IDs
-        const userIds = data.map((p) => p.user_id);
+        const userIds = data.map((p: { user_id: string }) => p.user_id);
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, display_name')
           .in('id', userIds);
 
         const profileMap = new Map(
-          (profiles ?? []).map((p) => [p.id, p.display_name as string]),
+          (profiles ?? []).map((p: { id: string; display_name: string }) => [p.id, p.display_name as string]),
         );
 
         setEntries(
-          data.map((p) => ({
+          data.map((p: { id: string; user_id: string; current_progress: number | null; rank: number | null }) => ({
             id: p.id,
             userId: p.user_id,
             displayName: profileMap.get(p.user_id) ?? 'User',
@@ -199,18 +199,18 @@ export function CommunityLeaderboard({
         .limit(compact ? 10 : 50);
 
       if (data) {
-        const userIds = data.map((e) => e.user_id);
+        const userIds = data.map((e: { user_id: string }) => e.user_id);
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, display_name')
           .in('id', userIds);
 
         const profileMap = new Map(
-          (profiles ?? []).map((p) => [p.id, p.display_name as string]),
+          (profiles ?? []).map((p: { id: string; display_name: string }) => [p.id, p.display_name as string]),
         );
 
         setEntries(
-          data.map((e) => ({
+          data.map((e: { id: string; user_id: string; score: number | null; rank: number | null }) => ({
             id: e.id,
             userId: e.user_id,
             displayName: profileMap.get(e.user_id) ?? 'User',

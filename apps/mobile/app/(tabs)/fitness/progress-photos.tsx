@@ -79,8 +79,8 @@ export default function ProgressPhotosScreen() {
     if (error || !data) { setLoading(false); return; }
 
     const stored: StoredPhoto[] = data
-      .filter((f) => f.name.endsWith('.jpg'))
-      .map((f) => {
+      .filter((f: { name: string }) => f.name.endsWith('.jpg'))
+      .map((f: { name: string }) => {
         const { data: urlData } = supabase.storage
           .from('progress-photos')
           .getPublicUrl(`${uid}/${f.name}`);
