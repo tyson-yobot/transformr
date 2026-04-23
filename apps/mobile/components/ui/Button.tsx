@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
+  View,
   Pressable,
   Text,
   ActivityIndicator,
@@ -77,7 +78,7 @@ export const Button = React.memo(function Button({
     lg: { height: 56, paddingHorizontal: spacing.xxl, fontSize: typography.h3 },
   };
 
-  const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
+  const getVariantStyles = (): { container: ViewStyle; shadow: ViewStyle; text: TextStyle } => {
     const base: ViewStyle = {
       borderRadius: borderRadius.md,
       height: sizeConfig[size].height,
@@ -91,6 +92,8 @@ export const Button = React.memo(function Button({
             ...base,
             backgroundColor: 'transparent',
             overflow: 'hidden',
+          },
+          shadow: {
             // Match the login screen Sign In button shadow exactly:
             shadowColor: colors.accent.primary,
             shadowOffset: { width: 0, height: 6 },
@@ -103,21 +106,25 @@ export const Button = React.memo(function Button({
       case 'secondary':
         return {
           container: { ...base, backgroundColor: colors.background.tertiary },
+          shadow: {},
           text: { color: colors.text.primary },
         };
       case 'outline':
         return {
           container: { ...base, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.border.default },
+          shadow: {},
           text: { color: colors.text.primary },
         };
       case 'ghost':
         return {
           container: { ...base, backgroundColor: 'transparent' },
+          shadow: {},
           text: { color: colors.accent.primary },
         };
       case 'danger':
         return {
           container: { ...base, backgroundColor: colors.accent.danger },
+          shadow: {},
           text: { color: colors.text.inverse },
         };
     }
@@ -129,6 +136,7 @@ export const Button = React.memo(function Button({
   const currentSize = sizeConfig[size];
 
   return (
+    <View style={[variantStyles.shadow, fullWidth && styles.fullWidth, style]}>
     <AnimatedPressable
       onPress={handlePress}
       onPressIn={handlePressIn}
@@ -141,7 +149,6 @@ export const Button = React.memo(function Button({
         fullWidth && styles.fullWidth,
         isDisabled && styles.disabled,
         animatedStyle,
-        style,
       ]}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
@@ -180,6 +187,7 @@ export const Button = React.memo(function Button({
         </>
       )}
     </AnimatedPressable>
+    </View>
   );
 });
 

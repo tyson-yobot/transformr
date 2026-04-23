@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -91,12 +91,14 @@ export const Toggle = React.memo(function Toggle({
           trackStyle,
         ]}
       >
+        <View style={styles.thumbShadow}>
         <Animated.View
           style={[
             styles.thumb,
             thumbStyle,
           ]}
         />
+        </View>
       </Animated.View>
     </Pressable>
   );
@@ -114,16 +116,18 @@ const styles = StyleSheet.create({
     padding: THUMB_MARGIN,
     justifyContent: 'center',
   },
-  thumb: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: THUMB_SIZE / 2,
-    backgroundColor: '#FFFFFF', /* brand-ok */
+  thumbShadow: {
     shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 3,
+  },
+  thumb: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2,
+    backgroundColor: '#FFFFFF', /* brand-ok */
   },
   disabled: {
     opacity: 0.5,

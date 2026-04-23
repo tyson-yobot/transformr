@@ -57,10 +57,11 @@ export function GlowButton({
   }));
 
   const accent = isDark ? colors.accent.primary : colors.accent.primary;
-  const btnStyle = getButtonStyle(variant, isDark, colors, accent);
+  const { btn: btnViewStyle, shadow: btnShadow } = getButtonStyle(variant, isDark, colors, accent);
   const textColor = getTextColor(variant, isDark, colors, accent);
 
   return (
+    <View style={[btnShadow, fullWidth && { alignSelf: 'stretch' }, style]}>
     <AnimatedPressable
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -69,11 +70,10 @@ export function GlowButton({
       accessibilityRole="button"
       accessibilityLabel={title}
       style={[
-        btnStyle,
+        btnViewStyle,
         fullWidth && { alignSelf: 'stretch' },
         disabled && { opacity: 0.5 },
         animatedStyle,
-        style,
       ]}
     >
       {loading ? (
@@ -92,6 +92,7 @@ export function GlowButton({
         </View>
       )}
     </AnimatedPressable>
+    </View>
   );
 }
 
@@ -100,7 +101,7 @@ function getButtonStyle(
   isDark: boolean,
   colors: ReturnType<typeof useTheme>['colors'],
   accent: string,
-): ViewStyle {
+): { btn: ViewStyle; shadow: ViewStyle } {
   const base: ViewStyle = {
     borderRadius: 14,
     height: 52,
@@ -112,35 +113,35 @@ function getButtonStyle(
   switch (variant) {
     case 'primary':
       return {
-        ...base,
-        backgroundColor: accent,
-        shadowColor: accent,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: isDark ? 0.5 : 0.3,
-        shadowRadius: 20,
-        elevation: 12,
+        btn: { ...base, backgroundColor: accent },
+        shadow: {
+          shadowColor: accent,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: isDark ? 0.5 : 0.3,
+          shadowRadius: 20,
+          elevation: 12,
+        },
       };
     case 'secondary':
       return {
-        ...base,
-        backgroundColor: 'transparent',
-        borderWidth: 1.5,
-        borderColor: accent,
+        btn: { ...base, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: accent },
+        shadow: {},
       };
     case 'ghost':
       return {
-        ...base,
-        backgroundColor: isDark ? 'rgba(168,85,247,0.12)' : 'rgba(124,58,237,0.08)',
+        btn: { ...base, backgroundColor: isDark ? 'rgba(168,85,247,0.12)' : 'rgba(124,58,237,0.08)' },
+        shadow: {},
       };
     case 'danger':
       return {
-        ...base,
-        backgroundColor: colors.accent.danger,
-        shadowColor: colors.accent.danger,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 8,
+        btn: { ...base, backgroundColor: colors.accent.danger },
+        shadow: {
+          shadowColor: colors.accent.danger,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 8,
+        },
       };
   }
 }

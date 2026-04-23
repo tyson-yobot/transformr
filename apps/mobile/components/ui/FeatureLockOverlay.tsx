@@ -101,6 +101,7 @@ export function FeatureLockOverlay({
   }, [showUpgradeModal]);
 
   return (
+    <View style={styles.sheetShadow}>
     <Animated.View
       style={[
         styles.sheet,
@@ -165,25 +166,28 @@ export function FeatureLockOverlay({
         </Text>
       </TouchableOpacity>
     </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sheet: {
+  sheetShadow: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-    alignItems: 'center',
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
+  },
+  sheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    alignItems: 'center',
   },
   accentBar: {
     height: 4,

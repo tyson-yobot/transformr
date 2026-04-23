@@ -86,11 +86,11 @@ export function ActionToast({
   if (!visible) return null;
 
   return (
+    <View style={[styles.containerShadow, { top: insets.top + 12 }]}>
     <Animated.View
       style={[
         styles.container,
         {
-          top: insets.top + 12,
           backgroundColor: colors.background.secondary,
           borderColor: accentColor,
           borderRadius: borderRadius.md,
@@ -108,6 +108,7 @@ export function ActionToast({
         ) : null}
       </View>
     </Animated.View>
+    </View>
   );
 }
 
@@ -147,21 +148,23 @@ export function useActionToast() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  containerShadow: {
     position: 'absolute',
     left: 16,
     right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
     zIndex: 9999,
+  },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   textContainer: {
     flex: 1,

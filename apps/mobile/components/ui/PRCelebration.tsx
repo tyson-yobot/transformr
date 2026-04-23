@@ -209,6 +209,7 @@ export const PRCelebration = forwardRef<PRCelebrationHandle, Record<string, neve
         </View>
 
         {/* PR Badge card */}
+        <View style={styles.badgeShadow} pointerEvents="none">
         <Animated.View
           style={[
             styles.badge,
@@ -245,6 +246,7 @@ export const PRCelebration = forwardRef<PRCelebrationHandle, Record<string, neve
             {displayData.achievement}
           </Text>
         </Animated.View>
+        </View>
 
         {/* Dismiss hint */}
         <Animated.Text
@@ -289,12 +291,14 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#A855F7', /* design constant: confetti accent */
   },
-  badge: {
-    minWidth: 260,
+  badgeShadow: {
     shadowColor: '#000', /* design constant: shadow always black */
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
     elevation: 12,
+  },
+  badge: {
+    minWidth: 260,
   },
 });

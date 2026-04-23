@@ -28,6 +28,14 @@ export const QuickActionTile = memo(function QuickActionTile({
   const handlePress = useCallback(() => { void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onPress(); }, [onPress]);
 
   return (
+    <View style={[{
+      flex: 1,
+      shadowColor: accentColor,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.18,
+      shadowRadius: 8,
+      elevation: 3,
+    }, style]}>
     <AnimatedPressable
       onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={handlePress}
       accessibilityRole="button" accessibilityLabel={label}
@@ -39,16 +47,12 @@ export const QuickActionTile = memo(function QuickActionTile({
         alignItems: 'center', gap: spacing.xs,
         minHeight: 76,
         justifyContent: 'center',
-        shadowColor: accentColor,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.18,
-        shadowRadius: 8,
-        elevation: 3,
-      }, animated, style]}
+      }, animated]}
     >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: accentColor, borderRadius: 2 }} />
       <Ionicons name={icon} size={26} color={accentColor} />
       <Text style={[typography.captionBold, { color: accentColor, textAlign: 'center' }]}>{label}</Text>
     </AnimatedPressable>
+    </View>
   );
 });

@@ -77,33 +77,31 @@ export function ChatFAB({ bottom = 96, right = 20, style, onPress }: ChatFABProp
       style={[styles.wrapper, { bottom, right }, style]}
       pointerEvents="box-none"
     >
-      <Animated.View
-        style={[
-          styles.glow,
-          {
-            backgroundColor: colors.accent.primary,
-            shadowColor: colors.accent.primary,
-          },
-          glowStyle,
-        ]}
-        pointerEvents="none"
-      />
-      <AnimatedPressable
-        onPress={handlePress}
-        style={[
-          styles.button,
-          {
-            backgroundColor: colors.accent.primary,
-            shadowColor: colors.accent.primary,
-          },
-          pressStyle,
-        ]}
+      <View style={[styles.glowShadow, { shadowColor: colors.accent.primary }]} pointerEvents="none">
+        <Animated.View
+          style={[
+            styles.glow,
+            { backgroundColor: colors.accent.primary },
+            glowStyle,
+          ]}
+          pointerEvents="none"
+        />
+      </View>
+      <View style={[styles.buttonShadow, { shadowColor: colors.accent.primary }]}>
+        <AnimatedPressable
+          onPress={handlePress}
+          style={[
+            styles.button,
+            { backgroundColor: colors.accent.primary },
+            pressStyle,
+          ]}
         accessibilityRole={'button' as AccessibilityRole}
         accessibilityLabel="Open AI Chat Coach"
         accessibilityHint="Starts a conversation with your personalized AI wellness coach"
       >
         <Ionicons name="sparkles" size={26} color="#FFFFFF" />
       </AnimatedPressable>
+      </View>
     </View>
   );
 }
@@ -117,14 +115,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 50,
   },
-  glow: {
+  glowShadow: {
     position: 'absolute',
-    width: SIZE + 20,
-    height: SIZE + 20,
-    borderRadius: (SIZE + 20) / 2,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.55,
     shadowRadius: 24,
+    elevation: 14,
+  },
+  glow: {
+    width: SIZE + 20,
+    height: SIZE + 20,
+    borderRadius: (SIZE + 20) / 2,
+  },
+  buttonShadow: {
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.55,
+    shadowRadius: 18,
     elevation: 14,
   },
   button: {
@@ -133,9 +139,5 @@ const styles = StyleSheet.create({
     borderRadius: SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.55,
-    shadowRadius: 18,
-    elevation: 14,
   },
 });

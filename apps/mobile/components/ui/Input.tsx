@@ -64,11 +64,6 @@ export const Input = React.memo(function Input({
     );
     return {
       borderColor,
-      shadowColor: colors.accent.primary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: focusAnim.value * 0.25,
-      shadowRadius: 8,
-      elevation: Math.round(focusAnim.value * 3),
     };
   });
 
@@ -79,6 +74,7 @@ export const Input = React.memo(function Input({
           {label}
         </Text>
       )}
+      <View style={[styles.focusGlow, { shadowColor: colors.accent.primary }]}>
       <AnimatedView
         style={[
           styles.container,
@@ -120,6 +116,7 @@ export const Input = React.memo(function Input({
           <View style={[styles.icon, { marginLeft: spacing.sm }]}>{rightIcon}</View>
         )}
       </AnimatedView>
+      </View>
       {error && (
         <Text style={[typography.caption, { color: colors.accent.danger, marginTop: spacing.xs }]}>
           {error}
@@ -131,6 +128,11 @@ export const Input = React.memo(function Input({
 
 const styles = StyleSheet.create({
   wrapper: {},
+  focusGlow: {
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',

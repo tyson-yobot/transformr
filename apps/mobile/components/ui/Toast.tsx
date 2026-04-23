@@ -67,6 +67,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
   }));
 
   return (
+    <View style={styles.toastShadow}>
     <Animated.View
       style={[
         styles.toastItem,
@@ -92,6 +93,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         <Text style={[typography.caption, { color: colors.text.muted }]}>{'\u2715'}</Text>
       </Pressable>
     </Animated.View>
+    </View>
   );
 }
 
@@ -179,14 +181,16 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     gap: 8,
   },
-  toastItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  toastShadow: {
     shadowColor: '#000', /* brand-ok */
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
+  },
+  toastItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   toastIcon: {
     fontSize: 18,
