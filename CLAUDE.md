@@ -15,20 +15,20 @@ circumstances. The ONLY exception is if Tyson explicitly says
 ### Splash Screen — LOCKED
 - File: components/SplashOverlay.tsx
 - Background: gym-hero.jpg (same as login screen)
-- Logo: transformr-favicon-.png from assets/icons/ (transparent)
+- Logo: transformr-icon.png from assets/icons/ (transparent — Logo Minus Blur version)
 - Text: "TRANSFORMR" title (pink R #EC4899), "Transform Everything." tagline, "By Automate AI"
 - DO NOT CHANGE THE ICON
 - DO NOT CHANGE THE BACKGROUND
 - DO NOT CHANGE ANY STYLING
-- Last updated: 2026-04-23 — tagline → "Transform Everything.", wordmark with pink R
+- Last updated: 2026-04-23 — icon swapped to transformr-icon.png (true transparency, no dark square)
 
 ### Login Screen — LOCKED
 - File: app/(auth)/login.tsx
 - Background: gym-hero.jpg
-- Logo: same as splash screen (transparent favicon)
+- Logo: transformr-icon.png from assets/icons/ (transparent — Logo Minus Blur version)
 - Text: TRANSFORMR wordmark with pink R (#EC4899), "Transform Everything." tagline
 - DO NOT MODIFY THIS FILE
-- Last updated: 2026-04-23 — tagline → "Transform Everything.", wordmark with pink R
+- Last updated: 2026-04-23 — icon swapped to transformr-icon.png (true transparency, no dark square)
 
 ### App Icon — LOCKED
 - Source: assets/icons/transformr-icon.png
@@ -343,3 +343,17 @@ This report is not optional. It is the proof of work.
   Exception: comments explaining a value are fine.
 - **No `any` type**: Use proper TypeScript types at all times.
 - **No emoji as functional icons**: Use Ionicons from `@expo/vector-icons`.
+
+### Task List — ALWAYS VISIBLE
+At the bottom of EVERY response, ALL sessions MUST display the current task list in this format:
+
+```
+---
+TASKS
+✅ #N  Task description
+🔄 #N  Task description   ← currently working on
+⬜ #N  Task description
+```
+
+Use TaskCreate at the start of any multi-step job. Use TaskUpdate to mark in_progress/completed as you go.
+This is non-negotiable — the user must always be able to see what is being worked on and what remains.

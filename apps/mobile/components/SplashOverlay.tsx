@@ -17,7 +17,7 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const GYM_IMAGE = require('@assets/images/gym-hero.jpg') as number;
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const LOGO = require('@assets/icons/transformr-favicon-.png') as number;
+const LOGO = require('@assets/icons/transformr-icon.png') as number;
 
 interface SplashOverlayProps {
   visible: boolean;
