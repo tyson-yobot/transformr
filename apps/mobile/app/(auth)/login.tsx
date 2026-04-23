@@ -131,7 +131,7 @@ export default function LoginScreen() {
               {/* Inner glow — brighter, tighter */}
               <View style={styles.iconGlow} />
               <Image
-                source={require('@assets/images/icon.png')}
+                source={require('@assets/icons/transformr-favicon-.png')}
                 style={styles.icon}
                 contentFit="contain"
               />

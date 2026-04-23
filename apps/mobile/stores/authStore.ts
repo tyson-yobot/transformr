@@ -119,10 +119,10 @@ export const useAuthStore = create<AuthStore>()(
           }
           set({ session: data.session, user: data.user, loading: false });
         } catch (err: unknown) {
-          const raw = err instanceof Error ? err.message : '';
-          const msg = raw.includes('network') || raw.includes('fetch')
+          const raw = (err instanceof Error ? err.message : '').toLowerCase();
+          const msg = raw.includes('network request failed') || raw.includes('failed to fetch') || raw.includes('unable to connect')
             ? 'Unable to connect. Check your internet connection.'
-            : raw || 'Sign in failed. Please try again.';
+            : (err instanceof Error ? err.message : '') || 'Sign in failed. Please try again.';
           set({ error: msg, loading: false });
         }
       },
