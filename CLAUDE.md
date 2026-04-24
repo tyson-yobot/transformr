@@ -80,6 +80,94 @@ in the current session.
 
 ---
 
+## UI REGRESSION LOCK — DO NOT STRIP VISUAL ASSETS
+
+This section exists because a prior session stripped all hero images from the
+onboarding screens. These rules are permanent and apply to every session.
+
+### RULE 1: NEVER REMOVE IMAGES FROM SCREENS
+
+If a screen currently uses a background image, hero image, or any
+visual asset via require() or import, you MUST NOT:
+- Remove the require()/import
+- Replace it with a solid color, gradient, or placeholder
+- Comment it out
+- "Simplify" the screen by removing visual assets
+- Replace an image with an icon or emoji
+
+If a screen has an image, it KEEPS the image. Period.
+
+### RULE 2: NEVER SIMPLIFY UI WITHOUT EXPLICIT WRITTEN PERMISSION
+
+"Simplify", "clean up", "refactor", "streamline", and "optimize" are
+NOT permission to:
+- Remove animations
+- Remove background images
+- Replace custom components with basic Views
+- Remove glass-morphism or blur effects
+- Remove gradient overlays
+- Flatten visual hierarchy
+- Remove feature cards or descriptive text
+
+If the user says "fix the bug on this screen", fix ONLY the bug.
+Do not touch anything else on the screen.
+
+### RULE 3: READ BEFORE WRITE — MANDATORY
+
+Before modifying ANY .tsx file, you MUST:
+1. Read the ENTIRE file first (not just the area around the bug)
+2. Count the number of require() / import statements for assets
+3. Note all Image components and their sources
+4. Note all background styles (colors, gradients, images)
+5. After your edit, verify ALL of the above are still present
+
+If your edit removes ANY asset reference that existed before your
+edit, UNDO your change and try again.
+
+### RULE 4: ONBOARDING SCREENS — LOCKED IMAGE ASSIGNMENTS
+
+The onboarding flow at `app/(auth)/onboarding/` uses local hero images
+from `assets/images/` via the `localSource` prop on `OnboardingBackground`.
+These are the LOCKED assignments:
+
+| Screen File | localSource Asset | Step Content |
+|-------------|------------------|--------------|
+| welcome.tsx | gym-hero.jpg | Welcome / transformation intro |
+| profile.tsx | hero-profile.jpg | Body stats / profile setup |
+| goals.tsx | hero-goals.jpg | Goal setting |
+| fitness.tsx | hero-fitness.jpg | Training plan / fitness prefs |
+| nutrition.tsx | hero-nutrition.jpg | Nutrition preferences |
+| business.tsx | hero-business.jpg | Business / revenue goals |
+| partner.tsx | hero-partner.jpg | Partner / couples setup |
+| notifications.tsx | hero-notifications.jpg | Notification preferences |
+| ready.tsx | hero-ready.jpg | Final confirmation / "Let's go" |
+
+These `localSource` props MUST appear on every `<OnboardingBackground>` call
+in each screen. They are NOT optional decorations. If any are missing, that
+is a regression that must be fixed immediately.
+
+### RULE 5: DIFF CHECK BEFORE COMMIT
+
+Before EVERY `git add` / `git commit`, verify:
+- No `localSource` props have been removed from OnboardingBackground calls
+- No `require()` calls for image assets have been removed from any .tsx file
+- No `ImageBackground`, `Image`, or `ExpoImage` sources have been removed
+
+If the diff shows ANY removed require() lines for image assets, STOP and
+verify those removals were explicitly requested by the user. If not, revert.
+
+### RULE 6: ONBOARDING BACKGROUND COMPONENT CONTRACT
+
+`OnboardingBackground` (`components/ui/OnboardingBackground.tsx`) accepts:
+- `imageUrl` — remote fallback URI (keep for backward compat, do not remove)
+- `localSource` — local require() asset (takes priority over imageUrl)
+- `blurHash` — optional placeholder
+
+When adding new onboarding screens, ALWAYS provide `localSource` with a
+local asset from `assets/images/`. Do not rely on network-only images.
+
+---
+
 ## SECTION 1 — NEVER TOUCH LIST
 
 These categories of files and actions are permanently off-limits.

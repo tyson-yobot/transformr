@@ -62,13 +62,13 @@ export default function BusinessScreen() {
   // Decision screen — full-screen background + two choices
   if (trackBusiness === null) {
     return (
-      <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+      <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-business.jpg')}>
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={styles.decisionRoot}>
           {/* Heading */}
           <View style={styles.decisionHero}>
             <Image
-              source={require('@assets/images/transformr-icon.png')}
+              source={require('@assets/icons/transformr-icon.png')}
               style={styles.icon}
               contentFit="contain"
             />
@@ -101,7 +101,7 @@ export default function BusinessScreen() {
   }
 
   return (
-    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-business.jpg')}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -116,7 +116,7 @@ export default function BusinessScreen() {
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
             <Image
-              source={require('@assets/images/transformr-icon.png')}
+              source={require('@assets/icons/transformr-icon.png')}
               style={styles.icon}
               contentFit="contain"
             />

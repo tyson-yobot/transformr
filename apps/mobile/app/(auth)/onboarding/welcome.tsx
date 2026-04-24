@@ -60,7 +60,7 @@ export default function WelcomeScreen() {
   }));
 
   return (
-    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/gym-hero.jpg')}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <ScrollView
         style={styles.scroll}
@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
         {/* Icon + Headline */}
         <View style={styles.heroSection}>
           <Image
-            source={require('@assets/images/transformr-icon.png')}
+            source={require('@assets/icons/transformr-icon.png')}
             style={styles.icon}
             contentFit="contain"
           />

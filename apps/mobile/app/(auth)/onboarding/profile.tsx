@@ -123,7 +123,7 @@ export default function ProfileScreen() {
   }, [validate, dateOfBirth, gender, heightFeet, heightInches, currentWeight, goalWeight, goalDirection, updateProfile, router]);
 
   return (
-    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-profile.jpg')}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -138,7 +138,7 @@ export default function ProfileScreen() {
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
             <Image
-              source={require('@assets/images/transformr-icon.png')}
+              source={require('@assets/icons/transformr-icon.png')}
               style={styles.icon}
               contentFit="contain"
             />

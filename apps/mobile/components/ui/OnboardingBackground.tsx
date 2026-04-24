@@ -16,15 +16,17 @@ const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 interface OnboardingBackgroundProps {
   imageUrl: string;
   blurHash?: string;
+  /** Optional local asset (require()). When provided, used instead of imageUrl. */
+  localSource?: number;
   children: React.ReactNode;
 }
 
-export function OnboardingBackground({ imageUrl, blurHash, children }: OnboardingBackgroundProps) {
+export function OnboardingBackground({ imageUrl, blurHash, localSource, children }: OnboardingBackgroundProps) {
   return (
     <View style={styles.container}>
       {/* Full-screen real photography background */}
       <Image
-        source={{ uri: imageUrl }}
+        source={localSource ?? { uri: imageUrl }}
         style={StyleSheet.absoluteFillObject}
         placeholder={blurHash ? { blurhash: blurHash } : undefined}
         contentFit="cover"

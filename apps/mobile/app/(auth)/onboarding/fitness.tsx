@@ -79,7 +79,7 @@ export default function FitnessScreen() {
   }, [activityLevel, workoutDays, experience, equipment, updateProfile, setFitnessPrefs, router]);
 
   return (
-    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-fitness.jpg')}>
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
@@ -90,7 +90,7 @@ export default function FitnessScreen() {
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
             <Image
-              source={require('@assets/images/transformr-icon.png')}
+              source={require('@assets/icons/transformr-icon.png')}
               style={styles.icon}
               contentFit="contain"
             />

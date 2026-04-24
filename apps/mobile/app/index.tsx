@@ -23,7 +23,7 @@ import { useSettingsStore } from '@stores/settingsStore';
 import { useGamificationStore } from '@stores/gamificationStore';
 // Local asset — guaranteed resolvable by Metro within project root
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const ICON = require('../assets/images/transformr-icon.png') as number;
+const ICON = require('../assets/icons/transformr-icon.png') as number;
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
