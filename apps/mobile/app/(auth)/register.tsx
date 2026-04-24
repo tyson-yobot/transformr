@@ -155,7 +155,7 @@ export default function RegisterScreen() {
               {/* Inner glow — brighter, tighter */}
               <View style={styles.iconGlow} />
               <Image
-                source={require('@assets/icons/transformr-favicon.png')}
+                source={require('@assets/icons/transformr-icon.png')}
                 style={styles.icon}
                 contentFit="contain"
               />
