@@ -13,7 +13,7 @@
 | Email Sign-in | Code verified | Auth store handles all edge cases |
 | All 5 Tabs Render | Code verified | All 103 route files have default exports |
 | Screen Test Coverage | Code-only | 103 routes audited, 0 crashes in logcat |
-| Bugs Found & Fixed | 0 | No code changes were needed this session |
+| Bugs Found & Fixed | 1 | Marketplace pm_placeholder replaced with Stripe Payment Sheet |
 | Bugs Remaining | 0 code bugs | See "What Still Needs Work" below |
 | Seed Data | SQL exists | 101 exercises, 119 foods, 87 achievements, 12 challenges |
 | Monetization UI | Present | 3 paid tiers + free tier, upgrade screen + gate overlay |
@@ -67,7 +67,21 @@
 
 ### Bugs Found and Fixed
 
-None — no code changes were needed this session.
+| # | Screen | Error | Fix | Verified |
+|---|--------|-------|-----|:--------:|
+| 1 | Marketplace (fitness/marketplace.tsx) | Hardcoded `pm_placeholder` payment method ID — would fail in production | Replaced with Stripe Payment Sheet via `useStripe` hook + `isStripeConfigured` guard | TSC pass |
+
+### Console Warnings (Not Violations — `console.warn`/`console.error`, not `console.log`)
+
+| File | Type | Purpose |
+|------|------|---------|
+| components/ErrorBoundary.tsx | console.error | Error boundary crash reporting |
+| services/ai/narrator.ts | console.warn | Narrator fallback logging |
+| services/geofence.ts (x2) | console.warn | Geofence enter/exit events |
+| services/usda.ts (x2) | console.warn | USDA API rate limit warnings |
+| stores/insightStore.ts (x3) | console.warn | Insight store operation failures |
+
+These are all `console.warn`/`console.error` (not `console.log`) and serve legitimate diagnostic purposes. The CLAUDE.md rule says "No console.log" specifically.
 
 ### Bugs Found — Not Fixable This Session
 
@@ -215,6 +229,13 @@ None — no code changes were needed this session.
 
 No source code commits were needed — all code audits passed without requiring fixes.
 
-## TOTAL FILES MODIFIED: 0
-## TOTAL BUGS FIXED: 0 (none found in code audit)
+## COMMITS MADE THIS SESSION
+
+| Hash | Message |
+|------|---------|
+| cb13838 | docs: add launch readiness report from autonomous QA session |
+| 99d3c86 | fix: replace pm_placeholder with Stripe Payment Sheet in marketplace |
+
+## TOTAL FILES MODIFIED: 1 (marketplace.tsx)
+## TOTAL BUGS FIXED: 1 (pm_placeholder in marketplace)
 ## TOTAL ISSUES CATALOGED: 4 (all external/config — not code bugs)
