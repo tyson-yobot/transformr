@@ -71,7 +71,7 @@ export const RewardCard: React.FC<RewardCardProps> = ({
   expiresAt,
   onApply,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const config = STATUS_CONFIG[status];
   const expirationLabel = useMemo(
@@ -131,8 +131,8 @@ export const RewardCard: React.FC<RewardCardProps> = ({
           <Text
             style={{
               color: accentColor,
-              fontSize: typography.sizes.xs,
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: 12,
+              fontWeight: '600',
             }}
           >
             {config.label}
@@ -144,8 +144,8 @@ export const RewardCard: React.FC<RewardCardProps> = ({
       <Text
         style={{
           color: colors.text.primary,
-          fontSize: typography.sizes.md,
-          fontWeight: typography.weights.bold as '700',
+          fontSize: 16,
+          fontWeight: '700',
           marginBottom: 4,
         }}
       >
@@ -156,7 +156,7 @@ export const RewardCard: React.FC<RewardCardProps> = ({
       <Text
         style={{
           color: colors.text.secondary,
-          fontSize: typography.sizes.sm,
+          fontSize: 14,
           marginBottom: spacing.sm,
         }}
       >
@@ -167,14 +167,14 @@ export const RewardCard: React.FC<RewardCardProps> = ({
       <View style={[styles.valueRow, { marginBottom: spacing.sm }]}>
         {freeMonths != null && freeMonths > 0 ? (
           <View style={[styles.valuePill, { backgroundColor: accentColor + '15', borderRadius: borderRadius.md, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs }]}>
-            <Text style={{ color: accentColor, fontSize: typography.sizes.sm, fontWeight: typography.weights.semibold as '600' }}>
+            <Text style={{ color: accentColor, fontSize: 14, fontWeight: '600' }}>
               {freeMonths} Free Month{freeMonths > 1 ? 's' : ''}
             </Text>
           </View>
         ) : null}
         {discountPercent != null && discountPercent > 0 ? (
           <View style={[styles.valuePill, { backgroundColor: accentColor + '15', borderRadius: borderRadius.md, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, marginLeft: freeMonths ? spacing.xs : 0 }]}>
-            <Text style={{ color: accentColor, fontSize: typography.sizes.sm, fontWeight: typography.weights.semibold as '600' }}>
+            <Text style={{ color: accentColor, fontSize: 14, fontWeight: '600' }}>
               {discountPercent}% Off
             </Text>
           </View>
@@ -185,8 +185,8 @@ export const RewardCard: React.FC<RewardCardProps> = ({
       <View style={styles.footerRow}>
         <Text
           style={{
-            color: colors.text.tertiary,
-            fontSize: typography.sizes.xs,
+            color: colors.text.muted,
+            fontSize: 12,
           }}
         >
           Earned {formatDate(earnedAt)}
@@ -195,9 +195,9 @@ export const RewardCard: React.FC<RewardCardProps> = ({
         {expirationLabel && status !== 'expired' ? (
           <Text
             style={{
-              color: colors.status.warning,
-              fontSize: typography.sizes.xs,
-              fontWeight: typography.weights.medium as '500',
+              color: colors.accent.warning,
+              fontSize: 12,
+              fontWeight: '500',
             }}
           >
             {expirationLabel}
@@ -230,8 +230,8 @@ export const RewardCard: React.FC<RewardCardProps> = ({
           <Text
             style={{
               color: '#FFFFFF',
-              fontSize: typography.sizes.sm,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 14,
+              fontWeight: '700',
             }}
           >
             Apply Reward

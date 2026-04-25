@@ -111,7 +111,12 @@ const SUFFIX_CHARS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 // =============================================================================
 
 function pickRandom<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+  const index = Math.floor(Math.random() * arr.length);
+  const item = arr[index];
+  if (item === undefined) {
+    throw new Error('pickRandom called on empty array');
+  }
+  return item;
 }
 
 function randomSuffix(length: number): string {

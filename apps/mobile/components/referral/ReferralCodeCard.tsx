@@ -33,7 +33,7 @@ export const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
   onCopy,
   loading = false,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   return (
     <View
@@ -64,8 +64,8 @@ export const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
           styles.label,
           {
             color: colors.text.secondary,
-            fontSize: typography.sizes.sm,
-            fontWeight: typography.weights.medium as '500',
+            fontSize: 14,
+            fontWeight: '500',
             marginBottom: spacing.sm,
           },
         ]}
@@ -86,7 +86,7 @@ export const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
             {
               color: colors.text.primary,
               fontSize: 28,
-              fontWeight: typography.weights.bold as '700',
+              fontWeight: '700',
               letterSpacing: 4,
               marginBottom: spacing.lg,
             },
@@ -127,8 +127,8 @@ export const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
           <Text
             style={{
               color: colors.accent.primary,
-              fontSize: typography.sizes.sm,
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: 14,
+              fontWeight: '600',
             }}
           >
             Copy
@@ -162,8 +162,8 @@ export const ReferralCodeCard: React.FC<ReferralCodeCardProps> = ({
           <Text
             style={{
               color: '#FFFFFF',
-              fontSize: typography.sizes.sm,
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: 14,
+              fontWeight: '600',
             }}
           >
             Share

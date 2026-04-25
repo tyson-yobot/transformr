@@ -173,9 +173,15 @@ export default function CreatorDashboardScreen() {
   const isLoading = creatorLoading && !creatorProfile;
 
   // Get tier info
-  const currentTier = creatorProfile
-    ? CREATOR_TIERS[creatorProfile.tier] ?? CREATOR_TIERS.standard
-    : CREATOR_TIERS.standard;
+  const defaultTier: CreatorTierInfo = {
+    label: 'Standard',
+    revenueShare: 10,
+    color: '#6B5E8A',
+    threshold: 10,
+  };
+  const currentTier: CreatorTierInfo = creatorProfile
+    ? (CREATOR_TIERS[creatorProfile.tier] ?? defaultTier)
+    : defaultTier;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
@@ -357,6 +363,7 @@ export default function CreatorDashboardScreen() {
                 </Text>
                 {TIER_ORDER.map((tierKey) => {
                   const tier = CREATOR_TIERS[tierKey];
+                  if (!tier) return null;
                   return (
                     <View
                       key={tierKey}
@@ -448,6 +455,7 @@ export default function CreatorDashboardScreen() {
               <View style={[styles.tierProgressRow, { marginTop: spacing.lg }]}>
                 {TIER_ORDER.map((tierKey) => {
                   const tier = CREATOR_TIERS[tierKey];
+                  if (!tier) return null;
                   const isActive = creatorProfile?.tier === tierKey;
                   const isPassed = creatorProfile
                     ? TIER_ORDER.indexOf(creatorProfile.tier) >=

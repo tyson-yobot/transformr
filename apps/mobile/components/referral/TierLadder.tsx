@@ -50,7 +50,7 @@ export const TierLadder: React.FC<TierLadderProps> = ({
   currentTier,
   activeCount,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
   const currentIndex = getTierIndex(currentTier);
 
   return (
@@ -60,8 +60,8 @@ export const TierLadder: React.FC<TierLadderProps> = ({
           styles.heading,
           {
             color: colors.text.primary,
-            fontSize: typography.sizes.lg,
-            fontWeight: typography.weights.bold as '700',
+            fontSize: 18,
+            fontWeight: '700',
             marginBottom: spacing.md,
           },
         ]}
@@ -120,8 +120,8 @@ export const TierLadder: React.FC<TierLadderProps> = ({
                     styles.tierName,
                     {
                       color: isCurrent ? tier.color : colors.text.primary,
-                      fontSize: typography.sizes.md,
-                      fontWeight: typography.weights.semibold as '600',
+                      fontSize: 16,
+                      fontWeight: '600',
                     },
                   ]}
                 >
@@ -131,8 +131,8 @@ export const TierLadder: React.FC<TierLadderProps> = ({
                   style={[
                     styles.threshold,
                     {
-                      color: colors.text.tertiary,
-                      fontSize: typography.sizes.xs,
+                      color: colors.text.muted,
+                      fontSize: 12,
                     },
                   ]}
                 >
@@ -142,7 +142,7 @@ export const TierLadder: React.FC<TierLadderProps> = ({
               <Text
                 style={{
                   color: colors.text.secondary,
-                  fontSize: typography.sizes.sm,
+                  fontSize: 14,
                 }}
               >
                 {tier.reward}
@@ -156,9 +156,9 @@ export const TierLadder: React.FC<TierLadderProps> = ({
               ) : (
                 <Text
                   style={{
-                    color: colors.text.tertiary,
-                    fontSize: typography.sizes.xs,
-                    fontWeight: typography.weights.medium as '500',
+                    color: colors.text.muted,
+                    fontSize: 12,
+                    fontWeight: '500',
                     textAlign: 'right',
                   }}
                 >

@@ -68,7 +68,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   title = 'Share Your Referral',
   message,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
   const translateY = useSharedValue(SHEET_HEIGHT);
   const backdropOpacity = useSharedValue(0);
   const isClosing = useRef(false);
@@ -125,7 +125,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       <Text
         style={[
           styles.optionLabel,
-          { color: colors.text.primary, fontSize: typography.sizes.xs },
+          { color: colors.text.primary, fontSize: 12 },
         ]}
         numberOfLines={1}
       >
@@ -157,7 +157,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <View
               style={[
                 styles.handle,
-                { backgroundColor: colors.text.tertiary, borderRadius: borderRadius.full },
+                { backgroundColor: colors.text.muted, borderRadius: borderRadius.full },
               ]}
             />
           </View>
@@ -168,8 +168,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               styles.title,
               {
                 color: colors.text.primary,
-                fontSize: typography.sizes.lg,
-                fontWeight: typography.weights.bold as '700',
+                fontSize: 18,
+                fontWeight: '700',
                 marginBottom: spacing.xs,
               },
             ]}
@@ -183,7 +183,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 styles.message,
                 {
                   color: colors.text.secondary,
-                  fontSize: typography.sizes.sm,
+                  fontSize: 14,
                   marginBottom: spacing.md,
                 },
               ]}

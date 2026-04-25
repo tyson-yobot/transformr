@@ -19,7 +19,7 @@ interface SquadMemberRowProps {
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase();
   }
   return (parts[0]?.[0] ?? '?').toUpperCase();
 }
@@ -30,7 +30,7 @@ export function SquadMemberRow({
   consecutiveMonths,
   isCreator = false,
 }: SquadMemberRowProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   return (
     <View
@@ -59,8 +59,8 @@ export function SquadMemberRow({
             styles.initials,
             {
               color: colors.accent.primary,
-              fontSize: typography.sizes.md,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 16,
+              fontWeight: '700',
             },
           ]}
         >
@@ -76,8 +76,8 @@ export function SquadMemberRow({
               styles.name,
               {
                 color: colors.text.primary,
-                fontSize: typography.sizes.md,
-                fontWeight: typography.weights.semibold as '600',
+                fontSize: 16,
+                fontWeight: '600',
               },
             ]}
             numberOfLines={1}
@@ -106,8 +106,8 @@ export function SquadMemberRow({
               <Text
                 style={{
                   color: colors.accent.gold,
-                  fontSize: typography.sizes.xs,
-                  fontWeight: typography.weights.semibold as '600',
+                  fontSize: 12,
+                  fontWeight: '600',
                 }}
               >
                 Creator
@@ -119,7 +119,7 @@ export function SquadMemberRow({
         <Text
           style={{
             color: colors.text.secondary,
-            fontSize: typography.sizes.sm,
+            fontSize: 14,
             marginTop: spacing.xs,
           }}
         >
@@ -142,7 +142,7 @@ export function SquadMemberRow({
         <Text
           style={{
             color: isActive ? colors.accent.success : colors.accent.danger,
-            fontSize: typography.sizes.xs,
+            fontSize: 12,
             marginLeft: spacing.xs,
           }}
         >

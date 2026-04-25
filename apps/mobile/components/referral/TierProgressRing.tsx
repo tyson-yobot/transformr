@@ -44,7 +44,7 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
   tierName,
   nextTierName,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const progress = useMemo(() => {
     if (target <= 0) return 1;
@@ -95,7 +95,7 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
               {
                 color: colors.text.primary,
                 fontSize: 32,
-                fontWeight: typography.weights.bold as '700',
+                fontWeight: '700',
               },
             ]}
           >
@@ -105,9 +105,9 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
             style={[
               styles.targetCount,
               {
-                color: colors.text.tertiary,
-                fontSize: typography.sizes.sm,
-                fontWeight: typography.weights.medium as '500',
+                color: colors.text.muted,
+                fontSize: 14,
+                fontWeight: '500',
               },
             ]}
           >
@@ -122,8 +122,8 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
           styles.tierName,
           {
             color: accentColor,
-            fontSize: typography.sizes.md,
-            fontWeight: typography.weights.bold as '700',
+            fontSize: 16,
+            fontWeight: '700',
             marginTop: spacing.sm,
           },
         ]}
@@ -137,7 +137,7 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
             styles.nextTier,
             {
               color: colors.text.secondary,
-              fontSize: typography.sizes.xs,
+              fontSize: 12,
               marginTop: spacing.xs,
             },
           ]}
@@ -149,8 +149,8 @@ export const TierProgressRing: React.FC<TierProgressRingProps> = ({
           style={[
             styles.nextTier,
             {
-              color: colors.status.success,
-              fontSize: typography.sizes.xs,
+              color: colors.accent.success,
+              fontSize: 12,
               marginTop: spacing.xs,
             },
           ]}

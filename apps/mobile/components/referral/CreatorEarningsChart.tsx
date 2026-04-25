@@ -31,7 +31,7 @@ export function CreatorEarningsChart({
   totalEarnings,
   pendingPayout,
 }: CreatorEarningsChartProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const maxAmount = earnings.length > 0
     ? Math.max(...earnings.map((e) => e.amount))
@@ -71,8 +71,8 @@ export function CreatorEarningsChart({
             <Text
               style={{
                 color: colors.accent.gold,
-                fontSize: typography.sizes.xs,
-                fontWeight: typography.weights.medium as '500',
+                fontSize: 12,
+                fontWeight: '500',
               }}
             >
               Total Earnings
@@ -81,8 +81,8 @@ export function CreatorEarningsChart({
           <Text
             style={{
               color: colors.text.primary,
-              fontSize: typography.sizes.xl,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 20,
+              fontWeight: '700',
               marginTop: spacing.xs,
             }}
           >
@@ -111,8 +111,8 @@ export function CreatorEarningsChart({
             <Text
               style={{
                 color: colors.accent.success,
-                fontSize: typography.sizes.xs,
-                fontWeight: typography.weights.medium as '500',
+                fontSize: 12,
+                fontWeight: '500',
               }}
             >
               Pending Payout
@@ -121,8 +121,8 @@ export function CreatorEarningsChart({
           <Text
             style={{
               color: colors.text.primary,
-              fontSize: typography.sizes.xl,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 20,
+              fontWeight: '700',
               marginTop: spacing.xs,
             }}
           >
@@ -135,8 +135,8 @@ export function CreatorEarningsChart({
       <Text
         style={{
           color: colors.text.primary,
-          fontSize: typography.sizes.md,
-          fontWeight: typography.weights.semibold as '600',
+          fontSize: 16,
+          fontWeight: '600',
           marginTop: spacing.xl,
           marginBottom: spacing.md,
         }}
@@ -155,7 +155,7 @@ export function CreatorEarningsChart({
           <Text
             style={{
               color: colors.text.muted,
-              fontSize: typography.sizes.sm,
+              fontSize: 14,
               marginTop: spacing.sm,
               textAlign: 'center',
             }}
@@ -176,7 +176,7 @@ export function CreatorEarningsChart({
                   <Text
                     style={{
                       color: colors.text.secondary,
-                      fontSize: typography.sizes.xs,
+                      fontSize: 12,
                       marginBottom: spacing.xs,
                       textAlign: 'center',
                     }}
@@ -203,7 +203,7 @@ export function CreatorEarningsChart({
                   <Text
                     style={{
                       color: colors.text.muted,
-                      fontSize: typography.sizes.xs,
+                      fontSize: 12,
                       marginTop: spacing.xs,
                       textAlign: 'center',
                     }}

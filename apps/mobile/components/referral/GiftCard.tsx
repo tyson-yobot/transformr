@@ -91,7 +91,7 @@ export function GiftCard({
   expiresAt,
   onSend,
 }: GiftCardProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const statusConfig = STATUS_MAP[status];
   const statusColor = colors.accent[statusConfig.colorKey];
@@ -130,8 +130,8 @@ export function GiftCard({
           <Text
             style={{
               color: colors.text.primary,
-              fontSize: typography.sizes.md,
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: 16,
+              fontWeight: '600',
             }}
             numberOfLines={1}
           >
@@ -140,7 +140,7 @@ export function GiftCard({
           <Text
             style={{
               color: colors.text.secondary,
-              fontSize: typography.sizes.sm,
+              fontSize: 14,
               marginTop: spacing.xs,
             }}
           >
@@ -169,8 +169,8 @@ export function GiftCard({
           <Text
             style={{
               color: statusColor,
-              fontSize: typography.sizes.xs,
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: 12,
+              fontWeight: '600',
             }}
           >
             {statusConfig.label}
@@ -199,7 +199,7 @@ export function GiftCard({
         <Text
           style={{
             color: colors.text.secondary,
-            fontSize: typography.sizes.sm,
+            fontSize: 14,
             fontFamily: 'monospace',
             flex: 1,
           }}
@@ -222,7 +222,7 @@ export function GiftCard({
           <Text
             style={{
               color: colors.text.muted,
-              fontSize: typography.sizes.xs,
+              fontSize: 12,
             }}
           >
             {getExpirationText(expiresAt)}
@@ -257,8 +257,8 @@ export function GiftCard({
             <Text
               style={{
                 color: colors.text.inverse,
-                fontSize: typography.sizes.sm,
-                fontWeight: typography.weights.semibold as '600',
+                fontSize: 14,
+                fontWeight: '600',
               }}
             >
               Send to Friend

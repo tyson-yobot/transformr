@@ -19,9 +19,9 @@ interface ShareButtonProps {
   size?: ShareButtonSize;
 }
 
-const SIZE_CONFIG: Record<ShareButtonSize, { height: number; iconSize: number; fontSize: 'sm' | 'md'; paddingH: 'md' | 'lg' }> = {
-  small: { height: 44, iconSize: 16, fontSize: 'sm', paddingH: 'md' },
-  medium: { height: 48, iconSize: 18, fontSize: 'md', paddingH: 'lg' },
+const SIZE_CONFIG: Record<ShareButtonSize, { height: number; iconSize: number; fontSize: number; paddingH: 'md' | 'lg' }> = {
+  small: { height: 44, iconSize: 16, fontSize: 14, paddingH: 'md' },
+  medium: { height: 48, iconSize: 18, fontSize: 16, paddingH: 'lg' },
 };
 
 export function ShareButton({
@@ -30,7 +30,7 @@ export function ShareButton({
   variant = 'primary',
   size = 'medium',
 }: ShareButtonProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const sizeConfig = SIZE_CONFIG[size];
 
@@ -66,8 +66,8 @@ export function ShareButton({
           <Text
             style={{
               color: colors.text.inverse,
-              fontSize: typography.sizes[sizeConfig.fontSize],
-              fontWeight: typography.weights.semibold as '600',
+              fontSize: sizeConfig.fontSize,
+              fontWeight: '600',
             }}
           >
             {label}
@@ -105,8 +105,8 @@ export function ShareButton({
       <Text
         style={{
           color: colors.accent.primary,
-          fontSize: typography.sizes[sizeConfig.fontSize],
-          fontWeight: typography.weights.semibold as '600',
+          fontSize: sizeConfig.fontSize,
+          fontWeight: '600',
         }}
       >
         {label}

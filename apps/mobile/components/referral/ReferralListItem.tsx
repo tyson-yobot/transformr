@@ -26,7 +26,7 @@ interface ReferralListItemProps {
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase();
   }
   return (name[0] ?? '?').toUpperCase();
 }
@@ -36,10 +36,10 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const STATUS_CONFIG: Record<ReferralStatus, { label: string; colorKey: 'warning' | 'success' | 'error' }> = {
+const STATUS_CONFIG: Record<ReferralStatus, { label: string; colorKey: 'warning' | 'success' | 'danger' }> = {
   pending: { label: 'Pending', colorKey: 'warning' },
   active: { label: 'Active', colorKey: 'success' },
-  churned: { label: 'Churned', colorKey: 'error' },
+  churned: { label: 'Churned', colorKey: 'danger' },
 };
 
 // -----------------------------------------------------------------------------
@@ -52,10 +52,10 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
   monthsRetained,
   joinedAt,
 }) => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const statusInfo = STATUS_CONFIG[status];
-  const statusColor = colors.status[statusInfo.colorKey];
+  const statusColor = colors.accent[statusInfo.colorKey];
   const initials = useMemo(() => getInitials(name), [name]);
   const dateStr = useMemo(() => formatDate(joinedAt), [joinedAt]);
 
@@ -85,8 +85,8 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         <Text
           style={{
             color: colors.accent.primary,
-            fontSize: typography.sizes.md,
-            fontWeight: typography.weights.bold as '700',
+            fontSize: 16,
+            fontWeight: '700',
           }}
         >
           {initials}
@@ -98,8 +98,8 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         <Text
           style={{
             color: colors.text.primary,
-            fontSize: typography.sizes.md,
-            fontWeight: typography.weights.semibold as '600',
+            fontSize: 16,
+            fontWeight: '600',
           }}
           numberOfLines={1}
         >
@@ -107,8 +107,8 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         </Text>
         <Text
           style={{
-            color: colors.text.tertiary,
-            fontSize: typography.sizes.xs,
+            color: colors.text.muted,
+            fontSize: 12,
             marginTop: 2,
           }}
         >
@@ -121,8 +121,8 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         <Text
           style={{
             color: colors.text.primary,
-            fontSize: typography.sizes.md,
-            fontWeight: typography.weights.bold as '700',
+            fontSize: 16,
+            fontWeight: '700',
             textAlign: 'center',
           }}
         >
@@ -130,7 +130,7 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         </Text>
         <Text
           style={{
-            color: colors.text.tertiary,
+            color: colors.text.muted,
             fontSize: 10,
             textAlign: 'center',
           }}
@@ -154,8 +154,8 @@ export const ReferralListItem: React.FC<ReferralListItemProps> = ({
         <Text
           style={{
             color: statusColor,
-            fontSize: typography.sizes.xs,
-            fontWeight: typography.weights.semibold as '600',
+            fontSize: 12,
+            fontWeight: '600',
           }}
         >
           {statusInfo.label}

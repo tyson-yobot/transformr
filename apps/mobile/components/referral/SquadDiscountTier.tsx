@@ -44,10 +44,11 @@ export function SquadDiscountTier({
   currentPercent,
   monthsQualified,
 }: SquadDiscountTierProps) {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, spacing, borderRadius } = useTheme();
 
   const nextTier = getNextTier(activeCount);
-  const maxTierMembers = TIERS[TIERS.length - 1].members;
+  const lastTier = TIERS[TIERS.length - 1];
+  const maxTierMembers = lastTier ? lastTier.members : 7;
   const progressRatio = Math.min(activeCount / maxTierMembers, 1);
   const isMaxTier = nextTier === null;
 
@@ -74,8 +75,8 @@ export function SquadDiscountTier({
           <Text
             style={{
               color: colors.text.primary,
-              fontSize: typography.sizes.lg,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 18,
+              fontWeight: '700',
             }}
           >
             Squad Discount
@@ -95,8 +96,8 @@ export function SquadDiscountTier({
           <Text
             style={{
               color: colors.accent.primary,
-              fontSize: typography.sizes.md,
-              fontWeight: typography.weights.bold as '700',
+              fontSize: 16,
+              fontWeight: '700',
             }}
           >
             {currentPercent}%
@@ -108,7 +109,7 @@ export function SquadDiscountTier({
       <Text
         style={{
           color: colors.text.secondary,
-          fontSize: typography.sizes.sm,
+          fontSize: 14,
           marginTop: spacing.sm,
         }}
       >
@@ -171,10 +172,8 @@ export function SquadDiscountTier({
                   color: isReached
                     ? colors.accent.primary
                     : colors.text.muted,
-                  fontSize: typography.sizes.xs,
-                  fontWeight: isReached
-                    ? (typography.weights.semibold as '600')
-                    : (typography.weights.regular as '400'),
+                  fontSize: 12,
+                  fontWeight: isReached ? '600' : '400',
                   textAlign: 'center',
                 }}
               >
@@ -185,7 +184,7 @@ export function SquadDiscountTier({
                   color: isReached
                     ? colors.text.primary
                     : colors.text.muted,
-                  fontSize: typography.sizes.xs,
+                  fontSize: 12,
                   textAlign: 'center',
                 }}
               >
@@ -219,8 +218,8 @@ export function SquadDiscountTier({
         <Text
           style={{
             color: isMaxTier ? colors.accent.success : colors.accent.primary,
-            fontSize: typography.sizes.sm,
-            fontWeight: typography.weights.medium as '500',
+            fontSize: 14,
+            fontWeight: '500',
             flex: 1,
           }}
         >
@@ -243,7 +242,7 @@ export function SquadDiscountTier({
         <Text
           style={{
             color: colors.text.muted,
-            fontSize: typography.sizes.xs,
+            fontSize: 12,
           }}
         >
           Minimum {MIN_CONSECUTIVE_MONTHS} consecutive months required
