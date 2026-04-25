@@ -72,6 +72,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-web-browser",
       "expo-camera",
       "expo-image-picker",
       "expo-notifications",
