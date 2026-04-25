@@ -16,18 +16,12 @@ web-build/
 
 # --- EAS-specific excludes ---
 
-# Patches are for local Windows dev only (Metro multipart response fix,
-# serializer null-path guard). They target packages hoisted to the monorepo
-# root node_modules/ which aren't present in apps/mobile/node_modules/.
-# Uploading them causes patch-package to fail during Install Dependencies.
-patches/
-
 # Original uncompressed video files (duplicates of the optimized versions)
 assets/videos/originals/
 
-# Local Android build artifacts (EAS does its own prebuild)
-android/
-ios/
-
 # App store marketing assets not needed for build
 app-store-assets/
+
+# Local Android build cache (not the source — keep android/ itself for EAS)
+android/app/build/
+android/.gradle/
