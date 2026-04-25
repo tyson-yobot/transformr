@@ -34,6 +34,15 @@ import {
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { useStripe } from '@stripe/stripe-react-native';
+
+// eslint-disable-next-line expo/no-dynamic-env-var
+const stripeKey = process.env['EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY'] ?? '';
+const isStripeConfigured =
+  Boolean(stripeKey) &&
+  !stripeKey.includes('your-') &&
+  !stripeKey.includes('xxxxx') &&
+  stripeKey.startsWith('pk_');
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   beginner:     '#10B981',
@@ -45,6 +54,7 @@ export default function MarketplaceScreen() {
   const { colors, typography, spacing, borderRadius, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
@@ -80,6 +90,11 @@ export default function MarketplaceScreen() {
     if (!userId) return;
     hapticLight();
 
+    if (!isStripeConfigured) {
+      Alert.alert('Payment Not Available', 'Payment processing is not configured yet. Please check back later.');
+      return;
+    }
+
     Alert.alert(
       `Purchase ${program.name}`,
       `One-time purchase for $${(program.price_cents / 100).toFixed(2)}. Payment will be processed via Stripe.`,
@@ -89,23 +104,72 @@ export default function MarketplaceScreen() {
           text: 'Buy Now',
           onPress: async () => {
             setPurchasing(program.id);
-            // In production, collect payment method via Stripe SDK first.
-            // For now we pass a placeholder — the Edge Function handles the full flow.
-            const result = await purchaseProgram(userId, program.id, program.stripe_price_id, 'pm_placeholder');
-            setPurchasing(null);
+            try {
+              // Create a PaymentIntent on the server and initialise the Payment Sheet
+              const intentResult = await supabase.functions.invoke('stripe-webhook', {
+                body: {
+                  action: 'create_program_payment_intent',
+                  userId,
+                  programId: program.id,
+                  stripePriceId: program.stripe_price_id,
+                },
+              });
 
-            if (result.success) {
-              hapticSuccess();
-              setPurchasedIds((prev) => new Set([...prev, program.id]));
-              Alert.alert('Purchase Complete', `${program.name} is now unlocked!`);
-            } else {
-              Alert.alert('Purchase Failed', result.error ?? 'Something went wrong. Please try again.');
+              if (intentResult.error || !(intentResult.data as { clientSecret?: string })?.clientSecret) {
+                setPurchasing(null);
+                Alert.alert('Purchase Failed', (intentResult.error?.message) ?? 'Could not start payment. Please try again.');
+                return;
+              }
+
+              const { clientSecret, customerId, ephemeralKey } = intentResult.data as {
+                clientSecret: string;
+                customerId?: string;
+                ephemeralKey?: string;
+              };
+
+              const { error: sheetError } = await initPaymentSheet({
+                paymentIntentClientSecret: clientSecret,
+                merchantDisplayName: 'TRANSFORMR',
+                ...(customerId ? { customerId } : {}),
+                ...(ephemeralKey ? { customerEphemeralKeySecret: ephemeralKey } : {}),
+              });
+
+              if (sheetError) {
+                setPurchasing(null);
+                Alert.alert('Purchase Failed', sheetError.message);
+                return;
+              }
+
+              const { error: presentError } = await presentPaymentSheet();
+
+              if (presentError) {
+                setPurchasing(null);
+                if (presentError.code !== 'Canceled') {
+                  Alert.alert('Purchase Failed', presentError.message);
+                }
+                return;
+              }
+
+              // Payment succeeded — record the purchase
+              const result = await purchaseProgram(userId, program.id, program.stripe_price_id, clientSecret);
+              setPurchasing(null);
+
+              if (result.success) {
+                hapticSuccess();
+                setPurchasedIds((prev) => new Set([...prev, program.id]));
+                Alert.alert('Purchase Complete', `${program.name} is now unlocked!`);
+              } else {
+                Alert.alert('Purchase Failed', result.error ?? 'Something went wrong. Please try again.');
+              }
+            } catch {
+              setPurchasing(null);
+              Alert.alert('Purchase Failed', 'An unexpected error occurred. Please try again.');
             }
           },
         },
       ],
     );
-  }, [userId]);
+  }, [userId, initPaymentSheet, presentPaymentSheet]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background.primary }]}>
