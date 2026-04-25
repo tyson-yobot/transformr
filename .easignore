@@ -31,6 +31,12 @@ expo-env.d.ts
 *.aab
 
 # Android/iOS build caches (not needed — EAS builds fresh)
+# Paths are relative to monorepo root
+apps/mobile/android/app/build/
+apps/mobile/android/.gradle/
+apps/mobile/ios/build/
+apps/mobile/ios/Pods/
+# Also match if EAS resolves from workspace root
 android/app/build/
 android/.gradle/
 ios/build/
