@@ -20,13 +20,13 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# iOS — keep ios/ for EAS builds
-# ios/
+# iOS — excluded; prebuild generates fresh native code on the builder
+ios/
 *.xcworkspace
 *.xcodeproj
 
-# Android — keep android/ for EAS builds (gradlew, build.gradle, etc.)
-# android/
+# Android — excluded because eas-build-post-install runs expo prebuild --clean
+android/
 *.apk
 *.aab
 
