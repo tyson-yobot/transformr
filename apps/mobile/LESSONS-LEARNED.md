@@ -168,6 +168,31 @@ If the session is already poisoned, start a fresh session.
 
 ---
 
+## 2026-04-25 — Subagent Typography Token Mismatch
+
+**What happened:** When creating 11 new components via parallel subagents,
+the agents assumed the theme's `typography` object had `.sizes` and `.weights`
+sub-objects (e.g., `typography.sizes.sm`, `typography.weights.bold`). It does
+not — it has named style objects like `h1`, `body`, `caption` which each
+contain `fontSize`, `fontWeight`, etc. This caused 40+ TypeScript errors.
+
+**Root cause:** Subagents don't have full context of the theme type structure.
+They inferred a common pattern that doesn't match this project's actual design
+system. The same issue hit `colors.text.tertiary` (doesn't exist — use `muted`)
+and `colors.status.X` (doesn't exist — use `colors.accent.X`).
+
+**Fix applied:** Replaced all `typography.sizes.X` with inline numeric fontSize
+values and all `typography.weights.X` with inline fontWeight strings. Replaced
+invalid color token paths with correct ones.
+
+**Rule going forward:** When briefing subagents to create components, explicitly
+include the theme's available typography tokens (h1, h2, h3, body, bodySmall,
+caption, label, sectionTitle) and clarify there are no `.sizes` or `.weights`
+sub-objects. Include the exact text color tokens available (primary, secondary,
+muted, inverse, link — no tertiary).
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:

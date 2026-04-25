@@ -122,6 +122,38 @@ remounts. Always crossfade between persistent slots.
 
 ---
 
+## AD-011: Billing Ledger as Single Source of Truth
+
+**Decision:** Every financial event is recorded in `billing_ledger` BEFORE touching Stripe or QuickBooks.
+**Rationale:** A single ledger table prevents discrepancies between Stripe state and accounting state. All discounts, payments, and refunds flow through the ledger.
+**Consequence:** Never modify Stripe coupons directly. Always go through the apply-reward Edge Function pipeline. QuickBooks sync reads from billing_ledger, not from Stripe.
+
+---
+
+## AD-012: Referral Anti-Abuse — 2-Month Retention Minimum
+
+**Decision:** Referrals must maintain 2+ months of active subscription and 3+ activity events in the last 30 days to qualify as "active" and count toward the referrer's rewards.
+**Rationale:** Prevents referral farming with throwaway accounts. Ensures rewards reflect genuine user acquisition.
+**Consequence:** Rewards are delayed but genuine. The `referral-qualification-check` Edge Function runs daily to evaluate.
+
+---
+
+## AD-013: Discount Stacking Rules
+
+**Decision:** Free months take priority. Squad discount applies during paid months only. Lifetime Pro overrides everything. Squad and referral discounts do NOT stack.
+**Rationale:** Simple, predictable billing behavior. Users always get the best available discount automatically.
+**Consequence:** `calculate_effective_discount()` database function is the single authority for what discount a user receives.
+
+---
+
+## AD-014: QuickBooks Gross + Contra-Revenue Model
+
+**Decision:** Free months and discounted payments are recorded in QuickBooks as full-price invoices with contra-revenue discount line items (accounts 4101-4105).
+**Rationale:** Books show true gross revenue and referral program cost separately, enabling accurate financial analysis of the referral program's ROI.
+**Consequence:** The qb-sync Edge Function always creates two line items for discounted invoices: gross revenue (4001-4003) and contra-revenue discount (4101-4105).
+
+---
+
 ## TEMPLATE FOR NEW DECISIONS
 
 ```
