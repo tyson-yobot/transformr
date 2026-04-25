@@ -21,7 +21,7 @@
     "prebuild": "npx expo prebuild",
     "prebuild:clean": "npx expo prebuild --clean",
     "postinstall": "npx patch-package || echo 'patch-package: some patches could not be applied (non-fatal in monorepo/CI)'",
-    "eas-build-post-install": "sed -i 's/kotlin = \"2.0.21\"/kotlin = \"1.9.25\"/' node_modules/react-native/gradle/libs.versions.toml && npx expo prebuild --clean --platform ${EAS_BUILD_PLATFORM:-android}"
+    "eas-build-post-install": "node -e \"var d=require('path').dirname(require.resolve('react-native/package.json'));var f=d+'/gradle/libs.versions.toml';var s=require('fs').readFileSync(f,'utf8');require('fs').writeFileSync(f,s.replace(/kotlin = .2\\.0\\.21./,'kotlin = \\\"1.9.25\\\"'));console.log('Patched Kotlin version in',f)\" && npx expo prebuild --clean --platform ${EAS_BUILD_PLATFORM:-android}"
   },
   "dependencies": {
     "@expo/vector-icons": "14.1.0",
