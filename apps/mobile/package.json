@@ -21,7 +21,7 @@
     "prebuild": "npx expo prebuild",
     "prebuild:clean": "npx expo prebuild --clean",
     "postinstall": "npx patch-package || echo 'patch-package: some patches could not be applied (non-fatal in monorepo/CI)'",
-    "eas-build-post-install": "node -e \"var fs=require('fs'),path=require('path');['react-native/package.json','@react-native/gradle-plugin/package.json'].forEach(function(p){try{var d=path.dirname(require.resolve(p));var f=d+'/gradle/libs.versions.toml';var s=fs.readFileSync(f,'utf8');fs.writeFileSync(f,s.replace(/kotlin = .2\\.0\\.21./,'kotlin = \\\"1.9.25\\\"'));console.log('Patched',f)}catch(e){console.log('Skip',p,e.message)}})\" && npx expo prebuild --clean --platform ${EAS_BUILD_PLATFORM:-android}"
+    "eas-build-post-install": "node -e \"var fs=require('fs'),path=require('path');['react-native/package.json','@react-native/gradle-plugin/package.json'].forEach(function(p){try{var d=path.dirname(require.resolve(p));var f=d+'/gradle/libs.versions.toml';var s=fs.readFileSync(f,'utf8');fs.writeFileSync(f,s.replace(/kotlin = .2\\.0\\.21./,'kotlin = \\\"1.9.25\\\"'));console.log('Patched',f)}catch(e){console.log('Skip',p,e.message)}})\""
   },
   "dependencies": {
     "@expo/vector-icons": "14.1.0",
