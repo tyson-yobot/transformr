@@ -97,6 +97,10 @@ export default function TabsLayout() {
           tabBarShowLabel: false,
           tabBarActiveTintColor: colors.accent.primary,
           tabBarInactiveTintColor: colors.text.muted,
+          // Performance: freeze off-screen tabs so they stop re-rendering
+          freezeOnBlur: true,
+          // Performance: defer rendering until first visit
+          lazy: true,
         }}
       >
         <Tabs.Screen

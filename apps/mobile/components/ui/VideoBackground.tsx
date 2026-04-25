@@ -1,13 +1,23 @@
 // =============================================================================
-// VideoBackground — cycling pillar video background with crossfade
+// VideoBackground — dual-slot ping-pong cycling with crossfade
+//
+// Performance design:
+// • Two persistent Video components (Slot A + Slot B) — NEVER mount/unmount.
+// • Ping-pong: while Slot A plays, Slot B silently buffers the next video.
+//   On cycle, crossfade A→B, then reload A with the video after next.
+// • progressUpdateIntervalMillis=0 eliminates 60fps JS-bridge callbacks.
+// • shouldPlay only on the active slot — inactive slot buffers without decoding frames.
+// • React.memo wrapper prevents re-renders from parent state changes.
+// • Static gym-hero.jpg fallback behind both slots during initial load.
 // =============================================================================
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import {
   View,
   StyleSheet,
   Dimensions,
   Animated,
+  ImageBackground,
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 
@@ -29,15 +39,31 @@ interface VideoBackgroundProps {
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-export function VideoBackground({
+// Static fallback shown behind video slots while the first video buffers.
+const FALLBACK_IMAGE = require('@assets/images/gym-hero.jpg');
+
+function VideoBackgroundComponent({
   videos,
   cycleDurationMs = 8000,
   overlayOpacity = 0.55,
   onIndexChange,
   children,
 }: VideoBackgroundProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const firstSource = videos[0]?.source ?? 0;
+  const secondSource = videos.length > 1 ? (videos[1]?.source ?? firstSource) : firstSource;
+
+  // Each slot has its own source and play-state.
+  // Slot A starts active (opacity 1, playing). Slot B preloads (opacity 0, paused).
+  const [slotASource, setSlotASource] = useState<number>(firstSource);
+  const [slotBSource, setSlotBSource] = useState<number>(secondSource);
+  const [slotAPlaying, setSlotAPlaying] = useState(true);
+  const [slotBPlaying, setSlotBPlaying] = useState(false);
+
+  const slotAOpacity = useRef(new Animated.Value(1)).current;
+  const slotBOpacity = useRef(new Animated.Value(0)).current;
+
+  const activeSlot = useRef<'A' | 'B'>('A');
+  const currentIndex = useRef(0);
   const isMounted = useRef(true);
   const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -50,69 +76,111 @@ export function VideoBackground({
   }, []);
 
   const cycleToNext = useCallback(() => {
-    // Fade out
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (!finished || !isMounted.current) return;
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % videos.length;
-        onIndexChange?.(next);
-        return next;
+    if (videos.length <= 1) return;
+
+    const nextIndex = (currentIndex.current + 1) % videos.length;
+    const nextNextIndex = (nextIndex + 1) % videos.length;
+
+    if (activeSlot.current === 'A') {
+      // A is playing. B has already buffered nextIndex. Start B playing and crossfade.
+      setSlotBPlaying(true);
+      Animated.parallel([
+        Animated.timing(slotAOpacity, { toValue: 0, duration: 800, useNativeDriver: true }),
+        Animated.timing(slotBOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+      ]).start(() => {
+        if (!isMounted.current) return;
+        currentIndex.current = nextIndex;
+        activeSlot.current = 'B';
+        onIndexChange?.(nextIndex);
+        setSlotAPlaying(false);
+        // Silently reload A with the next-next video while it's invisible.
+        setSlotASource(videos[nextNextIndex]?.source ?? firstSource);
       });
-      // Fade back in
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
-    });
-  }, [fadeAnim, videos.length, onIndexChange]);
+    } else {
+      // B is playing. A has already buffered nextIndex. Start A playing and crossfade.
+      setSlotAPlaying(true);
+      Animated.parallel([
+        Animated.timing(slotBOpacity, { toValue: 0, duration: 800, useNativeDriver: true }),
+        Animated.timing(slotAOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+      ]).start(() => {
+        if (!isMounted.current) return;
+        currentIndex.current = nextIndex;
+        activeSlot.current = 'A';
+        onIndexChange?.(nextIndex);
+        setSlotBPlaying(false);
+        // Silently reload B with the next-next video while it's invisible.
+        setSlotBSource(videos[nextNextIndex]?.source ?? firstSource);
+      });
+    }
+  }, [videos, slotAOpacity, slotBOpacity, onIndexChange, firstSource]);
 
   useEffect(() => {
+    if (videos.length <= 1) return;
     if (cycleTimer.current) clearInterval(cycleTimer.current);
     cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
     return () => {
       if (cycleTimer.current) clearInterval(cycleTimer.current);
     };
-  }, [cycleToNext, cycleDurationMs]);
+  }, [cycleToNext, cycleDurationMs, videos.length]);
 
-  const handleVideoError = useCallback(() => {
-    // Skip to next video on error
+  const handleSlotAError = useCallback(() => {
     if (cycleTimer.current) clearInterval(cycleTimer.current);
     cycleToNext();
-    cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
+    if (isMounted.current) {
+      cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
+    }
   }, [cycleToNext, cycleDurationMs]);
 
-  const currentVideo = videos[currentIndex];
+  const handleSlotBError = useCallback(() => {
+    if (cycleTimer.current) clearInterval(cycleTimer.current);
+    cycleToNext();
+    if (isMounted.current) {
+      cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
+    }
+  }, [cycleToNext, cycleDurationMs]);
 
   return (
     <View style={styles.container}>
-      {/* Video layer — fades in/out on cycle */}
-      <Animated.View style={[styles.absoluteFill, { opacity: fadeAnim }]}>
-        {currentVideo != null && (
-          <Video
-            key={currentIndex}
-            source={currentVideo.source}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            isLooping
-            isMuted
-            volume={0}
-            onError={handleVideoError}
-          />
-        )}
+      {/* Static fallback — visible only while first video buffers */}
+      <ImageBackground source={FALLBACK_IMAGE} style={styles.absoluteFill} />
+
+      {/* Slot A — starts active */}
+      <Animated.View style={[styles.absoluteFill, { opacity: slotAOpacity }]}>
+        <Video
+          source={slotASource}
+          style={styles.video}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay={slotAPlaying}
+          isLooping
+          isMuted
+          volume={0}
+          progressUpdateIntervalMillis={0}
+          onError={handleSlotAError}
+        />
       </Animated.View>
 
-      {/* Dark overlay for text readability */}
+      {/* Slot B — starts preloading, invisible */}
+      <Animated.View style={[styles.absoluteFill, { opacity: slotBOpacity }]}>
+        <Video
+          source={slotBSource}
+          style={styles.video}
+          resizeMode={ResizeMode.COVER}
+          shouldPlay={slotBPlaying}
+          isLooping
+          isMuted
+          volume={0}
+          progressUpdateIntervalMillis={0}
+          onError={handleSlotBError}
+        />
+      </Animated.View>
+
+      {/* Dark overlay for text readability — pointerEvents none so touches reach content */}
       <View
         style={[
           styles.absoluteFill,
           { backgroundColor: `rgba(12, 10, 21, ${overlayOpacity})` },
         ]}
+        pointerEvents="none"
       />
 
       {/* Content */}
@@ -120,6 +188,8 @@ export function VideoBackground({
     </View>
   );
 }
+
+export const VideoBackground = memo(VideoBackgroundComponent);
 
 const styles = StyleSheet.create({
   container: {
