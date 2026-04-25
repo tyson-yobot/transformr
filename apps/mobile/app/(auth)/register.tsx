@@ -55,7 +55,12 @@ function getPasswordStrength(password: string): { level: number; label: string }
 export default function RegisterScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { signUp, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
+  const signUp = useAuthStore((s) => s.signUp);
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
+  const signInWithApple = useAuthStore((s) => s.signInWithApple);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
+  const clearError = useAuthStore((s) => s.clearError);
   const session = useAuthStore((s) => s.session);
 
   const [displayName, setDisplayName] = useState('');

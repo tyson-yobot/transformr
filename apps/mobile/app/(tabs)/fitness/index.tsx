@@ -684,6 +684,8 @@ export default function FitnessHomeScreen() {
               keyExtractor={(item) => item.id}
               renderItem={renderRecentWorkout}
               scrollEnabled={false}
+              maxToRenderPerBatch={10}
+              initialNumToRender={5}
             />
           ) : (
             <View style={styles.emptyState}>

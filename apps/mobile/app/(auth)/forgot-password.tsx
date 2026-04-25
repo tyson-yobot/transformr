@@ -26,7 +26,10 @@ import { isValidEmail } from '@utils/validators';
 export default function ForgotPasswordScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const router = useRouter();
-  const { resetPassword, loading, error, clearError } = useAuthStore();
+  const resetPassword = useAuthStore((s) => s.resetPassword);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
+  const clearError = useAuthStore((s) => s.clearError);
 
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
