@@ -16,6 +16,7 @@ import { ThemeProvider, useTheme } from '@theme/index';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useAuthStore } from '@stores/authStore';
 import { usePartnerStore } from '@stores/partnerStore';
+import { useReferralStore } from '@stores/referralStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
 import { SplashOverlay } from '@components/SplashOverlay';
@@ -91,6 +92,39 @@ export default function RootLayout() {
         }
       } catch {
         // ignore malformed URL
+      }
+      return;
+    }
+
+    // Referral deep link: transformr://r/CODE or https://transformrpro.com/r/CODE
+    const referralMatch = url.match(/\/r\/([A-Za-z0-9_-]+)/);
+    if (referralMatch) {
+      const refCode = referralMatch[1];
+      const user = useAuthStore.getState().user;
+      if (user?.id && refCode) {
+        void useReferralStore.getState().applyCode(refCode, user.id);
+      }
+      return;
+    }
+
+    // Gift claim deep link: transformr://gift/CODE or https://transformrpro.com/gift/CODE
+    const giftMatch = url.match(/\/gift\/([A-Za-z0-9_-]+)/);
+    if (giftMatch) {
+      const giftCode = giftMatch[1];
+      const user = useAuthStore.getState().user;
+      if (user?.id && giftCode) {
+        void useReferralStore.getState().claimMilestoneGift(giftCode, user.id);
+      }
+      return;
+    }
+
+    // Squad join deep link: transformr://squad/CODE or https://transformrpro.com/squad/CODE
+    const squadMatch = url.match(/\/squad\/([A-Za-z0-9_-]+)/);
+    if (squadMatch) {
+      const inviteCode = squadMatch[1];
+      const user = useAuthStore.getState().user;
+      if (user?.id && inviteCode) {
+        void useReferralStore.getState().joinExistingSquad(user.id, inviteCode);
       }
       return;
     }
