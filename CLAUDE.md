@@ -610,3 +610,71 @@ echo "Stores: $(find apps/mobile/stores -name '*.ts' | wc -l)"
 echo "Videos: $(find apps/mobile/assets/videos -name '*.mp4' 2>/dev/null | wc -l)"
 echo "Images: $(find apps/mobile/assets/images 2>/dev/null | wc -l)"
 ```
+
+---
+
+## CONTINUOUS IMPROVEMENT — MANDATORY FOR ALL SESSIONS
+
+### Every Agent Must Read Before Working
+
+At the START of every Claude Code session, before writing any code,
+the agent MUST read these files in order:
+
+1. `CLAUDE.md` — Rules, constraints, and guardrails
+2. `SOUL.md` — Agent personality, values, and behavioral patterns
+3. `apps/mobile/ASSET-MANIFEST.md` — Locked visual assets and screen mappings
+4. `apps/mobile/LESSONS-LEARNED.md` — Past mistakes, root causes, and patterns to avoid
+5. `apps/mobile/ARCHITECTURE-DECISIONS.md` — Permanent technical decisions
+
+If any of these files don't exist, note it but continue working.
+
+### Every Agent Must Write Before Finishing
+
+At the END of every Claude Code session, before the final commit,
+the agent MUST update the relevant governance files with anything
+new it learned during the session:
+
+**Update LESSONS-LEARNED.md if:**
+- A bug was found that was caused by a previous AI session
+- A new failure pattern was discovered
+- A workaround was needed for a tool, library, or environment issue
+- An assumption was made that turned out to be wrong
+
+**Update ARCHITECTURE-DECISIONS.md if:**
+- A technical decision was made that future sessions should respect
+- A library was chosen over another for specific reasons
+- A pattern was established that should be followed going forward
+- A configuration was set that should not be changed
+
+**Update SOUL.md if:**
+- A new behavioral rule was established
+- A communication pattern was found to be ineffective
+- A new constraint on agent behavior was discovered
+
+**Update CLAUDE.md if:**
+- A new guardrail or permanent rule was established
+- A new locked file or asset was identified
+- A constraint was relaxed or tightened by the user
+
+**Update ASSET-MANIFEST.md if:**
+- New visual assets were added to any screen
+- Asset-to-screen mappings changed
+- New screens were created that use visual assets
+
+### How to Write Updates
+
+All updates must follow this format:
+
+```
+## [DATE] — [SESSION TYPE] — [BRIEF DESCRIPTION]
+
+**What happened:** [1-2 sentence description]
+**Root cause:** [Why it happened]
+**Fix applied:** [What was done]
+**Rule going forward:** [What future sessions must do/avoid]
+```
+
+Updates must be:
+- Factual, not vague ("removed image from login.tsx" not "UI issue")
+- Actionable (state what to DO or NOT DO, not just what happened)
+- Permanent (once written, the rule stays unless the user explicitly removes it)
