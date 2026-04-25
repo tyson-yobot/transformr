@@ -445,3 +445,168 @@ TASKS
 
 Use TaskCreate at the start of any multi-step job. Use TaskUpdate to mark in_progress/completed as you go.
 This is non-negotiable — the user must always be able to see what is being worked on and what remains.
+
+---
+
+## ANTI-REGRESSION GUARDRAILS — PERMANENT RULES FOR ALL SESSIONS
+
+These rules exist because AI agents have repeatedly caused regressions
+by removing working functionality during "fixes", "cleanups", and
+"optimizations." These regressions have cost the founder over a week
+of lost work. Every rule below was written in response to a real incident.
+
+### GOLDEN RULE: ADD AND FIX ONLY. NEVER REMOVE. NEVER DOWNGRADE.
+
+Every session must leave the app with MORE functionality than it started
+with, or exactly the same. Never less. There is no exception to this rule.
+
+---
+
+### RULE: NEVER REMOVE FUNCTIONALITY
+
+You MUST NOT, under any circumstance:
+- Remove a screen, route, component, or feature
+- Remove a button, link, card, or interactive element
+- Remove a form field, input, or validation
+- Remove a navigation path or menu item
+- Remove an import, require(), or asset reference
+- Disable, hide, or comment out working code
+- Replace a feature with a simpler version
+- "Simplify" or "streamline" by deleting capabilities
+- Remove error handling, loading states, or empty states
+
+The words "simplify", "clean up", "streamline", "optimize", and
+"refactor" are NEVER permission to delete functionality. They mean
+"make the existing thing work better while keeping everything it does."
+
+---
+
+### RULE: NEVER REMOVE VISUAL ASSETS
+
+You MUST NOT:
+- Remove any require() or import for images, videos, or icons
+- Replace an image/video background with a solid color or gradient
+- Remove ImageBackground, VideoBackground, or Image components
+- Remove animations, transitions, or visual effects
+- Remove blur effects, glass-morphism, or overlays
+- Downgrade a rich visual element to a plain element
+- Remove or change the TRANSFORMR prism icon on any screen
+- Remove hero images from onboarding screens
+- Remove video files from assets/videos/
+- Remove Pexels attribution from login screen
+
+If a screen has a visual asset, it KEEPS that visual asset.
+
+---
+
+### RULE: NEVER DOWNGRADE UI
+
+You MUST NOT:
+- Replace a custom component with a basic View/Text
+- Remove styling (shadows, gradients, rounded corners, etc.)
+- Reduce animation quality or remove micro-interactions
+- Remove haptic feedback triggers
+- Remove skeleton loading states and replace with blank screens
+- Remove empty states and replace with blank lists
+- Change dark mode colors to be less polished
+- Remove the pillar indicator dots from the login screen
+- Remove feature cards or descriptive text from any screen
+
+---
+
+### RULE: NEVER CHANGE WHAT'S NOT BROKEN
+
+If the task is "fix bug X on screen Y":
+- Fix ONLY bug X
+- Touch ONLY the code related to bug X
+- Do NOT "while I'm here" refactor other parts of screen Y
+- Do NOT change the layout, styling, or content of screen Y
+- Do NOT move, rename, or reorganize files unless that IS the task
+
+---
+
+### RULE: MANDATORY PRE/POST VERIFICATION
+
+Before modifying ANY .tsx file:
+1. Read the ENTIRE file
+2. Count all require() and import statements for assets
+3. Count all Image, ImageBackground, VideoBackground components
+4. Record all background colors/gradients/images
+
+After modifying the file:
+1. Re-count all of the above
+2. If ANY count is LOWER than before your edit, UNDO your change
+3. Run TypeScript check to ensure no compilation errors
+
+---
+
+### RULE: MANDATORY DIFF REVIEW BEFORE COMMIT
+
+Before every git add / git commit, check for removed asset references:
+```bash
+git diff --name-only | xargs grep -l "require\|ImageBackground\|VideoBackground" 2>/dev/null
+```
+
+If the diff shows ANY removed asset references, image components,
+or video components that were NOT explicitly requested by the user:
+- STOP
+- Revert those specific changes
+- Re-apply your fix without removing the assets
+
+---
+
+### RULE: LOCKED VISUAL ASSETS
+
+These files and their visual assets are PERMANENTLY LOCKED.
+See ASSET-MANIFEST.md for the complete mapping.
+
+**Index / Loading Screen (`app/index.tsx`):**
+- transformr-icon.png logo
+- gym-hero.jpg background
+
+**Register Screen (`app/(auth)/register.tsx`):**
+- gym-hero.jpg background
+- transformr-icon.png logo
+
+**Login Screen (`app/(auth)/login.tsx`):**
+- VideoBackground with 5 pillar videos (fitness, nutrition, sleep, business, mindset)
+- Pillar indicator dots
+- Pexels attribution text
+- transformr-icon.png logo
+
+**Splash Screen (`components/SplashOverlay.tsx`):**
+- gym-hero.jpg background
+- transformr-icon.png logo
+
+**VideoBackground component (`components/ui/VideoBackground.tsx`):**
+- gym-hero.jpg fallback image
+
+**Onboarding (9 screens):**
+- gym-hero.jpg → Welcome
+- hero-profile.jpg → Profile
+- hero-goals.jpg → Goals
+- hero-fitness.jpg → Fitness
+- hero-nutrition.jpg → Nutrition
+- hero-business.jpg → Business (×2 renders)
+- hero-partner.jpg → Partner (×2 renders)
+- hero-notifications.jpg → Notifications
+- hero-ready.jpg → Ready
+
+Modifying these files for bug fixes is permitted. Removing their
+visual assets is NEVER permitted.
+
+---
+
+### RULE: SESSION START INVENTORY
+
+Every Claude Code session SHOULD verify file counts at start and end.
+If ANY count is LOWER at end than at start, a regression was introduced.
+
+```bash
+echo "Routes: $(find apps/mobile/app -name '*.tsx' | wc -l)"
+echo "Components: $(find apps/mobile/components -name '*.tsx' | wc -l)"
+echo "Services: $(find apps/mobile/services -name '*.ts' | wc -l)"
+echo "Stores: $(find apps/mobile/stores -name '*.ts' | wc -l)"
+echo "Videos: $(find apps/mobile/assets/videos -name '*.mp4' 2>/dev/null | wc -l)"
+echo "Images: $(find apps/mobile/assets/images 2>/dev/null | wc -l)"
+```

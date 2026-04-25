@@ -8,6 +8,32 @@ Stop, revert, and re-read the task scope.
 
 ---
 
+## Index / Loading Screen (`app/index.tsx`) — LOCKED
+
+| Asset | Usage |
+|-------|-------|
+| assets/icons/transformr-icon.png | App logo displayed during load |
+| assets/images/gym-hero.jpg | Full-screen background |
+
+---
+
+## Register Screen (`app/(auth)/register.tsx`) — LOCKED
+
+| Asset | Usage |
+|-------|-------|
+| assets/images/gym-hero.jpg | Full-screen background |
+| assets/icons/transformr-icon.png | App wordmark logo |
+
+---
+
+## VideoBackground Component (`components/ui/VideoBackground.tsx`) — LOCKED
+
+| Asset | Usage |
+|-------|-------|
+| assets/images/gym-hero.jpg | Fallback image when video fails to load |
+
+---
+
 ## Onboarding Screens (`app/(auth)/onboarding/`)
 
 These screens use the `localSource` prop on `<OnboardingBackground>`.
