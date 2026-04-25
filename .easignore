@@ -1,0 +1,91 @@
+# EAS Build ignore file — based on .gitignore but keeps native dirs for builds
+# EAS needs android/ and ios/ directories for bare workflow builds.
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# iOS — keep ios/ for EAS builds
+# ios/
+*.xcworkspace
+*.xcodeproj
+
+# Android — keep android/ for EAS builds (gradlew, build.gradle, etc.)
+# android/
+*.apk
+*.aab
+
+# Android/iOS build caches (not needed — EAS builds fresh)
+android/app/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+
+# Environment
+.env
+.env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+__tests__/__snapshots__/
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Secrets
+google-play-service-account.json
+*.pem
+
+# Claude Code
+.claude/
+
+# Data files
+*.csv
+*.xml
+
+# Root-level images (not assets/)
+/*.png
+
+# Misc
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# EAS-specific excludes
+apps/mobile/assets/videos/originals/
+apps/mobile/app-store-assets/
