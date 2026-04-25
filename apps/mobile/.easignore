@@ -1,0 +1,33 @@
+# EAS Build ignore file
+# Same as .gitignore plus additional EAS-specific excludes
+
+# --- Standard gitignore entries ---
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# --- EAS-specific excludes ---
+
+# Patches are for local Windows dev only (Metro multipart response fix,
+# serializer null-path guard). They target packages hoisted to the monorepo
+# root node_modules/ which aren't present in apps/mobile/node_modules/.
+# Uploading them causes patch-package to fail during Install Dependencies.
+patches/
+
+# Original uncompressed video files (duplicates of the optimized versions)
+assets/videos/originals/
+
+# Local Android build artifacts (EAS does its own prebuild)
+android/
+ios/
+
+# App store marketing assets not needed for build
+app-store-assets/
