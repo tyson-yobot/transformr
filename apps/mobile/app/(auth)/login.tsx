@@ -21,17 +21,29 @@ import { StatusBar } from 'expo-status-bar';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { LinearGradient as LG, type LinearGradientProps } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@theme/index';
 import { useAuthStore } from '@stores/authStore';
 import { Input } from '@components/ui/Input';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { isValidEmail } from '@utils/validators';
+import { VideoBackground } from '@components/ui/VideoBackground';
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
 const LinearGradient = LG as unknown as ComponentType<LinearGradientProps>;
 
+// Transformation pillar videos — cycled as the login background
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const GYM_IMAGE = require('@assets/images/gym-hero.jpg') as number;
+const LOGIN_VIDEOS = [
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  { source: require('@assets/videos/pillar-fitness.mp4') as number, label: 'FITNESS' },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  { source: require('@assets/videos/pillar-nutrition.mp4') as number, label: 'NUTRITION' },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  { source: require('@assets/videos/pillar-sleep.mp4') as number, label: 'SLEEP' },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  { source: require('@assets/videos/pillar-business.mp4') as number, label: 'BUSINESS' },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  { source: require('@assets/videos/pillar-mindset.mp4') as number, label: 'MINDSET' },
+];
 
 // Google "G" icon — white to match dark theme
 function GoogleIcon({ size = 20 }: { size?: number }) {
@@ -43,11 +55,11 @@ function GoogleIcon({ size = 20 }: { size?: number }) {
 }
 
 export default function LoginScreen() {
-  const { colors } = useTheme();
   const router = useRouter();
   const { signIn, signInWithGoogle, signInWithApple, loading, error, clearError } = useAuthStore();
   const session = useAuthStore((s) => s.session);
 
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [email, setEmail] = useState(__DEV__ ? 'tyson@construktr.ai' : '');
   const [password, setPassword] = useState(__DEV__ ? 'Icedawgs2!' : '');
   const [emailError, setEmailError] = useState('');
@@ -92,27 +104,13 @@ export default function LoginScreen() {
   }, [router]);
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background.primary }]}>
-      <StatusBar style="light" backgroundColor="#0C0A15" />
-      {/* Warm gym background */}
-      <Image
-        source={GYM_IMAGE}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        cachePolicy="memory-disk"
-      />
-      {/* Gradient: atmosphere at top, solid form zone at bottom */}
-      <LinearGradient
-        colors={[
-          'rgba(12,10,21,0.10)',
-          'rgba(12,10,21,0.35)',
-          'rgba(12,10,21,0.80)',
-          'rgba(12,10,21,0.95)',
-          '#0C0A15',
-        ]}
-        locations={[0, 0.25, 0.45, 0.65, 0.80]}
-        style={StyleSheet.absoluteFill}
-      />
+    <VideoBackground
+      videos={LOGIN_VIDEOS}
+      cycleDurationMs={8000}
+      overlayOpacity={0.6}
+      onIndexChange={setCurrentVideoIndex}
+    >
+      <StatusBar style="light" backgroundColor="transparent" />
 
       <SafeAreaView style={styles.safe}>
         <KeyboardAvoidingView
@@ -282,12 +280,34 @@ export default function LoginScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </View>
+
+      {/* Pillar indicator — current video label + dot nav */}
+      <View style={styles.pillarIndicator} pointerEvents="none">
+        <Text style={styles.pillarLabel}>
+          {LOGIN_VIDEOS[currentVideoIndex]?.label ?? ''}
+        </Text>
+        <View style={styles.pillarDots}>
+          {LOGIN_VIDEOS.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.pillarDot,
+                i === currentVideoIndex && styles.pillarDotActive,
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Pexels attribution — required for free usage */}
+      <Text style={styles.pexelsAttribution} pointerEvents="none">
+        Videos by Pexels
+      </Text>
+    </VideoBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
   safe: { flex: 1 },
   flex: { flex: 1 },
   scroll: {
@@ -444,5 +464,44 @@ const styles = StyleSheet.create({
     color: '#C084FC' /* brand-ok */,
     textDecorationLine: 'underline',
     textDecorationColor: 'rgba(192,132,252,0.3)',
+  },
+  // Pillar indicator
+  pillarIndicator: {
+    position: 'absolute',
+    bottom: 32,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  pillarLabel: {
+    fontSize: 10,
+    fontWeight: '500',
+    letterSpacing: 3,
+    color: 'rgba(248, 250, 252, 0.4)',
+    fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
+    marginBottom: 8,
+  },
+  pillarDots: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pillarDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(248, 250, 252, 0.25)',
+  },
+  pillarDotActive: {
+    width: 20,
+    backgroundColor: '#A855F7' /* brand purple */,
+  },
+  // Pexels attribution
+  pexelsAttribution: {
+    position: 'absolute',
+    bottom: 8,
+    right: 12,
+    fontSize: 9,
+    color: 'rgba(248, 250, 252, 0.15)',
+    fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
   },
 });
