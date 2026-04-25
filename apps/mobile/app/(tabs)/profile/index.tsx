@@ -635,6 +635,24 @@ export default function ProfileScreen() {
         />
       </Animated.View>
 
+      <SectionHeader title="Rewards & Referrals" />
+      <Animated.View entering={FadeInDown.delay(125).duration(400)}>
+        <SettingsRow
+          icon="gift-outline"
+          iconColor={colors.accent.gold}
+          label="Referrals & Rewards"
+          iconBg={colors.dim.gold}
+          onPress={() => router.push('/(tabs)/profile/referrals')}
+        />
+        <SettingsRow
+          icon="shield-checkmark-outline"
+          iconColor={colors.accent.success}
+          label="My Squad"
+          iconBg={colors.dim.success}
+          onPress={() => router.push('/(tabs)/profile/squad')}
+        />
+      </Animated.View>
+
       <SectionHeader title="Features" />
       <Animated.View entering={FadeInDown.delay(150).duration(400)}>
         <SettingsRow

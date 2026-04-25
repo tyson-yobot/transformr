@@ -24,6 +24,7 @@ const ONBOARDING_STEPS = [
   'business',
   'partner',
   'notifications',
+  'referral',
   'ready',
 ] as const;
 
@@ -34,6 +35,7 @@ const SKIPPABLE_STEPS: readonly string[] = [
   'business',
   'partner',
   'notifications',
+  'referral',
 ];
 
 export default function OnboardingLayout() {

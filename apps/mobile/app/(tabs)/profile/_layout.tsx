@@ -96,6 +96,41 @@ export default function ProfileLayout() {
           headerBackTitle: 'Profile',
         }}
       />
+      <Stack.Screen
+        name="referrals"
+        options={{
+          title: 'Referral Hub',
+          headerBackTitle: 'Profile',
+        }}
+      />
+      <Stack.Screen
+        name="rewards"
+        options={{
+          title: 'Rewards',
+          headerBackTitle: 'Profile',
+        }}
+      />
+      <Stack.Screen
+        name="squad"
+        options={{
+          title: 'My Squad',
+          headerBackTitle: 'Profile',
+        }}
+      />
+      <Stack.Screen
+        name="gifts"
+        options={{
+          title: 'Milestone Gifts',
+          headerBackTitle: 'Profile',
+        }}
+      />
+      <Stack.Screen
+        name="creator"
+        options={{
+          title: 'Creator Dashboard',
+          headerBackTitle: 'Profile',
+        }}
+      />
     </Stack>
   );
 }
