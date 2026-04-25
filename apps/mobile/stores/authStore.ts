@@ -163,6 +163,12 @@ export const useAuthStore = create<AuthStore>()(
               set({ loading: false });
               return;
             }
+            // Surface any OAuth error returned in the callback URL
+            const oauthError = parsed.searchParams.get('error') ?? hashParams.get('error');
+            const oauthErrorDesc = parsed.searchParams.get('error_description') ?? hashParams.get('error_description');
+            if (oauthError) {
+              throw new Error(oauthErrorDesc ?? oauthError);
+            }
           }
           if (result.type === 'cancel') {
             set({ loading: false });
