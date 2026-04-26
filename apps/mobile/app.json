@@ -55,19 +55,20 @@
       "package": "com.automateai.transformr",
       "versionCode": 1,
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "RECORD_AUDIO",
-        "VIBRATE",
-        "USE_BIOMETRIC",
-        "USE_FINGERPRINT",
-        "NFC",
-        "INTERNET",
-        "RECEIVE_BOOT_COMPLETED"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.NFC",
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "plugins": [
@@ -111,7 +112,11 @@
       "supabaseUrl": "https://horqwbfsqqmzdbbafvov.supabase.co",
       "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvcnF3YmZzcXFtemRiYmFmdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MDczOTMsImV4cCI6MjA5MTE4MzM5M30.GAY9ystuTThmXkSmrjSTKuSbZkpcWgkEaYKxSPhMBtM",
       "privacyPolicyUrl": "https://transformr.app/privacy",
-      "termsOfServiceUrl": "https://transformr.app/terms"
-    }
+      "termsOfServiceUrl": "https://transformr.app/terms",
+      "eas": {
+        "projectId": "02da9bda-cd59-455a-a5c6-665595a7bf5e"
+      }
+    },
+    "owner": "tysonlerfald"
   }
 }

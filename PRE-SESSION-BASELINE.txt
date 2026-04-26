@@ -1,0 +1,17 @@
+TRANSFORMR PRE-SESSION BASELINE
+================================
+Date: 2026-04-23
+Route files (.tsx in app/): 103
+Component files (.tsx in components/): 120
+Service files (.ts in services/): 56
+Store files (.ts in stores/): 21
+Icon/asset files (assets/icons/): 57
+Git HEAD: 42d8f89
+Unpushed commits: 0
+Uncommitted changes: 2 untracked files (ASSET-MANIFEST.md, run-seed.js)
+
+Icon files at assets/icons/ root:
+- transformr-favicon.png  (transparent prism — used on splash/login)
+- transformr-icon.png     (containerized — used in app.json launcher)
+- TRANSFORMR_Logo_Background.png
+- icon-1024x1024.png

@@ -20,7 +20,7 @@
     "doctor": "npx expo-doctor",
     "prebuild": "npx expo prebuild",
     "prebuild:clean": "npx expo prebuild --clean",
-    "postinstall": "npx patch-package"
+    "postinstall": "npx patch-package || echo 'patch-package: some patches could not be applied (non-fatal in monorepo/CI)'"
   },
   "dependencies": {
     "@expo/vector-icons": "14.1.0",

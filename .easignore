@@ -1,0 +1,83 @@
+# Dependencies (EAS installs fresh)
+node_modules/
+.pnp
+.pnp.js
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds — EAS generates via CNG (expo prebuild)
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.xcworkspace
+*.xcodeproj
+*.apk
+*.aab
+
+# Environment
+.env
+.env.local
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+__tests__/__snapshots__/
+
+# Supabase temp
+supabase/.temp/
+supabase/.branches/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Secrets
+google-play-service-account.json
+*.pem
+
+# Claude Code
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Non-essential assets (backups, originals, store screenshots)
+assets/icons/old-icons-backup/
+assets/videos/originals/
+app-store-assets/
+*.backup.*
+
+# Misc generated files
+PRE-SESSION-BASELINE.txt
+TEST-REPORT-FINAL.md
+process_screenshots.py
+supabase/run-seed.js
+
+# Data files
+*.csv
+*.xml
