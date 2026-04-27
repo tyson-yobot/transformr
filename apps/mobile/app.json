@@ -50,7 +50,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/transformr-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "transparent"
       },
       "package": "com.automateai.transformr",
       "versionCode": 1,
