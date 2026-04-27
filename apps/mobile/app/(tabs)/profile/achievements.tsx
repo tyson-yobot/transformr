@@ -28,6 +28,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -420,7 +421,8 @@ export default function AchievementsScreen() {
 
       {/* Empty state */}
       {filtered.length === 0 && !isLoading && (
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+          <EmptyStateBackground query="trophy gold achievement dark" opacity={0.18} />
           <Text style={{ fontSize: 48, marginBottom: spacing.md }}>🏆</Text>
           <Text
             style={[

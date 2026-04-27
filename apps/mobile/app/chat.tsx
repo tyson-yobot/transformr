@@ -34,6 +34,7 @@ import { hapticLight, hapticMedium } from '@utils/haptics';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 const TOPICS: { id: ChatTopic; label: string; icon: string }[] = [
   { id: 'general', label: 'General', icon: 'chatbubble-ellipses-outline' },
@@ -288,8 +289,9 @@ export default function ChatScreen() {
   const renderEmptyState = () => (
     <Animated.View
       entering={FadeInDown.duration(400)}
-      style={[styles.emptyContainer, { padding: spacing.xl }]}
+      style={[styles.emptyContainer, { padding: spacing.xl, position: 'relative', overflow: 'hidden' }]}
     >
+      <EmptyStateBackground query="AI technology purple abstract" opacity={0.15} />
       <View
         style={[
           styles.emptyIcon,

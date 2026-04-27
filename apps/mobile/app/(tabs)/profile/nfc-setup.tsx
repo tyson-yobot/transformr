@@ -32,6 +32,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Available NFC actions
@@ -304,7 +305,8 @@ export default function NfcSetupScreen() {
         )}
 
         {triggers.length === 0 && !isLoading && !loadError && (
-          <View style={styles.emptyState}>
+          <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+            <EmptyStateBackground query="smart home technology dark" opacity={0.15} />
             <Text
               style={[
                 typography.body,

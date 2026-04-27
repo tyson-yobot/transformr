@@ -36,6 +36,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Privacy toggle keys
@@ -390,7 +391,8 @@ export default function PartnerScreen() {
         <>
           {/* No Partner -- invite flow */}
           <Animated.View entering={FadeInDown.duration(400)}>
-            <Card variant="elevated" style={{ marginBottom: spacing.xl }}>
+            <Card variant="elevated" style={{ marginBottom: spacing.xl, position: 'relative', overflow: 'hidden' }}>
+              <EmptyStateBackground query="couple fitness training together dark" opacity={0.18} />
               <View style={styles.emptyState}>
                 <Text style={{ fontSize: 48, marginBottom: spacing.md }}>
                   👫

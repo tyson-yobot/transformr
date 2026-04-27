@@ -6,6 +6,9 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import type { ErrorBoundaryProps } from 'expo-router';
+import { ScreenBackground } from '@components/ui/ScreenBackground';
+import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 const SUPPORT_EMAIL = process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? 'support@transformr.ai';
 
@@ -13,7 +16,10 @@ export default function ErrorBoundary({ error }: ErrorBoundaryProps) {
   const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { overflow: 'hidden' }]}>
+      <ScreenBackground />
+      <AmbientBackground />
+      <EmptyStateBackground query="calm minimal dark" opacity={0.20} />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <Text style={styles.emoji}>⚠️</Text>
       <Text style={styles.title}>Something went wrong</Text>

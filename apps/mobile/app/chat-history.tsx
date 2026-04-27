@@ -27,6 +27,7 @@ import type { ChatConversation, ChatTopic } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 const TOPIC_ICONS: Record<ChatTopic, keyof typeof Ionicons.glyphMap> = {
   general: 'chatbubble-ellipses-outline',
@@ -297,9 +298,10 @@ export default function ChatHistoryScreen() {
     <View
       style={[
         styles.emptyContainer,
-        { paddingTop: spacing.xxxl * 2, paddingHorizontal: spacing.xl },
+        { paddingTop: spacing.xxxl * 2, paddingHorizontal: spacing.xl, position: 'relative', overflow: 'hidden' },
       ]}
     >
+      <EmptyStateBackground query="conversation thoughtful dark" opacity={0.15} />
       <Ionicons
         name="chatbubbles-outline"
         size={56}

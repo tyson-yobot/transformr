@@ -25,6 +25,7 @@ import { useLabsStore } from '@stores/labsStore';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import type { LabUpload, LabUploadStatus } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
 
@@ -236,9 +237,10 @@ export default function LabsHistoryScreen() {
     <View
       style={[
         styles.emptyContainer,
-        { paddingTop: spacing.xxxl * 2, paddingHorizontal: spacing.xl },
+        { paddingTop: spacing.xxxl * 2, paddingHorizontal: spacing.xl, position: 'relative', overflow: 'hidden' },
       ]}
     >
+      <EmptyStateBackground query="laboratory science dark blue" opacity={0.15} />
       <Ionicons name="flask-outline" size={56} color={colors.text.muted} />
       <Text
         style={[
