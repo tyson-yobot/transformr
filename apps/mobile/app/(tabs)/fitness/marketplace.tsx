@@ -34,6 +34,7 @@ import {
 import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { useStripe } from '@stripe/stripe-react-native';
 
 // eslint-disable-next-line expo/no-dynamic-env-var
@@ -218,12 +219,15 @@ export default function MarketplaceScreen() {
         )}
 
         {!loading && programs.length === 0 && (
-          <Card style={{ padding: spacing.lg, alignItems: 'center', marginTop: 40 }}>
-            <Ionicons name="storefront-outline" size={40} color={colors.text.muted} />
-            <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
-              No programs available yet. Check back soon.
-            </Text>
-          </Card>
+          <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 200, marginTop: 40 }}>
+            <EmptyStateBackground query="gym training program dark" opacity={0.15} />
+            <Card style={{ padding: spacing.lg, alignItems: 'center' }}>
+              <Ionicons name="storefront-outline" size={40} color={colors.text.muted} />
+              <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
+                No programs available yet. Check back soon.
+              </Text>
+            </Card>
+          </View>
         )}
 
         {programs.map((program, i) => {

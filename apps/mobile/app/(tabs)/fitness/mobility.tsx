@@ -35,6 +35,7 @@ import { supabase } from '@services/supabase';
 import type { MobilitySession } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 interface StretchExercise {
   id: string;
@@ -719,11 +720,14 @@ export default function MobilityScreen() {
               </Card>
             ))
           ) : (
-            <EmptyState
-              ionIcon="body-outline"
-              title="No Sessions Yet"
-              subtitle="Complete a mobility routine to start tracking your recovery sessions."
-            />
+            <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 280 }}>
+              <EmptyStateBackground query="yoga stretching dark studio" opacity={0.15} />
+              <EmptyState
+                ionIcon="body-outline"
+                title="No Sessions Yet"
+                subtitle="Complete a mobility routine to start tracking your recovery sessions."
+              />
+            </View>
           )}
         </View>
       </ScrollView>

@@ -35,6 +35,7 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import type { AIProgressPhotoAnalysis } from '@app-types/ai';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const THUMB_SIZE = (SCREEN_WIDTH - 48) / 3;
@@ -337,12 +338,15 @@ export default function ProgressPhotosScreen() {
           {loading && <ActivityIndicator color={colors.accent.primary} />}
 
           {!loading && photos.length === 0 && (
-            <Card style={{ padding: spacing.lg, alignItems: 'center' }}>
-              <Ionicons name="camera-outline" size={40} color={colors.text.muted} />
-              <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
-                No photos yet. Tap the camera to capture your first progress photo.
-              </Text>
-            </Card>
+            <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 200 }}>
+              <EmptyStateBackground query="transformation fitness dark" opacity={0.15} />
+              <Card style={{ padding: spacing.lg, alignItems: 'center' }}>
+                <Ionicons name="camera-outline" size={40} color={colors.text.muted} />
+                <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
+                  No photos yet. Tap the camera to capture your first progress photo.
+                </Text>
+              </Card>
+            </View>
           )}
 
           <View style={styles.gridRow}>

@@ -32,6 +32,7 @@ import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 type FormCheckPhase = 'setup' | 'countdown' | 'recording' | 'review' | 'analyzing' | 'results';
 
@@ -411,7 +412,8 @@ export default function FormCheckScreen() {
   // Analyzing phase
   if (phase === 'analyzing') {
     return (
-      <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="athlete training form dark" opacity={0.15} />
         <ProgressRing progress={-1} size={80} strokeWidth={8} color={colors.accent.primary} />
         <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
           Analyzing Your Form...

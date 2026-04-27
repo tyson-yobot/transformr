@@ -29,6 +29,7 @@ import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -420,7 +421,8 @@ export default function SupplementScannerScreen() {
 
   if (step === 'analyzing') {
     return (
-      <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.screen, styles.centered, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="supplements vitamins dark" opacity={0.15} />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ActivityIndicator size="large" color={colors.accent.cyan} />
         <Text

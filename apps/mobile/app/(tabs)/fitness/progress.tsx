@@ -36,6 +36,7 @@ import { supabase } from '@services/supabase';
 import type { WeightLog, Measurement } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 interface ProgressPhoto {
   id: string;
@@ -273,13 +274,16 @@ export default function ProgressScreen() {
         <AIInsightCard screenKey="fitness/progress" style={{ marginBottom: spacing.md }} />
 
         {!error && weightLogs.length === 0 && measurements.length === 0 && progressPhotos.length === 0 && (
-          <EmptyState
-            ionIcon="trending-up-outline"
-            title="No Progress Data Yet"
-            subtitle="Log your weight and measurements to start tracking your transformation."
-            actionLabel="Log Weight"
-            onAction={() => { setShowLogWeightModal(true); }}
-          />
+          <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 300 }}>
+            <EmptyStateBackground query="weightlifting dark gym progress" opacity={0.15} />
+            <EmptyState
+              ionIcon="trending-up-outline"
+              title="No Progress Data Yet"
+              subtitle="Log your weight and measurements to start tracking your transformation."
+              actionLabel="Log Weight"
+              onAction={() => { setShowLogWeightModal(true); }}
+            />
+          </View>
         )}
 
         {error && (

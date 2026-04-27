@@ -29,6 +29,7 @@ import type { Exercise, PersonalRecord, WorkoutSet } from '@app-types/database';
 import { BodyMap } from '@components/ui/BodyMap';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { musclesToBodyParts } from '@utils/muscleMapping';
 import type { BodyPart } from '@components/ui/BodyMap';
 
@@ -170,7 +171,8 @@ export default function ExerciseDetailScreen() {
 
   if (error || !exercise) {
     return (
-      <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.centered, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="barbell dumbbell dark gym" opacity={0.15} />
         <Ionicons name="warning-outline" size={48} color={colors.accent.danger} />
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.md }]}>
           {error ?? 'Exercise not found'}

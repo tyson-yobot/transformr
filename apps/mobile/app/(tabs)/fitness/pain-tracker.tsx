@@ -34,6 +34,7 @@ import { supabase } from '@services/supabase';
 import type { PainLog } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 type PainType = 'sharp' | 'dull' | 'aching' | 'burning' | 'tingling' | 'stiffness';
 
@@ -381,11 +382,14 @@ export default function PainTrackerScreen() {
             </Animated.View>
           ))
         ) : (
-          <Card>
-            <Text style={[typography.body, { color: colors.text.muted, textAlign: 'center' }]}>
-              No pain entries yet. Tap on the body map to log pain.
-            </Text>
-          </Card>
+          <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 200 }}>
+            <EmptyStateBackground query="physical therapy recovery dark" opacity={0.15} />
+            <Card>
+              <Text style={[typography.body, { color: colors.text.muted, textAlign: 'center' }]}>
+                No pain entries yet. Tap on the body map to log pain.
+              </Text>
+            </Card>
+          </View>
         )}
       </ScrollView>
 
