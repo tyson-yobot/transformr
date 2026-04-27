@@ -720,6 +720,19 @@ export default function WorkoutPlayerScreen() {
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.lg }]}>
           Starting workout...
         </Text>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          style={{ marginTop: spacing.xl, flexDirection: 'row', alignItems: 'center',
+            paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12,
+            backgroundColor: colors.background.secondary }}
+        >
+          <Ionicons name="arrow-back" size={18} color={colors.text.secondary} />
+          <Text style={[typography.bodyBold, { color: colors.text.secondary, marginLeft: spacing.xs }]}>
+            Go Back
+          </Text>
+        </Pressable>
       </View>
     );
   }
