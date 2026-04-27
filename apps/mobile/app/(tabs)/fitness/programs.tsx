@@ -160,22 +160,27 @@ export default function ProgramsScreen() {
   const handleStartProgram = useCallback(
     async (templateId: string) => {
       await hapticLight();
-      await startWorkout(templateId);
+      try {
+        await startWorkout(templateId);
 
-      const calendarEnabled = await AsyncStorage.getItem('calendar_sync_enabled').catch(() => null);
-      if (calendarEnabled === 'true') {
-        const program = programsWithExercises.find((p) => p.id === templateId);
-        if (program) {
-          await addWorkoutToCalendar({
-            name: program.name,
-            startTime: new Date(),
-            durationMin: (program.estimated_duration_minutes as number | null) ?? 60,
-            notes: (program.description as string | null) ?? '',
-          }).catch(() => undefined);
+        const calendarEnabled = await AsyncStorage.getItem('calendar_sync_enabled').catch(() => null);
+        if (calendarEnabled === 'true') {
+          const program = programsWithExercises.find((p) => p.id === templateId);
+          if (program) {
+            await addWorkoutToCalendar({
+              name: program.name,
+              startTime: new Date(),
+              durationMin: (program.estimated_duration_minutes as number | null) ?? 60,
+              notes: (program.description as string | null) ?? '',
+            }).catch(() => undefined);
+          }
         }
-      }
 
-      router.push('/(tabs)/fitness/workout-player' as never);
+        router.push('/(tabs)/fitness/workout-player' as never);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to start workout';
+        Alert.alert('Could not start workout', message, [{ text: 'OK' }]);
+      }
     },
     [startWorkout, router, programsWithExercises],
   );

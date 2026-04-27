@@ -98,6 +98,7 @@ export const useWorkoutStore = create<WorkoutStore>()((set, get) => ({
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to start workout';
       set({ error: message, isLoading: false });
+      throw new Error(message);
     }
   },
 

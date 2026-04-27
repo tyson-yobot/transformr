@@ -682,7 +682,34 @@ export default function WorkoutPlayerScreen() {
     }
   }, [activeExerciseIndex, exercisesWithSets.length, showToast, handleCompleteWorkout]);
 
+  const workoutError = useWorkoutStore((s) => s.error);
+
   if (!activeSession) {
+    if (workoutError) {
+      return (
+        <View style={{ flex: 1, backgroundColor: colors.background.primary,
+          alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <Ionicons name="alert-circle-outline" size={48} color={colors.accent.danger} />
+          <Text style={{ color: colors.text.primary, fontSize: 18,
+            fontWeight: '700', marginTop: 16, textAlign: 'center' }}>
+            Could not start workout
+          </Text>
+          <Text style={{ color: colors.text.secondary, fontSize: 14,
+            marginTop: 8, textAlign: 'center' }}>
+            {workoutError}
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={{ marginTop: 24, backgroundColor: colors.accent.primary,
+              paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12 }}
+          >
+            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600' }}>
+              Go Back
+            </Text>
+          </Pressable>
+        </View>
+      );
+    }
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
         <View style={{ padding: spacing.lg, width: '100%' }}>
