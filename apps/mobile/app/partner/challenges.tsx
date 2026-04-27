@@ -15,6 +15,7 @@ import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
 import { ProgressBar } from '@components/ui/ProgressBar';
@@ -154,7 +155,8 @@ export default function PartnerChallengesScreen() {
 
   if (!partnership) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="couple workout fitness together dark" opacity={0.18} gradientColors={['rgba(20, 12, 24, 0.5)', 'rgba(15, 10, 22, 0.85)', 'rgba(12, 10, 21, 0.95)'] as const} />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center' }]}>No Partner Linked</Text>
         <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.md }]}>
@@ -256,7 +258,8 @@ export default function PartnerChallengesScreen() {
         })}
 
         {active.length === 0 && (
-          <Card style={{ marginBottom: spacing.lg }}>
+          <Card style={{ marginBottom: spacing.lg, position: 'relative', overflow: 'hidden' }}>
+            <EmptyStateBackground query="competitive fitness challenge dark" opacity={0.18} gradientColors={['rgba(20, 12, 24, 0.5)', 'rgba(15, 10, 22, 0.85)', 'rgba(12, 10, 21, 0.95)'] as const} />
             <Text style={[typography.body, { color: colors.text.secondary, textAlign: 'center' }]}>
               No active challenges. Create one to compete with your partner!
             </Text>
