@@ -31,6 +31,7 @@ import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { AnimatedNumber } from '@components/ui/AnimatedNumber';
 import { DashboardSkeleton } from '@components/ui/ScreenSkeleton';
+import { TabHeroBackground } from '@components/ui/TabHeroBackground';
 import { QuickActionTile } from '@components/ui/QuickActionTile';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeatherCard } from '@components/cards/WeatherCard';
@@ -471,6 +472,7 @@ export default function DashboardScreen() {
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />
       <NoiseOverlay />
+      <TabHeroBackground query="morning sunrise motivational dark moody" height={240} opacity={0.12} />
       <ScrollView
         style={styles.container}
         contentContainerStyle={{

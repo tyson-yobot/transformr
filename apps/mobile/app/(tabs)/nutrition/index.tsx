@@ -25,6 +25,7 @@ import { Sun, ForkKnife, Moon, Cookie, Drop, Lightning, Barbell, Plus, CaretLeft
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { MonoText } from '@components/ui/MonoText';
+import { TabHeroBackground } from '@components/ui/TabHeroBackground';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
 import { ProgressRing } from '@components/ui/ProgressRing';
@@ -309,6 +310,7 @@ export default function NutritionHomeScreen() {
       <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
+      <TabHeroBackground query="fresh ingredients meal prep dark" height={240} opacity={0.12} />
       {/* Header */}
       <View
         style={[

@@ -24,6 +24,7 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
+import { TabHeroBackground } from '@components/ui/TabHeroBackground';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { WeightChart } from '@components/charts/WeightChart';
 import { useWorkoutStore } from '@stores/workoutStore';
@@ -379,6 +380,7 @@ export default function FitnessHomeScreen() {
       <AmbientBackground />
       <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background.primary} />
       <PurpleRadialBackground />
+      <TabHeroBackground query="gym training equipment dark moody" height={240} opacity={0.12} />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
         refreshControl={

@@ -28,6 +28,7 @@ import { Input } from '@components/ui/Input';
 import { Chip } from '@components/ui/Chip';
 import { MonoText } from '@components/ui/MonoText';
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
+import { TabHeroBackground } from '@components/ui/TabHeroBackground';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { SectionTile } from '@components/ui/SectionTile';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
@@ -255,6 +256,7 @@ export default function GoalsDashboard() {
       <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
+      <TabHeroBackground query="achievement target sunrise dark" height={240} opacity={0.12} />
       <ScrollView
         contentContainerStyle={[styles.content, { padding: spacing.lg, paddingBottom: insets.bottom + 90 }]}
         showsVerticalScrollIndicator={false}
