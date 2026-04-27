@@ -48,6 +48,12 @@ const queryClient = new QueryClient({
       // Pause queries automatically while the device is offline so React Query
       // does not hammer the network when Supabase is unreachable.
       networkMode: 'online',
+      // Reduce background refetch storms — prevents unnecessary network threads
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+    mutations: {
+      retry: 0,
     },
   },
 });
@@ -140,7 +146,7 @@ export default function RootLayout() {
       // Hide the native splash immediately — our custom branded overlay takes over
       await SplashScreen.hideAsync();
       // Show the branded splash overlay briefly, then fade out
-      setTimeout(() => setShowSplash(false), 1800);
+      setTimeout(() => setShowSplash(false), 400);
     }
   }, [fontsLoaded]);
 

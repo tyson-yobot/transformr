@@ -25,6 +25,7 @@
       "bundleIdentifier": "com.automateai.transformr",
       "icon": "./assets/icons/transformr-icon.png",
       "buildNumber": "1",
+      "jsEngine": "hermes",
       "infoPlist": {
         "NSCameraUsageDescription": "TRANSFORMR uses the camera for meal photos, barcode scanning, progress photos, and exercise form checks.",
         "NSPhotoLibraryUsageDescription": "TRANSFORMR uses your photo library for progress photos and vision board images.",
@@ -48,6 +49,7 @@
       }
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/transformr-icon.png",
         "backgroundColor": "transparent"

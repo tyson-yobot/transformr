@@ -70,7 +70,8 @@ function VideoBackgroundInner({
     p.loop = true;
     p.muted = true;
     p.volume = 0;
-    // Slot B starts paused — it will play when it becomes active
+    // Slot B starts paused — only one hardware decoder active at a time
+    p.pause();
   });
 
   // Handle player errors — skip to next video on the errored slot
@@ -116,6 +117,9 @@ function VideoBackgroundInner({
       const activeOpacity = newActiveSlot === 0 ? opacityA : opacityB;
       const standbyOpacity = newActiveSlot === 0 ? opacityB : opacityA;
 
+      // The player that is about to become invisible (old active)
+      const oldActivePlayer = newActiveSlot === 0 ? playerB : playerA;
+
       // Replace source on the currently-invisible standby player (no visual glitch)
       void (async () => {
         try {
@@ -143,7 +147,13 @@ function VideoBackgroundInner({
             duration: CROSSFADE_MS,
             useNativeDriver: true,
           }),
-        ]).start();
+        ]).start(() => {
+          // After crossfade completes, pause the now-invisible player to
+          // release its hardware decoder — only 1 decoder active at a time
+          if (isMounted.current) {
+            oldActivePlayer.pause();
+          }
+        });
 
         onIndexChange?.(nextIndex);
       })();
