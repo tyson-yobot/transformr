@@ -141,11 +141,6 @@ export default function RootLayout() {
     return () => sub.remove();
   }, [handleOAuthUrl]);
 
-  // Hide the native splash screen immediately on mount — our custom SplashOverlay covers everything
-  useEffect(() => {
-    void SplashScreen.hideAsync();
-  }, []);
-
   // Hide the custom SplashOverlay once fonts are loaded (no artificial delay)
   useEffect(() => {
     if (fontsLoaded) {
@@ -161,7 +156,7 @@ export default function RootLayout() {
             <ThemeProvider>
               <AppStatusBar />
               <Slot />
-              <SplashOverlay visible={showSplash} />
+              <SplashOverlay visible={showSplash} onReady={() => void SplashScreen.hideAsync()} />
             </ThemeProvider>
           </QueryClientProvider>
         </StripeProvider>

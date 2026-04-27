@@ -21,9 +21,11 @@ const LOGO = require('@assets/icons/transformr-icon.png') as number;
 
 interface SplashOverlayProps {
   visible: boolean;
+  /** Called after the overlay's first layout paint — use to hide the native splash screen. */
+  onReady?: () => void;
 }
 
-export function SplashOverlay({ visible }: SplashOverlayProps) {
+export function SplashOverlay({ visible, onReady }: SplashOverlayProps) {
   if (!visible) return null;
 
   return (
@@ -31,6 +33,7 @@ export function SplashOverlay({ visible }: SplashOverlayProps) {
       exiting={FadeOut.duration(400)}
       style={styles.container}
       pointerEvents="none"
+      onLayout={() => { onReady?.(); }}
     >
       {/* Gym background — same as login screen */}
       <Image
