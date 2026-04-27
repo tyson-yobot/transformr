@@ -23,7 +23,7 @@ interface Props {
   opacity?: number; // default 0.12
 }
 
-export function TabHeroBackground({ query, height = 240, opacity = 0.12 }: Props) {
+export function TabHeroBackground({ query, height = 240, opacity = 0.08 }: Props) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(heroCache.get(query) ?? null);
 
   useEffect(() => {
@@ -78,8 +78,8 @@ export function TabHeroBackground({ query, height = 240, opacity = 0.12 }: Props
       ) : null}
       <LinearGradient
         colors={[
-          'rgba(12, 10, 21, 0.4)',
-          'rgba(12, 10, 21, 0.7)',
+          'rgba(12, 10, 21, 0.75)',
+          'rgba(12, 10, 21, 0.88)',
           'rgba(12, 10, 21, 1)',
         ]}
         style={StyleSheet.absoluteFillObject}
