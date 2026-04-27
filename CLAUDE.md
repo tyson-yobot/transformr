@@ -16,7 +16,7 @@ circumstances. The ONLY exception is if Tyson explicitly says
 - File: components/SplashOverlay.tsx
 - Background: gym-hero.jpg (same as login screen)
 - Logo: transformr-icon.png from assets/icons/ (transparent — Logo Minus Blur version)
-- Text: "TRANSFORMR" title (pink R #EC4899), "Transform Everything." tagline, "By Automate AI"
+- Text: "TRANSFORMR" title (pink R #EC4899), "Transform Everything" tagline, "By Automate AI"
 - DO NOT CHANGE THE ICON
 - DO NOT CHANGE THE BACKGROUND
 - DO NOT CHANGE ANY STYLING
@@ -26,7 +26,7 @@ circumstances. The ONLY exception is if Tyson explicitly says
 - File: app/(auth)/login.tsx
 - Background: gym-hero.jpg
 - Logo: transformr-icon.png from assets/icons/ (transparent — Logo Minus Blur version)
-- Text: TRANSFORMR wordmark with pink R (#EC4899), "Transform Everything." tagline
+- Text: TRANSFORMR wordmark with pink R (#EC4899), "Transform Everything" tagline
 - DO NOT MODIFY THIS FILE
 - Last updated: 2026-04-23 — icon swapped to transformr-icon.png (true transparency, no dark square)
 
@@ -34,6 +34,12 @@ circumstances. The ONLY exception is if Tyson explicitly says
 - Source: assets/icons/transformr-icon.png
 - Referenced in app.json icon fields
 - DO NOT replace with any other icon file
+
+### Tagline — LOCKED
+- Text: "Transform Everything" — exactly two words, no period, no exclamation, no punctuation
+- Hashtag form: #TransformEverything
+- DO NOT add a period, exclamation mark, or any other punctuation after "Everything"
+- Source of truth: this CLAUDE.md file, not the .docx brand doc
 
 ### Rules
 - "Update all screens" EXCLUDES these files

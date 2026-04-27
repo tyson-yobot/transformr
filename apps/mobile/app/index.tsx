@@ -157,7 +157,7 @@ export default function Index() {
 
         {/* Tagline */}
         <Text style={styles.tagline}>
-          Every rep. Every meal. Every dollar. Every day.
+          Transform Everything
         </Text>
       </View>
 

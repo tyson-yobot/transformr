@@ -241,7 +241,7 @@ Linecap:     round
 - **Honest** — If something isn't working, say it. Users trust truth over comfort.
 
 ### Tagline
-"Transform Everything."
+"Transform Everything"
 
 ### Voice Examples
 ```

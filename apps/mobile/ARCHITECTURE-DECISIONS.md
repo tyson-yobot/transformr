@@ -79,7 +79,7 @@ more premium.
 - Background: Deep Space #0C0A15
 - Pink R accent: #EC4899 on final letter only
 - Wordmark on light bg: Deep Violet #2D1B69
-- Tagline: "Transform Everything." (period, never exclamation)
+- Tagline: "Transform Everything" (no period, no exclamation, no punctuation)
 - Fonts: Inter (marketing), System (app)
 
 **Consequence:** Never change these values. They are in the brand kit

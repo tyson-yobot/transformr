@@ -161,7 +161,7 @@ export default function LoginScreen() {
                 </Text>
               </View>
               <Text style={styles.tagline}>
-                Transform Everything.
+                Transform Everything
               </Text>
             </Animated.View>
 

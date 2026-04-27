@@ -7,6 +7,25 @@ file at session start and UPDATE it at session end.
 
 ---
 
+## 2026-04-27 — Tagline Punctuation Regression
+
+**What happened:** Commit 2745566 updated the brand kit tagline to
+"Transform Everything." with a trailing period. The correct tagline is
+"Transform Everything" — two words, no period, no exclamation, no
+punctuation of any kind. The period was also present in SplashOverlay.tsx,
+login.tsx, and index.tsx.
+**Root cause:** The TRANSFORMR-BRAND-KIT.md previously had the old tagline
+with a period, and the agent copied it verbatim without checking the
+user's exact request ("Transform Everything" — no period).
+**Fix applied:** Removed the period from all 6 files: CLAUDE.md (×2),
+TRANSFORMR-BRAND-KIT.md, ARCHITECTURE-DECISIONS.md, SplashOverlay.tsx,
+login.tsx, and index.tsx.
+**Rule going forward:** The tagline is EXACTLY "Transform Everything" —
+no period, no exclamation, no other punctuation. Hashtag: #TransformEverything.
+When the user specifies exact text, use it verbatim. Do not add punctuation.
+
+---
+
 ## 2026-04 — Hero Images Stripped from Onboarding
 
 **What happened:** An AI agent "fixed" onboarding screens by removing

@@ -90,7 +90,7 @@ export function SplashOverlay({ visible, onReady }: SplashOverlayProps) {
             </Text>
           </View>
           <Text style={styles.tagline}>
-            Transform Everything.
+            Transform Everything
           </Text>
         </View>
       </View>
