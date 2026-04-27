@@ -52,13 +52,16 @@ export function VideoBackground({
 
   // Replace the player source when the video index changes
   useEffect(() => {
-    if (currentVideo?.source != null) {
-      player.replace(currentVideo.source);
-      player.loop = true;
-      player.muted = true;
-      player.volume = 0;
-      player.play();
-    }
+    const loadSource = async () => {
+      if (currentVideo?.source != null) {
+        await player.replaceAsync(currentVideo.source);
+        player.loop = true;
+        player.muted = true;
+        player.volume = 0;
+        player.play();
+      }
+    };
+    loadSource();
     // Only react to currentIndex changes — player is stable across renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
@@ -84,6 +87,12 @@ export function VideoBackground({
     };
   }, []);
 
+  // Notify parent of index changes after render completes
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
+
   const cycleToNext = useCallback(() => {
     // Fade out
     Animated.timing(fadeAnim, {
@@ -92,11 +101,7 @@ export function VideoBackground({
       useNativeDriver: true,
     }).start(({ finished }) => {
       if (!finished || !isMounted.current) return;
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % videos.length;
-        onIndexChange?.(next);
-        return next;
-      });
+      setCurrentIndex((prev) => (prev + 1) % videos.length);
       // Fade back in
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -104,7 +109,7 @@ export function VideoBackground({
         useNativeDriver: true,
       }).start();
     });
-  }, [fadeAnim, videos.length, onIndexChange]);
+  }, [fadeAnim, videos.length]);
 
   useEffect(() => {
     if (cycleTimer.current) clearInterval(cycleTimer.current);
