@@ -21,6 +21,7 @@ import { GlowCard } from '@components/ui/GlowCard';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { EmptyState } from '@components/ui/EmptyState';
 import { Skeleton } from '@components/ui/Skeleton';
 import { formatNumber, formatCurrency, formatPercentage, getGradeColor } from '@utils/formatters';
@@ -145,8 +146,9 @@ export default function WeeklyReviewScreen() {
 
   if (!review) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ position: 'absolute', top: insets.top + spacing.md, left: spacing.lg }}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="calendar planning dark zen" opacity={0.18} />
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Go back" style={{ position: 'absolute', top: insets.top + spacing.md, left: spacing.lg, zIndex: 1 }}>
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
         <EmptyState

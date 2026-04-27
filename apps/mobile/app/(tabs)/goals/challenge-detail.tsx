@@ -37,6 +37,7 @@ import type {
 } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -247,7 +248,8 @@ export default function ChallengeDetailScreen() {
 
   if (fetchError) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
+      <View style={[styles.screen, { backgroundColor: colors.background.primary, padding: spacing.lg, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="athlete determination dark" opacity={0.18} />
         <EmptyState
           ionIcon="alert-circle-outline"
           title="Something went wrong"

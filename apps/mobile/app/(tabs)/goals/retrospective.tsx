@@ -33,6 +33,7 @@ import { hapticLight, hapticSuccess } from '@utils/haptics';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -257,7 +258,8 @@ export default function RetrospectiveScreen() {
 
         {/* Empty State */}
         {!isLoading && !retro && (
-          <Animated.View entering={FadeInDown.delay(150)}>
+          <Animated.View entering={FadeInDown.delay(150)} style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 300 }}>
+            <EmptyStateBackground query="mountain summit sunrise dark" opacity={0.18} />
             <EmptyState
               ionIcon="document-text-outline"
               title={`No retrospective for ${formatMonthLabel(selectedMonth)}`}

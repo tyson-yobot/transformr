@@ -37,6 +37,7 @@ import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 const AI_PROMPTS = [
   'What are you most proud of today?',
@@ -410,12 +411,15 @@ export default function JournalScreen() {
         </Pressable>
 
         {showPastEntries && pastEntries.length === 0 && (
-          <EmptyState
-            ionIcon="journal-outline"
-            title="No past entries yet"
-            subtitle="Your AI coach generates a personalized prompt each evening based on your day."
-            style={{ paddingVertical: 24 }}
-          />
+          <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 240 }}>
+            <EmptyStateBackground query="journal writing reflection dark" opacity={0.18} />
+            <EmptyState
+              ionIcon="journal-outline"
+              title="No past entries yet"
+              subtitle="Your AI coach generates a personalized prompt each evening based on your day."
+              style={{ paddingVertical: 24 }}
+            />
+          </View>
         )}
 
         {showPastEntries &&

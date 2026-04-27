@@ -39,6 +39,7 @@ import { formatDate } from '@utils/formatters';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -345,7 +346,8 @@ export default function AffirmationsScreen() {
 
         {/* Today's Content */}
         {!isLoading && !todayAffirmation && (
-          <Animated.View entering={FadeInDown.delay(150)}>
+          <Animated.View entering={FadeInDown.delay(150)} style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 300 }}>
+            <EmptyStateBackground query="meditation mindfulness dark" opacity={0.18} />
             <EmptyState
               ionIcon={typeIcon as 'sunny-outline'}
               title={`No ${typeLabel.toLowerCase()} yet`}

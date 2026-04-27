@@ -40,6 +40,7 @@ import { HELP } from '../../../../constants/helpContent';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../../constants/coachmarkSteps';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 
 export default function BusinessDashboard() {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -156,13 +157,16 @@ export default function BusinessDashboard() {
         <AIInsightCard screenKey="goals/business/index" style={{ marginBottom: spacing.md }} />
 
         {businesses.length === 0 ? (
-          <EmptyState
-            ionIcon="trending-up-outline"
-            title="Track every dollar"
-            subtitle="Add your business to start tracking MRR, ARR, and revenue trends with AI-powered insights."
-            actionLabel="Add Revenue Entry"
-            onAction={() => { hapticLight(); router.push('/(tabs)/goals/business/revenue'); }}
-          />
+          <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 300 }}>
+            <EmptyStateBackground query="entrepreneur laptop work dark" opacity={0.18} />
+            <EmptyState
+              ionIcon="trending-up-outline"
+              title="Track every dollar"
+              subtitle="Add your business to start tracking MRR, ARR, and revenue trends with AI-powered insights."
+              actionLabel="Add Revenue Entry"
+              onAction={() => { hapticLight(); router.push('/(tabs)/goals/business/revenue'); }}
+            />
+          </View>
         ) : (
         <>
 
