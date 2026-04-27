@@ -4,7 +4,7 @@
 
 import { useCallback } from 'react';
 import { Pressable, Text, Share, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { hapticLight } from '@utils/haptics';
 
@@ -88,7 +88,7 @@ export function ShareButton({ type, data, size = 'md', label }: ShareButtonProps
       accessibilityLabel={label ?? 'Share'}
       accessibilityRole="button"
     >
-      <Ionicons name="share-outline" size={iconSize} color={colors.accent.primary} />
+      <Icon3D name="share" size={iconSize} />
       {label ? (
         <Text
           style={[

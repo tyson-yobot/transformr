@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -173,7 +174,7 @@ export default function ExerciseDetailScreen() {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
         <EmptyStateBackground query="barbell dumbbell dark gym" opacity={0.15} />
-        <Ionicons name="warning-outline" size={48} color={colors.accent.danger} />
+        <Icon3D name="warning" size={48} />
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.md }]}>
           {error ?? 'Exercise not found'}
         </Text>
@@ -248,7 +249,7 @@ export default function ExerciseDetailScreen() {
         {exercise.instructions && (
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="document-text-outline" size={20} color={colors.accent.primary} />
+              <Icon3D name="document" size={20} />
               <Text
                 style={[
                   typography.h3,
@@ -273,7 +274,7 @@ export default function ExerciseDetailScreen() {
         {exercise.tips && (
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="bulb-outline" size={20} color={colors.accent.warning} />
+              <Icon3D name="bulb" size={20} />
               <Text
                 style={[
                   typography.h3,
@@ -304,7 +305,7 @@ export default function ExerciseDetailScreen() {
             }}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons name="alert-circle-outline" size={20} color={colors.accent.danger} />
+              <Icon3D name="warning" size={20} />
               <Text
                 style={[
                   typography.h3,
@@ -329,7 +330,7 @@ export default function ExerciseDetailScreen() {
         {prs.length > 0 && (
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="trophy-outline" size={20} color={colors.accent.gold} />
+              <Icon3D name="trophy" size={20} />
               <Text
                 style={[
                   typography.h3,
@@ -352,7 +353,7 @@ export default function ExerciseDetailScreen() {
                   },
                 ]}
               >
-                <Ionicons name="trophy" size={16} color={colors.accent.gold} />
+                <Icon3D name="trophy" size={16} />
                 <View style={{ flex: 1, marginLeft: spacing.sm }}>
                   <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                     {pr.record_type?.replace(/_/g, ' ')}
@@ -375,7 +376,7 @@ export default function ExerciseDetailScreen() {
         {recentPerformance.length > 0 && (
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="stats-chart-outline" size={20} color={colors.accent.primary} />
+              <Icon3D name="bar-chart" size={20} />
               <Text
                 style={[
                   typography.h3,

@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -26,11 +27,14 @@ interface ActionToastProps {
   type?: ToastType;
 }
 
-const ICON_MAP: Record<ToastType, React.ComponentProps<typeof Ionicons>['name']> = {
+const IONICON_MAP: Partial<Record<ToastType, React.ComponentProps<typeof Ionicons>['name']>> = {
   success: 'checkmark-circle',
-  pr:      'trophy',
-  streak:  'flame',
   info:    'information-circle',
+};
+
+const ICON3D_MAP: Partial<Record<ToastType, Icon3DName>> = {
+  pr:      'trophy',
+  streak:  'fire',
 };
 
 export function ActionToast({
@@ -98,7 +102,11 @@ export function ActionToast({
         animatedStyle,
       ]}
     >
-      <Ionicons name={ICON_MAP[type]} size={20} color={accentColor} style={{ marginRight: spacing.md }} />
+      {ICON3D_MAP[type] ? (
+        <Icon3D name={ICON3D_MAP[type]} size={20} style={{ marginRight: spacing.md }} />
+      ) : (
+        <Ionicons name={IONICON_MAP[type] ?? 'information-circle'} size={20} color={accentColor} style={{ marginRight: spacing.md }} />
+      )}
       <View style={styles.textContainer}>
         <Text style={[typography.bodyBold, { color: colors.text.primary }]}>{message}</Text>
         {subtext ? (

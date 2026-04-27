@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { GlowCard } from '@components/ui/GlowCard';
 import { useScreenInsight } from '@hooks/useScreenInsight';
@@ -17,14 +18,14 @@ interface AIInsightCardProps {
   style?: object;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  fitness: 'barbell-outline',
-  nutrition: 'nutrition-outline',
-  sleep: 'moon-outline',
-  mood: 'happy-outline',
-  goals: 'flag-outline',
-  business: 'briefcase-outline',
-  finance: 'wallet-outline',
+const CATEGORY_ICONS: Record<string, Icon3DName> = {
+  fitness: 'dumbbell',
+  nutrition: 'fork-knife',
+  sleep: 'moon',
+  mood: 'smile',
+  goals: 'flag',
+  business: 'money',
+  finance: 'money',
   general: 'sparkles',
 };
 
@@ -53,7 +54,7 @@ export const AIInsightCard = React.memo(function AIInsightCard({ screenKey, styl
 
   if (!insight) return null;
 
-  const iconName = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.general;
+  const iconName: Icon3DName = CATEGORY_ICONS[category] ?? 'sparkles';
 
   return (
     <Animated.View entering={FadeInDown.duration(300)} style={style}>
@@ -64,10 +65,9 @@ export const AIInsightCard = React.memo(function AIInsightCard({ screenKey, styl
         padding={10}
       >
         <View style={styles.row}>
-          <Ionicons
-            name={iconName as keyof typeof Ionicons.glyphMap}
+          <Icon3D
+            name={iconName}
             size={16}
-            color={colors.accent.cyan}
           />
           <Text
             style={[

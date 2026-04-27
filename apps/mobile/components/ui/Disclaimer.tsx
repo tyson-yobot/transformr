@@ -6,6 +6,7 @@
 
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 
 type DisclaimerType = 'supplement' | 'lab' | 'nutrition' | 'workout' | 'general' | 'sleep';
@@ -85,10 +86,9 @@ export function Disclaimer({ type, compact = false, style }: DisclaimerProps) {
       accessibilityLabel={`Disclaimer: ${text}`}
     >
       <View style={[styles.headerRow, { marginBottom: spacing.sm }]}>
-        <Ionicons
-          name="shield-checkmark-outline"
+        <Icon3D
+          name="shield"
           size={16}
-          color={colors.text.muted}
           style={{ marginRight: spacing.sm }}
         />
         <Text

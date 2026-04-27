@@ -8,6 +8,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useRouter, type RelativePathString } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -31,19 +32,19 @@ const SEVERITY_ICONS = {
   critical: 'warning',
 } as const;
 
-const CATEGORY_ICONS: Record<string, string> = {
-  plateau: 'trending-flat',
-  overtraining: 'fitness-outline',
-  pr_approaching: 'trophy-outline',
-  weight_stall: 'scale-outline',
-  calorie_deficit_risk: 'flame-outline',
-  sleep_debt: 'moon-outline',
-  streak_risk: 'flame-outline',
-  goal_ahead: 'rocket-outline',
-  goal_behind: 'flag-outline',
-  dehydration_risk: 'water-outline',
-  recovery_needed: 'bed-outline',
-  reorder: 'cart-outline',
+const CATEGORY_ICONS: Record<string, Icon3DName> = {
+  plateau: 'chart-up',
+  overtraining: 'dumbbell',
+  pr_approaching: 'trophy',
+  weight_stall: 'scale',
+  calorie_deficit_risk: 'fire',
+  sleep_debt: 'moon',
+  streak_risk: 'fire',
+  goal_ahead: 'rocket',
+  goal_behind: 'flag',
+  dehydration_risk: 'drink',
+  recovery_needed: 'sleep',
+  reorder: 'cart',
   general: 'sparkles',
 };
 
@@ -67,7 +68,7 @@ export const PredictionAlert = React.memo(function PredictionAlert({
       ? colors.accent.warning
       : colors.accent.danger;
   const _severityIcon = SEVERITY_ICONS[severity];
-  const categoryIcon = CATEGORY_ICONS[category] ?? 'sparkles';
+  const categoryIcon: Icon3DName = CATEGORY_ICONS[category] ?? 'sparkles';
 
   return (
     <Animated.View entering={FadeInDown.duration(300)} style={style}>
@@ -81,10 +82,9 @@ export const PredictionAlert = React.memo(function PredictionAlert({
         ])}
       >
         <View style={styles.headerRow}>
-          <Ionicons
-            name={categoryIcon as keyof typeof Ionicons.glyphMap}
+          <Icon3D
+            name={categoryIcon}
             size={18}
-            color={severityColor}
           />
           <Text
             style={[

@@ -22,6 +22,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Chip } from '@components/ui/Chip';
@@ -228,10 +229,9 @@ export default function ChatScreen() {
           >
             {!isUser && (
               <View style={styles.assistantHeader}>
-                <Ionicons
+                <Icon3D
                   name="sparkles"
                   size={14}
-                  color={colors.accent.cyan}
                 />
                 <Text
                   style={[
@@ -301,10 +301,9 @@ export default function ChatScreen() {
           },
         ]}
       >
-        <Ionicons
+        <Icon3D
           name="sparkles"
           size={36}
-          color={colors.accent.cyan}
         />
       </View>
       <Text
@@ -404,7 +403,7 @@ export default function ChatScreen() {
           <Ionicons name="chevron-back" size={26} color={colors.text.primary} />
         </Pressable>
         <View style={styles.headerTitle}>
-          <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
+          <Icon3D name="sparkles" size={18} />
           <View>
             <Text
               style={[
@@ -564,10 +563,9 @@ export default function ChatScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Error: ${error}. Tap to dismiss.`}
         >
-          <Ionicons
-            name="alert-circle-outline"
+          <Icon3D
+            name="warning"
             size={18}
-            color={colors.accent.danger}
           />
           <Text
             style={[

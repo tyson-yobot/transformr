@@ -44,6 +44,7 @@ import { MurphWorkout } from '@components/challenges/MurphWorkout';
 import { SavingsCalculator } from '@components/challenges/SavingsCalculator';
 import { ProgressPhotoGuide } from '@components/challenges/ProgressPhotoGuide';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { Skeleton } from '@components/ui/Skeleton';
 import type {
   ChallengeDefinition,
@@ -478,7 +479,7 @@ export default function ChallengeActiveScreen() {
           <Animated.View entering={FadeInDown.delay(160)}>
             <Card variant="success" style={{ marginBottom: spacing.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                <Ionicons name="trophy-outline" size={18} color={colors.accent.success} style={{ marginRight: spacing.sm, marginTop: 2 }} />
+                <Icon3D name="trophy" size={18} style={{ marginRight: spacing.sm, marginTop: 2 }} />
                 <Text style={[typography.bodyBold, { color: colors.accent.success, flex: 1 }]}>
                   {completionMsg}
                 </Text>
@@ -494,7 +495,7 @@ export default function ChallengeActiveScreen() {
           <Animated.View entering={FadeInDown.delay(170)}>
             <Card variant="ai" style={{ marginBottom: spacing.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-                <Ionicons name="sparkles-outline" size={16} color={colors.accent.primary} style={{ marginRight: spacing.sm }} />
+                <Icon3D name="sparkles" size={16} style={{ marginRight: spacing.sm }} />
                 <Text style={[typography.captionBold, { color: colors.accent.primary }]}>Challenge Coach</Text>
                 {coachLoading && !isLoading && (
                   <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: spacing.sm }]}>Thinking…</Text>
@@ -844,7 +845,7 @@ export default function ChallengeActiveScreen() {
                     accessibilityRole="button"
                     accessibilityLabel="Take today's progress photo"
                   >
-                    <Ionicons name="camera-outline" size={20} color={colors.accent.primary} />
+                    <Icon3D name="camera" size={20} />
                     <Text style={[typography.bodyBold, { color: colors.accent.primary, marginLeft: spacing.sm }]}>
                       Take Today's Progress Photo
                     </Text>

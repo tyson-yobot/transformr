@@ -5,12 +5,12 @@
 
 import React from 'react';
 import { View, Text, Pressable, ViewStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 
 interface SectionHeaderAction {
   label?: string;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: Icon3DName;
   onPress: () => void;
 }
 
@@ -37,7 +37,7 @@ export function SectionHeader({ title, subtitle, action, style }: SectionHeaderP
         {action && (
           <Pressable onPress={action.onPress} hitSlop={8} accessibilityRole="button">
             {action.icon ? (
-              <Ionicons name={action.icon} size={18} color={colors.accent.primary} />
+              <Icon3D name={action.icon} size={18} />
             ) : action.label ? (
               <Text style={{
                 fontSize: 13,

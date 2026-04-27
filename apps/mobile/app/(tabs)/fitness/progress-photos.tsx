@@ -23,6 +23,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -207,7 +208,7 @@ export default function ProgressPhotosScreen() {
             {analyzing ? (
               <ActivityIndicator color={colors.accent.primary} size="small" />
             ) : (
-              <Ionicons name="sparkles-outline" size={22} color={colors.accent.primary} />
+              <Icon3D name="sparkles" size={22} />
             )}
           </Pressable>
         )}
@@ -265,7 +266,7 @@ export default function ProgressPhotosScreen() {
             {uploading ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Ionicons name="camera" size={18} color="#FFFFFF" />
+              <Icon3D name="camera" size={18} />
             )}
           </Pressable>
         </View>
@@ -341,7 +342,7 @@ export default function ProgressPhotosScreen() {
             <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 200 }}>
               <EmptyStateBackground query="transformation fitness dark" opacity={0.15} />
               <Card style={{ padding: spacing.lg, alignItems: 'center' }}>
-                <Ionicons name="camera-outline" size={40} color={colors.text.muted} />
+                <Icon3D name="camera" size={40} />
                 <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
                   No photos yet. Tap the camera to capture your first progress photo.
                 </Text>
@@ -368,7 +369,7 @@ export default function ProgressPhotosScreen() {
           <Animated.View entering={FadeInDown.duration(400)} style={{ paddingHorizontal: spacing.lg }}>
             <Card variant="elevated" style={{ padding: spacing.lg }}>
               <View style={[styles.analysisHeader, { marginBottom: spacing.md }]}>
-                <Ionicons name="sparkles" size={18} color={colors.accent.primary} />
+                <Icon3D name="sparkles" size={18} />
                 <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                   AI Body Composition Analysis
                 </Text>

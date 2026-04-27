@@ -25,6 +25,7 @@ import Animated, {
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -155,7 +156,7 @@ function BoxBreathingVisual() {
           boxStyle,
         ]}
       >
-        <Ionicons name="water-outline" size={32} color={colors.accent.primary} />
+        <Icon3D name="drink" size={32} />
       </Animated.View>
       <Text style={[typography.bodyBold, { color: colors.text.primary, marginTop: spacing.lg }]}>
         {PHASE_LABELS[phase]}
@@ -306,6 +307,9 @@ export default function AffirmationsScreen() {
   const typeIcon: string = sessionType === 'morning' ? 'sunny-outline'
     : sessionType === 'evening' ? 'moon-outline'
     : 'sparkles-outline';
+  const typeIcon3D = sessionType === 'morning' ? 'sun' as const
+    : sessionType === 'evening' ? 'moon' as const
+    : 'sparkles' as const;
 
   const accentColor = sessionType === 'morning' ? colors.accent.gold : colors.accent.primary;
 
@@ -337,7 +341,7 @@ export default function AffirmationsScreen() {
         {/* Header */}
         <Animated.View entering={FadeInDown.delay(100)}>
           <View style={[styles.headerRow, { marginBottom: spacing.lg }]}>
-            <Ionicons name={typeIcon as 'sunny-outline'} size={28} color={accentColor} />
+            <Icon3D name={typeIcon3D} size={28} />
             <Text style={[typography.h2, { color: colors.text.primary, marginLeft: spacing.sm }]}>
               {typeLabel}
             </Text>
@@ -396,7 +400,7 @@ export default function AffirmationsScreen() {
               <Animated.View entering={FadeInDown.delay(300)}>
                 <Card style={{ marginBottom: spacing.md }}>
                   <View style={styles.sectionHeader}>
-                    <Ionicons name="flag-outline" size={18} color={colors.accent.cyan} />
+                    <Icon3D name="flag" size={18} />
                     <Text style={[typography.bodyBold, { color: colors.accent.cyan, marginLeft: spacing.xs }]}>
                       Today's Intention
                     </Text>
@@ -412,7 +416,7 @@ export default function AffirmationsScreen() {
               <Animated.View entering={FadeInDown.delay(400)}>
                 <Card style={{ marginBottom: spacing.md }}>
                   <View style={styles.sectionHeader}>
-                    <Ionicons name="checkmark-circle-outline" size={18} color={colors.accent.success} />
+                    <Icon3D name="check" size={18} />
                     <Text
                       style={[typography.bodyBold, { color: colors.accent.success, marginLeft: spacing.xs }]}
                     >
@@ -485,7 +489,7 @@ export default function AffirmationsScreen() {
               <Animated.View entering={FadeInDown.delay(300)}>
                 <Card style={{ marginBottom: spacing.md }}>
                   <View style={styles.sectionHeader}>
-                    <Ionicons name="heart-outline" size={18} color={colors.accent.pink} />
+                    <Icon3D name="heart" size={18} />
                     <Text
                       style={[typography.bodyBold, { color: colors.accent.pink, marginLeft: spacing.xs }]}
                     >
@@ -503,7 +507,7 @@ export default function AffirmationsScreen() {
               <Animated.View entering={FadeInDown.delay(400)}>
                 <Card style={{ marginBottom: spacing.md }}>
                   <View style={styles.sectionHeader}>
-                    <Ionicons name="body-outline" size={18} color={colors.accent.cyan} />
+                    <Icon3D name="body" size={18} />
                     <Text
                       style={[typography.bodyBold, { color: colors.accent.cyan, marginLeft: spacing.xs }]}
                     >
@@ -522,7 +526,7 @@ export default function AffirmationsScreen() {
               <Animated.View entering={FadeInDown.delay(500)}>
                 <Card style={{ marginBottom: spacing.md }}>
                   <View style={styles.sectionHeader}>
-                    <Ionicons name="calendar-outline" size={18} color={colors.accent.warning} />
+                    <Icon3D name="calendar" size={18} />
                     <Text
                       style={[typography.bodyBold, { color: colors.accent.warning, marginLeft: spacing.xs }]}
                     >

@@ -14,6 +14,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -349,7 +350,7 @@ export default function ProgressScreen() {
         {/* Weight Chart - Full Size */}
         <Card style={{ marginBottom: spacing.lg, shadowColor: '#06B6D4', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 }}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="trending-up-outline" size={20} color="#06B6D4" />
+            <Icon3D name="chart-up" size={20} />
             <Text
               style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}
             >
@@ -427,7 +428,7 @@ export default function ProgressScreen() {
         {/* Progress Photos */}
         <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 }}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="camera-outline" size={20} color={colors.accent.secondary} />
+            <Icon3D name="camera" size={20} />
             <Text
               style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}
             >
@@ -536,7 +537,7 @@ export default function ProgressScreen() {
             }}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons name="sparkles" size={18} color="#06B6D4" />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -579,7 +580,7 @@ export default function ProgressScreen() {
             },
           ]}
         >
-          <Ionicons name="scale-outline" size={24} color={colors.text.inverse} />
+          <Icon3D name="scale" size={24} />
         </Pressable>
         <Pressable
           onPress={() => {
@@ -596,7 +597,7 @@ export default function ProgressScreen() {
             },
           ]}
         >
-          <Ionicons name="camera-outline" size={24} color={colors.text.inverse} />
+          <Icon3D name="camera" size={24} />
         </Pressable>
       </View>
 

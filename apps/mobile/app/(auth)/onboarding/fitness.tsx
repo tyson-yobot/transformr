@@ -283,19 +283,19 @@ export default function FitnessScreen() {
             {/* What you're unlocking */}
             <SectionHeader title="What you're unlocking" style={{ marginTop: spacing.xxl }} />
             <FeatureHighlightRow
-              icon="barbell-outline"
+              icon="dumbbell"
               iconColor={colors.accent.primary}
               title="Log workouts in seconds"
               subtitle="Track sets, reps, and weight with one tap"
             />
             <FeatureHighlightRow
-              icon="pulse-outline"
+              icon="heart-pulse"
               iconColor={colors.accent.cyan}
               title="AI-powered suggestions"
               subtitle="Personalized workout recommendations"
             />
             <FeatureHighlightRow
-              icon="trophy-outline"
+              icon="trophy"
               iconColor={colors.accent.gold}
               title="Personal records"
               subtitle="Auto-detected PRs with celebration moments"

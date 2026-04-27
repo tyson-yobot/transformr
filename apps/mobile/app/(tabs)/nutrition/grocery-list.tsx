@@ -17,6 +17,7 @@ import {
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -221,7 +222,7 @@ export default function GroceryListScreen() {
           contentContainerStyle={[styles.centerContent, { padding: spacing.lg }]}
           showsVerticalScrollIndicator={false}
         >
-          <Ionicons name="cart-outline" size={56} color={colors.text.muted} />
+          <Icon3D name="cart" size={56} />
           <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
             AI Grocery List
           </Text>
@@ -233,7 +234,7 @@ export default function GroceryListScreen() {
             title="Generate Grocery List"
             onPress={handleGenerate}
             loading={isGenerating}
-            leftIcon={<Ionicons name="sparkles" size={18} color="#FFFFFF" />}
+            leftIcon={<Icon3D name="sparkles" size={18} />}
             fullWidth
             style={{ marginTop: spacing.xl }}
           />
@@ -394,7 +395,7 @@ export default function GroceryListScreen() {
 
         {/* Auto-generated label */}
         <View style={[styles.autoLabel, { marginBottom: spacing.md, marginTop: spacing.sm }]}>
-          <Ionicons name="sparkles" size={14} color={colors.accent.primary} />
+          <Icon3D name="sparkles" size={14} />
           <Text style={[typography.tiny, { color: colors.accent.primary, marginLeft: 4 }]}>
             AI-generated with budget-aware pricing
           </Text>
@@ -501,7 +502,7 @@ export default function GroceryListScreen() {
           <Animated.View entering={FadeInDown.duration(300).delay(300)}>
             <Card style={{ marginTop: spacing.lg, backgroundColor: `${colors.accent.primary}10` }}>
               <View style={styles.tipsHeader}>
-                <Ionicons name="bulb-outline" size={16} color={colors.accent.primary} />
+                <Icon3D name="bulb" size={16} />
                 <Text style={[typography.captionBold, { color: colors.accent.primary, marginLeft: spacing.xs }]}>
                   Shopping Tips
                 </Text>
@@ -536,7 +537,7 @@ export default function GroceryListScreen() {
             onPress={handleGenerate}
             loading={isGenerating}
             variant="outline"
-            leftIcon={<Ionicons name="sparkles" size={18} color={colors.accent.primary} />}
+            leftIcon={<Icon3D name="sparkles" size={18} />}
             fullWidth
           />
         </View>

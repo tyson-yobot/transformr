@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { Icon3D } from '@components/ui/Icon3D';
 import { StatusBar } from 'expo-status-bar';
 import { Disclaimer } from '@components/ui/Disclaimer';
 import { useLabsStore } from '@stores/labsStore';
@@ -205,10 +206,9 @@ export default function LabDetailScreen() {
       >
         {renderHeader()}
         <View style={styles.centeredMessage}>
-          <Ionicons
-            name="document-text-outline"
+          <Icon3D
+            name="document"
             size={48}
-            color={colors.text.muted}
           />
           <Text
             style={[
@@ -264,10 +264,9 @@ export default function LabDetailScreen() {
               },
             ]}
           >
-            <Ionicons
-              name="alert-circle-outline"
+            <Icon3D
+              name="warning"
               size={18}
-              color={colors.accent.danger}
             />
             <Text
               style={[
@@ -368,10 +367,9 @@ export default function LabDetailScreen() {
               },
             ]}
           >
-            <Ionicons
-              name="alert-circle"
+            <Icon3D
+              name="warning"
               size={20}
-              color={colors.accent.danger}
             />
             <Text
               style={[

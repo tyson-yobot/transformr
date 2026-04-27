@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -258,7 +259,7 @@ export default function PostureCheckScreen() {
                 { backgroundColor: `${colors.accent.primary}15`, borderRadius: 40 },
               ]}
             >
-              <Ionicons name="body" size={40} color={colors.accent.primary} />
+              <Icon3D name="body" size={40} />
             </View>
             <Text
               style={[
@@ -307,7 +308,7 @@ export default function PostureCheckScreen() {
 
           <Card style={{ marginTop: spacing.md }} variant="ai">
             <View style={styles.rowCenter}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -333,7 +334,7 @@ export default function PostureCheckScreen() {
             fullWidth
             size="lg"
             style={{ marginTop: spacing.xl }}
-            leftIcon={<Ionicons name="camera" size={22} color={colors.text.inverse} />}
+            leftIcon={<Icon3D name="camera" size={22} />}
           />
           <Button
             title="Use Workout History Instead"
@@ -396,7 +397,7 @@ export default function PostureCheckScreen() {
 
           <Card style={{ marginTop: spacing.xl }}>
             <View style={styles.rowCenter}>
-              <Ionicons name="person" size={22} color={colors.accent.primary} />
+              <Icon3D name="profile" size={22} />
               <Text
                 style={[
                   typography.captionBold,
@@ -482,7 +483,7 @@ export default function PostureCheckScreen() {
               accessibilityLabel="Take front view photo"
               accessibilityRole="button"
             >
-              <Ionicons name="camera" size={48} color={colors.text.muted} />
+              <Icon3D name="camera" size={48} />
               <Text
                 style={[
                   typography.body,
@@ -547,7 +548,7 @@ export default function PostureCheckScreen() {
 
           <Card style={{ marginTop: spacing.xl }}>
             <View style={styles.rowCenter}>
-              <Ionicons name="person-outline" size={22} color={colors.accent.secondary} />
+              <Icon3D name="profile" size={22} />
               <Text
                 style={[
                   typography.captionBold,
@@ -615,7 +616,7 @@ export default function PostureCheckScreen() {
                 fullWidth
                 size="lg"
                 style={{ marginTop: spacing.sm }}
-                leftIcon={<Ionicons name="sparkles" size={20} color={colors.text.inverse} />}
+                leftIcon={<Icon3D name="sparkles" size={20} />}
               />
             </View>
           ) : (
@@ -634,7 +635,7 @@ export default function PostureCheckScreen() {
                 accessibilityLabel="Take side view photo"
                 accessibilityRole="button"
               >
-                <Ionicons name="camera" size={48} color={colors.text.muted} />
+                <Icon3D name="camera" size={48} />
                 <Text
                   style={[
                     typography.body,
@@ -751,17 +752,7 @@ export default function PostureCheckScreen() {
                 return (
                   <Card key={idx} style={{ marginBottom: spacing.sm }}>
                     <View style={styles.issueRow}>
-                      <Ionicons
-                        name="alert-circle"
-                        size={20}
-                        color={
-                          severity === 'danger'
-                            ? colors.accent.danger
-                            : severity === 'warning'
-                            ? colors.accent.warning
-                            : colors.accent.info
-                        }
-                      />
+                      <Icon3D name="warning" size={20} />
                       <Text
                         style={[
                           typography.body,
@@ -786,7 +777,7 @@ export default function PostureCheckScreen() {
           {result.recommendations.length > 0 && (
             <Card style={{ marginBottom: spacing.lg }}>
               <View style={[styles.rowCenter, { marginBottom: spacing.md }]}>
-                <Ionicons name="bulb-outline" size={20} color={colors.accent.gold} />
+                <Icon3D name="bulb" size={20} />
                 <Text
                   style={[
                     typography.h3,
@@ -841,7 +832,7 @@ export default function PostureCheckScreen() {
                         { backgroundColor: `${colors.accent.primary}15`, borderRadius: 20 },
                       ]}
                     >
-                      <Ionicons name="fitness" size={20} color={colors.accent.primary} />
+                      <Icon3D name="bicep" size={20} />
                     </View>
                     <View style={{ flex: 1, marginLeft: spacing.md }}>
                       <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
@@ -870,7 +861,7 @@ export default function PostureCheckScreen() {
                       ]}
                     >
                       <View style={styles.rowCenter}>
-                        <Ionicons name="information-circle-outline" size={16} color={colors.accent.info} />
+                        <Icon3D name="bulb" size={16} />
                         <Text
                           style={[
                             typography.captionBold,
@@ -899,7 +890,7 @@ export default function PostureCheckScreen() {
           {result.improvement_timeline ? (
             <Card variant="ai" style={{ marginBottom: spacing.lg }}>
               <View style={styles.rowCenter}>
-                <Ionicons name="time-outline" size={18} color={colors.accent.cyan} />
+                <Icon3D name="clock" size={18} />
                 <Text
                   style={[
                     typography.captionBold,
@@ -925,7 +916,7 @@ export default function PostureCheckScreen() {
               title="Analyze Again"
               onPress={handleReset}
               fullWidth
-              leftIcon={<Ionicons name="refresh" size={20} color={colors.text.inverse} />}
+              leftIcon={<Icon3D name="sparkles" size={20} />}
             />
             <Button
               title="Back to Fitness"

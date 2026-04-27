@@ -16,7 +16,7 @@
 import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useFeatureGate, FeatureKey } from '@hooks/useFeatureGate';
 import { useSubscriptionStore } from '../../stores/subscriptionStore';
@@ -95,7 +95,7 @@ export function UpgradePrompt({
             },
           ]}
         >
-          <Ionicons name="lock-closed" size={22} color={colors.accent.primary} />
+          <Icon3D name="lock" size={22} />
         </View>
 
         <Text

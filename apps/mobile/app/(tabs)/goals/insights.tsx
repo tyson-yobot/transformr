@@ -14,6 +14,7 @@ import {
 import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -84,7 +85,7 @@ export default function InsightsScreen() {
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(300)}>
           <View style={[styles.headerRow, { marginBottom: spacing.lg }]}>
-            <Ionicons name="analytics-outline" size={24} color={colors.accent.cyan} />
+            <Icon3D name="bar-chart" size={24} />
             <Text style={[typography.h2, { color: colors.text.primary, marginLeft: spacing.sm }]}>
               AI Insights
             </Text>
@@ -115,7 +116,7 @@ export default function InsightsScreen() {
         {/* Empty State */}
         {!isLoading && isEmpty && (
           <View style={styles.emptyState}>
-            <Ionicons name="sparkles" size={48} color={colors.text.muted} />
+            <Icon3D name="sparkles" size={48} />
             <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
               No insights right now
             </Text>

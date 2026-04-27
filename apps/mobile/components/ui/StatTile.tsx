@@ -15,7 +15,7 @@ import Animated, {
   useAnimatedStyle,
   cancelAnimation,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { triggerHaptic } from '@/constants/haptics';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -72,7 +72,7 @@ function AnimatedFlame({ color }: { color: string }) {
 
   return (
     <Animated.View style={animatedStyle}>
-      <Ionicons name="flame" size={20} color={color} />
+      <Icon3D name="fire" size={20} />
     </Animated.View>
   );
 }

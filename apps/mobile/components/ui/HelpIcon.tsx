@@ -21,6 +21,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hapticLight } from '@utils/haptics';
@@ -164,10 +165,9 @@ export function HelpIcon({ content, size = 16, color, style }: HelpIconProps) {
                   },
                 ]}
               >
-                <Ionicons
-                  name="flash"
+                <Icon3D
+                  name="lightning"
                   size={14}
-                  color={colors.accent.primary}
                   style={{ marginRight: spacing.sm, marginTop: 2 }}
                 />
                 <Text style={[typography.caption, { color: colors.accent.primary, flex: 1, lineHeight: 19 }]}>

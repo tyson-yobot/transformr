@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -244,7 +245,7 @@ export default function SupplementScannerScreen() {
                 { backgroundColor: `${colors.accent.cyan}15`, borderRadius: 40 },
               ]}
             >
-              <Ionicons name="scan" size={40} color={colors.accent.cyan} />
+              <Icon3D name="barcode" size={40} />
             </View>
             <Text
               style={[
@@ -288,7 +289,7 @@ export default function SupplementScannerScreen() {
                 },
               ]}
             >
-              <Ionicons name="camera" size={52} color={colors.accent.cyan} />
+              <Icon3D name="camera" size={52} />
             </View>
             <Text
               style={[
@@ -310,7 +311,7 @@ export default function SupplementScannerScreen() {
 
           <Card style={{ marginTop: spacing.xl }} variant="ai">
             <View style={styles.rowCenter}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -400,7 +401,7 @@ export default function SupplementScannerScreen() {
             fullWidth
             size="lg"
             style={{ marginTop: spacing.xl }}
-            leftIcon={<Ionicons name="sparkles" size={20} color={colors.text.inverse} />}
+            leftIcon={<Icon3D name="sparkles" size={20} />}
           />
           <Button
             title="Retake Photo"
@@ -408,7 +409,7 @@ export default function SupplementScannerScreen() {
             onPress={handleRetake}
             fullWidth
             style={{ marginTop: spacing.sm }}
-            leftIcon={<Ionicons name="camera" size={18} color={colors.accent.primary} />}
+            leftIcon={<Icon3D name="camera" size={18} />}
           />
         </ScrollView>
       </View>
@@ -468,7 +469,7 @@ export default function SupplementScannerScreen() {
                   { backgroundColor: `${colors.accent.cyan}15`, borderRadius: 16 },
                 ]}
               >
-                <Ionicons name="flask" size={24} color={colors.accent.cyan} />
+                <Icon3D name="flask" size={24} />
               </View>
               <View style={{ flex: 1, marginLeft: spacing.md }}>
                 <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -485,7 +486,7 @@ export default function SupplementScannerScreen() {
           {/* Overall Assessment */}
           <Card variant="ai" style={{ marginBottom: spacing.lg }}>
             <View style={[styles.rowCenter, { marginBottom: spacing.sm }]}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -597,7 +598,7 @@ export default function SupplementScannerScreen() {
               style={{ marginBottom: spacing.lg, borderLeftWidth: 3, borderLeftColor: colors.accent.danger }}
             >
               <View style={[styles.rowCenter, { marginBottom: spacing.md }]}>
-                <Ionicons name="warning" size={20} color={colors.accent.danger} />
+                <Icon3D name="warning" size={20} />
                 <Text
                   style={[
                     typography.h3,
@@ -612,7 +613,7 @@ export default function SupplementScannerScreen() {
                   key={idx}
                   style={[styles.instructionRow, { marginBottom: spacing.sm }]}
                 >
-                  <Ionicons name="alert-circle" size={16} color={colors.accent.danger} />
+                  <Icon3D name="warning" size={16} />
                   <Text
                     style={[
                       typography.body,
@@ -651,7 +652,7 @@ export default function SupplementScannerScreen() {
                   key={idx}
                   style={[styles.instructionRow, { marginBottom: spacing.sm }]}
                 >
-                  <Ionicons name="information-circle-outline" size={16} color={colors.accent.warning} />
+                  <Icon3D name="bulb" size={16} />
                   <Text
                     style={[
                       typography.body,
@@ -668,7 +669,7 @@ export default function SupplementScannerScreen() {
           {/* Compliance Note */}
           <Card variant="flat" style={{ marginBottom: spacing.lg }}>
             <View style={styles.rowCenter}>
-              <Ionicons name="shield-checkmark-outline" size={16} color={colors.text.muted} />
+              <Icon3D name="shield" size={16} />
               <Text
                 style={[
                   typography.tiny,
@@ -715,7 +716,7 @@ export default function SupplementScannerScreen() {
               variant="outline"
               onPress={handleReset}
               fullWidth
-              leftIcon={<Ionicons name="scan" size={18} color={colors.accent.primary} />}
+              leftIcon={<Icon3D name="barcode" size={18} />}
             />
             <Button
               title="Back to Fitness"

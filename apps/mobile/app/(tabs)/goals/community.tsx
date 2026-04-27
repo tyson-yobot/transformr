@@ -14,6 +14,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -256,7 +257,7 @@ export default function CommunityScreen() {
         {/* ----------------------------------------------------------------- */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
-            <Ionicons name="podium-outline" size={20} color={colors.accent.gold} />
+            <Icon3D name="medal" size={20} />
             <Text
               style={[
                 typography.h3,
@@ -276,7 +277,7 @@ export default function CommunityScreen() {
         {/* ----------------------------------------------------------------- */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
-            <Ionicons name="people-outline" size={20} color={colors.accent.cyan} />
+            <Icon3D name="people" size={20} />
             <Text
               style={[
                 typography.h3,
@@ -292,7 +293,7 @@ export default function CommunityScreen() {
           <Animated.View entering={FadeInDown.delay(250).duration(400)}>
             <Card style={{ marginBottom: spacing.xl }}>
               <View style={styles.emptyContainer}>
-                <Ionicons name="flag-outline" size={40} color={colors.text.muted} />
+                <Icon3D name="flag" size={40} />
                 <Text
                   style={[
                     typography.body,
@@ -347,14 +348,14 @@ export default function CommunityScreen() {
                   {/* Meta row */}
                   <View style={[styles.metaRow, { marginTop: spacing.md }]}>
                     <View style={styles.metaItem}>
-                      <Ionicons name="people" size={14} color={colors.text.muted} />
+                      <Icon3D name="people" size={14} />
                       <Text style={[typography.tiny, { color: colors.text.secondary, marginLeft: spacing.xs }]}>
                         {challenge.participant_count}
                         {challenge.max_participants ? `/${challenge.max_participants}` : ''} joined
                       </Text>
                     </View>
                     <View style={styles.metaItem}>
-                      <Ionicons name="time-outline" size={14} color={colors.text.muted} />
+                      <Icon3D name="clock" size={14} />
                       <Text
                         style={[
                           typography.tiny,
@@ -369,7 +370,7 @@ export default function CommunityScreen() {
                     </View>
                     {challenge.target_value ? (
                       <View style={styles.metaItem}>
-                        <Ionicons name="flag" size={14} color={colors.text.muted} />
+                        <Icon3D name="flag" size={14} />
                         <Text style={[typography.tiny, { color: colors.text.secondary, marginLeft: spacing.xs }]}>
                           Target: {challenge.target_value} {challenge.metric ?? ''}
                         </Text>
@@ -435,7 +436,7 @@ export default function CommunityScreen() {
         {/* ----------------------------------------------------------------- */}
         <Animated.View entering={FadeInDown.delay(400).duration(400)}>
           <View style={[styles.sectionHeader, { marginTop: spacing.xl, marginBottom: spacing.md }]}>
-            <Ionicons name="trophy-outline" size={20} color={colors.accent.primary} />
+            <Icon3D name="trophy" size={20} />
             <Text
               style={[
                 typography.h3,

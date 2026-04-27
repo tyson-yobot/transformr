@@ -7,6 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 
 type EvidenceLevel = 'strong' | 'moderate' | 'emerging' | 'anecdotal';
@@ -23,11 +24,11 @@ interface EvidenceBadgeProps {
   compact?: boolean;
 }
 
-const LEVEL_CONFIG: Record<EvidenceLevel, { label: string; icon: React.ComponentProps<typeof Ionicons>['name'] }> = {
-  strong: { label: 'Strong', icon: 'shield-checkmark' },
-  moderate: { label: 'Moderate', icon: 'shield-half' },
-  emerging: { label: 'Emerging', icon: 'flask' },
-  anecdotal: { label: 'Anecdotal', icon: 'chatbubble-ellipses-outline' },
+const LEVEL_CONFIG: Record<EvidenceLevel, { label: string; icon3d?: Icon3DName; ionIcon?: React.ComponentProps<typeof Ionicons>['name'] }> = {
+  strong: { label: 'Strong', icon3d: 'shield' },
+  moderate: { label: 'Moderate', icon3d: 'shield' },
+  emerging: { label: 'Emerging', icon3d: 'flask' },
+  anecdotal: { label: 'Anecdotal', icon3d: 'speech' },
 };
 
 const SOURCE_TYPE_LABEL: Record<EvidenceSource['type'], string> = {
@@ -84,7 +85,11 @@ export function EvidenceBadge({ level, sources, compact = false }: EvidenceBadge
           { backgroundColor: badgeBg, borderRadius: borderRadius.sm },
         ]}
       >
-        <Ionicons name={config.icon} size={10} color={badgeColor} />
+        {config.icon3d ? (
+          <Icon3D name={config.icon3d} size={10} />
+        ) : (
+          <Ionicons name={config.ionIcon ?? 'help-circle'} size={10} color={badgeColor} />
+        )}
         <Text
           style={[
             typography.tiny,
@@ -119,7 +124,11 @@ export function EvidenceBadge({ level, sources, compact = false }: EvidenceBadge
         accessibilityRole="button"
         accessibilityLabel={`Evidence: ${config.label}${sources && sources.length > 0 ? '. Tap for sources.' : ''}`}
       >
-        <Ionicons name={config.icon} size={14} color={badgeColor} />
+        {config.icon3d ? (
+          <Icon3D name={config.icon3d} size={14} />
+        ) : (
+          <Ionicons name={config.ionIcon ?? 'help-circle'} size={14} color={badgeColor} />
+        )}
         <Text
           style={[
             typography.tiny,

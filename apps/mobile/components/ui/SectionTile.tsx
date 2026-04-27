@@ -1,12 +1,12 @@
 import { memo, useCallback } from 'react';
 import { View, Text, Pressable, ViewStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
 export interface SectionTileProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: Icon3DName;
   label: string;
   accentColor?: string;
   isSelected?: boolean;
@@ -52,10 +52,9 @@ export const SectionTile = memo(function SectionTile({
         shadowRadius: isSelected ? 8 : 0,
         elevation: isSelected ? 4 : 0,
       }}>
-        <Ionicons
+        <Icon3D
           name={icon}
           size={size === 'sm' ? 20 : size === 'md' ? 24 : 28}
-          color={isSelected ? accent : colors.text.muted}
         />
         {badge !== undefined && (
           <View style={{

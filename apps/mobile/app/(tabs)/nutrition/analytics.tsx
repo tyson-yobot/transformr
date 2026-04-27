@@ -12,8 +12,8 @@ import {
   Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -706,7 +706,7 @@ export default function NutritionAnalyticsScreen() {
             <Animated.View entering={FadeInDown.duration(300).delay(560)}>
               <Card style={{ shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <View style={styles.waterRow}>
-                  <Ionicons name="water" size={24} color={colors.accent.info} />
+                  <Icon3D name="drink" size={24} />
                   <View style={{ flex: 1, marginLeft: spacing.md }}>
                     <Text style={[typography.monoBody, { color: colors.text.primary, fontWeight: '600' }]}>
                       Avg Water: {averages.water_oz} oz/day

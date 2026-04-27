@@ -15,7 +15,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
@@ -99,7 +99,7 @@ export function ChatFAB({ bottom = 96, right = 20, style, onPress }: ChatFABProp
         accessibilityLabel="Open AI Chat Coach"
         accessibilityHint="Starts a conversation with your personalized AI wellness coach"
       >
-        <Ionicons name="sparkles" size={26} color="#FFFFFF" />
+        <Icon3D name="sparkles" size={26} />
       </AnimatedPressable>
       </View>
     </View>

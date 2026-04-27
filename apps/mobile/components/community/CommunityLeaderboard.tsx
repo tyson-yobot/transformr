@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Skeleton } from '@components/ui/Skeleton';
 import { supabase } from '@services/supabase';
@@ -508,7 +509,7 @@ export function CommunityLeaderboard({
 
   const renderEmpty = () => (
     <View style={[styles.emptyContainer, { paddingVertical: spacing.xxxl }]}>
-      <Ionicons name="trophy-outline" size={48} color={colors.text.muted} />
+      <Icon3D name="trophy" size={48} />
       <Text
         style={[
           typography.body,

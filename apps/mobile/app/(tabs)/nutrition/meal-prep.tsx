@@ -19,6 +19,7 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -217,7 +218,7 @@ export default function MealPrepScreen() {
           contentContainerStyle={[styles.centerContent, { padding: spacing.lg }]}
           showsVerticalScrollIndicator={false}
         >
-          <Ionicons name="restaurant-outline" size={56} color={colors.text.muted} />
+          <Icon3D name="fork-knife" size={56} />
           <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
             AI Meal Prep Planner
           </Text>
@@ -235,7 +236,7 @@ export default function MealPrepScreen() {
             >
               <Card>
                 <View style={styles.budgetRow}>
-                  <Ionicons name="wallet-outline" size={20} color={colors.accent.primary} />
+                  <Icon3D name="money" size={20} />
                   <Text style={[typography.body, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                     Weekly Grocery Budget
                   </Text>
@@ -264,7 +265,7 @@ export default function MealPrepScreen() {
             title="Generate Meal Prep Plan"
             onPress={handleGenerate}
             loading={isGenerating}
-            leftIcon={<Ionicons name="sparkles" size={18} color="#FFFFFF" />}
+            leftIcon={<Icon3D name="sparkles" size={18} />}
             fullWidth
             style={{ marginTop: spacing.xl }}
           />
@@ -393,7 +394,7 @@ export default function MealPrepScreen() {
           <Animated.View entering={FadeInDown.duration(300).delay(100)}>
             <Card style={{ marginBottom: spacing.lg, backgroundColor: `${colors.accent.cyan}10` }}>
               <View style={styles.costNotesHeader}>
-                <Ionicons name="bulb-outline" size={16} color={colors.accent.cyan} />
+                <Icon3D name="bulb" size={16} />
                 <Text style={[typography.captionBold, { color: colors.accent.cyan, marginLeft: spacing.xs }]}>
                   Cost Comparison
                 </Text>
@@ -434,19 +435,19 @@ export default function MealPrepScreen() {
                   </Text>
                   <View style={[styles.overviewStats, { marginTop: spacing.sm, gap: spacing.sm }]}>
                     <View style={styles.statRow}>
-                      <Ionicons name="time-outline" size={14} color={colors.text.muted} />
+                      <Icon3D name="clock" size={14} />
                       <Text style={[typography.caption, { color: colors.text.secondary, marginLeft: 4 }]}>
                         {currentTierPlan.prep_day_schedule.total_time_hours}h prep
                       </Text>
                     </View>
                     <View style={styles.statRow}>
-                      <Ionicons name="restaurant-outline" size={14} color={colors.text.muted} />
+                      <Icon3D name="fork-knife" size={14} />
                       <Text style={[typography.caption, { color: colors.text.secondary, marginLeft: 4 }]}>
                         {totalServings} servings
                       </Text>
                     </View>
                     <View style={styles.statRow}>
-                      <Ionicons name="cash-outline" size={14} color={colors.text.muted} />
+                      <Icon3D name="money" size={14} />
                       <Text style={[typography.caption, { color: colors.text.secondary, marginLeft: 4 }]}>
                         ~{formatCurrencyDetailed(currentTierPlan.estimated_weekly_cost)}/wk
                       </Text>
@@ -674,7 +675,7 @@ export default function MealPrepScreen() {
             onPress={handleGenerate}
             loading={isGenerating}
             variant="outline"
-            leftIcon={<Ionicons name="sparkles" size={18} color={colors.accent.primary} />}
+            leftIcon={<Icon3D name="sparkles" size={18} />}
             fullWidth
           />
         </View>

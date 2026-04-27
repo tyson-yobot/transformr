@@ -20,6 +20,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -290,7 +291,7 @@ export default function HealthROIScreen() {
                   },
                 ]}
               >
-                <Ionicons name="flame-outline" size={16} color={colors.accent.danger} />
+                <Icon3D name="fire" size={16} />
                 <Text style={[typography.captionBold, { color: colors.text.primary, marginLeft: spacing.xs }]}>
                   ~{report.metrics.estimatedCaloriesBurned.toLocaleString()} kcal burned
                 </Text>
@@ -303,7 +304,7 @@ export default function HealthROIScreen() {
             {/* AI Narrative */}
             <Card variant="elevated" style={{ padding: spacing.lg }}>
               <View style={[styles.aiHeader, { marginBottom: spacing.md }]}>
-                <Ionicons name="sparkles-outline" size={18} color={colors.accent.primary} />
+                <Icon3D name="sparkles" size={18} />
                 <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                   AI Analysis
                 </Text>

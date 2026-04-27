@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { Icon3D } from '@components/ui/Icon3D';
 import { StatusBar } from 'expo-status-bar';
 import { useChatStore } from '@stores/chatStore';
 import type { ChatConversation, ChatTopic } from '@app-types/ai';
@@ -345,7 +346,7 @@ export default function ChatHistoryScreen() {
         accessibilityRole="button"
         accessibilityLabel="Start a new conversation"
       >
-        <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+        <Icon3D name="sparkles" size={16} />
         <Text
           style={[
             typography.bodyBold,
@@ -431,10 +432,9 @@ export default function ChatHistoryScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Error: ${error}. Tap to dismiss.`}
         >
-          <Ionicons
-            name="alert-circle-outline"
+          <Icon3D
+            name="warning"
             size={18}
-            color={colors.accent.danger}
           />
           <Text
             style={[

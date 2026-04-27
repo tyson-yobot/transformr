@@ -17,6 +17,7 @@ import { useFeatureGate } from '@hooks/useFeatureGate';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -195,7 +196,7 @@ export default function BarcodeScannerScreen() {
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <Ionicons name="barcode-outline" size={64} color={colors.text.muted} />
+        <Icon3D name="barcode" size={64} />
         <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
           Camera access needed
         </Text>
@@ -269,7 +270,7 @@ export default function BarcodeScannerScreen() {
 
       {stage === 'not_found' && (
         <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary, padding: spacing.lg }]}>
-          <Ionicons name="alert-circle-outline" size={64} color={colors.accent.warning} />
+          <Icon3D name="warning" size={64} />
           <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
             Product Not Found
           </Text>

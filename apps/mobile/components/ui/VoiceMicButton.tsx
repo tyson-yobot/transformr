@@ -16,6 +16,7 @@ import Animated, {
   cancelAnimation,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { hapticLight, hapticMedium, hapticWarning } from '@utils/haptics';
 import {
@@ -165,11 +166,11 @@ export function VoiceMicButton({
         accessibilityLabel={active ? 'Stop voice recording' : 'Start voice command'}
         accessibilityRole="button"
       >
-        <Ionicons
-          name={active ? 'stop' : 'mic'}
-          size={22}
-          color="#FFFFFF"
-        />
+        {active ? (
+          <Ionicons name="stop" size={22} color="#FFFFFF" />
+        ) : (
+          <Icon3D name="mic" size={22} />
+        )}
       </Pressable>
     </View>
   );

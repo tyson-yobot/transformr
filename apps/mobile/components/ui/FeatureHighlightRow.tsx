@@ -5,11 +5,11 @@
 
 import React from 'react';
 import { View, Text, ViewStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 
 interface FeatureHighlightRowProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: Icon3DName;
   iconColor: string;
   title: string;
   subtitle?: string;
@@ -36,7 +36,7 @@ export function FeatureHighlightRow({
         justifyContent: 'center',
         marginRight: 14,
       }}>
-        <Ionicons name={icon} size={22} color={iconColor} />
+        <Icon3D name={icon} size={22} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{

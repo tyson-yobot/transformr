@@ -18,6 +18,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -689,7 +690,7 @@ export default function WorkoutPlayerScreen() {
       return (
         <View style={{ flex: 1, backgroundColor: colors.background.primary,
           alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <Ionicons name="alert-circle-outline" size={48} color={colors.accent.danger} />
+          <Icon3D name="warning" size={48} />
           <Text style={{ color: colors.text.primary, fontSize: 18,
             fontWeight: '700', marginTop: 16, textAlign: 'center' }}>
             Could not start workout
@@ -751,13 +752,13 @@ export default function WorkoutPlayerScreen() {
         ]}
       >
         <View style={styles.topBarItem}>
-          <Ionicons name="time-outline" size={18} color={colors.accent.primary} />
+          <Icon3D name="clock" size={18} />
           <Text style={[typography.statSmall, { color: colors.text.primary, marginLeft: spacing.xs }]}>
             {formatTimerDisplay(elapsedSeconds)}
           </Text>
         </View>
         <View style={styles.topBarItem}>
-          <Ionicons name="barbell-outline" size={18} color={colors.accent.success} />
+          <Icon3D name="dumbbell" size={18} />
           <Text style={[typography.monoBody, { color: colors.text.primary, marginLeft: spacing.xs, fontWeight: '600' }]}>
             {formatVolume(totalVolume)}
           </Text>
@@ -825,7 +826,7 @@ export default function WorkoutPlayerScreen() {
             message="Timer starts automatically between sets"
             position="above"
           />
-          <Ionicons name="timer-outline" size={48} color={colors.accent.cyan} />
+          <Icon3D name="clock" size={48} />
           <MonoText
             variant="countdown"
             color={colors.accent.cyan}
@@ -851,7 +852,7 @@ export default function WorkoutPlayerScreen() {
         <View style={[styles.prOverlay, { backgroundColor: colors.accent.goldDim,
           shadowColor: '#EC4899', shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.45, shadowRadius: 40, elevation: 20 }]}>
-          <Ionicons name="trophy" size={64} color={colors.accent.gold} />
+          <Icon3D name="trophy" size={64} />
           <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
             NEW PR!
           </Text>
@@ -886,7 +887,7 @@ export default function WorkoutPlayerScreen() {
               onPress={() => router.push('/(tabs)/fitness/exercises' as never)}
               fullWidth
               accessibilityLabel="Browse exercises to add"
-              leftIcon={<Ionicons name="search" size={18} color={colors.text.inverse} />}
+              leftIcon={<Icon3D name="search" size={18} />}
             />
           </View>
         ) : (
@@ -988,7 +989,7 @@ export default function WorkoutPlayerScreen() {
               >
                 <View style={styles.aiCoachHeader}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <Ionicons name="sparkles" size={16} color={colors.accent.cyan} />
+                    <Icon3D name="sparkles" size={16} />
                     <Badge
                       label="AI Coach"
                       variant="info"

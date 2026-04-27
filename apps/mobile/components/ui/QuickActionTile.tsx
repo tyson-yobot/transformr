@@ -1,12 +1,12 @@
 import { memo, useCallback, type ReactNode } from 'react';
 import { View, Text, Pressable, ViewStyle } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
 export interface QuickActionTileProps {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: Icon3DName;
   /** Optional Phosphor icon node — when provided, takes priority over the icon name. */
   iconNode?: ReactNode;
   label: string;
@@ -52,7 +52,7 @@ export const QuickActionTile = memo(function QuickActionTile({
       }, animated]}
     >
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, backgroundColor: accentColor, borderRadius: 2 }} />
-      {iconNode ?? <Ionicons name={icon} size={26} color={accentColor} />}
+      {iconNode ?? <Icon3D name={icon} size={26} />}
       <Text style={[typography.captionBold, { color: accentColor, textAlign: 'center' }]}>{label}</Text>
     </AnimatedPressable>
     </View>

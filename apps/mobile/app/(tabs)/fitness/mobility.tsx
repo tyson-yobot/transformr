@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -642,13 +643,13 @@ export default function MobilityScreen() {
                 </Text>
                 <View style={[styles.routineMeta, { marginTop: spacing.sm, gap: spacing.md }]}>
                   <View style={styles.metaItem}>
-                    <Ionicons name="time-outline" size={14} color={colors.text.muted} />
+                    <Icon3D name="clock" size={14} />
                     <MonoText variant="monoCaption" color={colors.text.muted} style={{ marginLeft: 4 }}>
                       {routine.totalDurationMinutes} min
                     </MonoText>
                   </View>
                   <View style={styles.metaItem}>
-                    <Ionicons name="body-outline" size={14} color={colors.text.muted} />
+                    <Icon3D name="body" size={14} />
                     <MonoText variant="monoCaption" color={colors.text.muted} style={{ marginLeft: 4 }}>
                       {routine.exercises.length} stretches
                     </MonoText>
@@ -701,7 +702,7 @@ export default function MobilityScreen() {
             recentSessions.map((session) => (
               <Card key={session.id} style={{ marginBottom: spacing.sm }}>
                 <View style={styles.sessionRow}>
-                  <Ionicons name="body-outline" size={20} color={colors.accent.success} />
+                  <Icon3D name="body" size={20} />
                   <View style={{ flex: 1, marginLeft: spacing.md }}>
                     <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                       Mobility Session

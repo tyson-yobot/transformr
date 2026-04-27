@@ -14,6 +14,7 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -193,7 +194,7 @@ export default function MealPlansScreen() {
           title={isGenerating ? 'Generating...' : 'Generate AI Plan'}
           onPress={handleGenerateAIPlan}
           loading={isGenerating}
-          leftIcon={<Ionicons name="sparkles" size={18} color="#FFFFFF" />}
+          leftIcon={<Icon3D name="sparkles" size={18} />}
           fullWidth
           style={{ marginBottom: spacing.lg }}
         />
@@ -352,7 +353,7 @@ export default function MealPlansScreen() {
         {currentDayPlan && currentDayPlan.meals.length === 0 && (
           <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
             <EmptyStateBackground query="meal prep healthy food dark" opacity={0.10} />
-            <Ionicons name="restaurant-outline" size={48} color={colors.text.muted} />
+            <Icon3D name="fork-knife" size={48} />
             <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
               No meals planned for this day
             </Text>

@@ -21,6 +21,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
@@ -222,7 +223,7 @@ export default function MarketplaceScreen() {
           <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 200, marginTop: 40 }}>
             <EmptyStateBackground query="gym training program dark" opacity={0.15} />
             <Card style={{ padding: spacing.lg, alignItems: 'center' }}>
-              <Ionicons name="storefront-outline" size={40} color={colors.text.muted} />
+              <Icon3D name="store" size={40} />
               <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
                 No programs available yet. Check back soon.
               </Text>
@@ -268,13 +269,13 @@ export default function MarketplaceScreen() {
                 {/* Meta row */}
                 <View style={[styles.metaRow, { marginBottom: spacing.md, gap: spacing.sm }]}>
                   <View style={styles.metaChip}>
-                    <Ionicons name="time-outline" size={13} color={colors.text.muted} />
+                    <Icon3D name="clock" size={13} />
                     <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 3 }]}>
                       {program.duration_weeks}w
                     </Text>
                   </View>
                   <View style={styles.metaChip}>
-                    <Ionicons name="barbell-outline" size={13} color={colors.text.muted} />
+                    <Icon3D name="dumbbell" size={13} />
                     <Text
                       style={[
                         typography.tiny,
@@ -285,7 +286,7 @@ export default function MarketplaceScreen() {
                     </Text>
                   </View>
                   <View style={styles.metaChip}>
-                    <Ionicons name="pricetag-outline" size={13} color={colors.text.muted} />
+                    <Icon3D name="money" size={13} />
                     <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 3 }]}>
                       {program.category}
                     </Text>

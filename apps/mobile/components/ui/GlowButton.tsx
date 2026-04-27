@@ -6,7 +6,7 @@
 import React, { useCallback } from 'react';
 import { Text, ActivityIndicator, ViewStyle, Pressable, View } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
@@ -18,7 +18,7 @@ interface GlowButtonProps {
   loading?: boolean;
   variant?: GlowButtonVariant;
   disabled?: boolean;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: Icon3DName;
   style?: ViewStyle;
   fullWidth?: boolean;
 }
@@ -80,7 +80,7 @@ export function GlowButton({
         <ActivityIndicator color={textColor} size="small" />
       ) : (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {icon && <Ionicons name={icon} size={18} color={textColor} />}
+          {icon && <Icon3D name={icon} size={18} />}
           <Text style={{
             color: textColor,
             fontSize: 17,

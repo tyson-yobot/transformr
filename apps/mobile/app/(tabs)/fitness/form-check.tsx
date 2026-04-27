@@ -18,6 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
@@ -229,7 +230,7 @@ export default function FormCheckScreen() {
                 },
               ]}
             >
-              <Ionicons name="videocam" size={40} color={colors.accent.primary} />
+              <Icon3D name="video-camera" size={40} />
             </View>
             <Text
               style={[
@@ -303,7 +304,7 @@ export default function FormCheckScreen() {
             fullWidth
             size="lg"
             style={{ marginTop: spacing.xl }}
-            leftIcon={<Ionicons name="videocam" size={22} color={colors.text.inverse} />}
+            leftIcon={<Icon3D name="video-camera" size={22} />}
           />
         </ScrollView>
       </View>
@@ -396,7 +397,7 @@ export default function FormCheckScreen() {
             onPress={handleSubmitForAnalysis}
             fullWidth
             size="lg"
-            leftIcon={<Ionicons name="sparkles" size={20} color={colors.text.inverse} />}
+            leftIcon={<Icon3D name="sparkles" size={20} />}
           />
           <Button
             title="Re-record"
@@ -469,11 +470,7 @@ export default function FormCheckScreen() {
             }}
           >
             <View style={styles.riskRow}>
-              <Ionicons
-                name="shield-outline"
-                size={22}
-                color={getInjuryRiskColor(analysisResult.injuryRisk)}
-              />
+              <Icon3D name="shield" size={22} />
               <View style={{ flex: 1, marginLeft: spacing.md }}>
                 <Text style={[typography.captionBold, { color: colors.text.muted }]}>
                   Injury Risk
@@ -504,11 +501,7 @@ export default function FormCheckScreen() {
               {analysisResult.issues.map((issue, idx) => (
                 <Card key={idx} style={{ marginBottom: spacing.sm }}>
                   <View style={styles.issueHeader}>
-                    <Ionicons
-                      name="alert-circle"
-                      size={20}
-                      color={getSeverityColor(issue.severity)}
-                    />
+                    <Icon3D name="warning" size={20} />
                     <Text
                       style={[
                         typography.bodyBold,
@@ -546,7 +539,7 @@ export default function FormCheckScreen() {
           {analysisResult.corrections.length > 0 && (
             <Card style={{ marginBottom: spacing.lg }}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="bulb-outline" size={20} color={colors.accent.success} />
+                <Icon3D name="bulb" size={20} />
                 <Text
                   style={[
                     typography.h3,
@@ -584,7 +577,7 @@ export default function FormCheckScreen() {
             }}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.secondary} />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -609,7 +602,7 @@ export default function FormCheckScreen() {
               title="Check Another Exercise"
               onPress={handleReset}
               fullWidth
-              leftIcon={<Ionicons name="refresh" size={20} color={colors.text.inverse} />}
+              leftIcon={<Icon3D name="sparkles" size={20} />}
             />
             <Button
               title="Back to Fitness"

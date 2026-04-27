@@ -7,6 +7,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Badge } from '@components/ui/Badge';
@@ -164,7 +165,7 @@ export const WeatherCard = React.memo(function WeatherCard({ style }: WeatherCar
 
           {/* Workout recommendation - always shown */}
           <View style={[styles.tipRow, { marginTop: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border.subtle }]}>
-            <Ionicons name="barbell-outline" size={14} color={colors.accent.primary} />
+            <Icon3D name="dumbbell" size={14} />
             <Text
               style={[typography.tiny, { color: colors.text.secondary, flex: 1, marginLeft: spacing.xs }]}
               numberOfLines={expanded ? undefined : 2}
@@ -175,7 +176,7 @@ export const WeatherCard = React.memo(function WeatherCard({ style }: WeatherCar
 
           {expanded && (
             <View style={[styles.tipRow, { marginTop: spacing.xs }]}>
-              <Ionicons name="water-outline" size={14} color={colors.accent.cyan} />
+              <Icon3D name="drink" size={14} />
               <Text style={[typography.tiny, { color: colors.text.secondary, flex: 1, marginLeft: spacing.xs }]}>
                 {weather.hydration_note}
               </Text>

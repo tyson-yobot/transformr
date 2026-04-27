@@ -33,6 +33,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { SectionTile } from '@components/ui/SectionTile';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3DName } from '@components/ui/Icon3D';
 import { CalendarDots, CaretRight } from 'phosphor-react-native';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
@@ -66,21 +67,21 @@ const CATEGORIES: { key: GoalCategory; label: string }[] = [
 
 type NavAccent = 'success' | 'info' | 'warning' | 'cyan' | 'fire' | 'pink' | 'gold' | 'danger';
 
-const NAV_ITEMS: { route: string; label: string; icon: keyof typeof Ionicons.glyphMap; accent: NavAccent }[] = [
-  { route: '/(tabs)/goals/habits',       label: 'Habits',     icon: 'checkmark-circle-outline', accent: 'success' },
-  { route: '/(tabs)/goals/sleep',        label: 'Sleep',      icon: 'moon-outline',             accent: 'info' },
-  { route: '/(tabs)/goals/mood',         label: 'Mood',       icon: 'happy-outline',            accent: 'warning' },
-  { route: '/(tabs)/goals/journal',      label: 'Journal',    icon: 'journal-outline',          accent: 'cyan' },
-  { route: '/(tabs)/goals/focus-mode',   label: 'Focus',      icon: 'timer-outline',            accent: 'fire' },
-  { route: '/(tabs)/goals/vision-board', label: 'Vision',     icon: 'images-outline',           accent: 'pink' },
-  { route: '/(tabs)/goals/skills',       label: 'Skills',     icon: 'bulb-outline',             accent: 'gold' },
-  { route: '/(tabs)/goals/challenges',   label: 'Challenges', icon: 'trophy-outline',           accent: 'gold' },
-  { route: '/(tabs)/goals/stake-goals',  label: 'Stakes',     icon: 'flame-outline',            accent: 'danger' },
-  { route: '/(tabs)/goals/health-roi',   label: 'Health ROI', icon: 'pulse-outline',             accent: 'success' },
-  { route: '/(tabs)/goals/affirmations', label: 'Affirmations', icon: 'sunny-outline',           accent: 'gold' },
-  { route: '/(tabs)/goals/retrospective', label: 'Retrospective', icon: 'time-outline',          accent: 'info' },
-  { route: '/(tabs)/goals/community',    label: 'Community',  icon: 'people-outline',            accent: 'cyan' },
-  { route: '/(tabs)/goals/insights',     label: 'Insights',   icon: 'analytics-outline',         accent: 'info' },
+const NAV_ITEMS: { route: string; label: string; icon: Icon3DName; accent: NavAccent }[] = [
+  { route: '/(tabs)/goals/habits',       label: 'Habits',     icon: 'check',    accent: 'success' },
+  { route: '/(tabs)/goals/sleep',        label: 'Sleep',      icon: 'moon',     accent: 'info' },
+  { route: '/(tabs)/goals/mood',         label: 'Mood',       icon: 'smile',    accent: 'warning' },
+  { route: '/(tabs)/goals/journal',      label: 'Journal',    icon: 'book',     accent: 'cyan' },
+  { route: '/(tabs)/goals/focus-mode',   label: 'Focus',      icon: 'stopwatch', accent: 'fire' },
+  { route: '/(tabs)/goals/vision-board', label: 'Vision',     icon: 'eye',      accent: 'pink' },
+  { route: '/(tabs)/goals/skills',       label: 'Skills',     icon: 'bulb',     accent: 'gold' },
+  { route: '/(tabs)/goals/challenges',   label: 'Challenges', icon: 'trophy',   accent: 'gold' },
+  { route: '/(tabs)/goals/stake-goals',  label: 'Stakes',     icon: 'fire',     accent: 'danger' },
+  { route: '/(tabs)/goals/health-roi',   label: 'Health ROI', icon: 'heart-pulse', accent: 'success' },
+  { route: '/(tabs)/goals/affirmations', label: 'Affirmations', icon: 'sun',       accent: 'gold' },
+  { route: '/(tabs)/goals/retrospective', label: 'Retrospective', icon: 'clock',   accent: 'info' },
+  { route: '/(tabs)/goals/community',    label: 'Community',  icon: 'people',      accent: 'cyan' },
+  { route: '/(tabs)/goals/insights',     label: 'Insights',   icon: 'bar-chart',   accent: 'info' },
 ];
 
 export default function GoalsDashboard() {

@@ -502,28 +502,28 @@ export default function NutritionHomeScreen() {
         {/* Quick Links */}
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg, justifyContent: 'space-between' }}>
           <SectionTile
-            icon="calendar-outline"
+            icon="calendar"
             label="Meal Plans"
             size="sm"
             accentColor={colors.accent.primary}
             onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-plans'); }}
           />
           <SectionTile
-            icon="fast-food-outline"
+            icon="fork-knife"
             label="Meal Prep"
             size="sm"
             accentColor={colors.accent.success}
             onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/meal-prep'); }}
           />
           <SectionTile
-            icon="cart-outline"
+            icon="cart"
             label="Groceries"
             size="sm"
             accentColor={colors.accent.warning}
             onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/grocery-list'); }}
           />
           <SectionTile
-            icon="medical-outline"
+            icon="flask"
             label="Supplements"
             size="sm"
             accentColor={colors.accent.info}

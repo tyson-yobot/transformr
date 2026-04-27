@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 
 // ---------------------------------------------------------------------------
@@ -221,10 +222,9 @@ export function ShareCard({ type, data, onShare, onDismiss }: ShareCardProps) {
         accessibilityLabel="Share achievement"
         accessibilityRole="button"
       >
-        <Ionicons
-          name="share-outline"
+        <Icon3D
+          name="share"
           size={20}
-          color={colors.text.primary}
           style={{ marginRight: spacing.sm }}
         />
         <Text style={[typography.bodyBold, { color: colors.text.primary }]}>

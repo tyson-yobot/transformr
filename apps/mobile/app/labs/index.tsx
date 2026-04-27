@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '@theme/index';
+import { Icon3D } from '@components/ui/Icon3D';
 import { StatusBar } from 'expo-status-bar';
 import { useLabsStore } from '@stores/labsStore';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
@@ -161,7 +162,7 @@ export default function LabsHistoryScreen() {
               },
             ]}
           >
-            <Ionicons name="flask-outline" size={20} color={colors.accent.cyan} />
+            <Icon3D name="flask" size={20} />
           </View>
           <View style={{ flex: 1, marginLeft: spacing.md }}>
             <Text
@@ -241,7 +242,7 @@ export default function LabsHistoryScreen() {
       ]}
     >
       <EmptyStateBackground query="laboratory science dark blue" opacity={0.15} />
-      <Ionicons name="flask-outline" size={56} color={colors.text.muted} />
+      <Icon3D name="flask" size={56} />
       <Text
         style={[
           typography.h3,
@@ -284,7 +285,7 @@ export default function LabsHistoryScreen() {
         accessibilityRole="button"
         accessibilityLabel="Upload new lab work"
       >
-        <Ionicons name="cloud-upload-outline" size={16} color="#FFFFFF" />
+        <Icon3D name="cloud" size={16} />
         <Text
           style={[
             typography.bodyBold,
@@ -367,10 +368,9 @@ export default function LabsHistoryScreen() {
             },
           ]}
         >
-          <Ionicons
-            name="alert-circle-outline"
+          <Icon3D
+            name="warning"
             size={18}
-            color={colors.accent.danger}
           />
           <Text
             style={[

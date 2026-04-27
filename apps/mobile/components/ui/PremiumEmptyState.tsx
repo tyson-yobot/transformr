@@ -7,14 +7,14 @@
 import React from 'react';
 import { View, Text, ViewStyle, ImageSourcePropType } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { PhotoBackground } from './PhotoBackground';
 import { GlowButton } from './GlowButton';
 
 interface PremiumEmptyStateProps {
   image?: ImageSourcePropType;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: Icon3DName;
   iconColor?: string;
   title: string;
   subtitle: string;
@@ -71,7 +71,7 @@ export function PremiumEmptyState({
           shadowRadius: 12,
           elevation: 4,
         }}>
-          <Ionicons name={icon} size={36} color={accent} />
+          <Icon3D name={icon} size={36} />
         </View>
       ) : null}
 

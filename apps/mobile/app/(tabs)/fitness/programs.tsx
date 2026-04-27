@@ -20,6 +20,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -334,14 +335,14 @@ export default function ProgramsScreen() {
               <View style={[styles.metaRow, { marginTop: spacing.sm, gap: spacing.md }]}>
                 {item.estimated_duration_minutes && (
                   <View style={styles.metaItem}>
-                    <Ionicons name="time-outline" size={14} color={colors.text.muted} />
+                    <Icon3D name="clock" size={14} />
                     <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
                       {formatDuration(item.estimated_duration_minutes)}
                     </Text>
                   </View>
                 )}
                 <View style={styles.metaItem}>
-                  <Ionicons name="barbell-outline" size={14} color={colors.text.muted} />
+                  <Icon3D name="dumbbell" size={14} />
                   <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
                     {item.exercises.length > 0 ? (
                       <><Text style={typography.monoCaption}>{item.exercises.length}</Text> exercises</>
@@ -352,7 +353,7 @@ export default function ProgramsScreen() {
                 </View>
                 {item.day_of_week !== null && item.day_of_week !== undefined && (
                   <View style={styles.metaItem}>
-                    <Ionicons name="calendar-outline" size={14} color={colors.text.muted} />
+                    <Icon3D name="calendar" size={14} />
                     <Text style={[typography.tiny, { color: colors.text.muted, marginLeft: 4 }]}>
                       {DAY_NAMES[item.day_of_week] ?? ''}
                     </Text>
@@ -434,7 +435,7 @@ export default function ProgramsScreen() {
                     },
                   ]}
                 >
-                  <Ionicons name="trash-outline" size={18} color={colors.accent.danger} />
+                  <Icon3D name="trash" size={18} />
                 </Pressable>
               </View>
             </View>

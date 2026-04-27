@@ -19,6 +19,7 @@ import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import type { ThemeMode } from '@theme/colors';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3DName } from '@components/ui/Icon3D';
 import { Card } from '@components/ui/Card';
 import { Toggle } from '@components/ui/Toggle';
 import { MonoText } from '@components/ui/MonoText';
@@ -50,9 +51,9 @@ const CALENDAR_SYNC_KEY = 'calendar_sync_enabled';
 // Appearance segmented control
 // ---------------------------------------------------------------------------
 const THEME_OPTIONS = [
-  { value: 'dark'   as ThemeMode, icon: 'moon-outline'     as keyof typeof Ionicons.glyphMap, label: 'Dark' },
-  { value: 'light'  as ThemeMode, icon: 'sunny-outline'    as keyof typeof Ionicons.glyphMap, label: 'Light' },
-  { value: 'system' as ThemeMode, icon: 'settings-outline' as keyof typeof Ionicons.glyphMap, label: 'System' },
+  { value: 'dark'   as ThemeMode, icon: 'moon'   as Icon3DName, label: 'Dark' },
+  { value: 'light'  as ThemeMode, icon: 'sun'    as Icon3DName, label: 'Light' },
+  { value: 'system' as ThemeMode, icon: 'gear'   as Icon3DName, label: 'System' },
 ] as const;
 
 function AppearancePicker() {

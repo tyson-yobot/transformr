@@ -9,6 +9,7 @@ import { View, Text, Modal, StyleSheet, Pressable } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
 
@@ -79,7 +80,7 @@ export function ProgressPhotoGuide({ visible, onClose, onPhotoTaken }: ProgressP
         {/* Permission denied branch */}
         {!permission?.granted && (
           <View style={[styles.permissionContainer, { padding: spacing.xl }]}>
-            <Ionicons name="camera-outline" size={48} color={colors.text.muted} style={{ marginBottom: spacing.lg }} />
+            <Icon3D name="camera" size={48} style={{ marginBottom: spacing.lg }} />
             <Text style={[typography.h3, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.md }]}>
               Camera access required
             </Text>

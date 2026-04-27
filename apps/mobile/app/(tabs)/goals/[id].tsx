@@ -15,6 +15,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
@@ -425,7 +426,7 @@ export default function GoalDetailScreen() {
   if (!goal) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <Ionicons name="warning-outline" size={48} color={colors.accent.danger} />
+        <Icon3D name="warning" size={48} />
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.md }]}>
           Goal not found
         </Text>
@@ -470,7 +471,7 @@ export default function GoalDetailScreen() {
                     { backgroundColor: (goal.color ?? colors.accent.primary) + '20', borderRadius: borderRadius.md },
                   ]}
                 >
-                  <Ionicons name="flag" size={22} color={goal.color ?? colors.accent.primary} />
+                  <Icon3D name="flag" size={22} />
                 </View>
               )}
               <View style={{ flex: 1 }}>
@@ -500,7 +501,7 @@ export default function GoalDetailScreen() {
                 style={{ padding: spacing.xs }}
                 accessibilityLabel="Edit goal"
               >
-                <Ionicons name="pencil-outline" size={18} color={colors.text.muted} />
+                <Icon3D name="pencil" size={18} />
               </Pressable>
             </View>
           </Card>
@@ -613,7 +614,7 @@ export default function GoalDetailScreen() {
             }}
           >
             <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.cyan} />
+              <Icon3D name="sparkles" size={18} />
               <Text style={[typography.h3, { color: colors.accent.cyan, marginLeft: spacing.sm }]}>
                 AI Coach
               </Text>
@@ -705,7 +706,7 @@ export default function GoalDetailScreen() {
                 ]}
                 accessibilityLabel="Open daily check-in"
               >
-                <Ionicons name="calendar-outline" size={20} color={colors.accent.primary} />
+                <Icon3D name="calendar" size={20} />
                 <View style={{ marginLeft: spacing.sm }}>
                   <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>
                     Daily Check-In
@@ -754,7 +755,7 @@ export default function GoalDetailScreen() {
                 loading={isUpdating}
                 disabled={!progressInput.trim()}
                 style={{ marginTop: spacing.md }}
-                leftIcon={<Ionicons name="trending-up" size={18} color="#fff" />}
+                leftIcon={<Icon3D name="chart-up" size={18} />}
               />
             </Card>
           </Animated.View>
@@ -850,7 +851,7 @@ export default function GoalDetailScreen() {
                     )}
                   </View>
                   {milestone.is_completed && (
-                    <Ionicons name="trophy" size={14} color={colors.accent.gold} />
+                    <Icon3D name="trophy" size={14} />
                   )}
                 </View>
               </Card>
@@ -867,7 +868,7 @@ export default function GoalDetailScreen() {
                 },
               ]}
             >
-              <Ionicons name="flag-outline" size={20} color={colors.text.muted} />
+              <Icon3D name="flag" size={20} />
               <Text style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}>
                 Add milestones to break this goal into wins
               </Text>
@@ -882,7 +883,7 @@ export default function GoalDetailScreen() {
               title="Mark as Complete"
               onPress={handleMarkComplete}
               fullWidth
-              leftIcon={<Ionicons name="trophy" size={18} color={colors.accent.gold} />}
+              leftIcon={<Icon3D name="trophy" size={18} />}
             />
             <View style={[styles.rowButtons, { gap: spacing.sm }]}>
               <Button

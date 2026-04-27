@@ -34,6 +34,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useFeatureGate, FeatureKey } from '@hooks/useFeatureGate';
 import type { SubscriptionTier } from '@stores/subscriptionStore';
@@ -149,7 +150,7 @@ export function FeatureLockOverlay({
       </View>
 
       <Animated.View style={[styles.lockContainer, lockStyle]}>
-        <Ionicons name="lock-closed" size={40} color={accentColor} />
+        <Icon3D name="lock" size={40} />
       </Animated.View>
 
       <Text

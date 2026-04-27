@@ -554,7 +554,7 @@ export default function DashboardScreen() {
         <View ref={quickActionsRef} style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg, justifyContent: 'center', alignItems: 'stretch' }}>
           <LogSuccessRipple ref={rippleWorkoutRef}>
             <QuickActionTile
-              icon="barbell-outline"
+              icon="dumbbell"
               iconNode={<Icon3D name="dumbbell" size={28} />}
               label="Log Workout"
               accentColor={colors.accent.primary}
@@ -567,7 +567,7 @@ export default function DashboardScreen() {
           </LogSuccessRipple>
           <LogSuccessRipple ref={rippleMealRef}>
             <QuickActionTile
-              icon="restaurant-outline"
+              icon="fork-knife"
               iconNode={<Icon3D name="fork-knife" size={28} />}
               label="Log Meal"
               accentColor={colors.accent.success}
@@ -580,7 +580,7 @@ export default function DashboardScreen() {
           </LogSuccessRipple>
           <LogSuccessRipple ref={rippleWeightRef}>
             <QuickActionTile
-              icon="scale-outline"
+              icon="scale"
               iconNode={<Icon3D name="scale" size={28} />}
               label="Log Weight"
               accentColor={colors.accent.cyan}

@@ -21,6 +21,7 @@ import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -189,7 +190,7 @@ export default function WorkoutSummaryScreen() {
   if (error || !session) {
     return (
       <View style={[styles.centered, { backgroundColor: colors.background.primary }]}>
-        <Ionicons name="warning-outline" size={48} color={colors.accent.danger} />
+        <Icon3D name="warning" size={48} />
         <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.md }]}>
           {error ?? 'Session not found'}
         </Text>
@@ -253,7 +254,7 @@ export default function WorkoutSummaryScreen() {
               },
             ]}
           >
-            <Ionicons name="time-outline" size={22} color={colors.accent.primary} />
+            <Icon3D name="clock" size={22} />
             <Text style={[typography.stat, { color: colors.text.primary, marginTop: spacing.xs }]}>
               {formatDuration(session.duration_minutes ?? 0)}
             </Text>
@@ -274,7 +275,7 @@ export default function WorkoutSummaryScreen() {
               },
             ]}
           >
-            <Ionicons name="barbell-outline" size={22} color={colors.accent.fire} />
+            <Icon3D name="dumbbell" size={22} />
             <Text style={[typography.stat, { color: colors.text.primary, marginTop: spacing.xs }]}>
               {formatVolume(session.total_volume ?? 0)}
             </Text>
@@ -316,7 +317,7 @@ export default function WorkoutSummaryScreen() {
               }}
             >
               <View style={styles.sectionRow}>
-                <Ionicons name="trophy" size={20} color={colors.accent.gold} />
+                <Icon3D name="trophy" size={20} />
                 <Text
                   style={[
                     typography.h3,
@@ -382,7 +383,7 @@ export default function WorkoutSummaryScreen() {
                   <Ionicons name="arrow-up-circle" size={16} color={colors.accent.success} />
                 )}
                 {set.is_personal_record && (
-                  <Ionicons name="star" size={16} color={colors.accent.gold} />
+                  <Icon3D name="star" size={16} />
                 )}
               </View>
             ))}
@@ -396,7 +397,7 @@ export default function WorkoutSummaryScreen() {
           session.mood_after !== undefined && (
             <Card style={{ marginTop: spacing.md, marginBottom: spacing.lg }}>
               <View style={styles.sectionRow}>
-                <Ionicons name="happy-outline" size={20} color={colors.accent.primary} />
+                <Icon3D name="smile" size={20} />
                 <Text
                   style={[
                     typography.h3,
@@ -457,7 +458,7 @@ export default function WorkoutSummaryScreen() {
             }}
           >
             <View style={styles.sectionRow}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.secondary} />
+              <Icon3D name="sparkles" size={18} />
               <Text
                 style={[
                   typography.captionBold,
@@ -495,7 +496,7 @@ export default function WorkoutSummaryScreen() {
             onPress={() => { hapticLight(); handleSaveAsTemplate(); }}
             fullWidth
             accessibilityLabel="Save workout as template"
-            leftIcon={<Ionicons name="bookmark-outline" size={20} color={colors.text.primary} />}
+            leftIcon={<Icon3D name="bookmark" size={20} />}
           />
           <Button
             title="Done"

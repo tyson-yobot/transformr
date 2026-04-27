@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import {
   getCurrentTrack,
@@ -132,7 +133,7 @@ export function NowPlayingBar({ paused = false, onError }: NowPlayingBarProps) {
           <Image source={{ uri: track.albumArt }} style={styles.albumArt} />
         ) : (
           <View style={[styles.albumArt, { backgroundColor: colors.background.tertiary, justifyContent: 'center', alignItems: 'center' }]}>
-            <Ionicons name="musical-notes" size={16} color={colors.text.muted} />
+            <Icon3D name="music" size={16} />
           </View>
         )}
       </Animated.View>

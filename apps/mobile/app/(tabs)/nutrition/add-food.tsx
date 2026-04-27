@@ -17,6 +17,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -54,14 +55,14 @@ interface QueuedItem {
   foodId?: string;
 }
 
-const MEAL_TYPE_OPTIONS: { value: MealType; label: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
-  { value: 'breakfast',    label: 'Breakfast', icon: 'sunny-outline',      iconColor: '#F59E0B' },
-  { value: 'lunch',        label: 'Lunch',     icon: 'restaurant-outline',  iconColor: '#10B981' },
-  { value: 'dinner',       label: 'Dinner',    icon: 'moon-outline',        iconColor: '#A855F7' },
-  { value: 'snack',        label: 'Snack',     icon: 'cafe-outline',        iconColor: '#F97316' },
-  { value: 'shake',        label: 'Shake',     icon: 'nutrition-outline',   iconColor: '#06B6D4' },
-  { value: 'pre_workout',  label: 'Pre-WO',    icon: 'flash-outline',       iconColor: '#EAB308' },
-  { value: 'post_workout', label: 'Post-WO',   icon: 'barbell-outline',     iconColor: '#A855F7' },
+const MEAL_TYPE_OPTIONS: { value: MealType; label: string; icon3d: import('@components/ui/Icon3D').Icon3DName; iconColor: string }[] = [
+  { value: 'breakfast',    label: 'Breakfast', icon3d: 'sun',        iconColor: '#F59E0B' },
+  { value: 'lunch',        label: 'Lunch',     icon3d: 'fork-knife', iconColor: '#10B981' },
+  { value: 'dinner',       label: 'Dinner',    icon3d: 'moon',       iconColor: '#A855F7' },
+  { value: 'snack',        label: 'Snack',     icon3d: 'cookie',     iconColor: '#F97316' },
+  { value: 'shake',        label: 'Shake',     icon3d: 'drink',      iconColor: '#06B6D4' },
+  { value: 'pre_workout',  label: 'Pre-WO',    icon3d: 'lightning',  iconColor: '#EAB308' },
+  { value: 'post_workout', label: 'Post-WO',   icon3d: 'dumbbell',   iconColor: '#A855F7' },
 ];
 
 export default function AddFoodScreen() {
@@ -377,10 +378,9 @@ export default function AddFoodScreen() {
                 ]}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <Ionicons
-                    name={option.icon}
+                  <Icon3D
+                    name={option.icon3d}
                     size={14}
-                    color={mealType === option.value ? '#FFFFFF' : option.iconColor} /* brand-ok */
                   />
                   <Text
                     style={[
@@ -534,24 +534,15 @@ export default function AddFoodScreen() {
                         : `${colors.accent.danger}18`,
                   }}
                 >
-                  <Ionicons
-                    name={
-                      complianceLoading
-                        ? 'hourglass-outline'
-                        : complianceResult?.compliant
-                          ? 'checkmark-circle-outline'
-                          : 'warning-outline'
-                    }
-                    size={14}
-                    color={
-                      complianceLoading
-                        ? colors.text.muted
-                        : complianceResult?.compliant
-                          ? colors.accent.success
-                          : colors.accent.danger
-                    }
-                    style={{ marginRight: 6 }}
-                  />
+                  {complianceLoading ? (
+                    <Ionicons name="hourglass-outline" size={14} color={colors.text.muted} style={{ marginRight: 6 }} />
+                  ) : (
+                    <Icon3D
+                      name={complianceResult?.compliant ? 'check' : 'warning'}
+                      size={14}
+                      style={{ marginRight: 6 }}
+                    />
+                  )}
                   <Text
                     style={[
                       typography.tiny,
@@ -705,7 +696,7 @@ export default function AddFoodScreen() {
                 ) : searchQuery.length >= 2 ? (
                   <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
                     <EmptyStateBackground query="healthy food ingredients dark" opacity={0.10} />
-                    <Ionicons name="search-outline" size={48} color={colors.text.muted} />
+                    <Icon3D name="search" size={48} />
                     <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
                       No foods found for "{searchQuery}"
                     </Text>
@@ -720,7 +711,7 @@ export default function AddFoodScreen() {
                 ) : (
                   <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
                     <EmptyStateBackground query="healthy food ingredients dark" opacity={0.10} />
-                    <Ionicons name="nutrition-outline" size={48} color={colors.text.muted} />
+                    <Icon3D name="fork-knife" size={48} />
                     <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
                       Start typing to search foods
                     </Text>

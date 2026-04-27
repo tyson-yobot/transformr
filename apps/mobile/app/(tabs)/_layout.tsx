@@ -6,8 +6,8 @@ import React, { useMemo, memo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { House, Barbell, BowlFood, Trophy, UserCircle } from 'phosphor-react-native';
 import { useTheme } from '@theme/index';
+import { Icon3D, Icon3DName } from '@components/ui/Icon3D';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatFAB } from '@components/ui/ChatFAB';
 import { UpgradeModal } from '@components/ui/UpgradeModal';
@@ -18,14 +18,12 @@ interface TabIconProps {
   focused: boolean;
 }
 
-type PhosphorIcon = React.ComponentType<{ size?: number; color?: string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' }>;
-
-const PHOSPHOR_TABS: Record<string, PhosphorIcon> = {
-  dashboard:  House,
-  fitness:    Barbell,
-  nutrition:  BowlFood,
-  goals:      Trophy,
-  profile:    UserCircle,
+const ICON3D_TABS: Record<string, Icon3DName> = {
+  dashboard:  'home',
+  fitness:    'dumbbell',
+  nutrition:  'fork-knife',
+  goals:      'trophy',
+  profile:    'profile',
 };
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -34,7 +32,7 @@ const ROUTE_LABELS: Record<string, string> = {
 
 const TabIcon = memo(function TabIcon({ routeName, focused }: TabIconProps) {
   const { colors, typography } = useTheme();
-  const PhIcon = PHOSPHOR_TABS[routeName];
+  const icon3DName = ICON3D_TABS[routeName];
   const tintColor = focused ? colors.accent.primary : colors.text.muted;
 
   return (
@@ -44,8 +42,8 @@ const TabIcon = memo(function TabIcon({ routeName, focused }: TabIconProps) {
         alignItems: 'center', justifyContent: 'center',
         backgroundColor: focused ? colors.dim.primary : 'transparent',
       }}>
-        {PhIcon ? (
-          <PhIcon size={22} color={tintColor} weight={focused ? 'duotone' : 'regular'} />
+        {icon3DName ? (
+          <Icon3D name={icon3DName} size={22} style={{ opacity: focused ? 1 : 0.55 }} />
         ) : (
           <Ionicons name="apps-outline" size={22} color={tintColor} />
         )}

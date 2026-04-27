@@ -473,31 +473,31 @@ export default function UpgradeScreen() {
             subtitle="Personalized guidance that knows your data"
           />
           <FeatureHighlightRow
-            icon="camera-outline"
+            icon="camera"
             iconColor={colors.accent.success}
             title="AI meal camera"
             subtitle="Snap a photo — macros calculated instantly"
           />
           <FeatureHighlightRow
-            icon="pulse-outline"
+            icon="heart-pulse"
             iconColor={colors.accent.primary}
             title="Readiness score"
             subtitle="Know when to push hard and when to recover"
           />
           <FeatureHighlightRow
-            icon="trending-up-outline"
+            icon="chart-up"
             iconColor={colors.accent.gold}
             title="Trajectory simulator"
             subtitle="See where you'll be in 30, 60, 90 days"
           />
           <FeatureHighlightRow
-            icon="body-outline"
+            icon="body"
             iconColor={colors.accent.secondary}
             title="Ghost Mode training"
             subtitle="Race your past self in any workout"
           />
           <FeatureHighlightRow
-            icon="moon-outline"
+            icon="moon"
             iconColor={colors.accent.info}
             title="AI sleep optimizer"
             subtitle="Optimize your recovery with intelligent sleep analysis"

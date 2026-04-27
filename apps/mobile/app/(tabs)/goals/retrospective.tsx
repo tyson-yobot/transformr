@@ -19,6 +19,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
+import { Icon3D } from '@components/ui/Icon3D';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
@@ -334,7 +335,7 @@ export default function RetrospectiveScreen() {
           <Animated.View entering={FadeInDown.delay(400)}>
             <Card style={{ marginBottom: spacing.md }}>
               <View style={[styles.letterHeader, { marginBottom: spacing.md }]}>
-                <Ionicons name="mail-outline" size={18} color={colors.accent.primary} />
+                <Icon3D name="mail" size={18} />
                 <Text
                   style={[typography.bodyBold, { color: colors.accent.primary, marginLeft: spacing.xs }]}
                 >
@@ -358,7 +359,7 @@ export default function RetrospectiveScreen() {
           <Animated.View entering={FadeInDown.delay(500)}>
             <Card style={{ marginBottom: spacing.md }}>
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
-                <Ionicons name="trophy-outline" size={18} color={colors.accent.success} />
+                <Icon3D name="trophy" size={18} />
                 <Text
                   style={[typography.bodyBold, { color: colors.accent.success, marginLeft: spacing.xs }]}
                 >
@@ -367,10 +368,9 @@ export default function RetrospectiveScreen() {
               </View>
               {retro.wins.map((win, idx) => (
                 <View key={idx} style={[styles.listRow, { marginTop: spacing.xs }]}>
-                  <Ionicons
-                    name="checkmark-circle"
+                  <Icon3D
+                    name="check"
                     size={16}
-                    color={colors.accent.success}
                     style={{ marginRight: spacing.sm, flexShrink: 0 }}
                   />
                   <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>
@@ -387,7 +387,7 @@ export default function RetrospectiveScreen() {
           <Animated.View entering={FadeInDown.delay(600)}>
             <Card style={{ marginBottom: spacing.md }}>
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
-                <Ionicons name="trending-up-outline" size={18} color={colors.accent.warning} />
+                <Icon3D name="chart-up" size={18} />
                 <Text
                   style={[typography.bodyBold, { color: colors.accent.warning, marginLeft: spacing.xs }]}
                 >
@@ -396,10 +396,9 @@ export default function RetrospectiveScreen() {
               </View>
               {retro.growth_areas.map((area, idx) => (
                 <View key={idx} style={[styles.listRow, { marginTop: spacing.xs }]}>
-                  <Ionicons
-                    name="alert-circle-outline"
+                  <Icon3D
+                    name="warning"
                     size={16}
-                    color={colors.accent.warning}
                     style={{ marginRight: spacing.sm, flexShrink: 0 }}
                   />
                   <Text style={[typography.body, { color: colors.text.secondary, flex: 1 }]}>

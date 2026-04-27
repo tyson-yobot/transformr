@@ -18,6 +18,7 @@ import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import Animated, { FadeIn, FadeInUp, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -197,7 +198,7 @@ export default function MenuScannerScreen() {
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: colors.background.primary }]}>
-        <Ionicons name="reader-outline" size={64} color={colors.text.muted} />
+        <Icon3D name="book" size={64} />
         <Text style={[typography.h3, { color: colors.text.primary, marginTop: spacing.lg }]}>
           Camera access needed
         </Text>
@@ -292,7 +293,7 @@ export default function MenuScannerScreen() {
                 rightIcon={
                   restaurantName.trim().length > 0 ? (
                     <Pressable onPress={handleSaveFavorite}>
-                      <Ionicons name="heart-outline" size={20} color={colors.accent.danger} />
+                      <Icon3D name="heart" size={20} />
                     </Pressable>
                   ) : undefined
                 }

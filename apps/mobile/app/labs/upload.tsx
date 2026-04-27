@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -260,10 +261,9 @@ export default function LabUploadScreen() {
               },
             ]}
           >
-            <Ionicons
-              name="alert-circle-outline"
+            <Icon3D
+              name="warning"
               size={18}
-              color={colors.accent.danger}
             />
             <Text
               style={[
@@ -350,10 +350,9 @@ export default function LabUploadScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Take photo of lab work"
               >
-                <Ionicons
-                  name="camera-outline"
+                <Icon3D
+                  name="camera"
                   size={28}
-                  color={colors.accent.cyan}
                 />
                 <Text
                   style={[

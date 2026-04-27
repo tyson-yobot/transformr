@@ -351,19 +351,19 @@ export default function NutritionScreen() {
           {/* What you're unlocking */}
           <SectionHeader title="What you're unlocking" style={{ marginTop: spacing.xxl }} />
           <FeatureHighlightRow
-            icon="camera-outline"
+            icon="camera"
             iconColor={colors.accent.cyan}
             title="Snap your meals"
             subtitle="AI identifies food and calculates macros from a photo"
           />
           <FeatureHighlightRow
-            icon="barcode-outline"
+            icon="barcode"
             iconColor={colors.accent.success}
             title="Scan barcodes"
             subtitle="Log packaged foods in under 2 seconds"
           />
           <FeatureHighlightRow
-            icon="mic-outline"
+            icon="mic"
             iconColor={colors.accent.primary}
             title="Voice logging"
             subtitle="Say what you ate — AI handles the rest"

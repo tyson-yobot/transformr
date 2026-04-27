@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { CaretLeft } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
@@ -289,7 +290,7 @@ export default function SavedMealsScreen() {
                         accessibilityRole="button"
                         style={[styles.actionBtn, { backgroundColor: `${colors.accent.danger}20`, borderRadius: borderRadius.md }]}
                       >
-                        <Ionicons name="trash-outline" size={18} color={colors.accent.danger} />
+                        <Icon3D name="trash" size={18} />
                       </Pressable>
                     </View>
                   </View>
@@ -300,7 +301,7 @@ export default function SavedMealsScreen() {
         ) : (
           <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
             <EmptyStateBackground query="healthy meal bowl dark" opacity={0.10} />
-            <Ionicons name="bookmark-outline" size={48} color={colors.text.muted} />
+            <Icon3D name="bookmark" size={48} />
             <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
               No saved meals found
             </Text>

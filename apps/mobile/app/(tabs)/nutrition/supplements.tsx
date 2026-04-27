@@ -22,6 +22,7 @@ import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
+import { Icon3D } from '@components/ui/Icon3D';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -284,7 +285,7 @@ export default function SupplementsScreen() {
                   },
                 ]}
               >
-                <Ionicons name="alert-circle-outline" size={18} color={colors.accent.danger} />
+                <Icon3D name="warning" size={18} />
                 <Text
                   style={[typography.caption, { color: colors.accent.danger, marginLeft: spacing.sm, flex: 1 }]}
                   numberOfLines={2}
@@ -336,7 +337,7 @@ export default function SupplementsScreen() {
                     <BudgetBar spent={totalMonthlyCost} budget={budget} />
                   ) : (
                     <View style={styles.noBudgetRow}>
-                      <Ionicons name="wallet-outline" size={20} color={colors.text.muted} />
+                      <Icon3D name="money" size={20} />
                       <Text
                         style={[typography.caption, { color: colors.text.muted, marginLeft: spacing.sm }]}
                       >
@@ -359,7 +360,7 @@ export default function SupplementsScreen() {
                   }}
                 >
                   <View style={styles.warningHeader}>
-                    <Ionicons name="warning-outline" size={20} color={colors.accent.warning} />
+                    <Icon3D name="warning" size={20} />
                     <Text
                       style={[
                         typography.bodyBold,
@@ -434,7 +435,7 @@ export default function SupplementsScreen() {
                               {sup.name}
                             </Text>
                             {taken && (
-                              <Ionicons name="checkmark-circle" size={18} color={colors.accent.success} />
+                              <Icon3D name="check" size={18} />
                             )}
                           </View>
                           <View style={[styles.suppMeta, { gap: spacing.sm, marginTop: spacing.xs }]}>
@@ -512,7 +513,7 @@ export default function SupplementsScreen() {
                               },
                             ]}
                           >
-                            <Ionicons name="trash-outline" size={16} color={colors.accent.danger} />
+                            <Icon3D name="trash" size={16} />
                           </Pressable>
                         </View>
                       </View>
@@ -526,7 +527,7 @@ export default function SupplementsScreen() {
             {activeSupplements.length === 0 && (
               <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
                 <EmptyStateBackground query="vitamins supplements dark" opacity={0.10} />
-                <Ionicons name="medical-outline" size={48} color={colors.text.muted} />
+                <Icon3D name="bandage" size={48} />
                 <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
                   No supplements yet
                 </Text>
@@ -570,7 +571,7 @@ export default function SupplementsScreen() {
             {/* AI Recommendations */}
             <View style={{ marginTop: spacing.xl }}>
               <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
-                <Ionicons name="sparkles" size={20} color={colors.accent.primary} />
+                <Icon3D name="sparkles" size={20} />
                 <Text
                   style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm, flex: 1 }]}
                 >
