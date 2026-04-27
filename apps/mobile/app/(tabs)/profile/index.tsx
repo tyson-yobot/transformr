@@ -415,13 +415,14 @@ export default function ProfileScreen() {
       {
         text: 'Sign Out',
         style: 'destructive',
-        onPress: () => {
+        onPress: async () => {
           void hapticMedium();
-          void signOut();
+          await signOut();
+          router.replace('/(auth)/login' as never);
         },
       },
     ]);
-  }, [signOut]);
+  }, [signOut, router]);
 
   // Avatar source from profile avatar_url if present
   const avatarSource = (profile as unknown as { avatar_url?: string })?.avatar_url
