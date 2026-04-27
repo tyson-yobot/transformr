@@ -7,10 +7,12 @@ import {
   Text,
   ScrollView,
   FlatList,
+  Pressable,
   StyleSheet,
   Dimensions,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
@@ -90,6 +92,18 @@ export default function DailyBriefingScreen() {
       <ScreenBackground />
       <AmbientBackground />
       <PurpleRadialBackground />
+
+      {/* Close / Back button — escape hatch if content fails to load */}
+      <Pressable
+        onPress={() => router.back()}
+        hitSlop={12}
+        accessibilityLabel="Close daily briefing"
+        accessibilityRole="button"
+        style={{ alignSelf: 'flex-end', marginBottom: spacing.sm }}
+      >
+        <Ionicons name="close" size={28} color={colors.text.secondary} />
+      </Pressable>
+
       {/* ================================================================= */}
       {/* Section 1 -- Greeting + Countdown                                 */}
       {/* ================================================================= */}
