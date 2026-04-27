@@ -63,7 +63,7 @@ const EQUIPMENT: { value: EquipmentFilter; label: string }[] = [
 ];
 
 const DIFFICULTY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  beginner:     { bg: 'rgba(16,185,129,0.12)',  text: '#10B981', border: 'rgba(16,185,129,0.30)'  },
+  beginner:     { bg: 'rgba(34,197,94,0.12)',   text: '#22C55E', border: 'rgba(34,197,94,0.30)'   },
   intermediate: { bg: 'rgba(245,158,11,0.12)',  text: '#F59E0B', border: 'rgba(245,158,11,0.30)'  },
   advanced:     { bg: 'rgba(239,68,68,0.12)',   text: '#EF4444', border: 'rgba(239,68,68,0.30)'   },
 };
@@ -160,10 +160,27 @@ export default function ExercisesScreen() {
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.md,
+            shadowColor: '#A855F7',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.12,
+            shadowRadius: 6,
+            elevation: 3,
+            overflow: 'hidden',
           }}
           accessibilityRole="button"
           accessibilityLabel={`${item.name}, ${item.category ?? ''} exercise`}
         >
+          {/* Left purple accent border */}
+          <View style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 3,
+            backgroundColor: '#A855F7',
+            borderTopLeftRadius: borderRadius.lg,
+            borderBottomLeftRadius: borderRadius.lg,
+          }} />
           <ExerciseThumbnail muscleGroups={item.muscle_groups ?? []} category={item.category ?? undefined} size={44} />
           <View style={{ flex: 1 }}>
             <Text style={[typography.bodyBold, { color: colors.text.primary }]} numberOfLines={1}>

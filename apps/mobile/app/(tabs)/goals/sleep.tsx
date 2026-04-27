@@ -215,7 +215,7 @@ export default function SleepTracker() {
 
         {/* Sleep Score */}
         <Animated.View entering={FadeInDown.delay(100)}>
-          <Card variant="elevated">
+          <Card variant="elevated" style={styles.sleepScoreCard}>
             <View style={styles.scoreSection}>
               <View
                 style={[
@@ -255,6 +255,10 @@ export default function SleepTracker() {
               >
                 Sleep Score
               </Text>
+              {/* Cyan AI badge — score is AI-generated */}
+              <View style={styles.aiScoreBadge}>
+                <Text style={styles.aiScoreBadgeText}>AI</Text>
+              </View>
             </View>
           </Card>
         </Animated.View>
@@ -262,7 +266,7 @@ export default function SleepTracker() {
         {/* Stats Row */}
         <Animated.View entering={FadeInDown.delay(200)}>
           <View style={[styles.statsRow, { marginTop: spacing.lg, gap: spacing.md }]}>
-            <Card style={{ flex: 1 }}>
+            <Card style={[{ flex: 1 }, styles.purpleGlowCard]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>
                 Avg Sleep
               </Text>
@@ -270,7 +274,7 @@ export default function SleepTracker() {
                 {formatDuration(Math.round(avgSleep))}
               </Text>
             </Card>
-            <Card style={{ flex: 1 }}>
+            <Card style={[{ flex: 1 }, styles.purpleGlowCard]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>
                 Avg Quality
               </Text>
@@ -298,7 +302,7 @@ export default function SleepTracker() {
           >
             Last 14 Days
           </Text>
-          <Card>
+          <Card style={styles.purpleGlowCard}>
             <SleepChart data={chartData} targetHours={8} />
           </Card>
         </Animated.View>
@@ -307,14 +311,15 @@ export default function SleepTracker() {
         {aiRecommendation && (
           <Animated.View entering={FadeInDown.delay(400)}>
             <Card
-              style={{
-                marginTop: spacing.lg,
-                borderWidth: 1,
-                borderColor: colors.accent.primary,
-              }}
+              style={[
+                styles.aiInsightCard,
+                {
+                  marginTop: spacing.lg,
+                },
+              ]}
             >
               <View style={styles.aiHeader}>
-                <Text style={[typography.bodyBold, { color: colors.accent.primary }]}>
+                <Text style={[typography.bodyBold, styles.aiInsightTitle]}>
                   AI Sleep Coach
                 </Text>
                 <Badge label="AI" variant="info" size="sm" />
@@ -346,7 +351,7 @@ export default function SleepTracker() {
             >
               Last Night
             </Text>
-            <Card>
+            <Card style={styles.purpleGlowCard}>
               <View style={[styles.detailRow, { marginBottom: spacing.sm }]}>
                 <Text style={[typography.body, { color: colors.text.secondary }]}>
                   Bedtime
@@ -581,5 +586,51 @@ const styles = StyleSheet.create({
   historyRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  // Purple glow — applied to structural cards (stats, chart, detail)
+  purpleGlowCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  // Sleep score card with cyan glow — score is AI-generated
+  sleepScoreCard: {
+    shadowColor: '#06B6D4',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  // Cyan AI insight card — AI recommendation border + glow
+  aiInsightCard: {
+    borderWidth: 1,
+    borderColor: '#06B6D4',
+    shadowColor: '#06B6D4',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  // "AI Sleep Coach" title in cyan
+  aiInsightTitle: {
+    color: '#06B6D4',
+  },
+  // Small cyan "AI" pill below the sleep score number
+  aiScoreBadge: {
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    borderRadius: 10,
+    backgroundColor: '#06B6D420',
+    borderWidth: 1,
+    borderColor: '#06B6D4',
+  },
+  aiScoreBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#06B6D4',
   },
 });

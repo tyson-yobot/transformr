@@ -229,7 +229,12 @@ export default function JournalScreen() {
             variant="elevated"
             style={{
               borderLeftWidth: 2,
-              borderLeftColor: colors.accent.cyan,
+              borderLeftColor: '#06B6D4',
+              shadowColor: '#06B6D4',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.18,
+              shadowRadius: 10,
+              elevation: 4,
             }}
           >
             <View style={styles.promptHeader}>
@@ -351,6 +356,12 @@ export default function JournalScreen() {
                 marginTop: spacing.lg,
                 borderWidth: 1,
                 borderColor: colors.accent.primary,
+                backgroundColor: 'rgba(168,85,247,0.06)',
+                shadowColor: '#A855F7',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.22,
+                shadowRadius: 12,
+                elevation: 5,
               }}
             >
               <View style={styles.aiHeader}>
@@ -409,7 +420,18 @@ export default function JournalScreen() {
 
         {showPastEntries &&
           pastEntries.map((entry) => (
-            <Card key={entry.id} style={{ marginTop: spacing.sm }}>
+            <Card
+              key={entry.id}
+              style={{
+                marginTop: spacing.sm,
+                backgroundColor: 'rgba(168,85,247,0.06)',
+                shadowColor: '#A855F7',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                elevation: 3,
+              }}
+            >
               <View style={styles.entryHeader}>
                 <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                   {formatDate(entry.date)}

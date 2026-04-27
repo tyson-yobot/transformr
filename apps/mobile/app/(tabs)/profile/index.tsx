@@ -178,9 +178,11 @@ function SettingsRow({
             </Text>
           )}
           {onPress && (
-            <Text style={[typography.body, { color: colors.text.muted }]}>
-              {'\u203A'}
-            </Text>
+            <Ionicons
+              name="chevron-forward"
+              size={16}
+              color="#A855F7"
+            />
           )}
         </>
       )}
@@ -494,7 +496,7 @@ export default function ProfileScreen() {
 
       {/* Stats Row */}
       <Animated.View entering={FadeInDown.delay(50).duration(400)}>
-        <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+        <Card variant="elevated" style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOpacity: 0.15, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}>
           <View style={styles.statsGrid}>
             <StatBlock
               label="Workouts"
@@ -774,7 +776,7 @@ function StatBlock({ label, value }: StatBlockProps) {
     <View style={styles.statBlock}>
       <MonoText
         variant="statSmall"
-        color={colors.text.primary}
+        color={colors.accent.primary}
         numberOfLines={1}
       >
         {value}

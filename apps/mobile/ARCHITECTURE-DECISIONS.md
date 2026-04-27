@@ -122,6 +122,23 @@ remounts. Always crossfade between persistent slots.
 
 ---
 
+## AD-011: Three-Color Brand Language (Purple/Pink/Cyan)
+
+**Decision:** TRANSFORMR uses a three-color semantic brand system:
+- Purple #A855F7 = Structure, navigation, primary actions
+- Pink #EC4899 = Achievements, celebrations, milestones (expanded beyond couples-only)
+- Cyan #06B6D4 = AI intelligence, Claude-powered features, data insights
+**Rationale:** The cyan color comes from the glowing core of the TRANSFORMR
+prismatic mark. It creates a visual signal that "the AI is working for you"
+wherever Claude-powered features appear. Pink was expanded from couples-only
+to all achievement moments for better brand consistency.
+**Consequence:** All AI features (meal camera, form check, readiness score,
+AI coach, coaching responses) must use cyan accents. Achievement/PR moments
+use pink/gold. Theme tokens: `colors.gradient.purplePink` and
+`colors.gradient.cyanPurple`. Old cyan hex `#22D3EE` replaced with `#06B6D4`.
+
+---
+
 ## TEMPLATE FOR NEW DECISIONS
 
 ```

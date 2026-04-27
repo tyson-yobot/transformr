@@ -125,12 +125,55 @@ export function getGradeColor(grade: string): string {
   return gradeColors[grade] ?? '#9B8FC0';
 }
 
+// Currency input formatting — auto-inserts commas as the user types whole-dollar amounts
+export function formatCurrencyInput(text: string): string {
+  const digits = text.replace(/\D/g, '');
+  if (digits.length === 0) return '';
+  return Number(digits).toLocaleString('en-US');
+}
+
+// Strips commas from a formatted currency string to get the raw numeric value
+export function parseCurrencyInput(formatted: string): string {
+  return formatted.replace(/,/g, '');
+}
+
 // Date input formatting — auto-inserts / as the user types MM/DD/YYYY
 export function formatDateInput(text: string): string {
   const digits = text.replace(/\D/g, '').substring(0, 8);
   if (digits.length <= 2) return digits;
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+// Auto-formats time input as HH:MM — strips non-digits, inserts colon after 2 digits
+export function formatTimeInput(text: string): string {
+  const digits = text.replace(/\D/g, '').substring(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
+// Converts 24-hour HH:MM to 12-hour h:MM AM/PM display
+export function to12Hour(time24: string): string {
+  const match = time24.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return time24;
+  let hours = parseInt(match[1] ?? '0', 10);
+  const minutes = match[2] ?? '00';
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  if (hours === 0) hours = 12;
+  else if (hours > 12) hours -= 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+// Converts 12-hour h:MM AM/PM to 24-hour HH:MM for storage
+export function to24Hour(time12: string): string {
+  const match = time12.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return time12;
+  let hours = parseInt(match[1] ?? '0', 10);
+  const minutes = match[2] ?? '00';
+  const period = (match[3] ?? 'AM').toUpperCase();
+  if (period === 'AM' && hours === 12) hours = 0;
+  else if (period === 'PM' && hours !== 12) hours += 12;
+  return `${String(hours).padStart(2, '0')}:${minutes}`;
 }
 
 // Converts MM/DD/YYYY display value to YYYY-MM-DD for database storage

@@ -32,6 +32,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { SectionTile } from '@components/ui/SectionTile';
 import { PurpleRadialBackground } from '@components/ui/PurpleRadialBackground';
 import { Ionicons } from '@expo/vector-icons';
+import { CalendarDots, CaretRight } from 'phosphor-react-native';
 import { useGoalStore } from '@stores/goalStore';
 import { formatDate, formatCountdown, formatPercentage, formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 import { hapticLight, hapticSuccess } from '@utils/haptics';
@@ -408,16 +409,28 @@ export default function GoalsDashboard() {
           {filteredGoals.map((goal, index) => {
             const progress = getGoalProgress(goal);
             const categoryInfo = CATEGORIES.find((c) => c.key === goal.category);
+            const isCompleted = goal.status === 'completed';
+            // Status-based accent: completed → green, active → purple, else neutral
+            const statusGlowColor = isCompleted ? '#22C55E' : '#A855F7';
             return (
               <Animated.View key={goal.id} entering={FadeInDown.delay(400 + index * 50)}>
                 <Card
                   variant="elevated"
                   onPress={() => router.push(`/(tabs)/goals/${goal.id}` as Href)}
+                  style={{
+                    shadowColor: statusGlowColor,
+                    shadowOpacity: isCompleted ? 0.35 : 0.25,
+                    shadowRadius: 12,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 6,
+                    borderWidth: 1,
+                    borderColor: isCompleted ? '#22C55E30' : '#A855F720',
+                  }}
                 >
                   <View style={styles.goalHeader}>
                     <View style={{ flex: 1 }}>
                       <Text
-                        style={[typography.bodyBold, { color: colors.text.primary }]}
+                        style={[typography.bodyBold, { color: isCompleted ? '#22C55E' : colors.text.primary }]}
                         numberOfLines={1}
                       >
                         {goal.title}
@@ -442,7 +455,8 @@ export default function GoalsDashboard() {
                   <ProgressBar
                     progress={progress}
                     showPercentage
-                    color={goal.color ?? undefined}
+                    color={isCompleted ? '#22C55E' : (goal.color ?? undefined)}
+                    gradient={isCompleted ? undefined : ['#A855F7', '#EC4899']}
                     style={{ marginTop: spacing.md }}
                   />
 
@@ -598,7 +612,7 @@ export default function GoalsDashboard() {
             onPress={() => router.push('/weekly-review' as Href)}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Ionicons name="calendar-outline" size={24} color={colors.accent.primary} />
+              <CalendarDots size={24} color={colors.accent.primary} weight="duotone" />
               <View style={{ flex: 1 }}>
                 <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                   Weekly Review
@@ -607,7 +621,7 @@ export default function GoalsDashboard() {
                   See your weekly performance grade and AI analysis
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
+              <CaretRight size={20} color={colors.text.muted} />
             </View>
           </Card>
         </Animated.View>

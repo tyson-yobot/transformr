@@ -40,12 +40,25 @@ import { checkFoodBeforeLogging, type ComplianceResult } from '@services/ai/comp
 
 type MealType = typeof MEAL_TYPES[number];
 
+interface QueuedItem {
+  food: Food | null;          // null = manual entry
+  mealType: MealType;
+  quantity: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  foodName: string;
+  source: 'manual' | 'search';
+  foodId?: string;
+}
+
 const MEAL_TYPE_OPTIONS: { value: MealType; label: string; icon: keyof typeof Ionicons.glyphMap; iconColor: string }[] = [
   { value: 'breakfast',    label: 'Breakfast', icon: 'sunny-outline',      iconColor: '#F59E0B' },
   { value: 'lunch',        label: 'Lunch',     icon: 'restaurant-outline',  iconColor: '#10B981' },
   { value: 'dinner',       label: 'Dinner',    icon: 'moon-outline',        iconColor: '#A855F7' },
   { value: 'snack',        label: 'Snack',     icon: 'cafe-outline',        iconColor: '#F97316' },
-  { value: 'shake',        label: 'Shake',     icon: 'nutrition-outline',   iconColor: '#22D3EE' },
+  { value: 'shake',        label: 'Shake',     icon: 'nutrition-outline',   iconColor: '#06B6D4' },
   { value: 'pre_workout',  label: 'Pre-WO',    icon: 'flash-outline',       iconColor: '#EAB308' },
   { value: 'post_workout', label: 'Post-WO',   icon: 'barbell-outline',     iconColor: '#A855F7' },
 ];
@@ -73,6 +86,7 @@ export default function AddFoodScreen() {
   );
   const [quantity, setQuantity] = useState(1);
   const [isLogging, setIsLogging] = useState(false);
+  const [queuedItems, setQueuedItems] = useState<QueuedItem[]>([]);
 
   // Compliance pre-screen — runs when a food is selected and a diet challenge is active
   const [complianceResult, setComplianceResult] = useState<ComplianceResult | null>(null);
@@ -155,32 +169,127 @@ export default function AddFoodScreen() {
     setQuantity((prev) => Math.max(0.25, Math.round((prev + delta) * 4) / 4));
   }, []);
 
-  const handleAddToLog = useCallback(async () => {
-    setIsLogging(true);
+  const handleAddAndContinue = useCallback(() => {
     hapticSuccess();
-
+    let item: QueuedItem;
     if (manualMode) {
-      await logFood({
-        meal_type: mealType,
+      item = {
+        food: null,
+        mealType,
         quantity: 1,
         calories: Number(manualCalories) || 0,
         protein: Number(manualProtein) || 0,
         carbs: Number(manualCarbs) || 0,
         fat: Number(manualFat) || 0,
+        foodName: manualName.trim(),
         source: 'manual',
-        food_name: manualName.trim(),
-      });
+      };
     } else if (selectedFood) {
-      await logFood({
-        food_id: selectedFood.id,
-        meal_type: mealType,
+      item = {
+        food: selectedFood,
+        mealType,
         quantity,
         calories: scaledMacros.calories,
         protein: scaledMacros.protein,
         carbs: scaledMacros.carbs,
         fat: scaledMacros.fat,
+        foodName: selectedFood.name,
+        source: 'search',
+        foodId: selectedFood.id,
+      };
+    } else {
+      return;
+    }
+    setQueuedItems((prev) => [...prev, item]);
+    // Reset for next item
+    setSelectedFood(null);
+    setManualMode(false);
+    setManualName('');
+    setManualCalories('');
+    setManualProtein('');
+    setManualCarbs('');
+    setManualFat('');
+    setSearchQuery('');
+    setComplianceResult(null);
+    searchFoods('');
+  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, searchFoods]);
+
+  const handleRemoveFromQueue = useCallback((index: number) => {
+    hapticLight();
+    setQueuedItems((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const queueTotals = useMemo(() => {
+    return queuedItems.reduce(
+      (acc, item) => ({
+        calories: acc.calories + item.calories,
+        protein: acc.protein + item.protein,
+        carbs: acc.carbs + item.carbs,
+        fat: acc.fat + item.fat,
+      }),
+      { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    );
+  }, [queuedItems]);
+
+  const handleAddToLog = useCallback(async () => {
+    setIsLogging(true);
+    hapticSuccess();
+
+    // Build list of all items to log: queued + current selection
+    const itemsToLog: QueuedItem[] = [...queuedItems];
+
+    if (manualMode && manualName.trim().length > 0 && Number(manualCalories) > 0) {
+      itemsToLog.push({
+        food: null,
+        mealType,
+        quantity: 1,
+        calories: Number(manualCalories) || 0,
+        protein: Number(manualProtein) || 0,
+        carbs: Number(manualCarbs) || 0,
+        fat: Number(manualFat) || 0,
+        foodName: manualName.trim(),
         source: 'manual',
       });
+    } else if (selectedFood) {
+      itemsToLog.push({
+        food: selectedFood,
+        mealType,
+        quantity,
+        calories: scaledMacros.calories,
+        protein: scaledMacros.protein,
+        carbs: scaledMacros.carbs,
+        fat: scaledMacros.fat,
+        foodName: selectedFood.name,
+        source: 'search',
+        foodId: selectedFood.id,
+      });
+    }
+
+    // Log each item
+    for (const item of itemsToLog) {
+      if (item.source === 'manual' && !item.foodId) {
+        await logFood({
+          meal_type: item.mealType,
+          quantity: item.quantity,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fat: item.fat,
+          source: 'manual',
+          food_name: item.foodName,
+        });
+      } else {
+        await logFood({
+          food_id: item.foodId,
+          meal_type: item.mealType,
+          quantity: item.quantity,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fat: item.fat,
+          source: 'manual',
+        });
+      }
     }
 
     const storeError = useNutritionStore.getState().error;
@@ -189,13 +298,18 @@ export default function AddFoodScreen() {
       Alert.alert('Failed to Log', storeError);
       return;
     }
-    showToast('Meal logged', { subtext: 'Nutrition updated' });
+    const count = itemsToLog.length;
+    showToast(
+      count === 1 ? 'Meal logged' : `${count} items logged`,
+      { subtext: 'Nutrition updated' },
+    );
     router.back();
-  }, [manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router, showToast]);
+  }, [queuedItems, manualMode, selectedFood, mealType, quantity, scaledMacros, manualName, manualCalories, manualProtein, manualCarbs, manualFat, logFood, router, showToast]);
 
-  const canLog = manualMode
+  const hasCurrentItem = manualMode
     ? manualName.length > 0 && Number(manualCalories) > 0
     : selectedFood !== null;
+  const canLog = hasCurrentItem || queuedItems.length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -300,7 +414,7 @@ export default function AddFoodScreen() {
         {manualMode ? (
           /* Manual Entry Form */
           <Animated.View entering={FadeIn.duration(300)}>
-            <Card style={{ marginBottom: spacing.lg }}>
+            <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4 }}>
               <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                 Manual Entry
               </Text>
@@ -356,7 +470,7 @@ export default function AddFoodScreen() {
         ) : selectedFood ? (
           /* Selected Food Detail */
           <Animated.View entering={FadeIn.duration(300)}>
-            <Card style={{ marginBottom: spacing.lg }}>
+            <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4 }}>
               <View style={styles.selectedFoodHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -613,9 +727,55 @@ export default function AddFoodScreen() {
             )}
           </Animated.View>
         )}
+
+        {/* Queued Items Summary */}
+        {queuedItems.length > 0 && (
+          <Animated.View entering={FadeInDown.duration(300)}>
+            <Card style={{ marginTop: spacing.lg }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm }}>
+                <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                  Queued ({queuedItems.length})
+                </Text>
+                <Text style={[typography.monoCaption, { color: colors.accent.primary }]}>
+                  {Math.round(queueTotals.calories)} cal total
+                </Text>
+              </View>
+              {queuedItems.map((item, index) => (
+                <View
+                  key={`${item.foodName}-${index}`}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: spacing.xs,
+                    borderTopWidth: index > 0 ? 1 : 0,
+                    borderTopColor: colors.border.subtle,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[typography.caption, { color: colors.text.primary }]} numberOfLines={1}>
+                      {item.foodName}
+                    </Text>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      {Math.round(item.calories)} cal · P {Math.round(item.protein)}g · C {Math.round(item.carbs)}g · F {Math.round(item.fat)}g
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => handleRemoveFromQueue(index)}
+                    hitSlop={8}
+                    accessibilityLabel={`Remove ${item.foodName} from queue`}
+                    accessibilityRole="button"
+                    style={{ padding: spacing.xs }}
+                  >
+                    <Ionicons name="close-circle" size={20} color={colors.accent.danger} />
+                  </Pressable>
+                </View>
+              ))}
+            </Card>
+          </Animated.View>
+        )}
       </ScrollView>
 
-      {/* Add to Log Button */}
+      {/* Bottom Action Bar */}
       {canLog && (
         <Animated.View
           entering={FadeIn.duration(200)}
@@ -629,14 +789,39 @@ export default function AddFoodScreen() {
             },
           ]}
         >
-          <Button
-            title={isLogging ? 'Adding...' : 'Add to Log'}
-            onPress={handleAddToLog}
-            loading={isLogging}
-            variant="primary"
-            fullWidth
-            size="lg"
-          />
+          {hasCurrentItem && (
+            <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: queuedItems.length > 0 || hasCurrentItem ? 0 : spacing.sm }}>
+              <View style={{ flex: 1 }}>
+                <Button
+                  title="Add & Continue"
+                  onPress={handleAddAndContinue}
+                  variant="outline"
+                  size="md"
+                  fullWidth
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button
+                  title={isLogging ? 'Logging...' : queuedItems.length > 0 ? `Log All (${queuedItems.length + 1})` : 'Add to Log'}
+                  onPress={handleAddToLog}
+                  loading={isLogging}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                />
+              </View>
+            </View>
+          )}
+          {!hasCurrentItem && queuedItems.length > 0 && (
+            <Button
+              title={isLogging ? 'Logging...' : `Log All (${queuedItems.length})`}
+              onPress={handleAddToLog}
+              loading={isLogging}
+              variant="primary"
+              fullWidth
+              size="lg"
+            />
+          )}
         </Animated.View>
       )}
     </KeyboardAvoidingView>
@@ -689,6 +874,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(168, 85, 247, 0.15)',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
   },
   foodResultMacros: {
     alignItems: 'flex-end',

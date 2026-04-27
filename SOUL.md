@@ -57,15 +57,25 @@ AI Coaching:
 
 ## Brand Identity
 
-- Primary Color: #A855F7 (Vivid Purple)
+### Three-Color Brand Language
+- Primary: #A855F7 (Vivid Purple) — Structure, navigation, primary actions
+- Secondary: #EC4899 (Pink) — Achievements, celebrations, milestones, PRs
+- Tertiary: #06B6D4 (Cyan AI Core) — AI-powered features, Claude intelligence
 - Background: #0C0A15 (Deep Space)
 - Card Glass: rgba(22,18,42,0.88)
 - Purple Glow: rgba(168,85,247,0.25)
-- Secondary: #7E22CE
-- Light Accent: #C084FC
+
+### Semantic Color Meaning
+- Purple = the foundation you build on
+- Pink = your wins and celebrations
+- Cyan = the AI brain working for you
+
+### Brand Gradients
+- Purple→Pink (#A855F7 → #EC4899): CTAs, hero elements, progress
+- Cyan→Purple (#06B6D4 → #A855F7): AI features and insights
 
 Design Language: Dark ambient space, glass morphism cards, purple glow effects,
-skeleton loading states, AI badges on all AI-generated content.
+skeleton loading states, AI badges (cyan) on all AI-generated content.
 
 ## Product Standard
 

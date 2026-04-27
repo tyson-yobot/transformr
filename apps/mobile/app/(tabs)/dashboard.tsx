@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
-  FadeInDown,
   useSharedValue,
   withTiming,
   withRepeat,
@@ -22,10 +21,12 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { Fire, Barbell as PhBarbell, BowlFood, Heartbeat, ForkKnife, Scales, CheckCircle } from 'phosphor-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
+import { FadeInView } from '@components/ui/FadeInView';
 import { Badge } from '@components/ui/Badge';
 import { MonoText } from '@components/ui/MonoText';
 import { AnimatedNumber } from '@components/ui/AnimatedNumber';
@@ -402,7 +403,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.fire, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="flame" size={18} color={colors.accent.fire} />
+            <Fire size={18} color={colors.accent.fire} weight="duotone" />
           </View>
         ),
         label: 'Streak',
@@ -414,7 +415,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.primary, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="barbell" size={18} color={colors.accent.primary} />
+            <PhBarbell size={18} color={colors.accent.primary} weight="duotone" />
           </View>
         ),
         label: 'Workouts',
@@ -426,7 +427,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.success, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="nutrition" size={18} color={colors.accent.success} />
+            <BowlFood size={18} color={colors.accent.success} weight="duotone" />
           </View>
         ),
         label: 'Calories',
@@ -438,7 +439,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.cyan, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name="pulse" size={18} color={colors.accent.cyan} />
+            <Heartbeat size={18} color={colors.accent.cyan} weight="duotone" />
           </View>
         ),
         label: 'Readiness',
@@ -505,8 +506,7 @@ export default function DashboardScreen() {
 
       {/* Greeting */}
       <Animated.View style={getEntranceStyle('header')}>
-      <Animated.View
-        entering={FadeInDown.delay(0).duration(800)}
+      <View
         style={{ marginBottom: spacing.xl }}
       >
         <View ref={greetingRef} onLayout={measureCoachmarks} style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -541,17 +541,18 @@ export default function DashboardScreen() {
             day: 'numeric',
           })}
         </Text>
-      </Animated.View>
+      </View>
       </Animated.View>
       <HelpBubble id="dashboard_greeting" message="Pull down to refresh your daily briefing" position="below" />
 
       {/* Quick Actions — placed here so they're always above the ChatFAB */}
       <Animated.View style={getEntranceStyle('quickActions')}>
-      <Animated.View entering={FadeInDown.delay(30).duration(400)}>
+      <View>
         <View ref={quickActionsRef} style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg, justifyContent: 'center', alignItems: 'stretch' }}>
           <LogSuccessRipple ref={rippleWorkoutRef}>
             <QuickActionTile
               icon="barbell-outline"
+              iconNode={<PhBarbell size={28} color={colors.accent.primary} weight="duotone" />}
               label="Log Workout"
               accentColor={colors.accent.primary}
               dimColor={colors.dim.primary}
@@ -564,6 +565,7 @@ export default function DashboardScreen() {
           <LogSuccessRipple ref={rippleMealRef}>
             <QuickActionTile
               icon="restaurant-outline"
+              iconNode={<ForkKnife size={28} color={colors.accent.success} weight="duotone" />}
               label="Log Meal"
               accentColor={colors.accent.success}
               dimColor={colors.dim.success}
@@ -576,9 +578,10 @@ export default function DashboardScreen() {
           <LogSuccessRipple ref={rippleWeightRef}>
             <QuickActionTile
               icon="scale-outline"
+              iconNode={<Scales size={28} color={colors.accent.cyan} weight="duotone" />}
               label="Log Weight"
-              accentColor={colors.accent.info}
-              dimColor={colors.dim.info}
+              accentColor={colors.accent.cyan}
+              dimColor={colors.dim.cyan}
               onPress={() => {
                 rippleWeightRef.current?.trigger();
                 router.push('/(tabs)/profile' as never);
@@ -586,13 +589,14 @@ export default function DashboardScreen() {
             />
           </LogSuccessRipple>
         </View>
-      </Animated.View>
+      </View>
       </Animated.View>
 
       {/* Daily Accountability Card */}
       {accountabilityMessage && (
-        <Animated.View
-          entering={FadeInDown.delay(50).duration(600)}
+        <FadeInView
+          delay={50}
+          duration={600}
           style={{ marginBottom: spacing.md }}
         >
           <Card
@@ -697,7 +701,7 @@ export default function DashboardScreen() {
               </Pressable>
             </View>
           </Card>
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Weather */}
@@ -712,7 +716,7 @@ export default function DashboardScreen() {
 
       {/* Top Prediction Alert */}
       {topPrediction && (
-        <Animated.View entering={FadeInDown.delay(25).duration(400)}>
+        <FadeInView delay={25} duration={400}>
           <PredictionAlert
             title={topPrediction.title}
             body={topPrediction.body}
@@ -724,12 +728,12 @@ export default function DashboardScreen() {
             onDismiss={() => void acknowledgePrediction(topPrediction.id)}
             style={{ marginBottom: spacing.md }}
           />
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Primary Countdown */}
       {primaryGoal && primaryGoal.start_date && primaryGoal.target_date ? (
-        <Animated.View entering={FadeInDown.delay(50).duration(400)}>
+        <FadeInView delay={50} duration={400}>
           <CountdownCard
             title={primaryGoal.title}
             emoji={primaryGoal.icon ?? '🎯'}
@@ -737,9 +741,9 @@ export default function DashboardScreen() {
             startDate={primaryGoal.start_date}
             style={{ marginBottom: spacing.lg }}
           />
-        </Animated.View>
+        </FadeInView>
       ) : (
-        <Animated.View entering={FadeInDown.delay(50).duration(400)} style={{ marginBottom: spacing.lg }}>
+        <FadeInView delay={50} duration={400} style={{ marginBottom: spacing.lg }}>
           <Pressable
             onPress={() => router.push('/trajectory' as never)}
             accessibilityLabel="Set your countdown goal"
@@ -776,12 +780,12 @@ export default function DashboardScreen() {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.text.muted} />
           </Pressable>
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Active Challenge Card */}
       {activeEnrollment && activeChallengeDefinition && (
-        <Animated.View entering={FadeInDown.delay(75).duration(400)}>
+        <FadeInView delay={75} duration={400}>
           <ActiveChallengeCard
             definition={activeChallengeDefinition}
             enrollment={activeEnrollment}
@@ -789,17 +793,17 @@ export default function DashboardScreen() {
             onPress={() => router.push('/(tabs)/goals/challenge-active')}
             style={{ marginBottom: spacing.lg }}
           />
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Quick Stats Row */}
-      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+      <FadeInView delay={100} duration={400}>
         <QuickStatsRow stats={quickStats} style={{ marginBottom: spacing.lg }} />
-      </Animated.View>
+      </FadeInView>
 
       {/* Stats Grid — calories, protein, water, workout */}
       <Animated.View style={getEntranceStyle('statsGrid')}>
-      <Animated.View entering={FadeInDown.delay(110).duration(400)}>
+      <View>
         <View ref={statsCardRef}>
         <Card
           variant="default"
@@ -854,12 +858,12 @@ export default function DashboardScreen() {
           </View>
         </Card>
         </View>
-      </Animated.View>
+      </View>
       </Animated.View>
 
       {/* Top 3 Streaks */}
       {top3Streaks.length > 0 && (
-        <Animated.View entering={FadeInDown.delay(130).duration(400)}>
+        <FadeInView delay={130} duration={400}>
           <Card
             variant="default"
             style={{ marginBottom: spacing.lg }}
@@ -891,12 +895,12 @@ export default function DashboardScreen() {
               </View>
             ))}
           </Card>
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Today's Plan */}
       <Animated.View style={getEntranceStyle('todaysPlan')}>
-      <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+      <View>
         <Card
           variant="default"
           style={{ marginBottom: spacing.lg }}
@@ -912,6 +916,7 @@ export default function DashboardScreen() {
           <PlanRow
             icon="barbell"
             iconColor={colors.accent.primary}
+            iconNode={<PhBarbell size={20} color={colors.accent.primary} weight="duotone" />}
             label="Workout"
             detail={activeSession ? 'In progress' : 'Scheduled'}
             done={!!activeSession?.completed_at}
@@ -919,6 +924,7 @@ export default function DashboardScreen() {
           <PlanRow
             icon="restaurant"
             iconColor={colors.accent.success}
+            iconNode={<ForkKnife size={20} color={colors.accent.success} weight="duotone" />}
             label="Meals logged"
             detail={`${todayLogs.length}/4`}
             done={todayLogs.length >= 4}
@@ -927,18 +933,19 @@ export default function DashboardScreen() {
           <PlanRow
             icon="checkmark-circle-outline"
             iconColor={colors.accent.info}
+            iconNode={<CheckCircle size={20} color={colors.accent.info} weight="duotone" />}
             label="Habits remaining"
             detail={`${habitsRemaining} left`}
             done={habitsRemaining === 0}
             mono
           />
         </Card>
-      </Animated.View>
+      </View>
       </Animated.View>
 
       {/* Partner Card */}
       {partnerProfile && (
-        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+        <FadeInView delay={200} duration={400}>
           <Card
             variant="partner"
             style={{ marginBottom: spacing.lg }}
@@ -974,12 +981,12 @@ export default function DashboardScreen() {
               </Text>
             </View>
           </Card>
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Weight Sparkline */}
       {weightData.length > 0 && (
-        <Animated.View entering={FadeInDown.delay(250).duration(400)}>
+        <FadeInView delay={250} duration={400}>
           <Card
             variant="default"
             style={{ marginBottom: spacing.lg }}
@@ -994,12 +1001,12 @@ export default function DashboardScreen() {
               goalWeight={profile?.goal_weight}
             />
           </Card>
-        </Animated.View>
+        </FadeInView>
       )}
 
       {/* Revenue Sparkline */}
       {revenueSparkline.length > 0 && (
-        <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+        <FadeInView delay={300} duration={400}>
           <Card
             variant="default"
             style={{ marginBottom: spacing.lg }}
@@ -1035,13 +1042,13 @@ export default function DashboardScreen() {
               height={48}
             />
           </Card>
-        </Animated.View>
+        </FadeInView>
       )}
 
       <HelpBubble id="dashboard_fab" message="Tap the purple button to chat with your AI coach" position="below" />
 
       {/* Recent Achievements */}
-      <Animated.View entering={FadeInDown.delay(400).duration(400)}>
+      <FadeInView delay={400} duration={400}>
         <Card
           variant="default"
           style={{ marginBottom: spacing.lg }}
@@ -1080,6 +1087,8 @@ export default function DashboardScreen() {
                   {
                     backgroundColor: `${tierColors[ach.tier] ?? colors.accent.primary}15`,
                     borderRadius: borderRadius.md,
+                    borderWidth: 1,
+                    borderColor: `${tierColors[ach.tier] ?? colors.accent.primary}30`,
                     padding: spacing.md,
                   },
                 ]}
@@ -1100,7 +1109,7 @@ export default function DashboardScreen() {
             ))}
           </View>
         </Card>
-      </Animated.View>
+      </FadeInView>
       <Coachmark screenKey={COACHMARK_KEYS.dashboard} steps={coachmarkSteps} />
     </ScrollView>
     </View>
@@ -1123,6 +1132,14 @@ function StatsCell({
   unit: string;
 }) {
   const { colors, typography, spacing } = useTheme();
+  const pct = target > 0 ? Math.min(logged / target, 1) : 0;
+  const statColor = logged === 0
+    ? colors.text.muted
+    : logged >= target
+      ? colors.accent.success
+      : logged >= target * 0.75
+        ? colors.accent.warning
+        : colors.accent.danger;
   return (
     <View style={styles.statsCell}>
       <Text
@@ -1134,7 +1151,7 @@ function StatsCell({
       </Text>
       <AnimatedNumber
         value={logged}
-        style={[typography.monoBody, { color: colors.text.primary }]}
+        style={[typography.monoBody, { color: statColor, fontSize: 20, fontWeight: '800' }]}
       />
       <Text
         style={[typography.tiny, { color: colors.text.muted }]}
@@ -1143,6 +1160,14 @@ function StatsCell({
       >
         {`/ ${formatNumber(target)} ${unit}`}
       </Text>
+      <View style={{ width: '100%', height: 4, borderRadius: 2, backgroundColor: colors.dim.primary, marginTop: 4, overflow: 'hidden' }}>
+        <LinearGradient
+          colors={colors.gradient.purplePink}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{ height: 4, borderRadius: 2, width: `${Math.round(pct * 100)}%` }}
+        />
+      </View>
     </View>
   );
 }
@@ -1150,6 +1175,7 @@ function StatsCell({
 function PlanRow({
   icon,
   iconColor,
+  iconNode,
   label,
   detail,
   done,
@@ -1157,6 +1183,7 @@ function PlanRow({
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
+  iconNode?: React.ReactNode;
   label: string;
   detail: string;
   done: boolean;
@@ -1167,10 +1194,14 @@ function PlanRow({
     <View
       style={[
         styles.planRow,
-        { paddingVertical: spacing.sm, borderBottomColor: colors.border.subtle },
+        { paddingVertical: spacing.sm, borderBottomColor: colors.border.subtle, borderLeftWidth: 3, borderLeftColor: iconColor, paddingLeft: spacing.sm },
       ]}
     >
-      <Ionicons name={icon} size={20} color={iconColor} style={{ marginRight: spacing.sm }} />
+      {iconNode ? (
+        <View style={{ marginRight: spacing.sm }}>{iconNode}</View>
+      ) : (
+        <Ionicons name={icon} size={20} color={iconColor} style={{ marginRight: spacing.sm }} />
+      )}
       <Text
         style={[
           typography.body,

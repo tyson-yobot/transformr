@@ -49,9 +49,9 @@ function getProgramAccentColor(name: string): string {
   if (lower.includes('push') || lower.includes('pull') || lower.includes('ppl'))
     return '#A855F7'; // purple
   if (lower.includes('upper') || lower.includes('lower'))
-    return '#7E22CE'; // indigo
+    return '#06B6D4'; // cyan (upper-lower split)
   if (lower.includes('full body') || lower.includes('fullbody'))
-    return '#22D3EE'; // teal
+    return '#EC4899'; // pink (full body)
   if (lower.includes('couple') || lower.includes('partner'))
     return '#EC4899'; // pink
   if (lower.includes('leg'))
@@ -241,7 +241,9 @@ export default function ProgramsScreen() {
   const renderProgram = useCallback(
     ({ item, index }: { item: ProgramWithExercises; index: number }) => {
       const isExpanded = expandedProgramId === item.id;
-      const accentColor = getProgramAccentColor(item.name);
+      const accentColor = item.is_ai_generated
+        ? '#06B6D4'
+        : getProgramAccentColor(item.name);
       const programIcon = getProgramIcon(item.name);
 
       const difficultyColor =
@@ -256,7 +258,16 @@ export default function ProgramsScreen() {
       return (
         <Animated.View entering={FadeInDown.delay(index * 50).duration(400)}>
         <Card
-          style={{ marginBottom: spacing.sm, borderLeftWidth: 3, borderLeftColor: accentColor }}
+          style={{
+            marginBottom: spacing.sm,
+            borderLeftWidth: 3,
+            borderLeftColor: accentColor,
+            shadowColor: accentColor,
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 4,
+          }}
           onPress={() => {
             setExpandedProgramId(isExpanded ? null : item.id);
             hapticLight();

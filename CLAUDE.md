@@ -420,6 +420,51 @@ This report is not optional. It is the proof of work.
 
 ---
 
+## COLOR SYSTEM (Updated 2026-04-27 — Three-Color Brand Language)
+
+### Primary: Purple #A855F7
+Use for: CTAs, navigation active states, section headers, primary actions,
+default icon containers, card borders, progress bar gradients.
+
+### Secondary: Pink #EC4899
+Use for: The R in TRANSFORMR wordmark, partner/couples features, PR
+achievements, streak milestones, goal completions, celebration moments,
+active/selected states. EXPANDED beyond couples features — used for all
+achievement and celebration moments across the app.
+
+### Tertiary: Cyan #06B6D4 (AI Core)
+Use for: All AI-powered features — meal camera, form check, coaching
+responses, readiness score, AI coach FAB button, AI-generated badges,
+correlation insights, water tracking, any feature powered by Claude AI.
+Cyan = Claude AI working for the user.
+
+### Functional Colors
+- Gold #EAB308 — PRs, records, achievements, revenue displays
+- Fire #F97316 — Streaks, momentum, flame icons
+- Green #22C55E — Success, completion, logged items
+- Amber #F59E0B — Warning, approaching limits
+- Red #EF4444 — Missed, broken, errors, danger actions
+
+### Semantic Rules
+- Purple = structure and navigation
+- Pink = your wins and celebrations
+- Cyan = the AI brain working for you
+
+### Brand Gradients
+- Primary: #A855F7 → #EC4899 (purple to pink) — main CTAs, hero elements, progress bars
+- AI: #06B6D4 → #A855F7 (cyan to purple) — AI features and insights
+- Theme tokens: `colors.gradient.purplePink` and `colors.gradient.cyanPurple`
+
+### MANDATORY: Update brand docs on every brand change
+Whenever any brand color, typography, or design pattern changes:
+1. Update TRANSFORMR-Brand-Identity-Kit.docx in repo root
+2. Update this CLAUDE.md color section
+3. Update SOUL.md if personality/tone affected
+4. Update ARCHITECTURE-DECISIONS.md if it's a permanent decision
+An agent reading these files must always get current accurate information.
+
+---
+
 ## ADDITIONAL AGENT NOTES
 
 - **Logcat filtering**: Only flag `ReactNativeJS`, `JS ERROR`, `transformr` tags.

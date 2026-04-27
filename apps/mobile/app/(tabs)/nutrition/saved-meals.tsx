@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { CaretLeft } from 'phosphor-react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -42,13 +44,19 @@ export default function SavedMealsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const router = useRouter();
   const logFood = useNutritionStore((s) => s.logFood);
 
   useEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <Pressable onPress={() => router.back()} style={{ paddingRight: spacing.md }} hitSlop={12}>
+          <CaretLeft size={24} color={colors.text.primary} />
+        </Pressable>
+      ),
       headerRight: () => <ScreenHelpButton content={SCREEN_HELP.savedMealsScreen} />,
     });
-  }, [navigation]);
+  }, [navigation, router, colors, spacing]);
 
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
   const [isLoading, setIsLoading] = useState(true);

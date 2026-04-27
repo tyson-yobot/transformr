@@ -68,10 +68,18 @@ function HabitCheckbox({ isCompleted, colors }: {
           height: 36,
           borderRadius: 8,
           borderWidth: 1.5,
-          borderColor: isCompleted ? colors.accent.success : colors.border.default,
-          backgroundColor: isCompleted ? colors.accent.success : colors.background.tertiary,
+          borderColor: isCompleted ? '#22C55E' : colors.border.default,
+          backgroundColor: isCompleted ? '#22C55E' : colors.background.tertiary,
           alignItems: 'center',
           justifyContent: 'center',
+          // Green success glow when completed
+          ...(isCompleted && {
+            shadowColor: '#22C55E',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.7,
+            shadowRadius: 8,
+            elevation: 6,
+          }),
         },
         animatedStyle,
       ]}
@@ -359,8 +367,32 @@ export default function HabitTracker() {
                     variant={isCompleted ? 'success' : streak >= 7 ? 'fire' : 'default'}
                     style={
                       isCompleted
-                        ? { backgroundColor: colors.accent.successSubtle }
-                        : undefined
+                        ? {
+                            backgroundColor: colors.accent.successSubtle,
+                            // Green glow for completed habits
+                            shadowColor: '#22C55E',
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 10,
+                            elevation: 5,
+                          }
+                        : streak >= 7
+                          ? {
+                              // Fire orange glow for active streaks
+                              shadowColor: '#F97316',
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 0.25,
+                              shadowRadius: 10,
+                              elevation: 5,
+                            }
+                          : {
+                              // Purple glow for default cards
+                              shadowColor: '#A855F7',
+                              shadowOffset: { width: 0, height: 0 },
+                              shadowOpacity: 0.2,
+                              shadowRadius: 10,
+                              elevation: 4,
+                            }
                     }
                   >
                     <View style={styles.habitRow}>
@@ -401,16 +433,34 @@ export default function HabitTracker() {
                       </View>
 
                       {/* Streak Badge */}
-                      <View style={styles.streakBadge}>
+                      <View
+                        style={[
+                          styles.streakBadge,
+                          streak >= 7 && {
+                            // Gold shield badge treatment for milestone streaks
+                            backgroundColor: streak >= 30 ? 'rgba(234,179,8,0.15)' : 'rgba(249,115,22,0.12)',
+                            borderRadius: 8,
+                            paddingHorizontal: 6,
+                            paddingVertical: 4,
+                            borderWidth: 1,
+                            borderColor: streak >= 30 ? 'rgba(234,179,8,0.45)' : 'rgba(249,115,22,0.35)',
+                            shadowColor: streak >= 30 ? '#EAB308' : '#F97316',
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowOpacity: 0.5,
+                            shadowRadius: 6,
+                            elevation: 4,
+                          },
+                        ]}
+                      >
                         <MonoText
                           variant="monoCaption"
                           color={
                             streak >= 30
-                              ? colors.accent.gold
+                              ? '#EAB308'
                               : streak >= 7
-                                ? colors.accent.warning
+                                ? '#F97316'
                                 : streak > 0
-                                  ? colors.accent.success
+                                  ? '#22C55E'
                                   : colors.text.muted
                           }
                         >
@@ -419,7 +469,13 @@ export default function HabitTracker() {
                         <Text
                           style={[
                             typography.tiny,
-                            { color: colors.text.muted },
+                            {
+                              color: streak >= 30
+                                ? '#EAB308'
+                                : streak >= 7
+                                  ? '#F97316'
+                                  : colors.text.muted,
+                            },
                           ]}
                         >
                           {streak === 0

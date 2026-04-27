@@ -153,15 +153,15 @@ export default function FinanceDashboard() {
 
         {/* Net Worth */}
         <Animated.View entering={FadeInDown.delay(100)}>
-          <Card variant="elevated">
+          <Card variant="elevated" style={styles.netWorthCard}>
             <Text style={[typography.caption, { color: colors.text.secondary }]}>Net Worth</Text>
-            <Text style={[typography.stat, { color: netWorth >= 0 ? colors.accent.success : colors.accent.danger }]}>
+            <Text style={[typography.stat, styles.goldMono, netWorth < 0 && { color: colors.accent.danger }]}>
               {formatCurrency(netWorth)}
             </Text>
             <View style={[styles.netWorthBreakdown, { marginTop: spacing.md, gap: spacing.xl }]}>
               <View>
                 <Text style={[typography.tiny, { color: colors.text.muted }]}>Assets</Text>
-                <Text style={[typography.bodyBold, { color: colors.accent.success }]}>
+                <Text style={[typography.bodyBold, styles.goldMono]}>
                   {formatCurrency(totalAssets)}
                 </Text>
               </View>
@@ -178,14 +178,14 @@ export default function FinanceDashboard() {
         {/* Monthly Income vs Expenses */}
         <Animated.View entering={FadeInDown.delay(200)}>
           <View style={[styles.metricsRow, { marginTop: spacing.lg, gap: spacing.md }]}>
-            <Card style={{ flex: 1 }}>
+            <Card style={[styles.metricCard, { flex: 1 }]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>Income</Text>
-              <Text style={[typography.statSmall, { color: colors.accent.success }]}>
+              <Text style={[typography.statSmall, styles.goldMono]}>
                 {formatCurrency(monthlyIncome)}
               </Text>
               <Text style={[typography.tiny, { color: colors.text.muted }]}>This Month</Text>
             </Card>
-            <Card style={{ flex: 1 }}>
+            <Card style={[styles.metricCard, { flex: 1 }]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>Expenses</Text>
               <Text style={[typography.statSmall, { color: colors.accent.danger }]}>
                 {formatCurrency(monthlyExpenses)}
@@ -221,7 +221,7 @@ export default function FinanceDashboard() {
               <Text
                 style={[
                   typography.monoBody,
-                  { color: (account.balance ?? 0) >= 0 ? colors.accent.success : colors.accent.danger },
+                  (account.balance ?? 0) >= 0 ? styles.goldMono : { color: colors.accent.danger },
                 ]}
               >
                 {formatCurrencyDetailed(account.balance ?? 0)}
@@ -264,7 +264,7 @@ export default function FinanceDashboard() {
               <Text
                 style={[
                   typography.monoBody,
-                  { color: tx.amount >= 0 ? colors.accent.success : colors.accent.danger },
+                  tx.amount >= 0 ? styles.goldMono : { color: colors.accent.danger },
                 ]}
               >
                 {tx.amount >= 0 ? '+' : ''}{formatCurrencyDetailed(tx.amount)}
@@ -320,4 +320,25 @@ const styles = StyleSheet.create({
   metricsRow: { flexDirection: 'row' },
   accountRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
   txRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.15)' },
+  // Brand enhancement: gold monospace for all revenue/financial positive values
+  goldMono: {
+    color: '#EAB308',
+    fontVariant: ['tabular-nums'],
+  },
+  // Purple glow shadow for the primary net worth card
+  netWorthCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  // Subtle purple glow shadow for metric cards
+  metricCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
 });

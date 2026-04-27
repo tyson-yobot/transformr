@@ -325,7 +325,22 @@ export default function NutritionAnalyticsScreen() {
                 <Text style={[typography.body, { color: colors.accent.danger }]}>{loadError}</Text>
               </Card>
             )}
-            <AIInsightCard screenKey="nutrition/analytics" style={{ marginBottom: spacing.md }} />
+            <View
+              style={{
+                marginBottom: spacing.md,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#06B6D4', /* cyan — AI intelligence accent */
+                backgroundColor: 'rgba(6,182,212,0.06)',
+                shadowColor: '#06B6D4',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.18,
+                shadowRadius: 8,
+                elevation: 4,
+              }}
+            >
+              <AIInsightCard screenKey="nutrition/analytics" />
+            </View>
 
             {/* Time Range */}
             <View style={[styles.rangeRow, { marginBottom: spacing.lg, gap: spacing.sm }]}>
@@ -359,7 +374,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Average vs Target */}
             <Animated.View entering={FadeInDown.duration(300)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                   Average vs Target
                 </Text>
@@ -446,7 +461,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Calorie Trend Chart */}
             <Animated.View entering={FadeInDown.duration(300).delay(80)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                   Calorie Trend
                 </Text>
@@ -472,7 +487,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Protein Consistency Score */}
             <Animated.View entering={FadeInDown.duration(300).delay(160)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <View style={styles.consistencyRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -505,7 +520,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Calorie Adherence */}
             <Animated.View entering={FadeInDown.duration(300).delay(240)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <View style={styles.adherenceRow}>
                   <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
                     Calorie Adherence
@@ -540,7 +555,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Calorie Distribution by Meal */}
             <Animated.View entering={FadeInDown.duration(300).delay(320)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                   Calories by Meal Type
                 </Text>
@@ -579,7 +594,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Most Logged Foods */}
             <Animated.View entering={FadeInDown.duration(300).delay(400)}>
-              <Card style={{ marginBottom: spacing.lg }}>
+              <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                   Most Logged Foods
                 </Text>
@@ -625,7 +640,7 @@ export default function NutritionAnalyticsScreen() {
             {/* Weekly/Monthly Comparison */}
             {weeklyComparison && (
               <Animated.View entering={FadeInDown.duration(300).delay(480)}>
-                <Card style={{ marginBottom: spacing.lg }}>
+                <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                   <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.md }]}>
                     This Week vs Last Week
                   </Text>
@@ -687,7 +702,7 @@ export default function NutritionAnalyticsScreen() {
 
             {/* Water Average */}
             <Animated.View entering={FadeInDown.duration(300).delay(560)}>
-              <Card>
+              <Card style={{ shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 }}>
                 <View style={styles.waterRow}>
                   <Ionicons name="water" size={24} color={colors.accent.info} />
                   <View style={{ flex: 1, marginLeft: spacing.md }}>

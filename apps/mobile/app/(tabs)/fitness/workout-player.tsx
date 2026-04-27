@@ -825,10 +825,10 @@ export default function WorkoutPlayerScreen() {
             message="Timer starts automatically between sets"
             position="above"
           />
-          <Ionicons name="timer-outline" size={48} color={colors.accent.info} />
+          <Ionicons name="timer-outline" size={48} color={colors.accent.cyan} />
           <MonoText
             variant="countdown"
-            color={colors.text.primary}
+            color={colors.accent.cyan}
             style={{ marginTop: spacing.md, fontSize: 64 }}
           >
             {formatRestTimer(restSeconds)}
@@ -848,7 +848,9 @@ export default function WorkoutPlayerScreen() {
 
       {/* PR Celebration */}
       {showPRCelebration && (
-        <View style={[styles.prOverlay, { backgroundColor: colors.accent.goldDim }]}>
+        <View style={[styles.prOverlay, { backgroundColor: colors.accent.goldDim,
+          shadowColor: '#EC4899', shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.45, shadowRadius: 40, elevation: 20 }]}>
           <Ionicons name="trophy" size={64} color={colors.accent.gold} />
           <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
             NEW PR!
@@ -977,6 +979,11 @@ export default function WorkoutPlayerScreen() {
                   marginBottom: spacing.lg,
                   borderWidth: 1,
                   borderColor: colors.accent.cyan,
+                  shadowColor: '#A855F7',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
+                  elevation: 6,
                 }}
               >
                 <View style={styles.aiCoachHeader}>
@@ -1025,6 +1032,11 @@ export default function WorkoutPlayerScreen() {
                   marginBottom: spacing.lg,
                   borderWidth: 1,
                   borderColor: colors.accent.primary,
+                  shadowColor: '#A855F7',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
+                  elevation: 6,
                 }}
               >
                 <View style={styles.exerciseHeader}>

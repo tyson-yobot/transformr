@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Barbell, CalendarDots, TrendUp, VideoCamera, PersonSimpleRun, Storefront, Camera, FirstAidKit, CaretRight, Fire, Trophy, Scales, Plus } from 'phosphor-react-native';
 import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
@@ -63,6 +64,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Exercises',
     icon: 'barbell' as keyof typeof Ionicons.glyphMap,
     iconColor: '#A855F7',
+    phosphorIcon: Barbell,
     gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
     description: '100+ exercises with anatomy',
     route: '/(tabs)/fitness/exercises',
@@ -71,8 +73,9 @@ const FITNESS_NAV_CARDS = [
   {
     label: 'Programs',
     icon: 'calendar' as keyof typeof Ionicons.glyphMap,
-    iconColor: '#22D3EE',
-    gradient: ['rgba(34,211,238,0.15)', 'rgba(34,211,238,0.05)'] as [string, string],
+    iconColor: '#06B6D4',
+    phosphorIcon: CalendarDots,
+    gradient: ['rgba(6,182,212,0.15)', 'rgba(6,182,212,0.05)'] as [string, string],
     description: 'AI-adaptive training blocks',
     route: '/(tabs)/fitness/programs',
     a11y: 'View programs',
@@ -81,6 +84,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Progress',
     icon: 'trending-up' as keyof typeof Ionicons.glyphMap,
     iconColor: '#10B981',
+    phosphorIcon: TrendUp,
     gradient: ['rgba(16,185,129,0.15)', 'rgba(16,185,129,0.05)'] as [string, string],
     description: 'Charts, PRs, body metrics',
     route: '/(tabs)/fitness/progress',
@@ -90,6 +94,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Form Check',
     icon: 'videocam' as keyof typeof Ionicons.glyphMap,
     iconColor: '#F59E0B',
+    phosphorIcon: VideoCamera,
     gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
     description: 'AI frame-by-frame analysis',
     route: '/(tabs)/fitness/form-check',
@@ -99,6 +104,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Pain Tracker',
     icon: 'body' as keyof typeof Ionicons.glyphMap,
     iconColor: '#EF4444',
+    phosphorIcon: FirstAidKit,
     gradient: ['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.04)'] as [string, string],
     description: 'Body map logging + AI tips',
     route: '/(tabs)/fitness/pain-tracker',
@@ -108,6 +114,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Mobility',
     icon: 'accessibility' as keyof typeof Ionicons.glyphMap,
     iconColor: '#A855F7',
+    phosphorIcon: PersonSimpleRun,
     gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
     description: 'AI recovery + flexibility',
     route: '/(tabs)/fitness/mobility',
@@ -117,6 +124,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Marketplace',
     icon: 'storefront' as keyof typeof Ionicons.glyphMap,
     iconColor: '#F59E0B',
+    phosphorIcon: Storefront,
     gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
     description: 'Premium programs & coaching',
     route: '/(tabs)/fitness/marketplace',
@@ -126,6 +134,7 @@ const FITNESS_NAV_CARDS = [
     label: 'Progress Photos',
     icon: 'camera-outline' as keyof typeof Ionicons.glyphMap,
     iconColor: '#EC4899',
+    phosphorIcon: Camera,
     gradient: ['rgba(236,72,153,0.15)', 'rgba(236,72,153,0.05)'] as [string, string],
     description: 'Timelapse + AI analysis',
     route: '/(tabs)/fitness/progress-photos',
@@ -348,7 +357,7 @@ export default function FitnessHomeScreen() {
               {formatVolume(item.total_volume)} / {item.total_sets} sets
             </MonoText>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+          <CaretRight size={18} color={colors.text.muted} />
         </View>
       </Card>
     ),
@@ -397,7 +406,7 @@ export default function FitnessHomeScreen() {
           <HeroCard heroImage={HERO_IMAGES.fitness} style={{ marginBottom: spacing.lg, borderRadius: 12 }}>
           <Card variant="elevated" style={{ borderLeftWidth: 3, borderLeftColor: colors.accent.primary }}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="today-outline" size={20} color={colors.accent.primary} />
+              <CalendarDots size={20} color={colors.accent.primary} weight="duotone" />
               <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                 Today's Workout
               </Text>
@@ -484,7 +493,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Weekly volume: ${formatVolume(weeklyVolume)}`}
             >
-              <Ionicons name="barbell-outline" size={18} color={colors.accent.primary} />
+              <Barbell size={18} color={colors.accent.primary} weight="duotone" />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {weeklyVolume > 0 ? formatVolume(weeklyVolume) : '—'}
               </Text>
@@ -511,7 +520,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Workouts this week: ${workoutsThisWeek}`}
             >
-              <Ionicons name="fitness-outline" size={18} color={colors.accent.success} />
+              <Barbell size={18} color={colors.accent.success} weight="duotone" />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {workoutsThisWeek > 0 ? String(workoutsThisWeek) : '—'}
               </Text>
@@ -538,7 +547,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Current streak: ${currentStreak} days`}
             >
-              <Ionicons name="flame-outline" size={18} color={colors.accent.fire} />
+              <Fire size={18} color={colors.accent.fire} weight="duotone" />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {currentStreak > 0 ? `${currentStreak}d` : '—'}
               </Text>
@@ -585,13 +594,17 @@ export default function FitnessHomeScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Ionicons name={card.icon} size={24} color={card.iconColor} />
+                  {card.phosphorIcon ? (
+                    <card.phosphorIcon size={24} color={card.iconColor} weight="duotone" />
+                  ) : (
+                    <Ionicons name={card.icon} size={24} color={card.iconColor} />
+                  )}
                 </LinearGradient>
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.bodyBold, { color: colors.text.primary }]}>{card.label}</Text>
                   <Text style={[typography.tiny, { color: colors.text.secondary, marginTop: 2 }]}>{card.description}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+                <CaretRight size={16} color={colors.text.muted} />
               </Pressable>
             ))}
           </View>
@@ -621,7 +634,7 @@ export default function FitnessHomeScreen() {
                     },
                   ]}
                 >
-                  <Ionicons name="trophy" size={16} color={colors.accent.gold} />
+                  <Trophy size={16} color={colors.accent.gold} weight="duotone" />
                   <Text
                     style={[
                       typography.captionBold,
@@ -651,12 +664,12 @@ export default function FitnessHomeScreen() {
             onPress={() => handleNavigate('/(tabs)/fitness/progress')}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons name="scale-outline" size={18} color={colors.accent.primary} />
+              <Scales size={18} color={colors.accent.primary} weight="duotone" />
               <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                 Weight Trend
               </Text>
               <View style={{ flex: 1 }} />
-              <Ionicons name="chevron-forward" size={16} color={colors.text.muted} />
+              <CaretRight size={16} color={colors.text.muted} />
             </View>
             <View style={{ marginTop: spacing.md }}>
               <WeightChart data={weightData} />
@@ -695,7 +708,7 @@ export default function FitnessHomeScreen() {
                   { backgroundColor: `${colors.accent.primary}15`, borderRadius: 40 },
                 ]}
               >
-                <Ionicons name="trophy" size={40} color={colors.accent.gold} />
+                <Trophy size={40} color={colors.accent.gold} weight="duotone" />
               </View>
               <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
                 Your journey starts here
@@ -741,7 +754,7 @@ export default function FitnessHomeScreen() {
           },
         ]}
       >
-        <Ionicons name="add" size={28} color={colors.text.inverse} />
+        <Plus size={28} color={colors.text.inverse} weight="bold" />
       </Pressable>
     </View>
   );
@@ -758,6 +771,9 @@ const styles = StyleSheet.create({
   workoutRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderLeftWidth: 3,
+    borderLeftColor: '#A855F7',
+    paddingLeft: 10,
   },
   workoutInfo: {
     flex: 1,
@@ -779,6 +795,11 @@ const styles = StyleSheet.create({
     minHeight: 84,
     borderWidth: 1,
     gap: 2,
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
   // Fitness nav cards
   fitnessNavCard: {
@@ -817,6 +838,13 @@ const styles = StyleSheet.create({
   prCard: {
     minWidth: 120,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(234,179,8,0.25)',
+    shadowColor: '#EC4899',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
   },
   // Empty state
   emptyState: {

@@ -298,7 +298,7 @@ export default function ProgressScreen() {
 
         {/* Current Weight */}
         {latestWeight && (
-          <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
+          <Card variant="elevated" style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.18, shadowRadius: 12, elevation: 6 }}>
             <View style={styles.currentWeightRow}>
               <View>
                 <Text style={[typography.caption, { color: colors.text.muted }]}>
@@ -343,9 +343,9 @@ export default function ProgressScreen() {
         )}
 
         {/* Weight Chart - Full Size */}
-        <Card style={{ marginBottom: spacing.lg }}>
+        <Card style={{ marginBottom: spacing.lg, shadowColor: '#06B6D4', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 }}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="trending-up-outline" size={20} color={colors.accent.primary} />
+            <Ionicons name="trending-up-outline" size={20} color="#06B6D4" />
             <Text
               style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}
             >
@@ -364,7 +364,7 @@ export default function ProgressScreen() {
         </Card>
 
         {/* Body Measurements */}
-        <Card style={{ marginBottom: spacing.lg }}>
+        <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 }}>
           <View style={styles.sectionHeader}>
             <Ionicons name="resize-outline" size={20} color={colors.accent.info} />
             <Text
@@ -421,7 +421,7 @@ export default function ProgressScreen() {
         </Card>
 
         {/* Progress Photos */}
-        <Card style={{ marginBottom: spacing.lg }}>
+        <Card style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 12, elevation: 5 }}>
           <View style={styles.sectionHeader}>
             <Ionicons name="camera-outline" size={20} color={colors.accent.secondary} />
             <Text
@@ -523,15 +523,20 @@ export default function ProgressScreen() {
             style={{
               marginBottom: spacing.lg,
               borderLeftWidth: 3,
-              borderLeftColor: colors.accent.secondary,
+              borderLeftColor: '#06B6D4',
+              shadowColor: '#06B6D4',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.18,
+              shadowRadius: 12,
+              elevation: 6,
             }}
           >
             <View style={styles.sectionHeader}>
-              <Ionicons name="sparkles" size={18} color={colors.accent.secondary} />
+              <Ionicons name="sparkles" size={18} color="#06B6D4" />
               <Text
                 style={[
                   typography.captionBold,
-                  { color: colors.accent.secondary, marginLeft: spacing.sm },
+                  { color: '#06B6D4', marginLeft: spacing.sm },
                 ]}
               >
                 AI Body Analysis
@@ -562,7 +567,10 @@ export default function ProgressScreen() {
             styles.fab,
             {
               backgroundColor: colors.accent.primary,
-              shadowColor: colors.accent.primary,
+              shadowColor: '#A855F7',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.45,
+              shadowRadius: 14,
               marginBottom: spacing.sm,
             },
           ]}

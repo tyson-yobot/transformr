@@ -21,6 +21,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Sun, ForkKnife, Moon, Cookie, Drop, Lightning, Barbell, Plus, CaretLeft, CaretRight, BookmarkSimple, ChartBar, Camera, Barcode, NotePencil, PencilSimple } from 'phosphor-react-native';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { MonoText } from '@components/ui/MonoText';
@@ -61,23 +62,26 @@ import { checkWaterPace } from '@services/ai/compliance';
 
 type MealType = typeof MEAL_TYPES[number];
 
+type PhosphorIconComponent = React.ComponentType<{ size?: number; color?: string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' }>;
+
 interface MealSection {
   type: MealType;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
+  phosphorIcon?: PhosphorIconComponent;
 }
 
 // MEAL_SECTIONS is defined as a function so it can use theme colors at render time
 function getMealSections(colors: ReturnType<typeof useTheme>['colors']): MealSection[] {
   return [
-    { type: 'breakfast', label: 'Breakfast', icon: 'sunny-outline', color: colors.accent.warning },
-    { type: 'lunch', label: 'Lunch', icon: 'restaurant-outline', color: colors.accent.success },
-    { type: 'dinner', label: 'Dinner', icon: 'moon-outline', color: colors.accent.info },
-    { type: 'snack', label: 'Snacks', icon: 'nutrition-outline', color: colors.accent.pink },
-    { type: 'shake', label: 'Shakes', icon: 'water-outline', color: colors.accent.cyan },
-    { type: 'pre_workout', label: 'Pre-Workout', icon: 'flash-outline', color: colors.accent.fire },
-    { type: 'post_workout', label: 'Post-Workout', icon: 'barbell-outline', color: colors.accent.primary },
+    { type: 'breakfast', label: 'Breakfast', icon: 'sunny-outline', color: colors.accent.warning, phosphorIcon: Sun },
+    { type: 'lunch', label: 'Lunch', icon: 'restaurant-outline', color: colors.accent.success, phosphorIcon: ForkKnife },
+    { type: 'dinner', label: 'Dinner', icon: 'moon-outline', color: colors.accent.info, phosphorIcon: Moon },
+    { type: 'snack', label: 'Snacks', icon: 'nutrition-outline', color: colors.accent.pink, phosphorIcon: Cookie },
+    { type: 'shake', label: 'Shakes', icon: 'water-outline', color: colors.accent.cyan, phosphorIcon: Drop },
+    { type: 'pre_workout', label: 'Pre-Workout', icon: 'flash-outline', color: colors.accent.fire, phosphorIcon: Lightning },
+    { type: 'post_workout', label: 'Post-Workout', icon: 'barbell-outline', color: colors.accent.primary, phosphorIcon: Barbell },
   ];
 }
 
@@ -324,14 +328,14 @@ export default function NutritionHomeScreen() {
             accessibilityLabel="Saved meals"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md }]}
           >
-            <Ionicons name="bookmark-outline" size={20} color={colors.text.secondary} />
+            <BookmarkSimple size={20} color={colors.text.secondary} />
           </Pressable>
           <Pressable
             onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/analytics'); }}
             accessibilityLabel="Nutrition analytics"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, marginLeft: spacing.sm }]}
           >
-            <Ionicons name="analytics-outline" size={20} color={colors.text.secondary} />
+            <ChartBar size={20} color={colors.text.secondary} />
           </Pressable>
         </View>
       </View>
@@ -339,7 +343,7 @@ export default function NutritionHomeScreen() {
       {/* Date Selector */}
       <View style={[styles.dateSelector, { paddingHorizontal: spacing.lg, marginBottom: spacing.md }]}>
         <Pressable onPress={handlePrevDay} hitSlop={12}>
-          <Ionicons name="chevron-back" size={24} color={colors.text.secondary} />
+          <CaretLeft size={24} color={colors.text.secondary} />
         </Pressable>
         <Pressable onPress={() => setDayOffset(0)}>
           <Text style={[typography.h3, { color: colors.text.primary }]}>
@@ -352,7 +356,7 @@ export default function NutritionHomeScreen() {
           )}
         </Pressable>
         <Pressable onPress={handleNextDay} hitSlop={12}>
-          <Ionicons name="chevron-forward" size={24} color={colors.text.secondary} />
+          <CaretRight size={24} color={colors.text.secondary} />
         </Pressable>
       </View>
 
@@ -372,7 +376,7 @@ export default function NutritionHomeScreen() {
 
         {/* Macro Rings */}
         <View ref={macroRingsRef} onLayout={measureCoachmarks}>
-          <GlowCard intensity="subtle" animated style={{ marginBottom: spacing.lg }}>
+          <GlowCard intensity="subtle" animated style={{ marginBottom: spacing.lg, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 16, elevation: 8 }}>
             <View style={[styles.sectionHeader, { marginBottom: spacing.md }]}>
               <Text style={[typography.h3, { color: colors.text.primary }]}>Today's Macros</Text>
               <HelpIcon content={HELP.macroRings} size={13} />
@@ -545,7 +549,15 @@ export default function NutritionHomeScreen() {
           return (
             <View
               key={section.type}
-              style={{ marginBottom: spacing.lg }}
+              style={[
+                { marginBottom: spacing.lg },
+                logs.length > 0 && {
+                  borderLeftWidth: 3,
+                  borderLeftColor: '#22C55E',  // green = logged
+                  paddingLeft: spacing.sm,
+                  borderRadius: 2,
+                },
+              ]}
             >
               <View style={[styles.sectionHeader, { marginBottom: spacing.sm }]}>
                 <View style={styles.sectionTitleRow}>
@@ -555,7 +567,11 @@ export default function NutritionHomeScreen() {
                     alignItems: 'center', justifyContent: 'center',
                     marginRight: spacing.sm,
                   }}>
-                    <Ionicons name={section.icon} size={16} color={section.color} />
+                    {section.phosphorIcon ? (
+                      <section.phosphorIcon size={16} color={section.color} weight="duotone" />
+                    ) : (
+                      <Ionicons name={section.icon} size={16} color={section.color} />
+                    )}
                   </View>
                   <Text style={[typography.h3, { color: colors.text.primary }]}>
                     {section.label}
@@ -569,7 +585,7 @@ export default function NutritionHomeScreen() {
                   hitSlop={8}
                   style={[styles.addBtn, { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.full }]}
                 >
-                  <Ionicons name="add" size={18} color={colors.accent.primary} />
+                  <Plus size={18} color={colors.accent.primary} weight="bold" />
                   <Text style={[typography.caption, { color: colors.accent.primary, marginLeft: 2 }]}>Add</Text>
                 </Pressable>
               </View>
@@ -616,8 +632,8 @@ export default function NutritionHomeScreen() {
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={styles.sectionHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <View style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: colors.dim.info, alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name="water-outline" size={14} color={colors.accent.info} />
+                <View style={{ width: 24, height: 24, borderRadius: 6, backgroundColor: colors.dim.cyan, alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="water-outline" size={14} color={colors.accent.cyan} />
                 </View>
                 <Text style={[typography.h3, { color: colors.text.primary }]}>Water</Text>
                 <HelpIcon content={HELP.waterTracker} size={13} />
@@ -642,7 +658,7 @@ export default function NutritionHomeScreen() {
                   style={[
                     styles.waterBarFill,
                     {
-                      backgroundColor: colors.accent.info,
+                      backgroundColor: colors.accent.cyan,
                       borderRadius: borderRadius.full,
                       width: `${Math.min(100, (totalWater / targets.water) * 100)}%`,
                       height: 12,
@@ -657,7 +673,7 @@ export default function NutritionHomeScreen() {
                 <Ionicons
                   name={waterPacingNote.startsWith('Behind') ? 'alert-circle-outline' : 'checkmark-circle-outline'}
                   size={13}
-                  color={waterPacingNote.startsWith('Behind') ? colors.accent.warning : colors.accent.info}
+                  color={waterPacingNote.startsWith('Behind') ? colors.accent.warning : colors.accent.cyan}
                 />
                 <Text style={[typography.tiny, { color: colors.text.secondary, flex: 1 }]}>
                   {waterPacingNote}
@@ -680,7 +696,7 @@ export default function NutritionHomeScreen() {
                     },
                   ]}
                 >
-                  <MonoText variant="monoCaption" color={colors.accent.info}>
+                  <MonoText variant="monoCaption" color={colors.accent.cyan}>
                     +{oz}oz
                   </MonoText>
                 </Pressable>
@@ -788,7 +804,7 @@ export default function NutritionHomeScreen() {
           onPressOut={() => { fabScale.value = withSpring(1); }}
           style={styles.fabInner}
         >
-          <Ionicons name={fabOpen ? 'close' : 'add'} size={28} color="#FFFFFF" />
+          {fabOpen ? <Plus size={28} color="#FFFFFF" weight="bold" style={{ transform: [{ rotate: '45deg' }] }} /> : <Plus size={28} color="#FFFFFF" weight="bold" />}
         </Pressable>
       </Animated.View>
 
@@ -815,8 +831,8 @@ export default function NutritionHomeScreen() {
             onPress={() => handleFabAction('camera')}
             style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
           >
-            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.primary}20`, borderRadius: borderRadius.md }]}>
-              <Ionicons name="camera" size={24} color={colors.accent.primary} />
+            <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.cyan}20`, borderRadius: borderRadius.md }]}>
+              <Camera size={24} color={colors.accent.cyan} weight="duotone" />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
               <Text style={[typography.bodyBold, { color: colors.text.primary }]}>AI Camera</Text>
@@ -829,7 +845,7 @@ export default function NutritionHomeScreen() {
             style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
           >
             <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.success}20`, borderRadius: borderRadius.md }]}>
-              <Ionicons name="barcode" size={24} color={colors.accent.success} />
+              <Barcode size={24} color={colors.accent.success} weight="duotone" />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
               <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Barcode</Text>
@@ -842,7 +858,7 @@ export default function NutritionHomeScreen() {
             style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
           >
             <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.warning}20`, borderRadius: borderRadius.md }]}>
-              <Ionicons name="reader" size={24} color={colors.accent.warning} />
+              <NotePencil size={24} color={colors.accent.warning} weight="duotone" />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
               <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Menu Scanner</Text>
@@ -855,7 +871,7 @@ export default function NutritionHomeScreen() {
             style={[styles.fabOption, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.lg, padding: spacing.lg }]}
           >
             <View style={[styles.fabOptionIcon, { backgroundColor: `${colors.accent.info}20`, borderRadius: borderRadius.md }]}>
-              <Ionicons name="create" size={24} color={colors.accent.info} />
+              <PencilSimple size={24} color={colors.accent.info} weight="duotone" />
             </View>
             <View style={{ flex: 1, marginLeft: spacing.md }}>
               <Text style={[typography.bodyBold, { color: colors.text.primary }]}>Manual Entry</Text>

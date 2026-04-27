@@ -213,7 +213,7 @@ export default function BusinessDashboard() {
 
         {/* MRR / ARR */}
         <Animated.View entering={FadeInDown.delay(100)}>
-          <Card variant="elevated">
+          <Card variant="elevated" style={styles.revenueCard}>
             <View style={styles.mrrSection}>
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -222,7 +222,7 @@ export default function BusinessDashboard() {
                   </Text>
                   <HelpIcon content={HELP.mrr} size={14} />
                 </View>
-                <Text style={[typography.stat, { color: colors.accent.success }]}>
+                <Text style={[typography.stat, styles.revenueNumber]}>
                   {formatCurrency(mrr)}
                 </Text>
               </View>
@@ -233,7 +233,7 @@ export default function BusinessDashboard() {
                   </Text>
                   <HelpIcon content={HELP.revenueLog} size={14} />
                 </View>
-                <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+                <Text style={[typography.statSmall, styles.revenueNumberSmall]}>
                   {formatCurrency(arr)}
                 </Text>
               </View>
@@ -252,7 +252,7 @@ export default function BusinessDashboard() {
         {/* Key Metrics */}
         <Animated.View entering={FadeInDown.delay(200)}>
           <View style={[styles.metricsRow, { marginTop: spacing.lg, gap: spacing.md }]}>
-            <Card style={{ flex: 1 }}>
+            <Card style={[{ flex: 1 }, styles.metricCard]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>
                 Customers
               </Text>
@@ -260,11 +260,11 @@ export default function BusinessDashboard() {
                 {formatNumber(customerCount)}
               </Text>
             </Card>
-            <Card style={{ flex: 1 }}>
+            <Card style={[{ flex: 1 }, styles.metricCard]}>
               <Text style={[typography.captionBold, { color: colors.text.secondary }]}>
                 This Month
               </Text>
-              <Text style={[typography.statSmall, { color: colors.text.primary }]}>
+              <Text style={[typography.statSmall, styles.revenueNumberSmall]}>
                 {formatCurrency(monthlyMetrics[0]?.total_revenue ?? 0)}
               </Text>
             </Card>
@@ -286,7 +286,7 @@ export default function BusinessDashboard() {
             >
               Revenue Trend
             </Text>
-            <Card>
+            <Card style={styles.chartCard}>
               <RevenueChart data={chartData} />
             </Card>
           </Animated.View>
@@ -340,4 +340,39 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   metricsRow: { flexDirection: 'row' },
+  // Gold revenue number styling — brand color for financial figures
+  revenueNumber: {
+    color: '#EAB308',
+    fontFamily: 'monospace',
+    fontWeight: '800',
+  },
+  revenueNumberSmall: {
+    color: '#EAB308',
+    fontFamily: 'monospace',
+    fontWeight: '800',
+  },
+  // Purple glow shadow on the primary revenue card
+  revenueCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  // Purple glow shadow on metric tiles
+  metricCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  // Purple glow shadow on the revenue chart card
+  chartCard: {
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+  },
 });
