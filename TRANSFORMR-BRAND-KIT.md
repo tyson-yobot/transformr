@@ -241,7 +241,7 @@ Linecap:     round
 - **Honest** — If something isn't working, say it. Users trust truth over comfort.
 
 ### Tagline
-"Every rep. Every meal. Every dollar. Every day."
+"Transform Everything."
 
 ### Voice Examples
 ```

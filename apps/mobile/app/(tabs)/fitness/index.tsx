@@ -45,6 +45,7 @@ import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { HeroCard } from '@components/ui/HeroCard';
 import { HERO_IMAGES } from '@services/heroImagePreloader';
+import { Icon3D, type Icon3DName } from '@components/ui/Icon3D';
 
 interface RecentWorkout {
   id: string;
@@ -66,6 +67,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'barbell' as keyof typeof Ionicons.glyphMap,
     iconColor: '#A855F7',
     phosphorIcon: Barbell,
+    icon3d: 'dumbbell' as Icon3DName,
     gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
     description: '100+ exercises with anatomy',
     route: '/(tabs)/fitness/exercises',
@@ -76,6 +78,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'calendar' as keyof typeof Ionicons.glyphMap,
     iconColor: '#06B6D4',
     phosphorIcon: CalendarDots,
+    icon3d: 'calendar' as Icon3DName,
     gradient: ['rgba(6,182,212,0.15)', 'rgba(6,182,212,0.05)'] as [string, string],
     description: 'AI-adaptive training blocks',
     route: '/(tabs)/fitness/programs',
@@ -86,6 +89,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'trending-up' as keyof typeof Ionicons.glyphMap,
     iconColor: '#10B981',
     phosphorIcon: TrendUp,
+    icon3d: 'chart-up' as Icon3DName,
     gradient: ['rgba(16,185,129,0.15)', 'rgba(16,185,129,0.05)'] as [string, string],
     description: 'Charts, PRs, body metrics',
     route: '/(tabs)/fitness/progress',
@@ -96,6 +100,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'videocam' as keyof typeof Ionicons.glyphMap,
     iconColor: '#F59E0B',
     phosphorIcon: VideoCamera,
+    icon3d: 'video-camera' as Icon3DName,
     gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
     description: 'AI frame-by-frame analysis',
     route: '/(tabs)/fitness/form-check',
@@ -106,6 +111,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'body' as keyof typeof Ionicons.glyphMap,
     iconColor: '#EF4444',
     phosphorIcon: FirstAidKit,
+    icon3d: 'bandage' as Icon3DName,
     gradient: ['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.04)'] as [string, string],
     description: 'Body map logging + AI tips',
     route: '/(tabs)/fitness/pain-tracker',
@@ -116,6 +122,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'accessibility' as keyof typeof Ionicons.glyphMap,
     iconColor: '#A855F7',
     phosphorIcon: PersonSimpleRun,
+    icon3d: 'running' as Icon3DName,
     gradient: ['rgba(168,85,247,0.15)', 'rgba(168,85,247,0.05)'] as [string, string],
     description: 'AI recovery + flexibility',
     route: '/(tabs)/fitness/mobility',
@@ -126,6 +133,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'storefront' as keyof typeof Ionicons.glyphMap,
     iconColor: '#F59E0B',
     phosphorIcon: Storefront,
+    icon3d: 'store' as Icon3DName,
     gradient: ['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)'] as [string, string],
     description: 'Premium programs & coaching',
     route: '/(tabs)/fitness/marketplace',
@@ -136,6 +144,7 @@ const FITNESS_NAV_CARDS = [
     icon: 'camera-outline' as keyof typeof Ionicons.glyphMap,
     iconColor: '#EC4899',
     phosphorIcon: Camera,
+    icon3d: 'camera' as Icon3DName,
     gradient: ['rgba(236,72,153,0.15)', 'rgba(236,72,153,0.05)'] as [string, string],
     description: 'Timelapse + AI analysis',
     route: '/(tabs)/fitness/progress-photos',
@@ -495,7 +504,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Weekly volume: ${formatVolume(weeklyVolume)}`}
             >
-              <Barbell size={18} color={colors.accent.primary} weight="duotone" />
+              <Icon3D name="dumbbell" size={22} />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {weeklyVolume > 0 ? formatVolume(weeklyVolume) : '—'}
               </Text>
@@ -522,7 +531,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Workouts this week: ${workoutsThisWeek}`}
             >
-              <Barbell size={18} color={colors.accent.success} weight="duotone" />
+              <Icon3D name="dumbbell" size={22} />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {workoutsThisWeek > 0 ? String(workoutsThisWeek) : '—'}
               </Text>
@@ -549,7 +558,7 @@ export default function FitnessHomeScreen() {
               onPress={() => handleNavigate('/(tabs)/fitness/progress')}
               accessibilityLabel={`Current streak: ${currentStreak} days`}
             >
-              <Fire size={18} color={colors.accent.fire} weight="duotone" />
+              <Icon3D name="fire" size={22} />
               <Text style={[typography.statSmall, { color: colors.text.primary }]}>
                 {currentStreak > 0 ? `${currentStreak}d` : '—'}
               </Text>
@@ -596,7 +605,9 @@ export default function FitnessHomeScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  {card.phosphorIcon ? (
+                  {card.icon3d ? (
+                    <Icon3D name={card.icon3d} size={28} />
+                  ) : card.phosphorIcon ? (
                     <card.phosphorIcon size={24} color={card.iconColor} weight="duotone" />
                   ) : (
                     <Ionicons name={card.icon} size={24} color={card.iconColor} />
@@ -636,7 +647,7 @@ export default function FitnessHomeScreen() {
                     },
                   ]}
                 >
-                  <Trophy size={16} color={colors.accent.gold} weight="duotone" />
+                  <Icon3D name="trophy" size={20} />
                   <Text
                     style={[
                       typography.captionBold,
@@ -666,7 +677,7 @@ export default function FitnessHomeScreen() {
             onPress={() => handleNavigate('/(tabs)/fitness/progress')}
           >
             <View style={styles.sectionHeader}>
-              <Scales size={18} color={colors.accent.primary} weight="duotone" />
+              <Icon3D name="scale" size={22} />
               <Text style={[typography.h3, { color: colors.text.primary, marginLeft: spacing.sm }]}>
                 Weight Trend
               </Text>
@@ -710,7 +721,7 @@ export default function FitnessHomeScreen() {
                   { backgroundColor: `${colors.accent.primary}15`, borderRadius: 40 },
                 ]}
               >
-                <Trophy size={40} color={colors.accent.gold} weight="duotone" />
+                <Icon3D name="trophy" size={48} />
               </View>
               <Text style={[typography.h2, { color: colors.text.primary, textAlign: 'center', marginBottom: spacing.sm }]}>
                 Your journey starts here

@@ -79,7 +79,12 @@ export default function Index() {
     }
 
     // User is authenticated — check onboarding status
-    fetchProfile()
+    // Race fetchProfile against a 5s timeout so the app doesn't hang
+    // on the splash screen when the network is unreachable.
+    const timeout = new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new Error('Profile fetch timeout')), 5000),
+    );
+    Promise.race([fetchProfile(), timeout])
       .then(() => {
         const currentProfile = useProfileStore.getState().profile;
 

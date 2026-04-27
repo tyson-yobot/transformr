@@ -14,9 +14,13 @@ export function useAuth() {
   const setSession = useAuthStore((s) => s.setSession);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session: currentSession } }) => {
+        setSession(currentSession);
+      })
+      .catch(() => {
+        // Network unreachable — rely on persisted session from AsyncStorage
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);

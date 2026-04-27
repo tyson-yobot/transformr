@@ -62,6 +62,7 @@ import { getTodayGreeting } from '@utils/greetings';
 import { HelpBubble } from '@components/ui/HelpBubble';
 import { LogSuccessRipple } from '@components/ui/LogSuccessRipple';
 import type { LogSuccessRippleHandle } from '@components/ui/LogSuccessRipple';
+import { Icon3D } from '@components/ui/Icon3D';
 import { HelpIcon } from '@components/ui/HelpIcon';
 import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
@@ -404,7 +405,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.fire, alignItems: 'center', justifyContent: 'center' }}>
-            <Fire size={18} color={colors.accent.fire} weight="duotone" />
+            <Icon3D name="fire" size={22} />
           </View>
         ),
         label: 'Streak',
@@ -416,7 +417,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.primary, alignItems: 'center', justifyContent: 'center' }}>
-            <PhBarbell size={18} color={colors.accent.primary} weight="duotone" />
+            <Icon3D name="dumbbell" size={22} />
           </View>
         ),
         label: 'Workouts',
@@ -428,7 +429,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.success, alignItems: 'center', justifyContent: 'center' }}>
-            <BowlFood size={18} color={colors.accent.success} weight="duotone" />
+            <Icon3D name="fork-knife" size={22} />
           </View>
         ),
         label: 'Calories',
@@ -440,7 +441,7 @@ export default function DashboardScreen() {
       {
         icon: (
           <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: colors.dim.cyan, alignItems: 'center', justifyContent: 'center' }}>
-            <Heartbeat size={18} color={colors.accent.cyan} weight="duotone" />
+            <Icon3D name="heart-pulse" size={22} />
           </View>
         ),
         label: 'Readiness',
@@ -554,7 +555,7 @@ export default function DashboardScreen() {
           <LogSuccessRipple ref={rippleWorkoutRef}>
             <QuickActionTile
               icon="barbell-outline"
-              iconNode={<PhBarbell size={28} color={colors.accent.primary} weight="duotone" />}
+              iconNode={<Icon3D name="dumbbell" size={28} />}
               label="Log Workout"
               accentColor={colors.accent.primary}
               dimColor={colors.dim.primary}
@@ -567,7 +568,7 @@ export default function DashboardScreen() {
           <LogSuccessRipple ref={rippleMealRef}>
             <QuickActionTile
               icon="restaurant-outline"
-              iconNode={<ForkKnife size={28} color={colors.accent.success} weight="duotone" />}
+              iconNode={<Icon3D name="fork-knife" size={28} />}
               label="Log Meal"
               accentColor={colors.accent.success}
               dimColor={colors.dim.success}
@@ -580,7 +581,7 @@ export default function DashboardScreen() {
           <LogSuccessRipple ref={rippleWeightRef}>
             <QuickActionTile
               icon="scale-outline"
-              iconNode={<Scales size={28} color={colors.accent.cyan} weight="duotone" />}
+              iconNode={<Icon3D name="scale" size={28} />}
               label="Log Weight"
               accentColor={colors.accent.cyan}
               dimColor={colors.dim.cyan}
@@ -918,7 +919,7 @@ export default function DashboardScreen() {
           <PlanRow
             icon="barbell"
             iconColor={colors.accent.primary}
-            iconNode={<PhBarbell size={20} color={colors.accent.primary} weight="duotone" />}
+            iconNode={<Icon3D name="dumbbell" size={24} />}
             label="Workout"
             detail={activeSession ? 'In progress' : 'Scheduled'}
             done={!!activeSession?.completed_at}
@@ -926,7 +927,7 @@ export default function DashboardScreen() {
           <PlanRow
             icon="restaurant"
             iconColor={colors.accent.success}
-            iconNode={<ForkKnife size={20} color={colors.accent.success} weight="duotone" />}
+            iconNode={<Icon3D name="fork-knife" size={24} />}
             label="Meals logged"
             detail={`${todayLogs.length}/4`}
             done={todayLogs.length >= 4}
@@ -935,7 +936,7 @@ export default function DashboardScreen() {
           <PlanRow
             icon="checkmark-circle-outline"
             iconColor={colors.accent.info}
-            iconNode={<CheckCircle size={20} color={colors.accent.info} weight="duotone" />}
+            iconNode={<Icon3D name="check" size={24} />}
             label="Habits remaining"
             detail={`${habitsRemaining} left`}
             done={habitsRemaining === 0}

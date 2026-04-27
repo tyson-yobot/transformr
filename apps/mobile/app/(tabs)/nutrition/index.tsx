@@ -53,6 +53,7 @@ import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { Icon3D, type Icon3DName } from '@components/ui/Icon3D';
 import { HELP } from '../../../constants/helpContent';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
@@ -71,18 +72,19 @@ interface MealSection {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
   phosphorIcon?: PhosphorIconComponent;
+  icon3d?: Icon3DName;
 }
 
 // MEAL_SECTIONS is defined as a function so it can use theme colors at render time
 function getMealSections(colors: ReturnType<typeof useTheme>['colors']): MealSection[] {
   return [
-    { type: 'breakfast', label: 'Breakfast', icon: 'sunny-outline', color: colors.accent.warning, phosphorIcon: Sun },
-    { type: 'lunch', label: 'Lunch', icon: 'restaurant-outline', color: colors.accent.success, phosphorIcon: ForkKnife },
-    { type: 'dinner', label: 'Dinner', icon: 'moon-outline', color: colors.accent.info, phosphorIcon: Moon },
-    { type: 'snack', label: 'Snacks', icon: 'nutrition-outline', color: colors.accent.pink, phosphorIcon: Cookie },
-    { type: 'shake', label: 'Shakes', icon: 'water-outline', color: colors.accent.cyan, phosphorIcon: Drop },
-    { type: 'pre_workout', label: 'Pre-Workout', icon: 'flash-outline', color: colors.accent.fire, phosphorIcon: Lightning },
-    { type: 'post_workout', label: 'Post-Workout', icon: 'barbell-outline', color: colors.accent.primary, phosphorIcon: Barbell },
+    { type: 'breakfast', label: 'Breakfast', icon: 'sunny-outline', color: colors.accent.warning, phosphorIcon: Sun, icon3d: 'sun' },
+    { type: 'lunch', label: 'Lunch', icon: 'restaurant-outline', color: colors.accent.success, phosphorIcon: ForkKnife, icon3d: 'fork-knife' },
+    { type: 'dinner', label: 'Dinner', icon: 'moon-outline', color: colors.accent.info, phosphorIcon: Moon, icon3d: 'moon' },
+    { type: 'snack', label: 'Snacks', icon: 'nutrition-outline', color: colors.accent.pink, phosphorIcon: Cookie, icon3d: 'cookie' },
+    { type: 'shake', label: 'Shakes', icon: 'water-outline', color: colors.accent.cyan, phosphorIcon: Drop, icon3d: 'drink' },
+    { type: 'pre_workout', label: 'Pre-Workout', icon: 'flash-outline', color: colors.accent.fire, phosphorIcon: Lightning, icon3d: 'lightning' },
+    { type: 'post_workout', label: 'Post-Workout', icon: 'barbell-outline', color: colors.accent.primary, phosphorIcon: Barbell, icon3d: 'dumbbell' },
   ];
 }
 
@@ -330,14 +332,14 @@ export default function NutritionHomeScreen() {
             accessibilityLabel="Saved meals"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md }]}
           >
-            <BookmarkSimple size={20} color={colors.text.secondary} />
+            <Icon3D name="bookmark" size={22} />
           </Pressable>
           <Pressable
             onPress={() => { hapticLight(); router.push('/(tabs)/nutrition/analytics'); }}
             accessibilityLabel="Nutrition analytics"
             style={[styles.headerBtn, { backgroundColor: colors.background.secondary, borderRadius: borderRadius.md, marginLeft: spacing.sm }]}
           >
-            <ChartBar size={20} color={colors.text.secondary} />
+            <Icon3D name="bar-chart" size={22} />
           </Pressable>
         </View>
       </View>
@@ -569,7 +571,9 @@ export default function NutritionHomeScreen() {
                     alignItems: 'center', justifyContent: 'center',
                     marginRight: spacing.sm,
                   }}>
-                    {section.phosphorIcon ? (
+                    {section.icon3d ? (
+                      <Icon3D name={section.icon3d} size={22} />
+                    ) : section.phosphorIcon ? (
                       <section.phosphorIcon size={16} color={section.color} weight="duotone" />
                     ) : (
                       <Ionicons name={section.icon} size={16} color={section.color} />
