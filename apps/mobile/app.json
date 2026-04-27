@@ -13,8 +13,6 @@
     "scheme": "com.automateai.transformr",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#0C0A15"
     },
     "assetBundlePatterns": [
@@ -98,9 +96,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0C0A15",
-          "image": "./assets/images/splash.png",
-          "imageWidth": 200
+          "backgroundColor": "#0C0A15"
         }
       ],
       [

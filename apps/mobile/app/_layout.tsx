@@ -141,18 +141,17 @@ export default function RootLayout() {
     return () => sub.remove();
   }, [handleOAuthUrl]);
 
-  const onLayoutReady = useCallback(async () => {
+  // Hide the native splash screen immediately on mount — our custom SplashOverlay covers everything
+  useEffect(() => {
+    void SplashScreen.hideAsync();
+  }, []);
+
+  // Hide the custom SplashOverlay once fonts are loaded (no artificial delay)
+  useEffect(() => {
     if (fontsLoaded) {
-      // Hide the native splash immediately — our custom branded overlay takes over
-      await SplashScreen.hideAsync();
-      // Show the branded splash overlay briefly, then fade out
-      setTimeout(() => setShowSplash(false), 400);
+      setShowSplash(false);
     }
   }, [fontsLoaded]);
-
-  useEffect(() => {
-    void onLayoutReady();
-  }, [onLayoutReady]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
