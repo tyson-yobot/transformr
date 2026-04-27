@@ -98,11 +98,17 @@ export default function RootLayout() {
     if (!url.includes('auth/callback')) return;
     try {
       const parsed = new URL(url);
+
+      // PKCE code exchange is handled by authStore (foreground) or callback.tsx (fallback).
+      // Do NOT call exchangeCodeForSession here — a PKCE code is single-use and a
+      // duplicate exchange attempt causes an "invalid grant" race condition.
       const code = parsed.searchParams.get('code');
       if (code) {
-        await supabase.auth.exchangeCodeForSession(code);
+        // Deep link will be routed by Expo Router to callback.tsx
         return;
       }
+
+      // Hash-based token (implicit flow fallback)
       const hash = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
       const hashParams = new URLSearchParams(hash);
       const accessToken = hashParams.get('access_token');

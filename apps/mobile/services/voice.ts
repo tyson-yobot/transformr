@@ -1,4 +1,10 @@
-import { Audio } from 'expo-av';
+import {
+  AudioRecorder,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from 'expo-audio';
+import type { RecordingOptions } from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 import { supabase } from '@/services/supabase';
 
@@ -157,34 +163,33 @@ export async function parseVoiceCommandAI(
   }
 }
 
-let recording: Audio.Recording | null = null;
+let recorder: AudioRecorder | null = null;
 
 export async function startRecording(): Promise<void> {
-  await Audio.requestPermissionsAsync();
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: true,
-    playsInSilentModeIOS: true,
+  await requestRecordingPermissionsAsync();
+  await setAudioModeAsync({
+    allowsRecording: true,
+    playsInSilentMode: true,
   });
 
-  const { recording: newRecording } = await Audio.Recording.createAsync(
-    Audio.RecordingOptionsPresets.HIGH_QUALITY,
-  );
-  recording = newRecording;
+  recorder = new AudioRecorder(RecordingPresets.HIGH_QUALITY as RecordingOptions);
+  await recorder.prepareToRecordAsync();
+  recorder.record();
 }
 
 export async function stopRecording(): Promise<string | null> {
-  if (!recording) return null;
+  if (!recorder) return null;
 
-  await recording.stopAndUnloadAsync();
-  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+  await recorder.stop();
+  await setAudioModeAsync({ allowsRecording: false });
 
-  const uri = recording.getURI();
-  recording = null;
+  const uri = recorder.uri;
+  recorder = null;
   return uri;
 }
 
 export function isRecording(): boolean {
-  return recording !== null;
+  return recorder !== null && recorder.isRecording;
 }
 
 // Transcribe a recorded audio URI to text via the cloud transcription edge function

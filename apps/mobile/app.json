@@ -50,7 +50,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/transformr-icon.png",
-        "backgroundColor": "#0C0A15"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.automateai.transformr",
       "versionCode": 1,
@@ -80,7 +80,6 @@
       "expo-location",
       "expo-local-authentication",
       "expo-secure-store",
-      "expo-av",
       "expo-file-system",
       [
         "expo-font",
@@ -103,7 +102,6 @@
           "enableGooglePay": true
         }
       ],
-      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true

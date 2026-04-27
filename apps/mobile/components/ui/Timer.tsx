@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
+import type { AudioPlayer } from 'expo-audio';
 import { useTheme } from '@theme/index';
 import { ProgressRing } from './ProgressRing';
 
@@ -28,7 +29,7 @@ export function Timer({
   const [remainingSeconds, setRemainingSeconds] = useState(durationSeconds);
   const [timerState, setTimerState] = useState<TimerState>('idle');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<AudioPlayer | null>(null);
 
   const progress = durationSeconds > 0 ? remainingSeconds / durationSeconds : 0;
 
@@ -38,15 +39,20 @@ export function Timer({
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const playCompletionSound = useCallback(async () => {
+  const playCompletionSound = useCallback(() => {
     if (!enableSound) return;
     try {
-      const { sound } = await Audio.Sound.createAsync(
+      // Clean up previous player if any
+      if (playerRef.current) {
+        playerRef.current.release();
+      }
+      const player = createAudioPlayer(
         // Use a system-compatible approach; falls back silently if unavailable
         { uri: 'https://assets.mixkit.co/active_storage/sfx/2869/2869.wav' },
-        { shouldPlay: true, volume: 0.5 },
       );
-      soundRef.current = sound;
+      player.volume = 0.5;
+      player.play();
+      playerRef.current = player;
     } catch {
       // Sound playback is best-effort
     }
@@ -68,7 +74,7 @@ export function Timer({
   useEffect(() => {
     return () => {
       clearTimer();
-      soundRef.current?.unloadAsync();
+      playerRef.current?.remove();
     };
   }, [clearTimer]);
 

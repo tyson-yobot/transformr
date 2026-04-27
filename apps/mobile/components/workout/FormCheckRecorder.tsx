@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import Animated, {
   cancelAnimation,
   useSharedValue,
@@ -21,6 +21,15 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '@theme/index';
 
 type RecorderState = 'idle' | 'countdown' | 'recording' | 'review';
+
+/** Extracted review player so useVideoPlayer hook can be called unconditionally */
+function ReviewVideoPlayer({ uri, style }: { uri: string; style: ViewStyle }) {
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+    p.play();
+  });
+  return <VideoView player={player} style={style} nativeControls contentFit="contain" />;
+}
 
 interface FormCheckRecorderProps {
   maxDurationSeconds?: number;
@@ -233,14 +242,7 @@ export function FormCheckRecorder({
           style,
         ]}
       >
-        <Video
-          source={{ uri: videoUri }}
-          style={styles.videoPreview}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          shouldPlay
-        />
+        <ReviewVideoPlayer uri={videoUri} style={styles.videoPreview} />
         <View style={[styles.reviewActions, { padding: spacing.lg, gap: spacing.md }]}>
           <Pressable
             onPress={handleRetake}

@@ -9,7 +9,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { useVideoPlayer, VideoView } from 'expo-video';
 
 export interface PillarVideo {
   source: number; // require() local asset → number
@@ -40,6 +40,41 @@ export function VideoBackground({
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const isMounted = useRef(true);
   const cycleTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const currentVideo = videos[currentIndex];
+
+  const player = useVideoPlayer(currentVideo?.source ?? null, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.volume = 0;
+    p.play();
+  });
+
+  // Replace the player source when the video index changes
+  useEffect(() => {
+    if (currentVideo?.source != null) {
+      player.replace(currentVideo.source);
+      player.loop = true;
+      player.muted = true;
+      player.volume = 0;
+      player.play();
+    }
+    // Only react to currentIndex changes — player is stable across renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex]);
+
+  // Handle player errors — skip to next video
+  useEffect(() => {
+    const subscription = player.addListener('statusChange', (payload) => {
+      if (payload.status === 'error' && isMounted.current) {
+        if (cycleTimer.current) clearInterval(cycleTimer.current);
+        cycleToNext();
+        cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
+      }
+    });
+    return () => subscription.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player, cycleDurationMs]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -79,32 +114,16 @@ export function VideoBackground({
     };
   }, [cycleToNext, cycleDurationMs]);
 
-  const handleVideoError = useCallback(() => {
-    // Skip to next video on error
-    if (cycleTimer.current) clearInterval(cycleTimer.current);
-    cycleToNext();
-    cycleTimer.current = setInterval(cycleToNext, cycleDurationMs);
-  }, [cycleToNext, cycleDurationMs]);
-
-  const currentVideo = videos[currentIndex];
-
   return (
     <View style={styles.container}>
       {/* Video layer — fades in/out on cycle */}
       <Animated.View style={[styles.absoluteFill, { opacity: fadeAnim }]}>
-        {currentVideo != null && (
-          <Video
-            key={currentIndex}
-            source={currentVideo.source}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            shouldPlay
-            isLooping
-            isMuted
-            volume={0}
-            onError={handleVideoError}
-          />
-        )}
+        <VideoView
+          player={player}
+          style={styles.video}
+          contentFit="cover"
+          nativeControls={false}
+        />
       </Animated.View>
 
       {/* Dark overlay for text readability */}
