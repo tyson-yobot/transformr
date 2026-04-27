@@ -168,6 +168,28 @@ If the session is already poisoned, start a fresh session.
 
 ---
 
+## 2026-04 — Supabase Site URL Changed to localhost:3000
+
+**What happened:** An agent changed the Supabase Site URL from 
+com.automateai.transformr:// to http://localhost:3000 during a 
+development session (likely referral system or web testing work).
+This caused Google OAuth to redirect to localhost after authentication,
+returning "OAuth state parameter missing" and breaking all social sign-in.
+
+**Root cause:** Agent was testing web flows and set the Site URL to 
+localhost without restoring it. The mobile app redirect URL was correct
+but the Site URL override caused Supabase to route the callback wrong.
+
+**Fix:** Supabase Dashboard → Authentication → URL Configuration →
+Site URL → set back to com.automateai.transformr://
+
+**Rule going forward:** NEVER change the Supabase Site URL. It must
+always be com.automateai.transformr:// for the mobile app OAuth flow
+to work. If web testing is needed, use Redirect URLs allowlist only —
+never change the Site URL.
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:
