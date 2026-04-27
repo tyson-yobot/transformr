@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
@@ -523,7 +524,8 @@ export default function SupplementsScreen() {
             <HelpBubble id="supps_tiers" message="Start with essentials, add more if budget allows" position="below" />
 
             {activeSupplements.length === 0 && (
-              <View style={styles.emptyState}>
+              <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+                <EmptyStateBackground query="vitamins supplements dark" opacity={0.10} />
                 <Ionicons name="medical-outline" size={48} color={colors.text.muted} />
                 <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
                   No supplements yet

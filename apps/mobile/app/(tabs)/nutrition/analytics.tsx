@@ -30,6 +30,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 type TimeRange = '7d' | '14d' | '30d' | '90d';
@@ -313,7 +314,8 @@ export default function NutritionAnalyticsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {isLoading ? (
-          <View style={[styles.loadingState, { gap: spacing.lg }]}>
+          <View style={[styles.loadingState, { gap: spacing.lg, position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+            <EmptyStateBackground query="healthy food macros dark" opacity={0.10} />
             <Skeleton variant="card" height={160} />
             <Skeleton variant="card" height={140} />
             <Skeleton variant="card" height={100} />

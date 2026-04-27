@@ -45,6 +45,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 const TIER_ICONS: Record<MealPrepTier, { label: string; icon: string }> = {
@@ -209,7 +210,8 @@ export default function MealPrepScreen() {
 
   if (!prepResponse) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.container, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="meal prep containers dark" opacity={0.10} />
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={[styles.centerContent, { padding: spacing.lg }]}

@@ -34,6 +34,7 @@ import type { Food } from '@app-types/database';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { checkFoodBeforeLogging, type ComplianceResult } from '@services/ai/compliance';
@@ -702,7 +703,8 @@ export default function AddFoodScreen() {
                     ))}
                   </View>
                 ) : searchQuery.length >= 2 ? (
-                  <View style={styles.emptyState}>
+                  <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+                    <EmptyStateBackground query="healthy food ingredients dark" opacity={0.10} />
                     <Ionicons name="search-outline" size={48} color={colors.text.muted} />
                     <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md, textAlign: 'center' }]}>
                       No foods found for "{searchQuery}"
@@ -716,7 +718,8 @@ export default function AddFoodScreen() {
                     />
                   </View>
                 ) : (
-                  <View style={styles.emptyState}>
+                  <View style={[styles.emptyState, { position: 'relative', overflow: 'hidden', borderRadius: 16 }]}>
+                    <EmptyStateBackground query="healthy food ingredients dark" opacity={0.10} />
                     <Ionicons name="nutrition-outline" size={48} color={colors.text.muted} />
                     <Text style={[typography.body, { color: colors.text.muted, marginTop: spacing.md }]}>
                       Start typing to search foods

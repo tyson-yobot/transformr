@@ -42,6 +42,7 @@ import { useNavigation } from '@react-navigation/native';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 
 interface CheckedState {
@@ -213,7 +214,8 @@ export default function GroceryListScreen() {
 
   if (!groceryData && !isGenerating) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <View style={[styles.container, { backgroundColor: colors.background.primary, overflow: 'hidden' }]}>
+        <EmptyStateBackground query="fresh vegetables dark market" opacity={0.10} />
       <StatusBar style="light" backgroundColor="#0C0A15" />
         <ScrollView
           contentContainerStyle={[styles.centerContent, { padding: spacing.lg }]}
