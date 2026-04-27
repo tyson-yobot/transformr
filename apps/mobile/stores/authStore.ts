@@ -7,7 +7,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import type { Session, User, Subscription } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
@@ -131,46 +130,61 @@ export const useAuthStore = create<AuthStore>()(
       signInWithGoogle: async () => {
         set({ loading: true, error: null });
         try {
-          await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
-          const response = await GoogleSignin.signIn();
-          const idToken = response.data?.idToken;
-
-          if (!idToken) {
-            throw new Error('No ID token returned from Google Sign-In');
-          }
-
-          const { data, error } = await supabase.auth.signInWithIdToken({
+          const redirectUrl = Linking.createURL('auth/callback');
+          const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            token: idToken,
+            options: {
+              redirectTo: redirectUrl,
+              queryParams: { access_type: 'offline', prompt: 'select_account' },
+              skipBrowserRedirect: true,
+            },
           });
-
           if (error) throw error;
+          if (!data.url) throw new Error('No auth URL returned');
 
-          set({
-            session: data.session,
-            user: data.user,
-            loading: false,
-            error: null,
-          });
-        } catch (err: unknown) {
-          if (err !== null && typeof err === 'object' && 'code' in err) {
-            const code = (err as { code: string }).code;
-            if (code === statusCodes.SIGN_IN_CANCELLED) {
-              set({ loading: false, error: null });
+          await WebBrowser.warmUpAsync();
+          const result = await WebBrowser.openAuthSessionAsync(
+            data.url,
+            redirectUrl,
+            { showInRecents: false }
+          );
+          await WebBrowser.coolDownAsync();
+
+          if (result.type === 'success' && result.url) {
+            const parsed = new URL(result.url);
+            const code = parsed.searchParams.get('code');
+            if (code) {
+              await supabase.auth.exchangeCodeForSession(code);
+              set({ loading: false });
               return;
             }
-            if (code === statusCodes.IN_PROGRESS) {
-              set({ loading: false, error: null });
+            const hash = parsed.hash.startsWith('#') ? parsed.hash.substring(1) : '';
+            const hashParams = new URLSearchParams(hash);
+            const accessToken = hashParams.get('access_token') ??
+              parsed.searchParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') ??
+              parsed.searchParams.get('refresh_token');
+            if (accessToken && refreshToken) {
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              set({ loading: false });
               return;
             }
-            if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-              set({ loading: false, error: 'Google Play Services is not available on this device.' });
-              return;
-            }
+            const oauthError = parsed.searchParams.get('error') ?? hashParams.get('error');
+            const oauthErrorDesc = parsed.searchParams.get('error_description') ??
+              hashParams.get('error_description');
+            if (oauthError) throw new Error(oauthErrorDesc ?? oauthError);
           }
-          const message = err instanceof Error ? err.message : 'Google sign-in failed. Please try again.';
-          set({ error: message, loading: false });
+          if (result.type === 'cancel') {
+            set({ loading: false });
+            return;
+          }
+          set({ loading: false, error: 'Google sign in did not complete. Please try again.' });
+        } catch (err: unknown) {
+          const raw = err instanceof Error ? err.message : 'Google sign-in failed';
+          set({ error: raw, loading: false });
         }
       },
 
