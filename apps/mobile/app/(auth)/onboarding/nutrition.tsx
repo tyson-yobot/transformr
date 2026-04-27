@@ -128,11 +128,15 @@ export default function NutritionScreen() {
       >
         {/* Icon + Headline */}
         <View style={styles.heroSection}>
-          <Image
-            source={require('@assets/icons/transformr-icon.png')}
-            style={styles.icon}
-            contentFit="contain"
-          />
+          <View style={styles.logoSection}>
+            <View style={styles.iconGlowOuter} />
+            <View style={styles.iconGlow} />
+            <Image
+              source={require('@assets/icons/transformr-icon.png')}
+              style={styles.icon}
+              contentFit="contain"
+            />
+          </View>
           <Text style={styles.headline}>Fuel the{'\n'}transformation.</Text>
           <Text style={styles.subheadline}>
             We've calculated your targets based on your goals. Your body, your numbers — adjust if you know better.
@@ -387,7 +391,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
-  icon: { width: 56, height: 56, marginBottom: 12 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 28,
     fontWeight: '700',

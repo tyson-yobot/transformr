@@ -31,9 +31,9 @@ export const DEFAULT_LONG_BREAK_MINUTES = 15;
 // Nutrition
 export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'shake', 'pre_workout', 'post_workout'] as const;
 export const MACRO_COLORS = {
-  protein: '#10B981',
-  carbs: '#3B82F6',
-  fat: '#F59E0B',
+  protein: '#A855F7',  // Purple — structure / protein
+  carbs: '#06B6D4',    // Cyan — energy / carbs
+  fat: '#EC4899',      // Pink — fat macro
 } as const;
 
 // Fitness

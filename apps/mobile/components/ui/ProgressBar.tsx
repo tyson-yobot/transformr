@@ -6,6 +6,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@theme/index';
 
 interface ProgressBarProps {
@@ -13,6 +14,8 @@ interface ProgressBarProps {
   label?: string;
   showPercentage?: boolean;
   color?: string;
+  /** When provided, renders a left-to-right gradient fill instead of a flat color */
+  gradient?: readonly [string, string, ...string[]];
   height?: number;
   style?: ViewStyle;
   animationDuration?: number;
@@ -23,6 +26,7 @@ export const ProgressBar = React.memo(function ProgressBar({
   label,
   showPercentage = false,
   color,
+  gradient,
   height = 8,
   style,
   animationDuration = 500,
@@ -89,12 +93,21 @@ export const ProgressBar = React.memo(function ProgressBar({
             styles.fill,
             {
               height,
-              backgroundColor: fillColor,
               borderRadius: height / 2,
+              backgroundColor: gradient ? 'transparent' : fillColor,
             },
             animatedFillStyle,
           ]}
-        />
+        >
+          {gradient && (
+            <LinearGradient
+              colors={gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[StyleSheet.absoluteFill, { borderRadius: height / 2 }]}
+            />
+          )}
+        </Animated.View>
       </View>
     </View>
   );

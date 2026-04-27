@@ -58,13 +58,26 @@ export default function FitnessScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
+  const fitnessPrefs = useSettingsStore((s) => s.fitnessPreferences);
   const setFitnessPrefs = useSettingsStore((s) => s.setFitnessPrefs);
 
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>('moderate');
-  const [workoutDays, setWorkoutDays] = useState(4);
-  const [experience, setExperience] = useState<Difficulty>('intermediate');
-  const [equipment, setEquipment] = useState<Equipment[]>(['barbell', 'dumbbell']);
+  // Initialize from saved data so selections persist across back-navigation
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(() =>
+    (profile?.activity_level as ActivityLevel) ?? 'moderate',
+  );
+  const [workoutDays, setWorkoutDays] = useState(() =>
+    fitnessPrefs.workoutDaysPerWeek,
+  );
+  const [experience, setExperience] = useState<Difficulty>(() =>
+    fitnessPrefs.experienceLevel,
+  );
+  const [equipment, setEquipment] = useState<Equipment[]>(() =>
+    (fitnessPrefs.equipment as Equipment[]).length > 0
+      ? (fitnessPrefs.equipment as Equipment[])
+      : ['barbell', 'dumbbell'],
+  );
 
   const toggleEquipment = useCallback((item: Equipment) => {
     setEquipment((prev) =>
@@ -89,11 +102,15 @@ export default function FitnessScreen() {
         >
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
-            <Image
-              source={require('@assets/icons/transformr-icon.png')}
-              style={styles.icon}
-              contentFit="contain"
-            />
+            <View style={styles.logoSection}>
+              <View style={styles.iconGlowOuter} />
+              <View style={styles.iconGlow} />
+              <Image
+                source={require('@assets/icons/transformr-icon.png')}
+                style={styles.icon}
+                contentFit="contain"
+              />
+            </View>
             <Text style={styles.headline}>Let's build your{'\n'}training plan.</Text>
             <Text style={styles.subheadline}>
               Tell us how you train now. We'll meet you exactly where you are and build from there.
@@ -307,7 +324,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
-  icon: { width: 56, height: 56, marginBottom: 12 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 28,
     fontWeight: '700',

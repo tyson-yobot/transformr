@@ -22,7 +22,7 @@ import { Input } from '@components/ui/Input';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
-import { formatDateInput, dateInputToISO } from '@utils/formatters';
+import { formatDateInput, dateInputToISO, isoToDateInput } from '@utils/formatters';
 
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
@@ -51,14 +51,30 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const updateProfile = useProfileStore((s) => s.updateProfile);
+  const profile = useProfileStore((s) => s.profile);
 
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [gender, setGender] = useState<Gender | null>(null);
-  const [heightFeet, setHeightFeet] = useState('');
-  const [heightInches, setHeightInches] = useState('');
-  const [currentWeight, setCurrentWeight] = useState('');
-  const [goalWeight, setGoalWeight] = useState('');
-  const [goalDirection, setGoalDirection] = useState<GoalDirection>('lose');
+  // Initialize from saved profile so data persists across back-navigation
+  const [dateOfBirth, setDateOfBirth] = useState(() =>
+    profile?.date_of_birth ? isoToDateInput(profile.date_of_birth) : '',
+  );
+  const [gender, setGender] = useState<Gender | null>(() =>
+    (profile?.gender as Gender) ?? null,
+  );
+  const [heightFeet, setHeightFeet] = useState(() =>
+    profile?.height_inches ? String(Math.floor(profile.height_inches / 12)) : '',
+  );
+  const [heightInches, setHeightInches] = useState(() =>
+    profile?.height_inches ? String(profile.height_inches % 12) : '',
+  );
+  const [currentWeight, setCurrentWeight] = useState(() =>
+    profile?.current_weight ? String(profile.current_weight) : '',
+  );
+  const [goalWeight, setGoalWeight] = useState(() =>
+    profile?.goal_weight ? String(profile.goal_weight) : '',
+  );
+  const [goalDirection, setGoalDirection] = useState<GoalDirection>(() =>
+    (profile?.goal_direction as GoalDirection) ?? 'lose',
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = useCallback((): boolean => {
@@ -137,11 +153,15 @@ export default function ProfileScreen() {
         >
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
-            <Image
-              source={require('@assets/icons/transformr-icon.png')}
-              style={styles.icon}
-              contentFit="contain"
-            />
+            <View style={styles.logoSection}>
+              <View style={styles.iconGlowOuter} />
+              <View style={styles.iconGlow} />
+              <Image
+                source={require('@assets/icons/transformr-icon.png')}
+                style={styles.icon}
+                contentFit="contain"
+              />
+            </View>
             <Text style={styles.headline}>Where are you{'\n'}starting from?</Text>
             <Text style={styles.subheadline}>
               No judgment here. Every transformation has a starting line — this is yours.
@@ -310,7 +330,7 @@ export default function ProfileScreen() {
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 20, marginBottom: spacing.xs }}>{dir.icon}</Text>
+                    <Text style={{ fontSize: 20, marginBottom: spacing.xs, color: isSelected ? colors.accent.primary : colors.text.primary }}>{dir.icon}</Text>
                     <Text
                       style={[
                         typography.captionBold,
@@ -346,7 +366,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
-  icon: { width: 56, height: 56, marginBottom: 12 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 28,
     fontWeight: '700',

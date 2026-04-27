@@ -3,7 +3,8 @@
 // =============================================================================
 
 import { useState, useCallback, useEffect, type ComponentType } from 'react';
-import { View, Text, ScrollView, StyleSheet, Switch, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Switch, KeyboardAvoidingView, Platform, Share } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,6 +61,14 @@ export default function PartnerScreen() {
     }
   }, [mode, generatedCode, createPartnershipInvite]);
 
+  const handleShareCode = useCallback(async () => {
+    if (!generatedCode) return;
+    hapticLight();
+    await Share.share({
+      message: `Join me on TRANSFORMR! Use my partner invite code: ${generatedCode}\n\nDownload the app and enter this code to connect with me.`,
+    });
+  }, [generatedCode]);
+
   const togglePrivacy = useCallback((key: string) => {
     hapticLight();
     setPrivacy((prev) =>
@@ -81,16 +90,20 @@ export default function PartnerScreen() {
   // Choice screen — full background + action buttons
   if (mode === 'choice') {
     return (
-      <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-partner.jpg')}>
+      <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-partner.jpg')} overlayIntensity="light">
         <StatusBar style="light" backgroundColor="#0C0A15" />
         <View style={styles.choiceRoot}>
           {/* Heading */}
           <View style={styles.choiceHero}>
-            <Image
-              source={require('@assets/icons/transformr-icon.png')}
-              style={styles.icon}
-              contentFit="contain"
-            />
+            <View style={styles.logoSection}>
+              <View style={styles.iconGlowOuter} />
+              <View style={styles.iconGlow} />
+              <Image
+                source={require('@assets/icons/transformr-icon.png')}
+                style={styles.icon}
+                contentFit="contain"
+              />
+            </View>
             <Text style={styles.headline}>Better together.</Text>
             <Text style={styles.subheadline}>
               Invite your partner to train alongside you. Shared goals, live workout sync, and accountability that actually works.
@@ -128,7 +141,7 @@ export default function PartnerScreen() {
   }
 
   return (
-    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-partner.jpg')}>
+    <OnboardingBackground imageUrl={HERO_URL} blurHash={BLUR_HASH} localSource={require('@assets/images/hero-partner.jpg')} overlayIntensity="light">
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -142,11 +155,15 @@ export default function PartnerScreen() {
         >
           {/* Icon + Headline */}
           <View style={styles.heroSection}>
-            <Image
-              source={require('@assets/icons/transformr-icon.png')}
-              style={styles.icon}
-              contentFit="contain"
-            />
+            <View style={styles.logoSection}>
+              <View style={styles.iconGlowOuter} />
+              <View style={styles.iconGlow} />
+              <Image
+                source={require('@assets/icons/transformr-icon.png')}
+                style={styles.icon}
+                contentFit="contain"
+              />
+            </View>
             <Text style={styles.headline}>Better together.</Text>
             <Text style={styles.subheadline}>
               {mode === 'invite'
@@ -171,9 +188,16 @@ export default function PartnerScreen() {
                 >
                   {generatedCode || 'Generating…'}
                 </Text>
-                <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm }]}>
+                <Text style={[typography.caption, { color: colors.text.muted, marginTop: spacing.sm, marginBottom: spacing.md }]}>
                   Share this code with your partner
                 </Text>
+                <Button
+                  title="Share via Text or Email"
+                  onPress={handleShareCode}
+                  variant="outline"
+                  size="md"
+                  leftIcon={<Ionicons name="share-outline" size={18} color={colors.accent.primary} />}
+                />
               </Card>
             ) : (
               <Input
@@ -269,7 +293,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
-  icon: { width: 56, height: 56, marginBottom: 12 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 28,
     fontWeight: '700',

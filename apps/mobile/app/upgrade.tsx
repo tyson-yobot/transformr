@@ -49,20 +49,49 @@ const TIER_FEATURES: Record<UpgradeTier, string[]> = {
     'AI meal camera & grocery lists',
     'Readiness score & insights',
     'Wearable integrations',
+    'Unlimited habit tracking',
+    'Unlimited data history',
+    'AI adaptive programming',
+    'Smart notifications',
+    'Pain & mobility tracking',
+    'Business & finance tracking',
   ],
   elite: [
-    'Everything in Pro',
-    'Business & finance tracking',
+    'Everything in Pro, plus:',
+    'AI form check video analysis',
+    'Ghost Mode training',
     'AI trajectory simulator',
-    'Priority support',
+    'AI sleep optimizer',
+    'AI progress photo analysis',
+    'Custom dashboard builder',
+    'NFC & geofence triggers',
+    'AI social content generation',
+    'Priority AI response times',
   ],
   partners: [
-    'Everything in Elite',
-    'Live partner sync',
-    'Accountability features',
-    'Shared challenge progress',
+    'Everything in Elite, plus:',
+    'Live partner sync workouts',
+    'Joint streaks & accountability',
+    'Partner nudges & reactions',
+    'Partner challenges',
+    'Shared vision board',
+    'Couples weekly review',
+    'Partner activity feed',
+    'Partner data permissions',
   ],
 };
+
+const FREE_FEATURES: string[] = [
+  'Workout logging & exercise library',
+  'Manual food logging & barcode scanner',
+  'Weight tracking',
+  'Basic readiness score',
+  'Streak tracking',
+  'Up to 3 habits',
+  '7-day data history',
+  'Goal setting',
+  'View community challenges',
+];
 
 const TIER_LABELS: Record<UpgradeTier, string> = {
   pro:      'Pro',
@@ -461,6 +490,50 @@ export default function UpgradeScreen() {
             title="Trajectory simulator"
             subtitle="See where you'll be in 30, 60, 90 days"
           />
+          <FeatureHighlightRow
+            icon="body-outline"
+            iconColor={colors.accent.secondary}
+            title="Ghost Mode training"
+            subtitle="Race your past self in any workout"
+          />
+          <FeatureHighlightRow
+            icon="moon-outline"
+            iconColor={colors.accent.info}
+            title="AI sleep optimizer"
+            subtitle="Optimize your recovery with intelligent sleep analysis"
+          />
+        </View>
+
+        {/* What's included free */}
+        <SectionHeader title="Already included free" style={{ marginTop: spacing.sm }} />
+        <View
+          style={{
+            backgroundColor: colors.background.tertiary,
+            borderRadius: borderRadius.md,
+            padding: spacing.md,
+            marginBottom: spacing.md,
+          }}
+        >
+          {FREE_FEATURES.map((feature) => (
+            <View key={feature} style={[styles.featureRow, { marginTop: 3 }]}>
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.accent.success, marginRight: 6 },
+                ]}
+              >
+                ✓
+              </Text>
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.text.secondary, flex: 1 },
+                ]}
+              >
+                {feature}
+              </Text>
+            </View>
+          ))}
         </View>
 
         {/* CTA button */}

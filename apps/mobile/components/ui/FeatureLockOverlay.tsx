@@ -52,6 +52,28 @@ const TIER_LABELS: Record<SubscriptionTier, string> = {
   partners: 'Partners',
 };
 
+const TIER_HIGHLIGHTS: Record<SubscriptionTier, string[]> = {
+  free: [],
+  pro: [
+    'Unlimited AI coaching',
+    'AI meal camera & grocery lists',
+    'Readiness score & insights',
+    'Unlimited habit tracking',
+  ],
+  elite: [
+    'AI form check video analysis',
+    'Ghost Mode training',
+    'AI trajectory simulator',
+    'Custom dashboard builder',
+  ],
+  partners: [
+    'Live partner sync workouts',
+    'Joint streaks & accountability',
+    'Partner challenges & nudges',
+    'Shared vision board',
+  ],
+};
+
 interface FeatureLockOverlayProps {
   featureKey: FeatureKey;
   title: string;
@@ -141,6 +163,19 @@ export function FeatureLockOverlay({
         {description}
       </Text>
 
+      {TIER_HIGHLIGHTS[requiredTier].length > 0 && (
+        <View style={[styles.highlightList, { marginBottom: 20 }]}>
+          {TIER_HIGHLIGHTS[requiredTier].map((feature) => (
+            <View key={feature} style={styles.highlightRow}>
+              <Ionicons name="checkmark-circle" size={16} color={accentColor} style={{ marginRight: 8 }} />
+              <Text style={[typography.caption, { color: colors.text.secondary, flex: 1 }]}>
+                {feature}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
       <TouchableOpacity
         style={[
           styles.cta,
@@ -226,5 +261,14 @@ const styles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  highlightList: {
+    width: '100%',
+    paddingHorizontal: 12,
+  },
+  highlightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
   },
 });

@@ -23,6 +23,10 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
 import { useProfileStore } from '@stores/profileStore';
+import { useSettingsStore } from '@stores/settingsStore';
+import { useGoalStore } from '@stores/goalStore';
+import { useBusinessStore } from '@stores/businessStore';
+import { usePartnerStore } from '@stores/partnerStore';
 
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
 const Image = ExpoImage as unknown as ComponentType<ImageProps>;
@@ -65,6 +69,10 @@ export default function ReadyScreen() {
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
+  const fitnessPrefs = useSettingsStore((s) => s.fitnessPreferences);
+  const goals = useGoalStore((s) => s.goals);
+  const businesses = useBusinessStore((s) => s.businesses);
+  const partnership = usePartnerStore((s) => s.partnership);
 
   const buttonScale = useSharedValue(1);
   const buttonOpacity = useSharedValue(0);
@@ -107,7 +115,7 @@ export default function ReadyScreen() {
     opacity: glowOpacity.value,
   }));
 
-  // Dynamic summary from profile data
+  // Dynamic summary from profile data + all onboarding stores
   const { displayName, summaryItems } = useMemo(() => {
     const name = profile?.display_name?.split(' ')[0] ?? null;
     const items: { label: string; value: string; icon: string }[] = [];
@@ -130,8 +138,59 @@ export default function ReadyScreen() {
       items.push({ label: 'Activity', value: levelLabels[profile.activity_level] ?? 'Adaptive', icon: '\uD83D\uDCAA' });
     }
 
+    // Fitness preferences
+    if (fitnessPrefs.workoutDaysPerWeek > 0) {
+      items.push({ label: 'Training', value: `${fitnessPrefs.workoutDaysPerWeek} days/week`, icon: '\uD83C\uDFCB\uFE0F' });
+    }
+    const expLabels: Record<string, string> = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
+    if (fitnessPrefs.experienceLevel) {
+      items.push({ label: 'Experience', value: expLabels[fitnessPrefs.experienceLevel] ?? fitnessPrefs.experienceLevel, icon: '\uD83D\uDCC8' });
+    }
+
+    // Goals
+    if (goals.length > 0) {
+      const primary = goals.reduce((best, g) => ((g.priority ?? 0) > (best.priority ?? 0) ? g : best));
+      items.push({ label: 'Focus', value: primary.title, icon: '\u2B50' });
+      if (goals.length > 1) {
+        items.push({ label: 'Goals', value: `${goals.length} areas`, icon: '\uD83D\uDCCB' });
+      }
+    }
+
+    // Macros
+    if (profile?.daily_protein_target) {
+      items.push({
+        label: 'Macros',
+        value: `${profile.daily_protein_target}p / ${profile.daily_carb_target ?? 0}c / ${profile.daily_fat_target ?? 0}f`,
+        icon: '\uD83E\uDD69',
+      });
+    }
+
+    // Business
+    if (businesses.length > 0) {
+      const biz = businesses[0];
+      if (biz) {
+        items.push({ label: 'Business', value: biz.name, icon: '\uD83D\uDCBC' });
+      }
+    }
+
+    // Partner
+    if (partnership) {
+      items.push({ label: 'Partner', value: 'Connected', icon: '\uD83D\uDC9C' });
+    }
+
+    // Notifications
+    const notifPrefs = profile?.notification_preferences;
+    if (notifPrefs) {
+      const enabledCount = Object.values(notifPrefs).filter(
+        (v) => typeof v === 'object' && v !== null && 'enabled' in v && v.enabled,
+      ).length;
+      if (enabledCount > 0) {
+        items.push({ label: 'Reminders', value: `${enabledCount} active`, icon: '\uD83D\uDD14' });
+      }
+    }
+
     return { displayName: name, summaryItems: items };
-  }, [profile]);
+  }, [profile, fitnessPrefs, goals, businesses, partnership]);
 
   const handleStart = async () => {
     try {
@@ -165,11 +224,15 @@ export default function ReadyScreen() {
 
         {/* Icon + Headline */}
         <View style={styles.heroSection}>
-          <Image
-            source={require('@assets/icons/transformr-icon.png')}
-            style={styles.icon}
-            contentFit="contain"
-          />
+          <View style={styles.logoSection}>
+            <View style={styles.iconGlowOuter} />
+            <View style={styles.iconGlow} />
+            <Image
+              source={require('@assets/icons/transformr-icon.png')}
+              style={styles.icon}
+              contentFit="contain"
+            />
+          </View>
           <Text style={styles.headline}>
             {displayName ? `${displayName}, you're ready.` : "You're ready."}
           </Text>
@@ -265,7 +328,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 28,
   },
-  icon: { width: 64, height: 64, marginBottom: 14 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 32,
     fontWeight: '700',

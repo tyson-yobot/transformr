@@ -6,6 +6,7 @@ import React, { useMemo, memo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { House, Barbell, BowlFood, Trophy, UserCircle } from 'phosphor-react-native';
 import { useTheme } from '@theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChatFAB } from '@components/ui/ChatFAB';
@@ -17,12 +18,14 @@ interface TabIconProps {
   focused: boolean;
 }
 
-const TAB_ICONS: Record<string, { outline: keyof typeof Ionicons.glyphMap; filled: keyof typeof Ionicons.glyphMap }> = {
-  dashboard:  { outline: 'home-outline',        filled: 'home' },
-  fitness:    { outline: 'barbell-outline',      filled: 'barbell' },
-  nutrition:  { outline: 'nutrition-outline',   filled: 'nutrition' },
-  goals:      { outline: 'trophy-outline',      filled: 'trophy' },
-  profile:    { outline: 'person-circle-outline', filled: 'person-circle' },
+type PhosphorIcon = React.ComponentType<{ size?: number; color?: string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' }>;
+
+const PHOSPHOR_TABS: Record<string, PhosphorIcon> = {
+  dashboard:  House,
+  fitness:    Barbell,
+  nutrition:  BowlFood,
+  goals:      Trophy,
+  profile:    UserCircle,
 };
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -31,8 +34,8 @@ const ROUTE_LABELS: Record<string, string> = {
 
 const TabIcon = memo(function TabIcon({ routeName, focused }: TabIconProps) {
   const { colors, typography } = useTheme();
-  const icons = TAB_ICONS[routeName] ?? { outline: 'apps-outline', filled: 'apps' };
-  const iconName = focused ? icons.filled : icons.outline;
+  const PhIcon = PHOSPHOR_TABS[routeName];
+  const tintColor = focused ? colors.accent.primary : colors.text.muted;
 
   return (
     <View style={styles.tabIconContainer}>
@@ -41,7 +44,11 @@ const TabIcon = memo(function TabIcon({ routeName, focused }: TabIconProps) {
         alignItems: 'center', justifyContent: 'center',
         backgroundColor: focused ? colors.dim.primary : 'transparent',
       }}>
-        <Ionicons name={iconName} size={22} color={focused ? colors.accent.primary : colors.text.muted} />
+        {PhIcon ? (
+          <PhIcon size={22} color={tintColor} weight={focused ? 'duotone' : 'regular'} />
+        ) : (
+          <Ionicons name="apps-outline" size={22} color={tintColor} />
+        )}
       </View>
       <Text
         style={[

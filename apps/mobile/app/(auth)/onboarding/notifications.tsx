@@ -3,7 +3,7 @@
 // =============================================================================
 
 import { useState, useCallback, type ComponentType } from 'react';
-import { View, Text, ScrollView, StyleSheet, Switch, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Switch, Pressable, Platform, Alert } from 'react-native';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Notifications from 'expo-notifications';
@@ -16,6 +16,7 @@ import { Input } from '@components/ui/Input';
 import { OnboardingBackground } from '@components/ui/OnboardingBackground';
 import { useProfileStore } from '@stores/profileStore';
 import { hapticLight } from '@utils/haptics';
+import { formatTimeInput, to12Hour, to24Hour } from '@utils/formatters';
 import type { NotificationPreferences } from '@app-types/database';
 
 // Cast needed: expo class components don't satisfy React 19's JSX class element interface
@@ -119,12 +120,35 @@ export default function NotificationsScreen() {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
 
-  const [mealTimes, setMealTimes] = useState<MealTimes>(DEFAULT_MEAL_TIMES);
+  const savedPrefs = profile?.notification_preferences ?? null;
 
-  const updateMealTime = useCallback((meal: keyof MealTimes, time: string) => {
-    setMealTimes((prev) => ({ ...prev, [meal]: time }));
+  const [use24Hour, setUse24Hour] = useState(true);
+  const [mealTimes, setMealTimes] = useState<MealTimes>(() => {
+    if (savedPrefs?.meals?.times && savedPrefs.meals.times.length > 0) {
+      const times = savedPrefs.meals.times;
+      return {
+        breakfast: times[0] ?? DEFAULT_MEAL_TIMES.breakfast,
+        lunch: times[1] ?? DEFAULT_MEAL_TIMES.lunch,
+        dinner: times[2] ?? DEFAULT_MEAL_TIMES.dinner,
+        snack: times[3] ?? DEFAULT_MEAL_TIMES.snack,
+        drink: times[4] ?? DEFAULT_MEAL_TIMES.drink,
+      };
+    }
+    return DEFAULT_MEAL_TIMES;
+  });
+
+  // Display a stored 24h time in the user's chosen format
+  const displayTime = useCallback((time24: string): string => {
+    if (!time24 || use24Hour) return time24;
+    return to12Hour(time24);
+  }, [use24Hour]);
+
+  const updateMealTime = useCallback((meal: keyof MealTimes, raw: string) => {
+    const formatted = formatTimeInput(raw);
+    setMealTimes((prev) => ({ ...prev, [meal]: formatted }));
   }, []);
 
   const [groups, setGroups] = useState<
@@ -132,7 +156,15 @@ export default function NotificationsScreen() {
   >(() => {
     const initial: Record<string, NotificationGroupState> = {};
     NOTIFICATION_GROUPS.forEach((g) => {
-      initial[g.key] = { enabled: true, time: g.defaultTime };
+      if (savedPrefs && g.key in savedPrefs) {
+        const saved = savedPrefs[g.key];
+        initial[g.key] = {
+          enabled: saved.enabled,
+          time: 'time' in saved ? saved.time : g.defaultTime,
+        };
+      } else {
+        initial[g.key] = { enabled: true, time: g.defaultTime };
+      }
     });
     return initial;
   });
@@ -147,10 +179,11 @@ export default function NotificationsScreen() {
     });
   }, []);
 
-  const updateTime = useCallback((key: string, time: string) => {
+  const updateTime = useCallback((key: string, raw: string) => {
+    const formatted = formatTimeInput(raw);
     setGroups((prev) => {
       const current = prev[key] ?? DEFAULT_GROUP_STATE;
-      return { ...prev, [key]: { ...current, time } };
+      return { ...prev, [key]: { ...current, time: formatted } };
     });
   }, []);
 
@@ -206,11 +239,15 @@ export default function NotificationsScreen() {
       >
         {/* Icon + Headline */}
         <View style={styles.heroSection}>
-          <Image
-            source={require('@assets/icons/transformr-icon.png')}
-            style={styles.icon}
-            contentFit="contain"
-          />
+          <View style={styles.logoSection}>
+            <View style={styles.iconGlowOuter} />
+            <View style={styles.iconGlow} />
+            <Image
+              source={require('@assets/icons/transformr-icon.png')}
+              style={styles.icon}
+              contentFit="contain"
+            />
+          </View>
           <Text style={styles.headline}>Your AI coach{'\n'}has your back.</Text>
           <Text style={styles.subheadline}>
             We'll nudge you when you need it, celebrate when you earn it, and stay quiet when you don't.
@@ -240,6 +277,64 @@ export default function NotificationsScreen() {
               </Text>
             </View>
           )}
+
+          {/* Time Format Toggle */}
+          <View
+            style={[
+              styles.timeFormatRow,
+              {
+                backgroundColor: colors.background.secondary,
+                borderRadius: borderRadius.lg,
+                padding: spacing.lg,
+                marginBottom: spacing.xl,
+              },
+            ]}
+          >
+            <View style={styles.flex}>
+              <Text style={[typography.bodyBold, { color: colors.text.primary }]}>
+                Time Format
+              </Text>
+              <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                {use24Hour ? '24-hour (17:00)' : '12-hour (5:00 PM)'}
+              </Text>
+            </View>
+            <View style={styles.timeFormatToggle}>
+              <Pressable
+                onPress={() => { hapticLight(); setUse24Hour(false); }}
+                style={[
+                  styles.timeFormatButton,
+                  {
+                    backgroundColor: !use24Hour ? colors.accent.primary : colors.background.tertiary,
+                    borderTopLeftRadius: borderRadius.md,
+                    borderBottomLeftRadius: borderRadius.md,
+                    paddingVertical: spacing.sm,
+                    paddingHorizontal: spacing.md,
+                  },
+                ]}
+              >
+                <Text style={[typography.captionBold, { color: !use24Hour ? colors.text.inverse : colors.text.muted }]}>
+                  12h
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => { hapticLight(); setUse24Hour(true); }}
+                style={[
+                  styles.timeFormatButton,
+                  {
+                    backgroundColor: use24Hour ? colors.accent.primary : colors.background.tertiary,
+                    borderTopRightRadius: borderRadius.md,
+                    borderBottomRightRadius: borderRadius.md,
+                    paddingVertical: spacing.sm,
+                    paddingHorizontal: spacing.md,
+                  },
+                ]}
+              >
+                <Text style={[typography.captionBold, { color: use24Hour ? colors.text.inverse : colors.text.muted }]}>
+                  24h
+                </Text>
+              </Pressable>
+            </View>
+          </View>
 
           {/* Notification Groups */}
           {NOTIFICATION_GROUPS.map((group, groupIndex) => {
@@ -284,10 +379,11 @@ export default function NotificationsScreen() {
                       Time:
                     </Text>
                     <Input
-                      placeholder="HH:MM"
-                      value={state.time}
+                      placeholder={use24Hour ? 'HH:MM' : 'HH:MM'}
+                      value={displayTime(state.time)}
                       onChangeText={(t) => updateTime(group.key, t)}
-                      keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+                      keyboardType="number-pad"
+                      maxLength={5}
                       containerStyle={{ flex: 1 }}
                     />
                   </View>
@@ -303,11 +399,12 @@ export default function NotificationsScreen() {
                           {slot.label}
                         </Text>
                         <Input
-                          placeholder="HH:MM"
-                          value={mealTimes[slot.key]}
+                          placeholder={use24Hour ? 'HH:MM' : 'HH:MM'}
+                          value={displayTime(mealTimes[slot.key])}
                           onChangeText={(t) => updateMealTime(slot.key, t)}
-                          keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
-                          containerStyle={{ width: 90 }}
+                          keyboardType="number-pad"
+                          maxLength={5}
+                          containerStyle={{ width: 100 }}
                         />
                       </View>
                     ))}
@@ -354,7 +451,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
-  icon: { width: 56, height: 56, marginBottom: 12 },
+  logoSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    height: 100,
+    width: 200,
+  },
+  iconGlowOuter: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    top: -50,
+  },
+  iconGlow: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168,85,247,0.18)',
+    top: -25,
+  },
+  icon: { width: 100, height: 100 },
   headline: {
     fontSize: 28,
     fontWeight: '700',
@@ -371,6 +491,9 @@ const styles = StyleSheet.create({
   },
   formSection: { paddingHorizontal: 24 },
   banner: {},
+  timeFormatRow: { flexDirection: 'row', alignItems: 'center' },
+  timeFormatToggle: { flexDirection: 'row' },
+  timeFormatButton: {},
   groupCard: {},
   groupHeader: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
