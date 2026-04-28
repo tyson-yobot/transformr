@@ -69,16 +69,6 @@ export function SplashOverlay({ visible, onReady }: SplashOverlayProps) {
           />
         </View>
 
-        {/* Accent gradient line — matches login screen */}
-        <View style={styles.gradientLine}>
-          <LinearGradient
-            colors={['#7E22CE', '#A855F7', '#C084FC', '#A855F7', '#7E22CE']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ width: '100%', height: '100%' }}
-          />
-        </View>
-
         {/* TRANSFORMR title with glow — matches login screen */}
         <View style={styles.brandBlock}>
           <View style={{ alignItems: 'center' }}>
@@ -134,16 +124,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   icon: { width: 140, height: 140 },
-  // Accent line — matches login screen
-  gradientLine: {
-    width: 60,
-    height: 2,
-    borderRadius: 1,
-    alignSelf: 'center',
-    marginTop: 24,
-    marginBottom: 20,
-    overflow: 'hidden',
-  },
   // Brand text — matches login screen
   brandBlock: { alignItems: 'center', marginBottom: 16 },
   heroTitle: {
