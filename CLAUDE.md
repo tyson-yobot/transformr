@@ -729,3 +729,28 @@ Updates must be:
 - Factual, not vague ("removed image from login.tsx" not "UI issue")
 - Actionable (state what to DO or NOT DO, not just what happened)
 - Permanent (once written, the rule stays unless the user explicitly removes it)
+
+---
+
+## GUARDRAIL INFRASTRUCTURE (Installed 2026-04-27)
+
+### Pre-Commit Hook
+- Script: `scripts/pre-commit-check.ps1`
+- Installed at: `.git/hooks/pre-commit`
+- Blocks: DEPENDENCY+SOURCE in same commit, NATIVE+SOURCE in same commit
+- Blocks: locked file edits without `[locked-edit-approved]` in commit message
+- Bypass: `git commit --no-verify` (leaves audit trail in reflog)
+
+### Daily Audit
+- Script: `scripts/daily-audit.ps1`
+- Usage: `pwsh scripts/daily-audit.ps1` (default: last 24h)
+- Checks: multi-domain commits, locked file edits, removed asset references
+
+### Scope Lock Template
+- File: `scripts/scope-lock-prompt.md`
+- Usage: paste the boilerplate at the top of every Claude Code prompt
+- Prevents: agents from modifying files outside declared scope
+
+### Insurance Tag
+- Tag: `working-build-2026-04-27`
+- Pushed to origin. Restoring: `git checkout working-build-2026-04-27`
