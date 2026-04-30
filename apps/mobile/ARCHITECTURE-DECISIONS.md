@@ -139,6 +139,30 @@ use pink/gold. Theme tokens: `colors.gradient.purplePink` and
 
 ---
 
+## AD-012: Client-Side Exercise Filtering with Predictive Count Badges
+
+**Decision:** Exercise library filtering is done entirely client-side using `useMemo` rather than server-side Supabase queries. All exercises are fetched once on mount with no filters. Filter chips display predictive count badges computed in a single memoized pass.
+**Rationale:** The exercise library is small enough to fit in memory (~100 exercises). Client-side filtering provides instant feedback, eliminates network round-trips per filter change, and enables predictive count badges that show how many results each filter option would yield before the user taps. Server-side filtering provided no count preview and caused perceived "zero results" bugs due to sparse data.
+**Consequence:** New exercises added via seed migrations appear in filters immediately without code changes. The `fetchExercises` function in workoutStore still supports server-side filtering for other callers but the exercise library screen no longer uses it. Muscle group matching uses OR logic: an exercise matches if its `category` equals the group OR the `muscle_groups` array includes it.
+
+---
+
+## AD-013: Speed Dial FAB Pattern for Workout Player
+
+**Decision:** The workout player uses a Speed Dial FAB (one primary FAB that expands to reveal secondary actions) instead of multiple separate floating buttons. Voice logging, form check, and exercise swap are secondary actions.
+**Rationale:** Multiple separate FABs caused collision issues at the bottom of the screen. The speed dial pattern consolidates actions into a single touch point that expands on demand, avoiding overlap with the rest timer panel and bottom action bar.
+**Consequence:** Any new workout player actions should be added as speed dial items rather than standalone floating buttons. The VoiceMicButton component is still available for other screens but is not rendered directly on the workout player.
+
+---
+
+## AD-014: Rest Timer as Bottom Panel, Not Fullscreen Overlay
+
+**Decision:** The workout rest timer renders as a 200pt animated slide-up panel positioned above the bottom action bar, rather than a fullscreen overlay.
+**Rationale:** The previous fullscreen overlay blocked all interaction during rest periods. Users couldn't review their logged sets, check the exercise queue, or interact with any UI element while resting. The panel approach shows the timer prominently while keeping the exercise card visible and scrollable.
+**Consequence:** The rest timer panel uses `react-native-reanimated` spring animations for slide-in/out. It sits at `zIndex: 50` between the content and the bottom bar. The bottom bar's `paddingBottom` uses `insets.bottom + 12` for safe area compliance.
+
+---
+
 ## TEMPLATE FOR NEW DECISIONS
 
 ```

@@ -89,6 +89,7 @@ export const MuscleGroupTile = memo(function MuscleGroupTile({
           mode="muscle"
           highlightPrimary={parts}
           size={Math.round(size * 0.48)}
+          accentColor={accent}
         />
       </View>
       <Text

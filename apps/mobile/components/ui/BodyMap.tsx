@@ -27,6 +27,8 @@ export interface BodyMapProps {
   showBack?: boolean;
   size?: 'sm' | 'md' | 'lg' | number;
   style?: ViewStyle;
+  /** Override the default purple accent for muscle highlighting */
+  accentColor?: string;
 }
 
 const SIZE_MAP = { sm: 80, md: 160, lg: 220 } as const;
@@ -152,6 +154,7 @@ function Figure({ paths, excluded, painMap, primary, secondary, selectedPart, on
 export function BodyMap({
   mode = 'pain', painLevels = [], highlightPrimary = [], highlightSecondary = [],
   selectedPart = null, onSelectPart, showBack = false, size = 'md', style,
+  accentColor,
 }: BodyMapProps) {
   const { colors } = useTheme();
   const containerScale = useSharedValue(1);
@@ -180,8 +183,8 @@ export function BodyMap({
     elevated:    colors.background.elevated,
     borderLight: colors.border.light,
     borderFocus: colors.border.focus,
-    primary:     colors.accent.primary,
-    primaryLight:colors.accent.primaryLight,
+    primary:     accentColor ?? colors.accent.primary,
+    primaryLight: accentColor ? `${accentColor}99` : colors.accent.primaryLight,
     success:     colors.accent.success,
     warning:     colors.accent.warning,
     fire:        colors.accent.fire,

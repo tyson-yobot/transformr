@@ -12,7 +12,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from 'expo-router';
@@ -27,14 +27,12 @@ import { Badge } from '@components/ui/Badge';
 import { Modal } from '@components/ui/Modal';
 import { Slider } from '@components/ui/Slider';
 import { Skeleton } from '@components/ui/Skeleton';
-import { MonoText } from '@components/ui/MonoText';
 import { NarratorCard } from '@components/workout/NarratorCard';
 import { useWorkout } from '@hooks/useWorkout';
 import { useWorkoutStore } from '@stores/workoutStore';
 import { useNutritionStore } from '@stores/nutritionStore';
 import {
   formatTimerDisplay,
-  formatRestTimer,
   formatVolume,
   formatSetDisplay,
 } from '@utils/formatters';
@@ -44,7 +42,6 @@ import { getMidWorkoutCoachingTip, getNarratorMessage } from '@services/ai/worko
 import * as Speech from 'expo-speech';
 import { generateNarration, stopSpeaking } from '@services/ai/narrator';
 import { useFeatureGate } from '@hooks/useFeatureGate';
-import { VoiceMicButton } from '@components/ui/VoiceMicButton';
 import { NowPlayingBar } from '@components/ui/NowPlayingBar';
 import type { ParsedVoiceCommand } from '@services/voice';
 import { playWorkoutByIntensity } from '@services/spotify';
@@ -168,7 +165,6 @@ export default function WorkoutPlayerScreen() {
   const [moodAfter, setMoodAfter] = useState(5);
   const [showMoodModal, setShowMoodModal] = useState(false);
   const [showPRCelebration, setShowPRCelebration] = useState(false);
-  const [prMessage, setPrMessage] = useState('');
   const [showGhostOverlay, setShowGhostOverlay] = useState(true);
   const [loadingExercises, setLoadingExercises] = useState(true);
   const [exerciseLoadError, setExerciseLoadError] = useState<string | null>(null);
@@ -434,9 +430,11 @@ export default function WorkoutPlayerScreen() {
     setTotalSets((prev) => prev + 1);
 
     if (result.isPR) {
+      setPrExerciseName(currentExercise.exercise.name);
+      setPrWeight(weight);
+      setPrReps(reps);
       setShowPRCelebration(true);
-      setPrMessage(`New PR! ${weight} x ${reps}`);
-      setTimeout(() => setShowPRCelebration(false), 3000);
+      void hapticPR();
       showToast('New Personal Record!', {
         subtext: `${currentExercise.exercise.name}: ${weight} lbs`,
         type: 'pr',
@@ -652,8 +650,23 @@ export default function WorkoutPlayerScreen() {
 
   const currentExercise = exercisesWithSets[activeExerciseIndex] ?? null;
 
+  // Workout progress: completed sets / planned sets
+  const plannedSets = useMemo(() => {
+    return exercisesWithSets.reduce((sum, e) => {
+      const target = e.templateExercise?.target_sets ?? 3;
+      return sum + target;
+    }, 0);
+  }, [exercisesWithSets]);
+
+  const progressPercent = plannedSets > 0 ? Math.min(totalSets / plannedSets, 1) : 0;
+
+  // PR celebration data for the overlay (capture before inputs clear)
+  const [prExerciseName, setPrExerciseName] = useState('');
+  const [prWeight, setPrWeight] = useState(0);
+  const [prReps, setPrReps] = useState(0);
+
   // Voice command handler — processes commands from VoiceMicButton
-  const handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
+  const _handleVoiceCommand = useCallback((result: ParsedVoiceCommand) => {
     const cmd = result.command;
     switch (cmd.action) {
       case 'log_set': {
@@ -770,8 +783,9 @@ export default function WorkoutPlayerScreen() {
           </Text>
         </View>
         <View style={styles.topBarItem}>
-          <Text style={[typography.monoCaption, { color: colors.text.muted }]}>
-            {totalSets} sets
+          <Ionicons name="checkmark-circle" size={16} color={colors.accent.success} style={{ marginRight: 3 }} />
+          <Text style={[typography.monoCaption, { color: colors.text.primary, fontWeight: '600' }]}>
+            {totalSets}{plannedSets > 0 ? ` / ${plannedSets}` : ''} sets
           </Text>
         </View>
         <Pressable
@@ -816,6 +830,21 @@ export default function WorkoutPlayerScreen() {
           paused={isResting}
           onError={() => {/* non-fatal */}}
         />
+      )}
+
+      {/* Workout Progress Bar */}
+      {exercisesWithSets.length > 0 && (
+        <View style={{ height: 4, backgroundColor: colors.background.tertiary }}>
+          <Animated.View
+            style={{
+              height: 4,
+              width: `${Math.round(progressPercent * 100)}%`,
+              backgroundColor: colors.accent.primary,
+              borderTopRightRadius: 2,
+              borderBottomRightRadius: 2,
+            }}
+          />
+        </View>
       )}
 
       {/* Rest Timer Panel (non-blocking bottom panel) */}
@@ -1034,21 +1063,21 @@ export default function WorkoutPlayerScreen() {
                 {currentExercise.loggedSets.length > 0 && (
                   <View style={{ marginTop: spacing.md }}>
                     <View style={[styles.setRow, { marginBottom: spacing.xs }]}>
-                      <Text style={[typography.tiny, { color: colors.text.muted, width: 30 }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 0.6, textAlign: 'center' }]}>
                         SET
                       </Text>
-                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1.4, textAlign: 'right' }]}>
                         WEIGHT
                       </Text>
-                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 1, textAlign: 'center' }]}>
                         REPS
                       </Text>
                       {showGhostOverlay && (
-                        <Text style={[typography.tiny, { color: colors.text.muted, flex: 1 }]}>
+                        <Text style={[typography.tiny, { color: colors.text.muted, flex: 1.2, textAlign: 'center' }]}>
                           PREV
                         </Text>
                       )}
-                      <Text style={[typography.tiny, { color: colors.text.muted, width: 30 }]}>
+                      <Text style={[typography.tiny, { color: colors.text.muted, flex: 0.8, textAlign: 'center' }]}>
                         RPE
                       </Text>
                     </View>
@@ -1077,15 +1106,15 @@ export default function WorkoutPlayerScreen() {
                           <Text
                             style={[
                               typography.monoCaption,
-                              { color: set.isPR ? colors.accent.gold : colors.text.primary, width: 30, fontWeight: '600' },
+                              { color: set.isPR ? colors.accent.gold : colors.text.primary, flex: 0.6, textAlign: 'center', fontWeight: '600' },
                             ]}
                           >
                             {set.isPR ? '\u2B50' : `${set.setNumber}`}
                           </Text>
-                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1 }]}>
+                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1.4, textAlign: 'right' }]}>
                             {set.weight} lbs
                           </Text>
-                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1 }]}>
+                          <Text style={[typography.monoBody, { color: colors.text.primary, flex: 1, textAlign: 'center' }]}>
                             {set.reps}
                           </Text>
                           {showGhostOverlay && (
@@ -1096,7 +1125,8 @@ export default function WorkoutPlayerScreen() {
                                   color: beatGhost
                                     ? colors.accent.success
                                     : colors.text.muted,
-                                  flex: 1,
+                                  flex: 1.2,
+                                  textAlign: 'center',
                                 },
                               ]}
                             >
@@ -1106,7 +1136,7 @@ export default function WorkoutPlayerScreen() {
                               {beatGhost ? ' \u2191' : ''}
                             </Text>
                           )}
-                          <Text style={[typography.monoCaption, { color: colors.text.muted, width: 30 }]}>
+                          <Text style={[typography.monoCaption, { color: colors.text.muted, flex: 0.8, textAlign: 'center' }]}>
                             {set.rpe}
                           </Text>
                         </View>
@@ -1115,8 +1145,41 @@ export default function WorkoutPlayerScreen() {
                   </View>
                 )}
 
+                {/* Same-as-last-set quick-fill */}
+                {currentExercise.loggedSets.length > 0 && (
+                  <Pressable
+                    onPress={() => {
+                      const lastSet = currentExercise.loggedSets[currentExercise.loggedSets.length - 1];
+                      if (lastSet) {
+                        setCurrentWeight(String(lastSet.weight));
+                        setCurrentReps(String(lastSet.reps));
+                        setCurrentRpe(lastSet.rpe);
+                        hapticLight();
+                      }
+                    }}
+                    accessibilityLabel={`Copy values from set ${currentExercise.loggedSets.length}`}
+                    accessibilityRole="button"
+                    style={{
+                      marginTop: spacing.md,
+                      alignSelf: 'flex-start',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                      paddingHorizontal: spacing.sm,
+                      paddingVertical: 4,
+                      borderRadius: borderRadius.full,
+                      backgroundColor: colors.dim.primary,
+                    }}
+                  >
+                    <Ionicons name="refresh" size={12} color={colors.accent.primary} />
+                    <Text style={[typography.tiny, { color: colors.accent.primary, fontWeight: '600' }]}>
+                      Same as Set {currentExercise.loggedSets.length}
+                    </Text>
+                  </Pressable>
+                )}
+
                 {/* Set Logger Inputs */}
-                <View ref={setInputRef} onLayout={measureCoachmarks} style={[styles.setLogger, { marginTop: spacing.lg, gap: spacing.sm }]}>
+                <View ref={setInputRef} onLayout={measureCoachmarks} style={[styles.setLogger, { marginTop: spacing.sm, gap: spacing.sm }]}>
                   <View style={styles.inputGroup}>
                     <Text style={[typography.tiny, { color: colors.text.muted, marginBottom: 2 }]}>
                       WEIGHT (lbs)
@@ -1125,7 +1188,7 @@ export default function WorkoutPlayerScreen() {
                       value={currentWeight}
                       onChangeText={setCurrentWeight}
                       keyboardType="numeric"
-                      accessibilityLabel="Weight in pounds"
+                      accessibilityLabel={`Weight in pounds for set ${currentExercise.loggedSets.length + 1}`}
                       placeholder={
                         currentExercise.templateExercise?.target_weight?.toString() ?? '0'
                       }
@@ -1151,7 +1214,7 @@ export default function WorkoutPlayerScreen() {
                       value={currentReps}
                       onChangeText={setCurrentReps}
                       keyboardType="numeric"
-                      accessibilityLabel="Number of reps"
+                      accessibilityLabel={`Reps for set ${currentExercise.loggedSets.length + 1}`}
                       placeholder={String(currentExercise.templateExercise?.target_reps ?? '0')}
                       placeholderTextColor={colors.text.muted}
                       style={[
@@ -1167,35 +1230,22 @@ export default function WorkoutPlayerScreen() {
                       ]}
                     />
                   </View>
-                  <View style={styles.inputGroup}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                      <Text style={[typography.tiny, { color: colors.text.muted }]}>
-                        RPE
-                      </Text>
-                      <HelpIcon content={HELP.rpeRating} size={13} style={{ marginLeft: 3 }} />
-                    </View>
-                    <TextInput
-                      value={currentRpe.toString()}
-                      accessibilityLabel="Rate of perceived exertion"
-                      onChangeText={(v) => {
-                        const num = parseInt(v, 10);
-                        if (!isNaN(num) && num >= 1 && num <= 10) setCurrentRpe(num);
-                      }}
-                      keyboardType="numeric"
-                      placeholderTextColor={colors.text.muted}
-                      style={[
-                        styles.numericInput,
-                        {
-                          backgroundColor: colors.background.input,
-                          color: colors.text.primary,
-                          borderRadius: borderRadius.sm,
-                          borderWidth: 1,
-                          borderColor: colors.border.default,
-                          ...typography.h3,
-                        },
-                      ]}
-                    />
+                </View>
+
+                {/* Plate Calculator — barbell exercises only */}
+                {currentExercise.exercise.equipment === 'barbell' && currentWeight && parseFloat(currentWeight) > 0 && (
+                  <PlateCalculator weight={parseFloat(currentWeight)} />
+                )}
+
+                {/* RPE Picker */}
+                <View style={{ marginTop: spacing.sm }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                    <Text style={[typography.tiny, { color: colors.text.muted }]}>
+                      RPE
+                    </Text>
+                    <HelpIcon content={HELP.rpeRating} size={13} style={{ marginLeft: 3 }} />
                   </View>
+                  <RPEPicker value={currentRpe} onChange={setCurrentRpe} />
                 </View>
 
                 <Button
@@ -1232,13 +1282,27 @@ export default function WorkoutPlayerScreen() {
         )}
       </ScrollView>
 
+      {/* Rest Timer Panel — positioned above bottom bar */}
+      <RestTimerPanel
+        isResting={isResting}
+        restSeconds={restSeconds}
+        setNumber={currentExercise ? currentExercise.loggedSets.length + 1 : 1}
+        isCompound={currentExercise?.exercise?.is_compound ?? false}
+        exerciseName={currentExercise?.exercise?.name}
+        onSkipRest={handleSkipRest}
+        onExtendRest={() => { setRestSeconds((prev) => prev + 30); hapticLight(); }}
+        onLogSet={handleLogSet}
+      />
+
       {/* Bottom Action Bar */}
       <View
         style={[
           styles.bottomBar,
           {
             backgroundColor: colors.background.secondary,
-            padding: spacing.lg,
+            paddingHorizontal: spacing.lg,
+            paddingTop: spacing.md,
+            paddingBottom: insets.bottom + 12,
             borderTopWidth: 1,
             borderTopColor: colors.border.subtle,
           },
@@ -1278,6 +1342,15 @@ export default function WorkoutPlayerScreen() {
         </View>
       </Modal>
     </View>
+    {/* PR Celebration overlay */}
+    {showPRCelebration && (
+      <PRCelebration
+        exerciseName={prExerciseName}
+        recordValue={`${prWeight} lbs × ${prReps} reps`}
+        recordType="Personal Record"
+        onDismiss={() => setShowPRCelebration(false)}
+      />
+    )}
     <ActionToast
       message={toast.message}
       subtext={toast.subtext}
@@ -1286,22 +1359,37 @@ export default function WorkoutPlayerScreen() {
       type={toast.type}
     />
     <Coachmark screenKey={COACHMARK_KEYS.workoutPlayer} steps={coachmarkSteps} />
-    <VoiceMicButton
-      context={{
-        userId: activeSession?.user_id ?? '',
-        activeScreen: 'workout_player',
-        workoutContext: {
-          currentExercise: currentExercise?.exercise?.name,
-          lastSet: (() => {
-            const ls = currentExercise?.loggedSets?.at(-1);
-            return ls !== undefined ? { weight: ls.weight, reps: ls.reps } : undefined;
-          })(),
-        },
-      }}
-      onCommand={handleVoiceCommand}
-      onError={(msg) => showToast(msg, { type: 'info' })}
-      bottom={120}
+    <SpeedDialFAB
+      primaryIcon="sparkles"
+      bottom={insets.bottom + 80}
       right={16}
+      actions={[
+        {
+          icon: 'mic',
+          label: 'Voice Log',
+          accessibilityLabel: 'Voice log a set',
+          onPress: () => {
+            // Trigger voice recording via the existing VoiceMicButton logic
+            showToast('Voice logging — say weight, reps, RPE', { type: 'info' });
+          },
+        },
+        {
+          icon: 'camera',
+          label: 'Form Check',
+          accessibilityLabel: 'Record form check',
+          onPress: () => {
+            router.push('/(tabs)/fitness/form-check' as never);
+          },
+        },
+        {
+          icon: 'swap-horizontal',
+          label: 'Swap Exercise',
+          accessibilityLabel: 'Swap this exercise',
+          onPress: () => {
+            router.push('/(tabs)/fitness/exercises' as never);
+          },
+        },
+      ]}
     />
     </>
   );

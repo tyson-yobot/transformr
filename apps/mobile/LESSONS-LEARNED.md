@@ -209,6 +209,24 @@ never change the Site URL.
 
 ---
 
+## 2026-04-29 — Equipment Filter Returns Zero Results
+
+**What happened:** Exercise library equipment filter showed 0 results for valid combinations like "abs + dumbbell". Users perceived this as a bug.
+**Root cause:** Server-side Supabase query used `.eq('category', ...).eq('equipment', ...)` which correctly returned 0 rows because no abs exercises in the seed data used dumbbells. The real problem was sparse seed data combined with no predictive UI (no count badges, no helpful empty state, no visual feedback before tapping a filter chip).
+**Fix applied:** Moved ALL filtering to client-side `useMemo` for instant feedback. Added predictive count badges on every filter chip showing how many exercises match. Chips with 0 count render at 40% opacity and trigger haptic warning. Expanded seed data from 54 to 101 exercises covering all equipment types per muscle group. Changed muscle group matching to OR logic (category equals OR muscle_groups array includes).
+**Rule going forward:** When building filter UIs, always show the count of matching results BEFORE the user taps. Never rely on server-side filtering for small datasets that fit in memory. If a filter combination yields 0 results, show that count on the chip rather than a blank screen.
+
+---
+
+## 2026-04-29 — BodyMap Muscle Tiles All Render Identical Purple
+
+**What happened:** All 8 muscle group filter tiles on the exercise library screen rendered as identical purple silhouettes — no visual distinction between chest, back, legs, etc.
+**Root cause:** MuscleGroupTile passed per-muscle accent colors (red for chest, blue for back, etc.) via MUSCLE_CONFIG but BodyMap's Figure component always used `colors.accent.primary` (purple) for the SVG fill. The `accentColor` prop didn't exist on BodyMap.
+**Fix applied:** Added optional `accentColor` prop to BodyMap that overrides the default purple when provided. MuscleGroupTile now passes its accent color through to BodyMap. Each muscle tile now renders with its own distinct color.
+**Rule going forward:** When a parent component has color configuration for a child, verify the color actually reaches the rendering layer. Don't assume a prop is connected end-to-end without tracing the data flow.
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:
