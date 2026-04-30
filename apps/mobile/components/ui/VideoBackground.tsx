@@ -168,6 +168,12 @@ function VideoBackgroundInner({
 
         if (!isMounted.current) return;
 
+        // Pause the old player BEFORE starting the crossfade so it stops
+        // pushing frames to its SurfaceTexture while the GL context is
+        // being detached during the opacity fade-out.  The frozen last
+        // frame fades out smoothly — visually identical to a live feed.
+        oldActivePlayer.pause();
+
         // Crossfade: bring standby (now loaded) to 1, fade active to 0
         Animated.parallel([
           Animated.timing(activeOpacity, {
@@ -180,13 +186,7 @@ function VideoBackgroundInner({
             duration: CROSSFADE_MS,
             useNativeDriver: true,
           }),
-        ]).start(() => {
-          // After crossfade completes, pause the now-invisible player to
-          // release its hardware decoder — only 1 decoder active at a time
-          if (isMounted.current) {
-            oldActivePlayer.pause();
-          }
-        });
+        ]).start();
 
         onIndexChange?.(nextIndex);
       })();
