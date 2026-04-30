@@ -9,8 +9,17 @@ import {
   View,
   StyleSheet,
   Animated,
+  Platform,
 } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { Image as ExpoImage, type ImageProps } from 'expo-image';
+
+// Cast needed: expo class components don't satisfy React 19's JSX class element interface
+const FallbackImage = ExpoImage as unknown as React.ComponentType<ImageProps>;
+
+// Fallback hero image shown while video slots are deferred (first frame)
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const GYM_HERO_FALLBACK = require('@assets/images/gym-hero.jpg') as number;
 
 export interface PillarVideo {
   source: number; // require() local asset → number
@@ -47,6 +56,30 @@ function VideoBackgroundInner({
   onIndexChange,
   children,
 }: VideoBackgroundProps) {
+  // Defer VideoView mounting on Android to unblock the first native draw pass.
+  // SurfaceView registers an OnPreDrawListener that returns false until its
+  // surface is allocated. If SurfaceViews exist during the FIRST draw traversal,
+  // they deadlock the entire view tree: the draw never completes, onLayout never
+  // fires, and the native splash screen (backgroundColor #0C0A15) stays forever.
+  //
+  // Strategy: keep videoReady=false on Android. The container's onLayout fires
+  // once the first layout pass succeeds (with only the static fallback image).
+  // After onLayout, we wait two animation frames so the compositor finishes the
+  // first draw, THEN mount the VideoView SurfaceViews.
+  const [videoReady, setVideoReady] = useState(Platform.OS !== 'android');
+  const containerLaidOut = useRef(false);
+  const onContainerLayout = useCallback(() => {
+    if (Platform.OS !== 'android' || containerLaidOut.current) return;
+    containerLaidOut.current = true;
+    // Two rAF hops: first waits for the current frame to finish, second
+    // ensures the compositor has actually drawn the frame to the display.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setVideoReady(true);
+      });
+    });
+  }, []);
+
   // Which slot (0 = A, 1 = B) is currently the visible/active one
   const [activeSlot, setActiveSlot] = useState<0 | 1>(0);
   // Current video index in the videos array
@@ -179,30 +212,44 @@ function VideoBackgroundInner({
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Slot A — persistent, never unmounted */}
-      <Animated.View style={[StyleSheet.absoluteFill, { opacity: opacityA }]}>
-        <VideoView
-          player={playerA}
+    <View style={styles.container} onLayout={onContainerLayout}>
+      {/* Fallback hero image — visible until VideoView slots mount */}
+      {!videoReady && (
+        <FallbackImage
+          source={GYM_HERO_FALLBACK}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
-          nativeControls={false}
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
+          cachePolicy="memory-disk"
         />
-      </Animated.View>
+      )}
 
-      {/* Slot B — persistent, never unmounted */}
-      <Animated.View style={[StyleSheet.absoluteFill, { opacity: opacityB }]}>
-        <VideoView
-          player={playerB}
-          style={StyleSheet.absoluteFill}
-          contentFit="cover"
-          nativeControls={false}
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
-        />
-      </Animated.View>
+      {/* Slot A — persistent, never unmounted (deferred on Android) */}
+      {videoReady && (
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: opacityA }]}>
+          <VideoView
+            player={playerA}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            nativeControls={false}
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
+          />
+        </Animated.View>
+      )}
+
+      {/* Slot B — persistent, never unmounted (deferred on Android) */}
+      {videoReady && (
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: opacityB }]}>
+          <VideoView
+            player={playerB}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            nativeControls={false}
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
+          />
+        </Animated.View>
+      )}
 
       {/* Dark overlay for text readability */}
       <View

@@ -141,10 +141,15 @@ export default function RootLayout() {
     return () => sub.remove();
   }, [handleOAuthUrl]);
 
-  // Hide the custom SplashOverlay once fonts are loaded (no artificial delay)
+  // Hide the custom SplashOverlay once fonts are loaded (no artificial delay).
+  // Also call hideAsync() directly here — the SplashOverlay onLayout callback
+  // may never fire if React batches the mount+unmount into a single UI-thread
+  // commit (fonts load immediately from cache, so the SplashOverlay can be
+  // removed before native performs a layout pass).
   useEffect(() => {
     if (fontsLoaded) {
       setShowSplash(false);
+      void SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
