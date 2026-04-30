@@ -126,17 +126,18 @@ export function Coachmark({ screenKey, steps, onComplete }: CoachmarkProps) {
           <View style={[styles.overlayPanel, { flex: 1, width: SCREEN_W }]} />
         </TouchableOpacity>
 
-        {/* Spotlight ring */}
+        {/* Spotlight ring — soft glow instead of hard border */}
         <View
           style={[
             styles.spotlightRing,
             {
-              left: spotX - 2,
-              top: spotY - 2,
-              width: spotW + 4,
-              height: spotH + 4,
-              borderColor: colors.accent.primary,
+              left: spotX - 3,
+              top: spotY - 3,
+              width: spotW + 6,
+              height: spotH + 6,
+              borderColor: `${colors.accent.primary}40`,
               borderRadius: borderRadius.md,
+              shadowColor: colors.accent.primary,
             },
           ]}
         />
@@ -206,7 +207,11 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row' },
   spotlightRing: {
     position: 'absolute',
-    borderWidth: 2,
+    borderWidth: 1.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
   },
   tooltip: {
     position: 'absolute',
