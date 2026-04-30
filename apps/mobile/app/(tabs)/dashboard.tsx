@@ -98,7 +98,6 @@ export default function DashboardScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [coachmarkSteps, setCoachmarkSteps] = React.useState<CoachmarkStep[]>([]);
-  const greetingRef = React.useRef<View>(null);
   const aiCardRef = React.useRef<View>(null);
   const quickActionsRef = React.useRef<View>(null);
   const statsCardRef = React.useRef<View>(null);
@@ -109,7 +108,7 @@ export default function DashboardScreen() {
   const measureCoachmarks = React.useCallback(() => {
     const content = COACHMARK_CONTENT.dashboard;
     if (!content) return;
-    const refs = [greetingRef, statsCardRef, aiCardRef, quickActionsRef];
+    const refs = [statsCardRef, aiCardRef, quickActionsRef];
     const steps: CoachmarkStep[] = [];
     let pending = refs.length;
     refs.forEach((ref, i) => {
@@ -512,7 +511,7 @@ export default function DashboardScreen() {
       <View
         style={{ marginBottom: spacing.xl }}
       >
-        <View ref={greetingRef} onLayout={measureCoachmarks} style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <View onLayout={measureCoachmarks} style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <Text
             style={[
               typography.h1,

@@ -21,11 +21,6 @@ export interface CoachmarkContent {
 export const COACHMARK_CONTENT: Record<keyof typeof COACHMARK_KEYS, CoachmarkContent[]> = {
   dashboard: [
     {
-      title: 'Your Transformation Hub',
-      body: 'Everything starts here. Your countdown, readiness score, macros, and AI coaching card give you today\'s full picture at a glance.',
-      position: 'below',
-    },
-    {
       title: 'Daily Readiness Score',
       body: 'This tells you how hard to push today. Green = go hard. Yellow = moderate. Red = recovery day. Tap the ⓘ to learn how it\'s calculated.',
       position: 'below',
