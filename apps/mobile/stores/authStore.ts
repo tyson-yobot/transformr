@@ -5,8 +5,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import type { Session, User, Subscription } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
@@ -130,6 +132,33 @@ export const useAuthStore = create<AuthStore>()(
       signInWithGoogle: async () => {
         set({ loading: true, error: null });
         try {
+          // Android: use native Google Sign-In SDK to get an ID token, then
+          // exchange it with Supabase via signInWithIdToken. This bypasses
+          // Chrome Custom Tabs entirely — the web-based openAuthSessionAsync
+          // flow is broken on Android because expo-web-browser's
+          // BrowserLauncherActivity is not in the manifest, so the auth
+          // session never completes and the redirect back to the app fails.
+          if (Platform.OS === 'android') {
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            const response = await GoogleSignin.signIn();
+            if (response.type === 'cancelled') {
+              set({ loading: false });
+              return;
+            }
+            const idToken = response.data.idToken;
+            if (!idToken) {
+              throw new Error('Google sign-in did not return an ID token. Check that webClientId is configured correctly.');
+            }
+            const { error } = await supabase.auth.signInWithIdToken({
+              provider: 'google',
+              token: idToken,
+            });
+            if (error) throw error;
+            set({ loading: false });
+            return;
+          }
+
+          // iOS / fallback: web-based OAuth via Chrome Custom Tabs / Safari
           const redirectUrl = Linking.createURL('auth/callback');
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
