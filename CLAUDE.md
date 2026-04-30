@@ -754,3 +754,72 @@ Updates must be:
 ### Insurance Tag
 - Tag: `working-build-2026-04-27`
 - Pushed to origin. Restoring: `git checkout working-build-2026-04-27`
+
+---
+
+## SECTION 8 — BRAND SYSTEM REFERENCES
+
+### Canonical brand kit
+
+The canonical brand kit is `apps/mobile/TRANSFORMR-Brand-Identity-Kit.docx`.
+All color values, glow specs, AI Coach format rules, notification tiers,
+and accessibility requirements live there. Sections 16-19 of the docx
+were added in the dashboard v2 build and contain the most recent
+additions:
+
+- Section 16 — Light Mode App Surfaces
+- Section 17 — Glow System
+- Section 18 — AI Coach Format
+- Section 19 — Notification Tiers
+
+The repo-root `TRANSFORMR-BRAND-KIT.md` is a deprecation pointer and
+should NOT be used as a reference. Read the docx instead.
+
+### Dashboard v2 spec
+
+The dashboard v2 build is governed by `docs/TRANSFORMR-DASHBOARD-V2-SPEC.md`.
+This document is the source of truth for layout, dimensions, animation
+timing, score formulas, AI integration contracts, and the build prompt
+sequence. Any agent working on dashboard v2 components must read the
+relevant section of the spec before writing code.
+
+### Light Mode App Surfaces
+
+The locked light mode background color is `#F3EDE8` (warm cream). The
+secondary surface for elevated cards is `#FFFFFF`. Do not use the
+previous lavender-gray value anywhere in code. The `apps/mobile/theme/colors.ts`
+token `light.background.primary` should be `#F3EDE8`.
+
+### Glow System
+
+Cards in the v2 dashboard use one of three domain glows:
+
+- Purple glow (`#A855F7`) — primary actions, scores, default cards
+- Pink glow (`#EC4899`) — celebration moments and partner features
+- Cyan glow (`#06B6D4`) — AI features and AI-generated content
+
+Pink is no longer "exclusively partner" — it is "celebration plus
+partner." Cyan was previously documented with an incorrect hex; the canonical
+value is `#06B6D4`. Apply glow sparingly: a maximum of two glow domains
+visible on screen at once.
+
+### Accessibility Requirements
+
+All v2 dashboard components must meet:
+
+- Touch targets: minimum 44pt on every interactive element
+- Color contrast: WCAG AA (4.5:1 body text, 3:1 large text and UI
+  components) against the surface they sit on, in both dark and light
+  modes
+- Dynamic Type: text scales correctly when the user changes system
+  font size
+- VoiceOver / TalkBack labels: every interactive element has an
+  accessibility label that describes the action, not the visual
+- Haptic feedback: present on PR achievements, streak milestones,
+  toggle switches, timer completions, and errors — but not on
+  passive scroll or navigation
+- Reduce Motion: when the OS-level Reduce Motion setting is on,
+  spring physics animations collapse to opacity fades only
+
+When in doubt, the spec doc at `docs/TRANSFORMR-DASHBOARD-V2-SPEC.md`
+is authoritative.
