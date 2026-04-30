@@ -117,6 +117,27 @@ export const colors = {
         shadowRadius:   8,
         elevation:      4,
       },
+      glowPurpleCard: {
+        shadowColor:    '#A855F7',
+        shadowOpacity:  0.25,
+        shadowRadius:   16,
+        shadowOffset:   { width: 0, height: 0 },
+        elevation:      8,
+      },
+      glowPinkCard: {
+        shadowColor:    '#EC4899',
+        shadowOpacity:  0.22,
+        shadowRadius:   14,
+        shadowOffset:   { width: 0, height: 0 },
+        elevation:      7,
+      },
+      glowCyanCard: {
+        shadowColor:    '#06B6D4',
+        shadowOpacity:  0.20,
+        shadowRadius:   14,
+        shadowOffset:   { width: 0, height: 0 },
+        elevation:      7,
+      },
     },
     gradient: {
       primary:    ['#A855F7', '#7C3AED'] as [string, string],
@@ -139,7 +160,7 @@ export const colors = {
 
   light: {
     background: {
-      primary:        '#F3F1F8',   // Warm lavender — visible purple tint (brand kit Surface)
+      primary:        '#F3EDE8',   // Warm cream — locked light mode background
       secondary:      '#FFFFFF',   // Cards: white pops against lavender bg
       tertiary:       '#EBE8F2',   // Elevated surfaces (brand kit Surface Light)
       input:          '#FFFFFF',
@@ -244,6 +265,27 @@ export const colors = {
         shadowOpacity:  0.12,
         shadowRadius:   8,
         elevation:      3,
+      },
+      glowPurpleCard: {
+        shadowColor:    '#A855F7',
+        shadowOpacity:  0.18,
+        shadowRadius:   14,
+        shadowOffset:   { width: 0, height: 2 },
+        elevation:      6,
+      },
+      glowPinkCard: {
+        shadowColor:    '#EC4899',
+        shadowOpacity:  0.15,
+        shadowRadius:   12,
+        shadowOffset:   { width: 0, height: 2 },
+        elevation:      5,
+      },
+      glowCyanCard: {
+        shadowColor:    '#06B6D4',
+        shadowOpacity:  0.14,
+        shadowRadius:   12,
+        shadowOffset:   { width: 0, height: 2 },
+        elevation:      5,
       },
     },
     gradient: {
@@ -373,9 +415,12 @@ interface ShadowToken {
 }
 
 interface ShadowTokens {
-  readonly card:       ShadowToken;
-  readonly cardStrong: ShadowToken;
-  readonly cardSubtle: ShadowToken;
+  readonly card:           ShadowToken;
+  readonly cardStrong:     ShadowToken;
+  readonly cardSubtle:     ShadowToken;
+  readonly glowPurpleCard: ShadowToken;
+  readonly glowPinkCard:   ShadowToken;
+  readonly glowCyanCard:   ShadowToken;
 }
 
 interface GradientTokens {
