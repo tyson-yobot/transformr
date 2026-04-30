@@ -23,6 +23,8 @@ interface ModalProps {
   title?: string;
   showCloseButton?: boolean;
   showHandle?: boolean;
+  /** When false, backdrop press and close button are disabled. Default: true */
+  dismissable?: boolean;
   children: React.ReactNode;
 }
 
@@ -34,6 +36,7 @@ export function Modal({
   title,
   showCloseButton = true,
   showHandle = true,
+  dismissable = true,
   children,
 }: ModalProps) {
   const { colors, typography, spacing, borderRadius } = useTheme();
@@ -65,8 +68,8 @@ export function Modal({
   }));
 
   const handleBackdropPress = useCallback(() => {
-    onDismiss();
-  }, [onDismiss]);
+    if (dismissable) onDismiss();
+  }, [onDismiss, dismissable]);
 
   if (!visible) return null;
 
@@ -109,7 +112,7 @@ export function Modal({
               >
                 {title}
               </Text>
-              {showCloseButton && (
+              {showCloseButton && dismissable && (
                 <Pressable
                   onPress={onDismiss}
                   hitSlop={12}

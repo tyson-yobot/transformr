@@ -2,7 +2,7 @@
 // TRANSFORMR -- Active Workout Player Screen
 // =============================================================================
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, interpolate } from 'react-native-reanimated';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from 'expo-router';
@@ -37,7 +38,7 @@ import {
   formatVolume,
   formatSetDisplay,
 } from '@utils/formatters';
-import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { hapticLight, hapticMedium, hapticSuccess, hapticPR } from '@utils/haptics';
 import { supabase } from '@services/supabase';
 import { getMidWorkoutCoachingTip, getNarratorMessage } from '@services/ai/workoutCoach';
 import * as Speech from 'expo-speech';
@@ -62,6 +63,11 @@ import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useChallengeStore } from '@stores/challengeStore';
 import { checkWorkoutCompliance } from '@services/ai/compliance';
+import { SpeedDialFAB } from '@components/workout/SpeedDialFAB';
+import { RestTimerPanel } from '@components/workout/RestTimerPanel';
+import { RPEPicker } from '@components/workout/RPEPicker';
+import { PlateCalculator } from '@components/workout/PlateCalculator';
+import { PRCelebration } from '@components/workout/PRCelebration';
 
 interface GhostSet {
   exercise_id: string;
@@ -812,55 +818,9 @@ export default function WorkoutPlayerScreen() {
         />
       )}
 
-      {/* Rest Timer Overlay */}
-      {isResting && (
-        <View
-          ref={restTimerRefCoach}
-          style={[
-            styles.restOverlay,
-            { backgroundColor: `${colors.background.primary}E6`, padding: spacing.xl },
-          ]}
-        >
-          <HelpBubble
-            id="workout_rest_timer"
-            message="Timer starts automatically between sets"
-            position="above"
-          />
-          <Icon3D name="clock" size={48} />
-          <MonoText
-            variant="countdown"
-            color={colors.accent.cyan}
-            style={{ marginTop: spacing.md, fontSize: 64 }}
-          >
-            {formatRestTimer(restSeconds)}
-          </MonoText>
-          <Text style={[typography.body, { color: colors.text.secondary, marginTop: spacing.sm }]}>
-            Rest Time
-          </Text>
-          <Button
-            title="Skip Rest"
-            variant="outline"
-            onPress={handleSkipRest}
-            accessibilityLabel="Skip rest timer"
-            style={{ marginTop: spacing.xl }}
-          />
-        </View>
-      )}
+      {/* Rest Timer Panel (non-blocking bottom panel) */}
 
-      {/* PR Celebration */}
-      {showPRCelebration && (
-        <View style={[styles.prOverlay, { backgroundColor: colors.accent.goldDim,
-          shadowColor: '#EC4899', shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.45, shadowRadius: 40, elevation: 20 }]}>
-          <Icon3D name="trophy" size={64} />
-          <Text style={[typography.h1, { color: colors.accent.gold, marginTop: spacing.md }]}>
-            NEW PR!
-          </Text>
-          <Text style={[typography.statSmall, { color: colors.text.primary, marginTop: spacing.sm }]}>
-            {prMessage}
-          </Text>
-        </View>
-      )}
+      {/* PR Celebration — enhanced with confetti + haptic */}
 
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 120 }}
@@ -912,12 +872,14 @@ export default function WorkoutPlayerScreen() {
                     {
                       backgroundColor:
                         idx === activeExerciseIndex
-                          ? colors.accent.primary
-                          : colors.background.secondary,
-                      borderRadius: borderRadius.md,
+                          ? colors.accent.pink
+                          : 'transparent',
+                      borderRadius: borderRadius.full,
                       paddingHorizontal: spacing.lg,
                       paddingVertical: spacing.sm,
                       marginRight: spacing.sm,
+                      borderWidth: idx === activeExerciseIndex ? 0 : 1,
+                      borderColor: colors.border.default,
                     },
                   ]}
                 >
@@ -926,7 +888,8 @@ export default function WorkoutPlayerScreen() {
                       typography.captionBold,
                       {
                         color:
-                          idx === activeExerciseIndex ? colors.text.inverse : colors.text.secondary,
+                          idx === activeExerciseIndex ? colors.text.inverse : colors.text.muted,
+                        fontWeight: idx === activeExerciseIndex ? '700' : '500',
                       },
                     ]}
                     numberOfLines={1}
@@ -1293,7 +1256,7 @@ export default function WorkoutPlayerScreen() {
       </View>
 
       {/* Mood Modal */}
-      <Modal visible={showMoodModal} onDismiss={() => setShowMoodModal(false)} title="How are you feeling?">
+      <Modal visible={showMoodModal} onDismiss={() => setShowMoodModal(false)} dismissable={false} title="How are you feeling?">
         <View style={{ gap: spacing.lg }}>
           <Slider
             value={moodBefore}
