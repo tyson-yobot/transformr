@@ -12,16 +12,13 @@ import {
   Alert,
   StyleSheet,
   RefreshControl,
-  LayoutAnimation,
-  Platform,
-  UIManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { ScreenHelpButton } from '@components/ui/ScreenHelpButton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@theme/index';
 import { Button } from '@components/ui/Button';
@@ -38,11 +35,6 @@ import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { ExerciseInfoModal } from '@components/workout/ExerciseInfoModal';
 import { MMKV } from 'react-native-mmkv';
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const storage = new MMKV();
 
@@ -318,7 +310,6 @@ export default function ExercisesScreen() {
   // ---------- Handlers ----------
 
   const handleMuscleGroupPress = useCallback((value: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedMuscleGroup((prev) => prev === value ? null : value);
     hapticLight();
   }, []);
@@ -330,7 +321,6 @@ export default function ExercisesScreen() {
       hapticWarning();
       return;
     }
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedEquipment(newVal);
     hapticLight();
   }, [equipmentCounts]);
@@ -342,7 +332,6 @@ export default function ExercisesScreen() {
       hapticWarning();
       return;
     }
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setSelectedDifficulty(newVal);
     hapticLight();
   }, [difficultyCounts]);
@@ -357,7 +346,6 @@ export default function ExercisesScreen() {
   const handleClearFilters = useCallback(() => {
     setSelectedEquipment(null);
     setSelectedDifficulty(null);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     hapticLight();
   }, []);
 
@@ -414,7 +402,11 @@ export default function ExercisesScreen() {
       const secondaryMuscles = muscleGroups.slice(1, 3);
 
       return (
-        <Animated.View entering={FadeInDown.duration(300).delay(Math.min(index, 8) * 50)}>
+        <Animated.View
+          entering={FadeInDown.duration(300).delay(Math.min(index, 8) * 50)}
+          exiting={FadeOut.duration(200)}
+          layout={LinearTransition.springify().damping(18).stiffness(180)}
+        >
           <Pressable
             onPress={() => handleExercisePress(item)}
             style={{
