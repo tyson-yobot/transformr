@@ -70,10 +70,14 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Navigate to dashboard when session is set (after successful sign-in or OAuth)
+  // Navigate to entry redirect when session is set (after successful sign-in or OAuth).
+  // Route through index.tsx so it can fetch the profile, check onboarding status,
+  // and send first-time users to onboarding vs returning users to dashboard.
+  // Also avoids staying on this screen's VideoBackground SurfaceViews during
+  // the post-resume draw pass (same class of bug as 8e198f2).
   useEffect(() => {
     if (session) {
-      router.replace('/(tabs)/dashboard');
+      router.replace('/');
     }
   }, [session, router]);
 
