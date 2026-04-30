@@ -2,10 +2,10 @@
 // TRANSFORMR -- Root Layout
 // =============================================================================
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { Linking, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Slot } from 'expo-router';
+import { Slot, useRouter, type Href } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,6 +19,12 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
 import { SplashOverlay } from '@components/SplashOverlay';
+import * as Notifications from 'expo-notifications';
+import {
+  registerForPushNotifications,
+  savePushToken,
+  addNotificationResponseListener,
+} from '@services/notifications';
 
 // Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
 // All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
@@ -58,6 +64,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Deep-link map for notification tap routing
+const NOTIFICATION_DEEP_LINK_MAP: Record<string, string> = {
+  'transformr://dashboard': '/(tabs)/dashboard',
+  'transformr://nutrition': '/(tabs)/nutrition',
+  'transformr://nutrition/add': '/(tabs)/nutrition/add-food',
+  'transformr://workout/start': '/(tabs)/fitness/workout-player',
+  'transformr://workout/log': '/(tabs)/fitness',
+  'transformr://goals': '/(tabs)/goals',
+  'transformr://goals/journal': '/(tabs)/goals/journal',
+  'transformr://goals/sleep': '/(tabs)/goals/sleep',
+  'transformr://goals/habits': '/(tabs)/goals/habits',
+  'transformr://partner': '/(tabs)/profile/partner',
+  'transformr://profile': '/(tabs)/profile',
+};
+
 function AppStatusBar() {
   const { isDark } = useTheme();
   return <StatusBar style={isDark ? 'light' : 'dark'} />;
@@ -65,6 +86,9 @@ function AppStatusBar() {
 
 export default function RootLayout() {
   const listenToAuthChanges = useAuthStore((s) => s.listenToAuthChanges);
+  const session = useAuthStore((s) => s.session);
+  const pushTokenRegistered = useRef(false);
+  const router = useRouter();
   useOfflineSync();
   const [showSplash, setShowSplash] = useState(true);
 
@@ -152,6 +176,51 @@ export default function RootLayout() {
       void SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  // Bug 1: Register push token on sign-in and cold-start with existing session
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId || pushTokenRegistered.current) return;
+    pushTokenRegistered.current = true;
+
+    void (async () => {
+      try {
+        const token = await registerForPushNotifications();
+        if (token) {
+          await savePushToken(userId, token);
+        }
+      } catch {
+        // Push token registration must not block app usage
+      }
+    })();
+  }, [session?.user?.id]);
+
+  // Bug 3: Handle notification taps (foreground + cold-start)
+  useEffect(() => {
+    function handleNotificationResponse(response: Notifications.NotificationResponse) {
+      const deepLink = response.notification.request.content.data?.deep_link as string | undefined;
+      const route = deepLink ? NOTIFICATION_DEEP_LINK_MAP[deepLink] : undefined;
+      if (!route) {
+        if (deepLink) {
+          console.warn(`[Notifications] Unknown deep_link: ${deepLink}`);
+        }
+        router.push('/(tabs)/dashboard');
+        return;
+      }
+      router.push(route as Href);
+    }
+
+    const subscription = addNotificationResponseListener(handleNotificationResponse);
+
+    // Cold-start: app launched from a notification tap
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        handleNotificationResponse(response);
+      }
+    });
+
+    return () => subscription.remove();
+  }, [router]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
