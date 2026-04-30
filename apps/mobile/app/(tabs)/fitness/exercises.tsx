@@ -777,7 +777,13 @@ export default function ExercisesScreen() {
       {isLoading && exercises.length === 0 ? (
         <ListSkeleton rows={6} style={{ backgroundColor: colors.background.primary }} />
       ) : (
-        <FlatList<Exercise>
+        <Animated.View
+          key={`${selectedMuscleGroup ?? 'all'}-${selectedEquipment ?? 'all'}-${selectedDifficulty ?? 'all'}-${sortOrder}`}
+          entering={FadeInDown.duration(220).springify().damping(20)}
+          exiting={FadeOut.duration(180)}
+          style={{ flex: 1 }}
+        >
+          <FlatList<Exercise>
           data={filteredExercises as Exercise[]}
           keyExtractor={(item) => item.id}
           renderItem={renderExerciseItem}
@@ -876,6 +882,7 @@ export default function ExercisesScreen() {
             </View>
           }
         />
+        </Animated.View>
       )}
 
       {/* Sort Menu Popup */}
