@@ -2,10 +2,10 @@
 // TRANSFORMR -- Root Layout
 // =============================================================================
 
-import { useEffect, useCallback, useState } from 'react';
-import { Linking, LogBox } from 'react-native';
+import { useEffect, useCallback, useState, useRef } from 'react';
+import { InteractionManager, Linking, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Slot } from 'expo-router';
+import { Slot, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,6 +19,12 @@ import { usePartnerStore } from '@stores/partnerStore';
 import { useOfflineSync } from '@hooks/useOfflineSync';
 import { supabase } from '@services/supabase';
 import { SplashOverlay } from '@components/SplashOverlay';
+import {
+  registerForPushNotifications,
+  savePushToken,
+  addNotificationResponseListener,
+} from '@services/notifications';
+import * as Notifications from 'expo-notifications';
 
 // Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
 // All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
@@ -36,6 +42,41 @@ GoogleSignin.configure({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+// ---------------------------------------------------------------------------
+// Notification helpers (Guards 1-6)
+// ---------------------------------------------------------------------------
+
+/** Guard 2 — Hard 5s timeout on every async notification call */
+async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T | null> {
+  return Promise.race([
+    p,
+    new Promise<null>((resolve) =>
+      setTimeout(() => {
+        console.warn(`[notifications] ${label} timed out after ${ms}ms`);
+        resolve(null);
+      }, ms),
+    ),
+  ]);
+}
+
+/** Guard 5 — Idempotency flag, reset on sign-out */
+let pushTokenRegistered = false;
+
+/** Deep link map for notification tap routing (Fix 3) */
+const DEEP_LINK_ROUTES: Record<string, string> = {
+  'transformr://dashboard': '/(tabs)/dashboard',
+  'transformr://nutrition': '/(tabs)/nutrition',
+  'transformr://nutrition/add': '/(tabs)/nutrition/add-food',
+  'transformr://workout/start': '/(tabs)/fitness/workout-player',
+  'transformr://workout/log': '/(tabs)/fitness',
+  'transformr://goals': '/(tabs)/goals',
+  'transformr://goals/journal': '/(tabs)/goals/journal',
+  'transformr://goals/sleep': '/(tabs)/goals/sleep',
+  'transformr://goals/habits': '/(tabs)/goals/habits',
+  'transformr://partner': '/(tabs)/profile/partner',
+  'transformr://profile': '/(tabs)/profile',
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +108,10 @@ export default function RootLayout() {
   const listenToAuthChanges = useAuthStore((s) => s.listenToAuthChanges);
   useOfflineSync();
   const [showSplash, setShowSplash] = useState(true);
+  const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
+  const notificationSubRef = useRef<Notifications.EventSubscription | null>(null);
 
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('@assets/fonts/Inter-Regular.ttf'),
@@ -83,6 +128,122 @@ export default function RootLayout() {
       subscription.unsubscribe();
     };
   }, [listenToAuthChanges]);
+
+  // ---------------------------------------------------------------------------
+  // Fix 1 — Push token registration on auth state change (Guards 1-6)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        pushTokenRegistered = false; // Guard 5: reset on sign-out
+        return;
+      }
+
+      if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return;
+
+      // Guard 4 — Session presence check
+      const userId = session?.user?.id;
+      if (!userId) {
+        console.warn('[notifications] skipping push token: no user id');
+        return;
+      }
+
+      // Guard 5 — Idempotency (set eagerly to prevent race between rapid auth events)
+      if (pushTokenRegistered) return;
+      pushTokenRegistered = true;
+
+      // Guard 1 — Defer to after first frame
+      InteractionManager.runAfterInteractions(() => {
+        void (async () => {
+          try { // Guard 3 — try/catch
+            console.warn('[notifications] deferred setup starting'); // Guard 6
+
+            // Guard 2 — 5s timeout on every async call
+            const token = await withTimeout(
+              registerForPushNotifications(),
+              5000,
+              'registerForPushNotifications',
+            );
+
+            if (!token) {
+              console.warn('[notifications] no push token returned, skipping save');
+              console.warn('[notifications] deferred setup complete'); // Guard 6
+              return;
+            }
+
+            await withTimeout(savePushToken(userId, token), 5000, 'savePushToken');
+
+            console.warn('[notifications] deferred setup complete'); // Guard 6
+          } catch (err) {
+            // Guard 3 — never throw up the React tree
+            console.warn('[notifications] push token setup failed:', err);
+          }
+        })();
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Fix 3 — Notification tap handler with deep-link routing (Guards 1-3, 6)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    // Guard 1 — Defer to after first frame
+    const handle = InteractionManager.runAfterInteractions(() => {
+      try { // Guard 3
+        // Subscribe to taps while app is foregrounded
+        notificationSubRef.current = addNotificationResponseListener((response) => {
+          try {
+            const deepLink =
+              (response.notification.request.content.data as Record<string, unknown> | undefined)
+                ?.deep_link as string | undefined;
+            const route = deepLink ? DEEP_LINK_ROUTES[deepLink] : undefined;
+            if (route) {
+              routerRef.current.push(route as never);
+            } else {
+              if (deepLink) {
+                console.warn('[notifications] unmapped deep_link:', deepLink);
+              }
+              routerRef.current.push('/(tabs)/dashboard' as never);
+            }
+          } catch (err) {
+            console.warn('[notifications] tap handler error:', err);
+          }
+        });
+
+        // Guard 2 — Handle cold-start tap with timeout
+        void (async () => {
+          try {
+            const lastResponse = await withTimeout(
+              Notifications.getLastNotificationResponseAsync(),
+              5000,
+              'getLastNotificationResponseAsync',
+            );
+            if (lastResponse) {
+              const deepLink =
+                (lastResponse.notification.request.content.data as Record<string, unknown> | undefined)
+                  ?.deep_link as string | undefined;
+              const route = deepLink ? DEEP_LINK_ROUTES[deepLink] : undefined;
+              routerRef.current.push((route ?? '/(tabs)/dashboard') as never);
+            }
+          } catch (err) {
+            console.warn('[notifications] cold-start tap check failed:', err);
+          }
+        })();
+      } catch (err) {
+        console.warn('[notifications] tap handler setup failed:', err);
+      }
+    });
+
+    return () => {
+      handle.cancel();
+      notificationSubRef.current?.remove();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle OAuth deep link callbacks (PKCE code exchange on cold start or resume)
   // Also handles partner invite deep links: scheme://partner/join?code=TRFM-XXXXX
