@@ -1,374 +1,577 @@
-# TRANSFORMR Execution Plan — UX Remediation Reconciliation Against Specs
+# TRANSFORMR Master Execution Plan v2.1
 
-**Version:** 1.0
+**Version:** 2.1 (supersedes v2.0 — adds notification scope and autonomous execution mode)
 **Date:** May 2026
-**Branch:** dev
-**Author:** Claude (collaborative reconciliation with Tyson)
-**Status:** Draft — awaiting Tyson's review before execution
+**Repo:** `C:\dev\transformr`
+**Branch:** `dev`
+**Status:** Draft — awaiting Tyson's approval to commit and begin execution
+
+**Source-of-truth specs (read before any execution):**
+- `C:\dev\transformr\docs\TRANSFORMR-DASHBOARD-V2-SPEC.md` (visual/structural)
+- `C:\dev\transformr\docs\specs\TRANSFORMR-MASTER-PRINCIPLES.md` (behavioral)
+- `C:\dev\transformr\TRANSFORMR-BRAND-KIT.md` (brand)
+- `C:\dev\transformr\CLAUDE.md` (governance)
+- `C:\dev\transformr\ASSET-MANIFEST.md` (asset locks)
 
 ---
 
 ## SECTION 0 — PURPOSE
 
-This document reconciles the 12 UX remediation prompts (committed at `63636a7` with spec-compliance wrappers) against the canonical spec system:
+This is the canonical execution sequence for shipping TRANSFORMR at production grade for 100,000+ users. v2.1 adds:
+1. Explicit notification scope (Section 4.3 expanded with 9 notification categories)
+2. Autonomous execution mode for safe-to-run-unattended prompts (Section 10)
 
-- `docs/TRANSFORMR-DASHBOARD-V2-SPEC.md` (visual/structural source of truth, locked at `6e67e0f`)
-- `docs/specs/TRANSFORMR-MASTER-PRINCIPLES.md` (behavioral source of truth, committed at `fd0e764`)
-
-For each prompt, this document determines whether to execute as-is, amend before execution, or supersede with a different approach. The output is an ordered execution sequence that doesn't produce work-we-undo.
-
----
-
-## SECTION 1 — RECONCILIATION RESULTS PER PROMPT
-
-### Prompt 01 — Dashboard Above-Fold Restructure
-
-**Status:** ⛔ **DO NOT EXECUTE AS-IS — SUPERSEDE WITH V2 BUILD**
-
-**Conflicts with spec:**
-
-The dashboard v2 spec (Sections 6.1-6.6) defines a complete dashboard architecture: status bar → adaptive hero with 4 score rings (Body/Wealth/Mind/Bond) → AI Coach insight strip → Couples/Bond strip → widget grid → bottom tab bar with cyan FAB. This prompt's restructure conflicts in 6 places:
-
-1. **dayScore formula:** Prompt 01 uses `(habitCompletionRate × 40) + (nutritionAdherenceRate × 30) + (readinessNormalized × 30)`. V2 spec Section 6.2 specifies composite scores per pillar with weighted formulas. These are different mental models.
-
-2. **Score rings missing:** V2 spec 6.2 requires 4 score rings as the hero anchor (66px, gradient stroke, animated). Prompt 01 doesn't add them.
-
-3. **Couples/Bond strip missing:** V2 spec 6.4 requires a pink-glow couples strip after AI Coach. Prompt 01 doesn't include it.
-
-4. **Glow system missing:** V2 spec 5 requires every card to have domain-specific glow (purple/pink/cyan). Prompt 01 keeps existing card styling without glow.
-
-5. **Hero modes missing:** V2 spec 6.2.A-E defines morning/midday/evening/quiet/welcome adaptive modes. Prompt 01 has no time-of-day adaptation.
-
-6. **Widget grid missing:** V2 spec 6.5 specifies a 2-column widget grid with stake goal, habits, weight, revenue, sleep, deep work. Prompt 01 reorders existing components without converting to the v2 widget pattern.
-
-**Recommendation:** Replace with v2 dashboard build sequence (24 prompts in v2 spec Section 14). Specifically Prompts 1-21 from v2 spec which build: brand kit sync (Phase A done at `27145cc`+), foundation primitives, hero modes, strips, widgets, assembly behind feature flag.
-
-V2 dashboard ships behind a feature flag. Old dashboard stays untouched. User flips the flag to switch. No "patch v1 then redo" cycle.
-
-**Action:** Delete Prompt 01 from execution queue. Add v2 spec Prompts 1-21 to execution queue.
+This document is amended in place as work progresses.
 
 ---
 
-### Prompt 02 — Quick-Log Row (6 Targets)
+## SECTION 1 — VERIFICATION RITUAL
 
-**Status:** ⚠️ **AMEND BEFORE EXECUTING**
+Run before every prompt, after every prompt, between every phase.
 
-**Aligns with spec:**
+### 1.1 Pre-prompt verification
 
-- Quick-log mechanism is explicitly called for in master principles Section 1 (operational engine — one-tap actions).
-- 6 targets (workout, meal, water, weight, mood, habit) match the audit's intent inventory.
+```powershell
+cd C:\dev\transformr
+git status --short
+git log -1 --format="%H %s"
+```
 
-**Conflicts/gaps with spec:**
+Expected: clean working tree (only `~$ANSFORMR-DASHBOARD-V2-SPEC.md` Word lock file allowed). Capture commit hash.
 
-1. **Component placement assumes v1 dashboard.** Prompt 02 modifies `dashboard.tsx` line ~551-595 in the existing layout. V2 dashboard has a Quick Log surface as part of the FAB quick-actions sheet (v2 spec 6.6) AND in the persistent today header zone (master principles Section 6). Need to know which one we're building.
+If working tree is dirty (anything other than the Word lock file untracked), STOP. Investigate before running any prompt.
 
-2. **Missing override-with-friction.** Master principles Section 4 requires every AI-generated proposal to be overridable with consequence shown. Quick-log Water at 8oz default — if user has already exceeded daily water target, should the consequence show? Prompt doesn't address.
+### 1.2 Post-prompt verification
 
-3. **Missing operational defaults.** Master principles Section 1 says no blank slates. Quick-log mood opens a 5-emoji selector — that's a blank slate. Should be: "Last logged mood was 7. Today's energy reading from your data suggests 6. Tap to confirm or adjust." Operational default with override.
+The agent's report must include:
+- Starting commit hash
+- Final commit hash
+- All verification gates passed
+- TypeScript: `npx tsc --noEmit` clean
+- ESLint: zero new warnings
+- Tests: passing if applicable
+- Spec sync: shows `git diff --stat` includes any required spec updates
+- Asset checksums match if onboarding-adjacent
 
-**Recommendation:** Amend Prompt 02 to:
-- Build Quick Log as a reusable component that mounts in BOTH the v1 dashboard (immediate) AND the v2 dashboard FAB sheet (when v2 builds).
-- Add operational defaults to mood and water (suggest values based on user's recent data).
-- Add transparency drilldown: tap-and-hold any quick-log button to see "why this default?"
+If ANY gate failed, STOP.
 
-**Order:** Run AFTER v2 dashboard ships (so we can test in both contexts), OR run NOW as v1-only with explicit note that v2 will rebuild.
+### 1.3 Visual verification (every UI prompt)
 
-**Action:** Amend prompt to specify reusable component + operational defaults + transparency. Decision pending: ship in v1 now or wait for v2.
+After agent commits and pushes, Tyson:
+1. Cold-boot emulator if state is corrupted
+2. Open the app
+3. Navigate to the screen the prompt changed
+4. Verify the change visually matches the prompt's intent
+5. Capture screenshot to `docs/visual-verification/{prompt-id}-{date}.png`
+6. Confirm "visual matches" before authorizing next prompt
 
----
+For autonomous runs, visual verification is deferred to Tyson's return. Agent declares "code complete, visual verification pending."
 
-### Prompt 03 — AICoachFAB Creation
+### 1.4 Inter-phase verification
 
-**Status:** ✅ **EXECUTE AS-IS WITH MINOR AMENDMENT**
+After every phase completes:
 
-**Aligns with spec:**
+```powershell
+cd C:\dev\transformr\apps\mobile
+npx tsc --noEmit
+npx eslint .
+npx jest --coverage
+```
 
-- Master principles Section 1 (AI accessible everywhere) requires this.
-- V2 spec Section 6.6 specifies a cyan FAB with cyan-purple gradient, breathing pulse animation, AI quick-actions on tap.
-- Prompt 03 implementation matches v2 spec design exactly: 56pt diameter, cyan-purple gradient, cyan glow, pulse animation, tap → chat, long-press → menu.
+```powershell
+cd C:\dev\transformr
+git log --oneline -20
+git status
+```
 
-**Minor gap:**
+### 1.5 Performance budget gate
 
-- V2 spec 6.6 specifies the FAB is positioned **center of bottom tab bar** with `-18px margin-top` to overlap. Prompt 03 specifies bottom-right corner. **CONFLICT.**
+Every 5 prompts AND end of every phase. Run on Galaxy A52 emulator.
 
-**Recommendation:** Amend Prompt 03 to position FAB per v2 spec Section 6.6 (center of tab bar, overlapping). This is a one-line change in the prompt (position from bottom-right to bottom-center, integrated with tab bar).
+### 1.6 Accessibility gate
 
-Master principles also requires: long-press menu must include "Daily Briefing" and "Weekly Review" — Prompt 03 already specifies these. Good.
+Every prompt that adds UI components.
 
-**Action:** Amend position spec, then execute. ~5 min amendment.
+### 1.7 Spec drift audit
 
----
+Every 5 prompts.
 
-### Prompt 04 — Sleep Time Picker
+### 1.8 Rollback drill
 
-**Status:** ✅ **EXECUTE AS-IS**
-
-**Aligns with spec:**
-
-- Master principles Section 1 (operational engine, no blank slates) requires smart defaults — Prompt 04 includes 22:30 / 06:30 / 14:00 / 21:00 defaults.
-- Master principles Section 5 (hand-holding) requires every flow to be guided — time pickers are the right pattern.
-- V2 spec doesn't address sleep logging UI directly (it's a Goals tab concern, not Dashboard) — no conflict.
-- Reduces 27-31 taps to 5-8 taps, the highest-impact tap reduction in the audit.
-
-**No amendments needed.**
-
-**Action:** Execute as-is. Standalone. Can run in parallel with anything except itself.
-
----
-
-### Prompt 05 — Coachmark Expansion (7 Screens)
-
-**Status:** ✅ **EXECUTE AS-IS**
-
-**Aligns with spec:**
-
-- Master principles Section 5 (hand-holding) explicitly calls for coach marks for first-time interactions.
-- V2 spec doesn't address coachmarks for non-Dashboard screens — no conflict.
-- 7 new screens × 2-3 coach marks each = standardized first-run guidance.
-
-**No amendments needed.**
-
-**Action:** Execute as-is. Standalone, low-risk additive change. Each screen modification is independent — true parallelization possible.
+Every 10 prompts AND end of every phase.
 
 ---
 
-### Prompt 06 — Help Bubbles for Gated Features
+## SECTION 2 — DEPENDENCY ISOLATION RULES
 
-**Status:** ✅ **EXECUTE AS-IS**
+### 2.1 What "true parallelization" requires
 
-**Aligns with spec:**
+For two Claude Code sessions to run in parallel safely:
+- Disjoint files (no overlap)
+- Disjoint imports
+- Neither modifies `package.json` or any dependency file
+- Neither runs `npm install` or `expo install`
+- Neither modifies a Zustand store
+- Commit at end, deterministic ordering
 
-- Master principles Section 5 (hand-holding) — explain features before paywall friction.
-- Master principles Section 16 requires no placeholder/coming-soon text — Prompt 06 adds explanatory copy that's brand-voice consistent.
-- Reduces paywall abandon rate.
+### 2.2 Rules for parallel sessions
 
-**No amendments needed.**
+- Maximum 3 parallel sessions
+- Each in its own `git worktree`:
 
-**Action:** Execute as-is. Standalone, low-risk additive. 6 file modifications, all independent.
+```powershell
+cd C:\dev\transformr
+git worktree add ../transformr-session-1 dev
+git worktree add ../transformr-session-2 dev
+git worktree add ../transformr-session-3 dev
+```
 
----
+### 2.3 Dependency installation rule
 
-### Prompt 07 — Goals Navigation Simplification
+Only ONE prompt per phase may modify dependencies.
 
-**Status:** ⚠️ **AMEND BEFORE EXECUTING**
+### 2.4 Store modification rule
 
-**Aligns with spec:**
-
-- Master principles Section 5 (hand-holding) — eliminating horizontal scroll improves discovery.
-- Reduces hidden navigation targets.
-
-**Gap with spec:**
-
-- V2 spec scope is Today tab only (Section 2 explicitly lists Body/Wealth/Mind/Bond tabs as out of scope). Goals tab will be respec'd in `TRANSFORMR-GOALS-SPEC.md` (not yet written).
-- Restructuring Goals tab nav now means we may have to redo it when Goals spec is written.
-- However, the change is purely additive UI restructure — no behavior change, no data flow change. Risk of redo is low.
-
-**Recommendation:** Execute as-is BUT with a note in commit message: "This is interim Goals nav restructure. Final Goals tab structure will be locked in TRANSFORMR-GOALS-SPEC.md. This restructure does not commit us to this navigation pattern long-term."
-
-**Action:** Execute as-is. Add the interim caveat to commit message.
+Only ONE prompt at a time may touch a given Zustand store.
 
 ---
 
-### Prompt 08 — Profile Home State Completeness
+## SECTION 3 — RECONCILIATION OF 12 UX PROMPTS
 
-**Status:** ✅ **EXECUTE AS-IS**
+### 3.1 Prompt 01 — Dashboard Above-Fold Restructure
 
-**Aligns with spec:**
+**Status:** SUPERSEDE WITH V2 DASHBOARD BUILD
 
-- Master principles Section 16 (no corner cutting) — every screen has loading skeleton, error state, refresh control.
-- Profile screen is identified as lowest state-completeness in the audit.
-- Pure preservation work — adds missing states without removing anything.
+6 conflicts with v2 spec. Replace with v2 spec Prompts 1-21.
 
-**No amendments needed.**
+### 3.2 Prompt 02 — Quick-Log Row
 
-**Action:** Execute as-is. Lowest risk in the entire pack.
+**Status:** DEFER TO V2 BUILD (Phase 4)
 
----
+Build once correctly in v2 dashboard FAB sheet AND persistent today header.
 
-### Prompt 09 — Daily Briefing Wayfinding
+### 3.3 Prompt 03 — AICoachFAB
 
-**Status:** ✅ **EXECUTE AS-IS**
+**Status:** AMEND THEN EXECUTE
 
-**Aligns with spec:**
+Amendment: Position fix per v2 spec 6.6.
 
-- Master principles Section 5 (hand-holding) — every screen must have an escape, no dead ends.
-- Adds HelpIcon and contextual action buttons.
+### 3.4 Prompt 04 — Sleep Time Picker
 
-**Note:** Master principles Section 21-22 specifies Weekly Review and Monthly Letter as part of the operational engine. Daily Briefing is part of that family. The wayfinding fix is consistent with making these surfaces more accessible.
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
-**No amendments needed.**
+### 3.5 Prompt 05 — Coachmark Expansion
 
-**Action:** Execute as-is.
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
----
+### 3.6 Prompt 06 — Help Bubbles for Gated Features
 
-### Prompt 10 — AI Feedback Table Migration
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
-**Status:** ✅ **EXECUTE AS-IS**
+### 3.7 Prompt 07 — Goals Navigation Simplification
 
-**Aligns with spec:**
+**Status:** DEFER UNTIL GOALS SPEC IS WRITTEN
 
-- Master principles Section 2 (transparency) requires feedback mechanism on AI recommendations.
-- Master principles Section 14 (telemetry) requires we measure recommendation quality.
-- Migration creates `ai_feedback` table with proper RLS, indices, FK constraint.
-- Sequential dependency: Prompt 11 (Why This sheet) requires this table.
+### 3.8 Prompt 08 — Profile Home State Completeness
 
-**No amendments needed.**
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
-**Action:** Execute as-is. Must run BEFORE Prompt 11.
+### 3.9 Prompt 09 — Daily Briefing Wayfinding
 
----
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
-### Prompt 11 — Transparency "Why This?" Sheet
+### 3.10 Prompt 10 — AI Feedback Migration
 
-**Status:** ✅ **EXECUTE AS-IS WITH AMENDMENT**
+**Status:** EXECUTE AS-IS — AUTONOMOUS-SAFE
 
-**Aligns with spec:**
+### 3.11 Prompt 11 — Why This Sheet
 
-- Master principles Section 2 (transparency) explicitly requires this. Every AI number tappable to see calculation chain — Why This sheet is the implementation.
-- Master principles Section 24 includes this in the Decisions Log.
+**Status:** AMEND THEN EXECUTE
 
-**Gap with spec:**
+Amendment: Add calculation chain display.
 
-- Master principles Section 2 says transparency drilldown should show **calculation chain** (specific data points → math → result). Prompt 11 shows data points and confidence but doesn't show the math.
-- E.g., "Sleep quality averaged 2.8/5" is a data point. Master principles wants: "Sleep quality 2.8/5 → contributes 30% weight to body score → reduces body score by 21 points."
+### 3.12 Prompt 12 — AI Proactive Hooks
 
-**Recommendation:** Amend Prompt 11 to include calculation chain when applicable. For AI-generated insights without explicit math (e.g., "you're winning at nutrition"), data points alone is fine. For numeric outputs (scores, targets), show the math.
-
-**Action:** Amend prompt to include math-display pattern. ~10 min amendment. Then execute.
+**Status:** DEFER UNTIL COACH STYLE SPEC + PHASE A.5 LANDS
 
 ---
 
-### Prompt 12 — AI Proactive Trigger Specifications
+## SECTION 4 — MISSING WORK NOW SCHEDULED
 
-**Status:** ⚠️ **AMEND BEFORE EXECUTING**
+### 4.1 Phase A.5 — Notification bug fixes
 
-**Aligns with spec:**
+From `docs/audit/NOTIFICATIONS-AUDIT-2026-04-30.md`:
+1. proactive_messages CHECK constraint mismatch
+2. daily-reminder pref field name issues
+3. global toggle no-op
+4. daily-accountability ignoring prefs
 
-- Master principles Section 7 (notification heartbeat) — operational engine requires AI triggers throughout the day.
-- 17 of 23 AI services are reactive per the audit. This prompt makes them proactive.
+### 4.2 AI Vision Camera shell
 
-**Gaps with spec:**
+Field-name mismatch (`image` vs `image_base64`) affects 6+ vision features. Need unified Camera shell.
 
-1. **Coach Style integration missing.** Master principles Section 7 locks **Off / Calm / Coach / Drill Sergeant** as the user-controlled tier system. This prompt fires triggers at fixed times without considering Coach Style preferences. **CONFLICT** — would fire morning briefing for Off-tier users who don't want them.
+Used by: meal camera, menu scanner, supplement bottle scanner, blood work scanner, posture analysis, progress photo, form check.
 
-2. **Quiet hours missing.** Master principles Section 7.always-on-safety-rules specifies 10pm-7am quiet hours. Prompt 12 fires evening reflection 8pm-11pm — extends past quiet hours start.
+### 4.3 Coach Style spec + Notification system (EXPANDED)
 
-3. **AI-generated content vs static.** Master principles Section 7 says notification content must be Claude-generated with full user context. Prompt 12 calls existing edge functions which is correct, but doesn't specify the context block.
+**Coach Style tier system:**
+- Off / Calm / Coach / Drill Sergeant
+- User-controlled in Settings
+- Default: Coach for new users
 
-4. **Cooldown using AsyncStorage instead of MMKV.** Master principles Section 11 (performance) and project memory: TRANSFORMR uses MMKV for hot-path data. AsyncStorage is fine for cold storage. Cooldown checks happen on every app open — that's hot-path. Should use MMKV.
+**Notification categories that MUST ship:**
 
-**Recommendation:** Amend Prompt 12 to:
-- Read Coach Style from user preferences before firing
-- Off tier → never fire
-- Calm tier → fire only morning briefing + critical alerts
-- Coach tier → fire all 4 specified triggers
-- Drill Sergeant tier → fire all 4 PLUS additional triggers per Coach Style spec
-- Respect quiet hours (no firing 10pm-7am, even if condition met)
-- Use MMKV instead of AsyncStorage for cooldowns
-- Add explicit `buildUserAIContext` helper call (master principles Section 3)
-
-**Action:** Amend before executing. ~20 min amendment. Depends on Coach Style preference being readable from store.
-
----
-
-## SECTION 2 — EXECUTION ORDER
-
-Based on reconciliation, here's the ordered execution sequence:
-
-### Phase 1 — Low-risk, no-amendment prompts (run in parallel)
-
-| Order | Prompt | File scope | Parallelizable with |
+| Category | Description | Tiers active | AI-generated content |
 |---|---|---|---|
-| 1.1 | 04 — Sleep time picker | `goals/sleep.tsx` | All others in Phase 1 |
-| 1.2 | 05 — Coachmark expansion | 7 screen files | All others in Phase 1 |
-| 1.3 | 06 — Help bubbles for gated | 6 screen files | All others in Phase 1 |
-| 1.4 | 08 — Profile state completeness | `profile/index.tsx` | All others in Phase 1 |
-| 1.5 | 09 — Daily briefing wayfinding | `daily-briefing.tsx` | All others in Phase 1 |
-| 1.6 | 10 — AI feedback migration | New SQL migration | All others in Phase 1 |
-| 1.7 | 07 — Goals nav simplify (with caveat) | `goals/index.tsx` | All others in Phase 1 |
+| Task reminders | "Time for breakfast", "Time for water", "Pre-workout in 30 min", "Wind down for sleep" | Calm + Coach + Drill Sergeant | Yes — references user's actual data and time of day |
+| Streak protection | "Your 14-day streak is at risk — log something today" — fires within 4 hours of midnight | All except Off | Yes — references current streak length and what's missing |
+| Motivational pings | Daily nudges with brand voice | Coach + Drill Sergeant | Yes — references user's last action, current state, today's goal |
+| Milestone celebrations | "PR alert! Just hit 145lb bench, up 5 from last week" | All except Off | Yes — references the specific milestone reached |
+| Re-engagement | After 1/3/7 days of absence, escalating re-engagement | All except Off | Yes — references how long absent and what's pending |
+| AI insights | "Your sleep dropped, readiness at 62, today is a recovery day" | Coach + Drill Sergeant | Yes — full cross-pillar context |
+| Partner activity | "Danyell just started Push Day", "Danyell sent you a cheer" | All if partner linked | Real-time, not AI-generated |
+| Cross-pillar nudges | "You haven't logged sleep, water, or workout — your all-pillar streak is at risk" | Coach + Drill Sergeant | Yes — multi-pillar status check |
+| Weekly review prompt | Sunday 10am | Calm + Coach + Drill Sergeant | Yes — full week context |
+| Monthly letter | 1st of each month | Calm + Coach + Drill Sergeant | Yes — full month retrospective |
 
-**All 7 prompts can run in parallel** — they touch different files, no shared state, no dependencies. Estimated time with parallel execution: 2-4 hours total agent time.
+**Frequency targets per tier (approximate, configurable):**
+- Off: 0/day
+- Calm: 3-4/day
+- Coach: 6-8/day (default)
+- Drill Sergeant: 10-15/day
 
-### Phase 2 — Amendments needed before execution
+**Always-on safety rules (all tiers):**
+- Quiet hours 10pm-7am user local time, non-overridable
+- No firing during active workout sessions
+- 3-skip downgrade: dismissed 3x in a row → that category drops one tier of frequency
+- Tone is firm, never cruel, even at Drill Sergeant
 
-| Order | Prompt | Amendment scope |
-|---|---|---|
-| 2.1 | 03 — AICoachFAB | Position fix per v2 spec 6.6 (center of tab bar, not bottom-right) |
-| 2.2 | 11 — Why This sheet | Add calculation chain display for numeric outputs |
-| 2.3 | 12 — AI proactive hooks | Coach Style integration, quiet hours, MMKV, buildUserAIContext |
+**Per-category override:**
+Settings > Notifications > Advanced lets users toggle individual categories on/off within their chosen tier.
 
-**Sequential after amendments:**
-- 2.1 (FAB) can run in parallel with anything in Phase 1
-- 2.2 (Why This) depends on Phase 1.6 (migration)
-- 2.3 (Proactive hooks) depends on 2.1 (FAB exists)
+**AI-generated message text (mandatory, not template):**
+Every notification message goes through Claude Edge Function call with full user context. Static templates produce app-feels-robotic. AI-generated messages reference user's specific state and feel like a coach paying attention.
 
-Amendment time: ~35 min me. Execution time: 2-4 hours per prompt.
+Spec lives at `docs/specs/TRANSFORMR-COACH-STYLE-SPEC.md`. Build follows spec.
 
-### Phase 3 — Decision pending
+### 4.4 Tab specs
 
-| Order | Prompt | Decision |
-|---|---|---|
-| 3.1 | 02 — Quick-log row | Decide: ship v1 now (interim) or wait for v2 dashboard |
-| 3.2 | 01 — Dashboard above-fold | SUPERSEDED — replace with v2 spec Prompts 1-21 |
+- `TRANSFORMR-FITNESS-SPEC.md`
+- `TRANSFORMR-NUTRITION-SPEC.md`
+- `TRANSFORMR-GOALS-SPEC.md`
+- `TRANSFORMR-PROFILE-SPEC.md`
 
-### Phase 4 — V2 Dashboard Build
+### 4.5 V2 dashboard 24-prompt sequence
 
-This replaces Prompt 01 entirely. The 24-prompt v2 spec build sequence (Section 14 of dashboard v2 spec) executes here:
+Phase A is partially done. Verification needed before continuing.
 
-- Phase A (Prompts 1-4): Brand kit synchronization — partially done at commits `27145cc`, `7dd1b9b`, etc. Verify what's done and complete the rest.
-- Phase B (Prompts 5-7): Foundation infrastructure (i18n, telemetry, performance class).
-- Phase C (Prompts 8-11): Foundation primitives (CardShell, ScoreRing, EmptyState, etc.).
-- Phase D (Prompts 12-16): Hero modes (welcome, plan timeline, progress bars, reflection, adaptive orchestrator).
-- Phase E (Prompts 17-20): Strips and widgets (AI Coach, Couples, 6 widgets, grid).
-- Phase F (Prompt 21): Assembly + feature flag toggle.
-- Phase G (Prompts 22-24): Real data wiring.
+### 4.6 Phase A status verification
 
-Per v2 spec, this is roughly 13-18 days of agent work at 1-2 prompts per day with verification.
+Before running v2 build:
 
-### Phase 5 — Notification system completion
-
-After v2 dashboard ships:
-- Phase A.5 — Fix the 4 outstanding notification bugs identified in audit
-- Coach Style spec (write the spec first)
-- Coach Style implementation (Off / Calm / Coach / Drill Sergeant tiers)
-
-### Phase 6 — Other tab specs and builds
-
-After v2 dashboard ships and notification system is complete:
-- Write `TRANSFORMR-FITNESS-SPEC.md`, build Fitness tab v2
-- Write `TRANSFORMR-NUTRITION-SPEC.md`, build Nutrition tab v2 (includes AI Vision Camera)
-- Write `TRANSFORMR-GOALS-SPEC.md`, build Goals tab v2
-- Write `TRANSFORMR-PROFILE-SPEC.md`, build Profile tab v2
+```powershell
+cd C:\dev\transformr
+git log --oneline | Select-String "brand|kit|color|gradient" | Select-Object -First 20
+```
 
 ---
 
-## SECTION 3 — IMMEDIATE NEXT MOVE
+## SECTION 5 — EXECUTION SEQUENCE
 
-**Right now:**
+### Phase 1 — No-amendment, low-risk additive prompts
 
-1. Tyson reviews this reconciliation report.
-2. If approved, commit this doc to repo as `docs/EXECUTION-PLAN.md`.
-3. Tyson decides on Phase 3.1 (Quick-Log v1 interim or wait).
-4. Begin executing Phase 1 prompts in parallel via separate Claude Code sessions.
-5. While Phase 1 runs, I amend Prompts 03, 11, 12.
+| # | Prompt | File scope | Autonomous-safe |
+|---|---|---|---|
+| 1.1 | 04 — Sleep time picker | `goals/sleep.tsx` | YES |
+| 1.2 | 05 — Coachmark expansion | 7 screen files | YES |
+| 1.3 | 06 — Help bubbles for gated | 6 screen files | YES |
+| 1.4 | 08 — Profile state completeness | `profile/index.tsx` | YES |
+| 1.5 | 09 — Daily briefing wayfinding | `daily-briefing.tsx` | YES |
+| 1.6 | 10 — AI feedback migration | new SQL migration | YES |
 
-**Phase 1 is 7 prompts that can all run in parallel — true parallelization across multiple Claude Code windows.**
+All 6 are autonomous-safe. See Section 10 for autonomous execution mode.
 
-**Estimated calendar time to ship Phase 1 + Phase 2:** 1-2 days
-**Estimated calendar time to ship Phase 4 (v2 dashboard):** 13-18 days
-**Estimated calendar time to full app at production grade:** 6-10 weeks
+**Estimated calendar time:** 1-2 days manual, 5-8 hours autonomous.
 
----
+### Phase 2 — Amend prompts then execute (NOT AUTONOMOUS)
 
-## SECTION 4 — DECISIONS PENDING
-
-| Decision | Options | Recommendation |
+| # | Action | Time |
 |---|---|---|
-| Quick-Log v1 interim or wait for v2? | Ship v1 now / Wait for v2 | Wait for v2 — we'll build it once correctly in v2 dashboard FAB sheet (v2 spec 6.6) and persistent today header (master principles Section 6). Saves 2-4 hours of redo work. |
-| Goals nav restructure (Prompt 07) | Execute now / wait for Goals spec | Execute now with caveat — purely additive UI restructure, low risk of redo, immediate UX win. |
-| When to commit this execution plan | Immediately / after Phase 1 / after every phase | Immediately — this becomes the source of truth for execution. |
+| 2.1 | Amend Prompt 03 (FAB position fix), commit amended prompt | ~15min me |
+| 2.2 | Execute amended Prompt 03 | ~3h agent |
+| 2.3 | Amend Prompt 11 (calculation chain) | ~15min me |
+| 2.4 | Execute amended Prompt 11 (depends on 1.6) | ~4h agent |
+
+### Phase 3 — Phase A.5 notification bug fixes (NOT AUTONOMOUS)
+
+| # | Action | Time |
+|---|---|---|
+| 3.1 | Fix proactive_messages CHECK constraint | ~1.5h |
+| 3.2 | Fix daily-reminder pref field names | ~1h |
+| 3.3 | Fix global toggle no-op | ~1h |
+| 3.4 | Fix daily-accountability prefs | ~1.5h |
+
+Sequential. Real device push notification test required.
+
+### Phase 4 — V2 dashboard build (NOT AUTONOMOUS)
+
+24 prompts per v2 spec. 13-18 days.
+
+### Phase 5 — Quick-Log + AICoachFAB consolidation
+
+After v2 ships. 1-2 days.
+
+### Phase 6 — Coach Style spec + Notification system build (NOT AUTONOMOUS)
+
+| # | Action | Time |
+|---|---|---|
+| 6.1 | Write `docs/specs/TRANSFORMR-COACH-STYLE-SPEC.md` covering all 10 notification categories | ~2h me + 30min review |
+| 6.2 | Build Coach Style settings UI | ~3h agent |
+| 6.3 | Build preference store + Supabase sync | ~2h agent |
+| 6.4 | Build per-category override UI | ~2h agent |
+| 6.5 | Build notification scheduler with cooldowns + quiet hours | ~3h agent |
+| 6.6 | Build AI message generation Edge Function with full context | ~3h agent |
+| 6.7 | Build re-engagement notification system (1/3/7 day absence) | ~2h agent |
+| 6.8 | Build streak protection notification logic | ~2h agent |
+| 6.9 | Build milestone celebration notification logic | ~2h agent |
+| 6.10 | Build cross-pillar nudge notification logic | ~2h agent |
+| 6.11 | Wire weekly review and monthly letter notifications | ~2h agent |
+| 6.12 | Test all 4 tiers on emulator + real device | ~3h |
+
+**Estimated calendar time:** 5-7 days.
+
+### Phase 7 — Execute amended Prompt 12 (proactive hooks)
+
+After Coach Style ships, amend Prompt 12 to integrate. Execute.
+
+### Phase 8 — AI Vision Camera shell
+
+3-4 days.
+
+### Phase 9 — Tab specs
+
+2-3 days.
+
+### Phase 10 — Execute deferred Prompt 07 (Goals nav)
+
+After Goals spec written.
+
+### Phase 11 — Tab v2 builds
+
+3-4 weeks.
+
+### Phase 12 — End-to-end verification
+
+1 week.
+
+### Phase 13 — Submission and launch
+
+1-2 weeks.
 
 ---
 
-*End of reconciliation. Awaiting Tyson's approval to proceed.*
+## SECTION 6 — TOTAL CALENDAR TIME
+
+| Phase | Calendar time |
+|---|---|
+| Phase 1 | 1-2 days manual / 5-8 hours autonomous |
+| Phase 2 | 1-2 days |
+| Phase 3 | 1 day |
+| Phase 4 | 13-18 days |
+| Phase 5 | 1-2 days |
+| Phase 6 (notifications) | 5-7 days |
+| Phase 7 | 1 day |
+| Phase 8 | 3-4 days |
+| Phase 9 | 2-3 days |
+| Phase 10 | 1 day |
+| Phase 11 | 15-28 days |
+| Phase 12 | 5-7 days |
+| Phase 13 | 5-14 days |
+| **TOTAL** | **55-92 days = 8-13 weeks** |
+
+---
+
+## SECTION 7 — SUCCESS METRICS
+
+A phase is "done" when:
+
+| Metric | Threshold |
+|---|---|
+| TypeScript errors | 0 |
+| ESLint new errors | 0 |
+| Test coverage statements | 80%+ |
+| Test coverage branches | 75%+ |
+| Test coverage functions | 80%+ |
+| Test coverage lines | 80%+ |
+| Cold start iPhone 12 | < 2.5s |
+| Cold start Galaxy A52 | < 4s |
+| Dashboard scroll fps iPhone 12 | 60 |
+| Dashboard scroll fps A52 | 45+ |
+| Memory at launch | < 80MB |
+| Memory after 10min | < 120MB |
+| Touch targets | >= 44pt |
+| WCAG 2.2 AA contrast | Pass on all text |
+| VoiceOver navigability | Full app |
+| TalkBack navigability | Full app |
+| Dynamic Type at xxxLarge | No layout breaks |
+| Reduce-motion | All decorative anims disabled |
+| Offline logging | All log types work |
+| Asset checksums | Match manifest |
+| Spec sync | All specs reflect code |
+
+---
+
+## SECTION 8 — RISK MITIGATION
+
+### 8.1 Per-prompt rollback
+
+`git revert`. Drill every 10 prompts.
+
+### 8.2 Per-phase rollback
+
+Revert all phase commits. Restart phase with corrected spec.
+
+### 8.3 V2 dashboard rollback
+
+Feature flag default OFF.
+
+### 8.4 Production rollback
+
+Crash rate spike → kill switch via Supabase config row.
+
+### 8.5 Spec interpretation escalation
+
+STOP execution. Report to Tyson. Spec amended. Resume.
+
+---
+
+## SECTION 9 — IMMEDIATE NEXT MOVE
+
+1. Tyson reviews this plan v2.1
+2. If approved, commit `docs/EXECUTION-PLAN.md` to repo
+3. Run autonomous Phase 1 launcher (Section 10)
+4. Tyson returns, reviews autonomous run report
+5. Begin Phase 2 manually
+
+---
+
+## SECTION 10 — AUTONOMOUS EXECUTION MODE
+
+### 10.1 Purpose
+
+Allow Phase 1 prompts to run unattended while Tyson is away. Hardened with strict STOP-on-anything-unexpected discipline. No improvisation, no spec amendments without approval, no "best effort" workarounds.
+
+### 10.2 Autonomous-safe prompt criteria
+
+A prompt qualifies for autonomous execution ONLY if it meets ALL of:
+1. Single file OR multiple independent files (no shared state)
+2. Pure additive change (no removals, no behavior changes to existing flows)
+3. No new dependencies required
+4. No store file modifications
+5. No spec amendments required
+6. No visual judgment needed (changes are mechanical)
+7. Clear verification gates the agent can run unattended
+8. Easily revertible with single `git revert`
+
+Phase 1 prompts (04, 05, 06, 08, 09, 10) all meet these criteria.
+
+### 10.3 STOP conditions (hard rules)
+
+The autonomous agent MUST STOP and exit cleanly if ANY of these occur:
+
+1. **Spec conflict detected** — any conflict between prompt and spec files
+2. **Test failure** — any test goes from passing to failing
+3. **Pre-existing TypeScript error** — agent must not "fix" errors that existed before this run
+4. **New TypeScript error** — agent's changes introduced a type error
+5. **ESLint regression** — new lint errors introduced
+6. **File outside scope modified** — agent touched a file not listed in the prompt's scope
+7. **Asset checksum mismatch** — any change to `apps/mobile/assets/images/`
+8. **Process killing attempt** — agent tried `taskkill`, `Stop-Process`, `kill`, `pkill`
+9. **Dependency change** — agent ran `npm install` or `expo install`
+10. **Store file modification** — agent modified a Zustand store
+11. **Migration file modification** — agent modified an existing migration (only new ones allowed)
+12. **Edge function modification** — agent modified an existing Edge Function
+13. **Performance regression** — measurable perf drop on existing screens
+14. **Build failure** — `npx tsc --noEmit` fails
+15. **Working tree dirty between prompts** — uncommitted changes carrying over
+16. **Git operation failure** — commit or push fails
+17. **Network failure** — Supabase or GitHub unreachable
+18. **Spec ambiguity** — prompt could be interpreted multiple ways
+
+### 10.4 STOP behavior
+
+When a STOP condition is hit, the agent:
+1. Does NOT improvise or attempt to recover
+2. Does NOT commit any partial work
+3. Does NOT roll back successfully completed prior prompts
+4. Discards uncommitted changes for the prompt that triggered STOP
+5. Creates `C:\dev\transformr\BLOCKED.md` with:
+   - Which prompt was running when STOP triggered
+   - Which STOP condition fired
+   - Exact error or finding
+   - What's been completed successfully so far (with commit hashes)
+   - What hasn't been attempted yet
+   - Recommended next step for Tyson
+6. Exits cleanly without further action
+
+### 10.5 Successful completion behavior
+
+When all 6 prompts complete successfully:
+1. Agent creates `C:\dev\transformr\docs\autonomous-runs\autonomous-run-{YYYYMMDD-HHMMSS}.md` with:
+   - Start time, end time, total duration
+   - All 6 prompts and their commit hashes
+   - All verification gates that passed
+   - Visual verification deferred note
+   - "All Phase 1 autonomous prompts complete. Visual verification pending Tyson's return. Recommended next step: Phase 2 manual amendments."
+2. All commits tagged with `[autonomous]` in commit message body
+3. All commits pushed to `dev`
+4. Final `git status` shows clean tree
+
+### 10.6 Forbidden actions in autonomous mode
+
+The agent MAY NOT:
+- Amend any spec file (even if it thinks the spec is wrong)
+- Run `npm install` or `expo install`
+- Modify any Zustand store
+- Modify any Edge Function
+- Modify any existing migration
+- Touch any file in `apps/mobile/assets/images/`
+- Touch `package.json`, `app.json`, `eas.json`, `tsconfig.json`
+- Modify the `cc` PowerShell function or any shell tooling
+- Use any process-killing command
+- Disable a failing test to make it pass
+- Lower a verification threshold to make it pass
+- "Best effort" anything
+- Make commits without all gates passing
+
+### 10.7 Required actions in autonomous mode
+
+The agent MUST:
+- Read all spec files (per the wrapper) before executing each prompt
+- Run all verification gates after each prompt
+- Stop on ANY STOP condition without exception
+- Tag every commit with `[autonomous]` marker
+- Push every commit to origin immediately after commit (not batched)
+- Maintain clean working tree between prompts
+- Create the run report at end (success) or BLOCKED.md (stop)
+
+### 10.8 What Tyson does on return
+
+1. Read `BLOCKED.md` first if it exists. Address blocker.
+2. Read `docs/autonomous-runs/autonomous-run-*.md`. Verify what completed.
+3. Cold-boot emulator.
+4. Visually verify each completed prompt.
+5. Run `git log --oneline -10` and verify commits look right.
+6. If all visual verifications pass, mark Phase 1 complete and proceed to Phase 2.
+7. If any visual verification fails, `git revert` the specific commit and re-prompt manually.
+
+### 10.9 Resumption rules
+
+If Phase 1 partially completed (some prompts done, then STOP), Tyson:
+1. Address the blocker that caused STOP
+2. Determine if remaining prompts are still autonomous-safe given new state
+3. Either re-launch autonomous mode for remaining prompts OR run them manually
+
+---
+
+*End of Master Execution Plan v2.1.*
