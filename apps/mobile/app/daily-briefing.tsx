@@ -27,6 +27,7 @@ import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { useDailyBriefing } from '@hooks/useDailyBriefing';
 import { useSettingsStore } from '@stores/settingsStore';
+import { HelpIcon } from '@components/ui/HelpIcon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const GAME_PLAN_CARD_WIDTH = SCREEN_WIDTH * 0.42;
@@ -93,16 +94,22 @@ export default function DailyBriefingScreen() {
       <AmbientBackground />
       <PurpleRadialBackground />
 
-      {/* Close / Back button — escape hatch if content fails to load */}
-      <Pressable
-        onPress={() => router.back()}
-        hitSlop={12}
-        accessibilityLabel="Close daily briefing"
-        accessibilityRole="button"
-        style={{ alignSelf: 'flex-end', marginBottom: spacing.sm }}
-      >
-        <Ionicons name="close" size={28} color={colors.text.secondary} />
-      </Pressable>
+      {/* Header — help icon + close button */}
+      <View style={[styles.headerRow, { marginBottom: spacing.sm }]}>
+        <HelpIcon content={{
+          title: 'Daily Briefing',
+          body: 'Your AI coach summarizes your current state and gives you one clear priority for today. This briefing is generated from your actual data, not generic advice.',
+          proTip: 'Check your briefing every morning before making decisions about today\'s training and nutrition.',
+        }} size={20} />
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          accessibilityLabel="Close daily briefing"
+          accessibilityRole="button"
+        >
+          <Ionicons name="close" size={28} color={colors.text.secondary} />
+        </Pressable>
+      </View>
 
       {/* ================================================================= */}
       {/* Section 1 -- Greeting + Countdown                                 */}
@@ -305,6 +312,70 @@ export default function DailyBriefingScreen() {
       </Animated.View>
 
       {/* ================================================================= */}
+      {/* Quick Actions                                                     */}
+      {/* ================================================================= */}
+      <Animated.View
+        entering={FadeInDown.delay(ANIMATION_BASE_DELAY + ANIMATION_STAGGER * 4).duration(500)}
+        style={styles.section}
+        pointerEvents="auto"
+      >
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <Pressable
+            onPress={() => router.push('/(tabs)/fitness')}
+            accessibilityLabel="Start Workout"
+            accessibilityRole="button"
+            style={[
+              styles.actionButton,
+              {
+                flex: 1,
+                backgroundColor: colors.background.secondary,
+                borderRadius: 12,
+                padding: spacing.md,
+                borderWidth: 1,
+                borderColor: colors.border.default,
+              },
+            ]}
+          >
+            <Ionicons name="barbell-outline" size={20} color={colors.accent.primary} />
+            <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.xs }]}>
+              Start Workout
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(tabs)/nutrition/add-food')}
+            accessibilityLabel="Log Meal"
+            accessibilityRole="button"
+            style={[
+              styles.actionButton,
+              {
+                flex: 1,
+                backgroundColor: colors.background.secondary,
+                borderRadius: 12,
+                padding: spacing.md,
+                borderWidth: 1,
+                borderColor: colors.border.default,
+              },
+            ]}
+          >
+            <Ionicons name="restaurant-outline" size={20} color={colors.accent.success} />
+            <Text style={[typography.captionBold, { color: colors.text.primary, marginTop: spacing.xs }]}>
+              Log Meal
+            </Text>
+          </Pressable>
+        </View>
+        <Pressable
+          onPress={() => router.push('/(tabs)/dashboard')}
+          accessibilityLabel="Go to Dashboard"
+          accessibilityRole="link"
+          style={{ alignItems: 'center', marginTop: spacing.md }}
+        >
+          <Text style={[typography.caption, { color: colors.accent.primary }]}>
+            Go to Dashboard
+          </Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* ================================================================= */}
       {/* Section 5 -- CTA                                                  */}
       {/* ================================================================= */}
       <Animated.View
@@ -361,5 +432,14 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  actionButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
