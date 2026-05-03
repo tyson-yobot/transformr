@@ -2,7 +2,7 @@
 // TRANSFORMR -- Mood Logger
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -35,6 +35,9 @@ import type { ParsedVoiceCommand } from '@services/voice';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type MoodContext = NonNullable<MoodLog['context']>;
 
@@ -64,6 +67,29 @@ export default function MoodLogger() {
   const logMood = useMoodStore((s) => s.logMood);
   const fetchMoodHistory = useMoodStore((s) => s.fetchMoodHistory);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const sliderCardRef = useRef<View>(null);
+  const contextRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.mood;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    sliderCardRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    contextRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [refreshing, setRefreshing] = useState(false);
   const [mood, setMood] = useState(5);
@@ -201,7 +227,7 @@ export default function MoodLogger() {
         <AIInsightCard screenKey="goals/mood" style={{ marginBottom: spacing.md }} />
 
         {/* Quick Mood Input */}
-        <Animated.View entering={FadeInDown.delay(100)}>
+        <Animated.View ref={sliderCardRef} onLayout={measureCoachmarks} entering={FadeInDown.delay(100)}>
           <Card variant="elevated">
             <Text style={[typography.h3, { color: colors.text.primary, textAlign: 'center' }]}>
               How are you feeling?
@@ -267,7 +293,7 @@ export default function MoodLogger() {
         </Animated.View>
 
         {/* Context Selector */}
-        <Animated.View entering={FadeInDown.delay(300)}>
+        <Animated.View ref={contextRef} entering={FadeInDown.delay(300)}>
           <Text
             style={[
               typography.captionBold,
@@ -383,6 +409,7 @@ export default function MoodLogger() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+      <Coachmark screenKey={COACHMARK_KEYS.mood} steps={coachmarkSteps} />
       <VoiceMicButton
         context={{ userId: '', activeScreen: 'mood' }}
         onCommand={handleVoiceCommand}

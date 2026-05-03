@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -35,6 +35,9 @@ import type { PainLog } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type PainType = 'sharp' | 'dull' | 'aching' | 'burning' | 'tingling' | 'stiffness';
 
@@ -73,6 +76,29 @@ export default function PainTrackerScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const bodyMapRef = useRef<View>(null);
+  const painScaleRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.painTracker;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    bodyMapRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    painScaleRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [selectedPart, setSelectedPart] = useState<BodyPart | null>(null);
   const [showLogSheet, setShowLogSheet] = useState(false);
@@ -225,6 +251,7 @@ export default function PainTrackerScreen() {
         )}
 
         {/* Anatomical Body Map */}
+        <View ref={bodyMapRef} onLayout={measureCoachmarks}>
         <Card variant="elevated" style={{ marginBottom: spacing.lg }}>
           <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.sm }]}>
             Tap where it hurts
@@ -242,9 +269,11 @@ export default function PainTrackerScreen() {
             style={{ alignSelf: 'center' }}
           />
         </Card>
+        </View>
 
         {/* Selected Part — history + log button */}
         {selectedPart && (
+          <View ref={painScaleRef}>
           <Card style={{ marginBottom: spacing.lg }}>
             <View style={[styles.selectedHeader, { marginBottom: spacing.md }]}>
               <View style={{ flex: 1 }}>
@@ -337,6 +366,7 @@ export default function PainTrackerScreen() {
               </Text>
             )}
           </Card>
+          </View>
         )}
 
         {/* Recent Pain Entries */}
@@ -470,6 +500,7 @@ export default function PainTrackerScreen() {
           <Button title="Save Pain Log" onPress={handleLogPain} fullWidth />
         </View>
       </BottomSheet>
+      <Coachmark screenKey={COACHMARK_KEYS.painTracker} steps={coachmarkSteps} />
     </View>
   );
 }

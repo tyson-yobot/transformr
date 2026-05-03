@@ -2,7 +2,7 @@
 // TRANSFORMR -- Add Food Screen
 // =============================================================================
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,9 @@ import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { checkFoodBeforeLogging, type ComplianceResult } from '@services/ai/compliance';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -80,6 +83,29 @@ export default function AddFoodScreen() {
   const activeEnrollment = useChallengeStore((s) => s.activeEnrollment);
   const challengeDefinitions = useChallengeStore((s) => s.challengeDefinitions);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const searchBarRef = useRef<View>(null);
+  const batchAreaRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.addFood;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    searchBarRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    batchAreaRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
@@ -336,7 +362,7 @@ export default function AddFoodScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Search Bar */}
-        <Animated.View entering={FadeInDown.duration(300)}>
+        <Animated.View ref={searchBarRef} onLayout={measureCoachmarks} entering={FadeInDown.duration(300)}>
           <Input
             placeholder="Search foods..."
             value={searchQuery}
@@ -354,7 +380,7 @@ export default function AddFoodScreen() {
         </Animated.View>
 
         {/* Meal Type Selector */}
-        <Animated.View entering={FadeInDown.duration(300).delay(100)}>
+        <Animated.View ref={batchAreaRef} entering={FadeInDown.duration(300).delay(100)}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -818,6 +844,7 @@ export default function AddFoodScreen() {
           )}
         </Animated.View>
       )}
+      <Coachmark screenKey={COACHMARK_KEYS.addFood} steps={coachmarkSteps} />
     </KeyboardAvoidingView>
   );
 }

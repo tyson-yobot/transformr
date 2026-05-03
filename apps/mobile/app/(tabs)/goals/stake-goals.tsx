@@ -5,7 +5,7 @@
 export const unstable_settings = { lazy: true };
 
 /* eslint-disable import/first */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -38,6 +38,9 @@ import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 /* eslint-enable import/first */
 
 interface StakeGoalWithDetails extends StakeGoal {
@@ -56,6 +59,29 @@ export default function StakeGoalsScreen() {
       headerRight: () => <ScreenHelpButton content={SCREEN_HELP.stakeGoalsScreen} />,
     });
   }, [navigation]);
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const summaryRef = useRef<View>(null);
+  const activeStakesRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.stakeGoals;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    summaryRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    activeStakesRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [stakeGoals, setStakeGoals] = useState<StakeGoalWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -235,7 +261,7 @@ export default function StakeGoalsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Summary */}
-        <Animated.View entering={FadeInDown.delay(100)}>
+        <Animated.View ref={summaryRef} onLayout={measureCoachmarks} entering={FadeInDown.delay(100)}>
           <View style={[styles.summaryRow, { gap: spacing.md }]}>
             <Card style={{ flex: 1 }} variant="elevated">
               <Text style={[typography.captionBold, { color: colors.accent.success }]}>
@@ -257,7 +283,7 @@ export default function StakeGoalsScreen() {
         </Animated.View>
 
         {/* Active Stake Goals */}
-        <Animated.View entering={FadeInDown.delay(200)}>
+        <Animated.View ref={activeStakesRef} entering={FadeInDown.delay(200)}>
           <Text
             style={[
               typography.h3,
@@ -405,6 +431,8 @@ export default function StakeGoalsScreen() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
+
+      <Coachmark screenKey={COACHMARK_KEYS.stakeGoals} steps={coachmarkSteps} />
 
       {/* Create Stake Modal */}
       <Modal

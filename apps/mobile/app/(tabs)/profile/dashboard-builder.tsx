@@ -2,7 +2,7 @@
 // TRANSFORMR -- Dashboard Builder Screen
 // =============================================================================
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,9 @@ import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { useDashboardStore } from '@stores/dashboardStore';
 import { hapticLight, hapticMedium, hapticSuccess } from '@utils/haptics';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 // ---------------------------------------------------------------------------
 // Widget type icons
@@ -69,6 +72,29 @@ export default function DashboardBuilderScreen() {
   const isLoading = useDashboardStore((s) => s.isLoading);
   const saveLayout = useDashboardStore((s) => s.saveLayout);
   const resetToDefault = useDashboardStore((s) => s.resetToDefault);
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const layoutPreviewRef = useRef<View>(null);
+  const widgetListRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.dashboardBuilder;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    layoutPreviewRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    widgetListRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [widgets, setWidgets] = useState(layout);
   const [hasChanges, setHasChanges] = useState(false);
@@ -202,7 +228,7 @@ export default function DashboardBuilderScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Layout Preview */}
-        <Animated.View entering={FadeInDown.duration(400)}>
+        <Animated.View ref={layoutPreviewRef} onLayout={measureCoachmarks} entering={FadeInDown.duration(400)}>
           <Text
             style={[
               typography.h3,
@@ -250,6 +276,7 @@ export default function DashboardBuilderScreen() {
         </Animated.View>
 
         {/* Active Widgets */}
+        <View ref={widgetListRef}>
         <Text
           style={[
             typography.h3,
@@ -360,6 +387,7 @@ export default function DashboardBuilderScreen() {
             </View>
           </Animated.View>
         ))}
+        </View>
 
         {/* Widget Library (hidden widgets) */}
         {hiddenWidgets.length > 0 && (
@@ -421,6 +449,7 @@ export default function DashboardBuilderScreen() {
           </>
         )}
       </ScrollView>
+      <Coachmark screenKey={COACHMARK_KEYS.dashboardBuilder} steps={coachmarkSteps} />
 
       {/* Bottom Action Bar */}
       <View

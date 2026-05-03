@@ -2,7 +2,7 @@
 // TRANSFORMR -- Sleep Tracker
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,9 @@ import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 const timeStringToDate = (timeStr: string): Date => {
   const [h, m] = timeStr.split(':').map(Number);
@@ -80,6 +83,35 @@ export default function SleepTracker() {
   const [caffeineCutoff, setCaffeineCutoff] = useState('14:00');
   const [screenCutoff, setScreenCutoff] = useState('21:00');
   const [activePicker, setActivePicker] = useState<'bedtime' | 'wake' | 'caffeine' | 'screen' | null>(null);
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const sleepLogBtnRef = useRef<View>(null);
+  const scoreCardRef = useRef<View>(null);
+  const aiCardRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.sleep;
+    const steps: CoachmarkStep[] = [];
+    let pending = 3;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    sleepLogBtnRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    scoreCardRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    aiCardRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s2 = content[2];
+      if (s2) steps[2] = { ...s2, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const openLogModal = useCallback(() => {
     if (lastSleep) {
@@ -254,7 +286,7 @@ export default function SleepTracker() {
         <>
 
         {/* Sleep Score */}
-        <Animated.View entering={FadeInDown.delay(100)}>
+        <Animated.View ref={scoreCardRef} onLayout={measureCoachmarks} entering={FadeInDown.delay(100)}>
           <Card variant="elevated" style={styles.sleepScoreCard}>
             <View style={styles.scoreSection}>
               <View
@@ -349,7 +381,7 @@ export default function SleepTracker() {
 
         {/* AI Recommendation */}
         {aiRecommendation && (
-          <Animated.View entering={FadeInDown.delay(400)}>
+          <Animated.View ref={aiCardRef} entering={FadeInDown.delay(400)}>
             <Card
               style={[
                 styles.aiInsightCard,
@@ -502,19 +534,23 @@ export default function SleepTracker() {
         )}
 
         {/* Log Sleep Button */}
-        <HelpBubble id="sleep_log" message="Log sleep to unlock AI recovery insights" position="above" />
-        <Button
-          title="Log Sleep"
-          onPress={() => { hapticLight(); openLogModal(); }}
-          accessibilityLabel="Log last night's sleep"
-          fullWidth
-          style={{ marginTop: spacing.xl }}
-        />
+        <View ref={sleepLogBtnRef}>
+          <HelpBubble id="sleep_log" message="Log sleep to unlock AI recovery insights" position="above" />
+          <Button
+            title="Log Sleep"
+            onPress={() => { hapticLight(); openLogModal(); }}
+            accessibilityLabel="Log last night's sleep"
+            fullWidth
+            style={{ marginTop: spacing.xl }}
+          />
+        </View>
 
         <View style={{ height: 24 }} />
         </>
         )}
       </ScrollView>
+
+      <Coachmark screenKey={COACHMARK_KEYS.sleep} steps={coachmarkSteps} />
 
       {/* Log Sleep Modal */}
       <Modal

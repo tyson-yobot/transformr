@@ -2,7 +2,7 @@
 // TRANSFORMR -- AI Meal Camera Screen
 // =============================================================================
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -38,6 +38,9 @@ import { HelpBubble } from '@components/ui/HelpBubble';
 import { ActionToast, useActionToast } from '@components/ui/ActionToast';
 import { analyzeMealPhoto } from '@services/ai/mealCamera';
 import { supabase } from '../../../services/supabase';
+import { Coachmark } from '@components/ui/Coachmark';
+import type { CoachmarkStep } from '@components/ui/Coachmark';
+import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
 
 type MealType = typeof MEAL_TYPES[number];
 
@@ -71,6 +74,29 @@ export default function MealCameraScreen() {
   const logFood = useNutritionStore((s) => s.logFood);
   const { toast, show: showToast, hide: hideToast } = useActionToast();
   const [permission, requestPermission] = useCameraPermissions();
+
+  const [coachmarkSteps, setCoachmarkSteps] = useState<CoachmarkStep[]>([]);
+  const scanFrameRef = useRef<View>(null);
+  const captureBtnRef = useRef<View>(null);
+
+  const measureCoachmarks = useCallback(() => {
+    const content = COACHMARK_CONTENT.mealCamera;
+    const steps: CoachmarkStep[] = [];
+    let pending = 2;
+    const done = () => {
+      if (--pending === 0) setCoachmarkSteps(steps.filter(Boolean) as CoachmarkStep[]);
+    };
+    scanFrameRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s0 = content[0];
+      if (s0) steps[0] = { ...s0, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+    captureBtnRef.current?.measure((_x, _y, w, h, px, py) => {
+      const s1 = content[1];
+      if (s1) steps[1] = { ...s1, targetX: px, targetY: py, targetWidth: w, targetHeight: h };
+      done();
+    });
+  }, []);
 
   const [stage, setStage] = useState<CameraStage>('capture');
   const [detectedFoods, setDetectedFoods] = useState<DetectedFood[]>([]);
@@ -248,14 +274,14 @@ export default function MealCameraScreen() {
               <View style={{ width: 28 }} />
             </View>
 
-            <View style={styles.cameraCenter}>
+            <View ref={scanFrameRef} onLayout={measureCoachmarks} style={styles.cameraCenter}>
               <View style={[styles.scanFrame, { borderColor: colors.accent.primary, borderRadius: borderRadius.xl }]} />
               <Text style={[typography.caption, { color: colors.text.inverse, marginTop: spacing.md, textAlign: 'center' }]}>
                 Center your meal in the frame
               </Text>
             </View>
 
-            <View style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + spacing.lg, padding: spacing.lg }]}>
+            <View ref={captureBtnRef} style={[styles.cameraBottomBar, { paddingBottom: insets.bottom + spacing.lg, padding: spacing.lg }]}>
               <Pressable
                 onPress={handleCapture}
                 accessibilityLabel="Take photo of meal"
@@ -448,6 +474,7 @@ export default function MealCameraScreen() {
           </Animated.View>
         </Animated.View>
       )}
+      <Coachmark screenKey={COACHMARK_KEYS.mealCamera} steps={coachmarkSteps} />
     </View>
   );
 }
