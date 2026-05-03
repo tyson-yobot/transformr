@@ -10,6 +10,7 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
@@ -26,6 +27,7 @@ import { MonoText } from '@components/ui/MonoText';
 import { Avatar } from '@components/ui/Avatar';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { SectionTile } from '@components/ui/SectionTile';
+import { ListSkeleton } from '@components/ui/ScreenSkeleton';
 import { useProfileStore } from '@stores/profileStore';
 import { useSettingsStore } from '@stores/settingsStore';
 import { useAuthStore } from '@stores/authStore';
@@ -348,6 +350,9 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
 
   const profile = useProfileStore((s) => s.profile);
+  const profileLoading = useProfileStore((s) => s.isLoading);
+  const profileError = useProfileStore((s) => s.error);
+  const fetchProfile = useProfileStore((s) => s.fetchProfile);
   const voiceEnabled = useSettingsStore((s) => s.voiceEnabled);
   const narratorEnabled = useSettingsStore((s) => s.narratorEnabled);
   const updateSetting = useSettingsStore((s) => s.updateSetting);
@@ -355,6 +360,7 @@ export default function ProfileScreen() {
   const { tone: selectedTone, setTone } = useGamificationStyle();
   const tier = useSubscriptionStore((s) => s.tier);
 
+  const [refreshing, setRefreshing] = useState(false);
   const [calendarSync, setCalendarSync] = useState(false);
 
   useEffect(() => {
@@ -367,6 +373,12 @@ export default function ProfileScreen() {
     setCalendarSync(value);
     await AsyncStorage.setItem(CALENDAR_SYNC_KEY, value ? 'true' : 'false');
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchProfile();
+    setRefreshing(false);
+  }, [fetchProfile]);
 
   // Top streak from habitStore
   const habits = useHabitStore((s) => s.habits);
@@ -438,6 +450,32 @@ export default function ProfileScreen() {
     <AmbientBackground />
     <StatusBar style="light" backgroundColor="#0C0A15" />
     <PurpleRadialBackground />
+    {profileLoading && !profile && (
+      <View style={{ padding: spacing.lg }}>
+        <ListSkeleton />
+      </View>
+    )}
+    {profileError && (
+      <Pressable
+        onPress={() => { void fetchProfile(); }}
+        accessibilityRole="button"
+        accessibilityLabel="Failed to load profile. Tap to retry."
+        style={[
+          styles.errorBanner,
+          {
+            backgroundColor: colors.accent.dangerSubtle,
+            marginHorizontal: spacing.lg,
+            marginTop: spacing.md,
+            padding: spacing.md,
+            borderRadius: 8,
+          },
+        ]}
+      >
+        <Text style={[typography.body, { color: colors.accent.danger, textAlign: 'center' }]}>
+          Failed to load profile. Tap to retry.
+        </Text>
+      </Pressable>
+    )}
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       contentContainerStyle={{
@@ -446,6 +484,13 @@ export default function ProfileScreen() {
         paddingHorizontal: spacing.lg,
       }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={colors.accent.primary}
+        />
+      }
     >
       <AIInsightCard screenKey="profile/index" style={{ marginBottom: spacing.md }} />
 
@@ -838,5 +883,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
+  },
+  errorBanner: {
+    alignItems: 'center',
   },
 });
