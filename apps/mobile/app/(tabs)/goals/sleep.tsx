@@ -11,6 +11,7 @@ import {
   StyleSheet,
   RefreshControl,
   Alert,
+  Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -20,7 +21,6 @@ import { useTheme } from '@theme/index';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { Badge } from '@components/ui/Badge';
-import { Input } from '@components/ui/Input';
 import { Modal } from '@components/ui/Modal';
 import { SleepChart } from '@components/charts/SleepChart';
 import { AIInsightCard } from '@components/cards/AIInsightCard';
@@ -36,12 +36,33 @@ import { Skeleton } from '@components/ui/Skeleton';
 import { SCREEN_HELP } from '../../../constants/screenHelp';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+const timeStringToDate = (timeStr: string): Date => {
+  const [h, m] = timeStr.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h ?? 22, m ?? 0, 0, 0);
+  return d;
+};
+
+const dateToTimeString = (d: Date): string => {
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+const formatTimeDisplay = (timeStr: string): string => {
+  const [h, m] = timeStr.split(':').map(Number);
+  const hour = h ?? 0;
+  const minute = m ?? 0;
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${String(minute).padStart(2, '0')} ${ampm}`;
+};
 
 const QUALITY_LABELS = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'];
 const isValidTime = (t: string): boolean => /^\d{1,2}:\d{2}$/.test(t);
 
 export default function SleepTracker() {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const lastSleep = useSleepStore((s) => s.lastSleep);
@@ -58,6 +79,25 @@ export default function SleepTracker() {
   const [quality, setQuality] = useState(3);
   const [caffeineCutoff, setCaffeineCutoff] = useState('14:00');
   const [screenCutoff, setScreenCutoff] = useState('21:00');
+  const [activePicker, setActivePicker] = useState<'bedtime' | 'wake' | 'caffeine' | 'screen' | null>(null);
+
+  const openLogModal = useCallback(() => {
+    if (lastSleep) {
+      setBedtime(lastSleep.bedtime?.substring(11, 16) ?? '22:30');
+      setWakeTime(lastSleep.wake_time?.substring(11, 16) ?? '06:30');
+      setCaffeineCutoff(lastSleep.caffeine_cutoff_time ?? '14:00');
+      setScreenCutoff(lastSleep.screen_cutoff_time ?? '21:00');
+      setQuality(lastSleep.quality ?? 3);
+    } else {
+      setBedtime('22:30');
+      setWakeTime('06:30');
+      setCaffeineCutoff('14:00');
+      setScreenCutoff('21:00');
+      setQuality(3);
+    }
+    setActivePicker(null);
+    setShowLogModal(true);
+  }, [lastSleep]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -208,7 +248,7 @@ export default function SleepTracker() {
             title="Sleep is where you grow"
             subtitle="Log your sleep to unlock AI-powered recovery insights and optimize your performance."
             actionLabel="Log Last Night's Sleep"
-            onAction={() => { hapticLight(); setShowLogModal(true); }}
+            onAction={() => { hapticLight(); openLogModal(); }}
           />
         ) : (
         <>
@@ -465,7 +505,7 @@ export default function SleepTracker() {
         <HelpBubble id="sleep_log" message="Log sleep to unlock AI recovery insights" position="above" />
         <Button
           title="Log Sleep"
-          onPress={() => { hapticLight(); setShowLogModal(true); }}
+          onPress={() => { hapticLight(); openLogModal(); }}
           accessibilityLabel="Log last night's sleep"
           fullWidth
           style={{ marginTop: spacing.xl }}
@@ -482,19 +522,81 @@ export default function SleepTracker() {
         onDismiss={() => setShowLogModal(false)}
         title="Log Sleep"
       >
-        <Input
-          label="Bedtime (HH:MM)"
-          value={bedtime}
-          onChangeText={setBedtime}
-          placeholder="22:30"
-        />
-        <Input
-          label="Wake Time (HH:MM)"
-          value={wakeTime}
-          onChangeText={setWakeTime}
-          placeholder="06:30"
-          containerStyle={{ marginTop: spacing.md }}
-        />
+        <View>
+          <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+            Bedtime
+          </Text>
+          {Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={timeStringToDate(bedtime)}
+              mode="time"
+              display="spinner"
+              onChange={(_, date) => { if (date) setBedtime(dateToTimeString(date)); }}
+              minuteInterval={5}
+              themeVariant={isDark ? 'dark' : 'light'}
+            />
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setActivePicker('bedtime')}
+                style={[styles.timeButton, { backgroundColor: colors.background.tertiary, borderColor: colors.border.default }]}
+                accessibilityLabel={`Bedtime: ${formatTimeDisplay(bedtime)}. Tap to change`}
+              >
+                <Text style={[typography.body, { color: colors.text.primary }]}>{formatTimeDisplay(bedtime)}</Text>
+              </Pressable>
+              {activePicker === 'bedtime' && (
+                <DateTimePicker
+                  value={timeStringToDate(bedtime)}
+                  mode="time"
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setActivePicker(null);
+                    if (date) setBedtime(dateToTimeString(date));
+                  }}
+                  minuteInterval={5}
+                />
+              )}
+            </>
+          )}
+        </View>
+
+        <View style={{ marginTop: spacing.md }}>
+          <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+            Wake Time
+          </Text>
+          {Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={timeStringToDate(wakeTime)}
+              mode="time"
+              display="spinner"
+              onChange={(_, date) => { if (date) setWakeTime(dateToTimeString(date)); }}
+              minuteInterval={5}
+              themeVariant={isDark ? 'dark' : 'light'}
+            />
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setActivePicker('wake')}
+                style={[styles.timeButton, { backgroundColor: colors.background.tertiary, borderColor: colors.border.default }]}
+                accessibilityLabel={`Wake time: ${formatTimeDisplay(wakeTime)}. Tap to change`}
+              >
+                <Text style={[typography.body, { color: colors.text.primary }]}>{formatTimeDisplay(wakeTime)}</Text>
+              </Pressable>
+              {activePicker === 'wake' && (
+                <DateTimePicker
+                  value={timeStringToDate(wakeTime)}
+                  mode="time"
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setActivePicker(null);
+                    if (date) setWakeTime(dateToTimeString(date));
+                  }}
+                  minuteInterval={5}
+                />
+              )}
+            </>
+          )}
+        </View>
 
         <Text
           style={[
@@ -530,20 +632,81 @@ export default function SleepTracker() {
           {QUALITY_LABELS[quality]}
         </Text>
 
-        <Input
-          label="Caffeine Cutoff (HH:MM)"
-          value={caffeineCutoff}
-          onChangeText={setCaffeineCutoff}
-          placeholder="14:00"
-          containerStyle={{ marginTop: spacing.lg }}
-        />
-        <Input
-          label="Screen Cutoff (HH:MM)"
-          value={screenCutoff}
-          onChangeText={setScreenCutoff}
-          placeholder="21:00"
-          containerStyle={{ marginTop: spacing.md }}
-        />
+        <View style={{ marginTop: spacing.lg }}>
+          <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+            Caffeine Cutoff
+          </Text>
+          {Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={timeStringToDate(caffeineCutoff)}
+              mode="time"
+              display="spinner"
+              onChange={(_, date) => { if (date) setCaffeineCutoff(dateToTimeString(date)); }}
+              minuteInterval={5}
+              themeVariant={isDark ? 'dark' : 'light'}
+            />
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setActivePicker('caffeine')}
+                style={[styles.timeButton, { backgroundColor: colors.background.tertiary, borderColor: colors.border.default }]}
+                accessibilityLabel={`Caffeine cutoff: ${formatTimeDisplay(caffeineCutoff)}. Tap to change`}
+              >
+                <Text style={[typography.body, { color: colors.text.primary }]}>{formatTimeDisplay(caffeineCutoff)}</Text>
+              </Pressable>
+              {activePicker === 'caffeine' && (
+                <DateTimePicker
+                  value={timeStringToDate(caffeineCutoff)}
+                  mode="time"
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setActivePicker(null);
+                    if (date) setCaffeineCutoff(dateToTimeString(date));
+                  }}
+                  minuteInterval={5}
+                />
+              )}
+            </>
+          )}
+        </View>
+
+        <View style={{ marginTop: spacing.md }}>
+          <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>
+            Screen Cutoff
+          </Text>
+          {Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={timeStringToDate(screenCutoff)}
+              mode="time"
+              display="spinner"
+              onChange={(_, date) => { if (date) setScreenCutoff(dateToTimeString(date)); }}
+              minuteInterval={5}
+              themeVariant={isDark ? 'dark' : 'light'}
+            />
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setActivePicker('screen')}
+                style={[styles.timeButton, { backgroundColor: colors.background.tertiary, borderColor: colors.border.default }]}
+                accessibilityLabel={`Screen cutoff: ${formatTimeDisplay(screenCutoff)}. Tap to change`}
+              >
+                <Text style={[typography.body, { color: colors.text.primary }]}>{formatTimeDisplay(screenCutoff)}</Text>
+              </Pressable>
+              {activePicker === 'screen' && (
+                <DateTimePicker
+                  value={timeStringToDate(screenCutoff)}
+                  mode="time"
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setActivePicker(null);
+                    if (date) setScreenCutoff(dateToTimeString(date));
+                  }}
+                  minuteInterval={5}
+                />
+              )}
+            </>
+          )}
+        </View>
 
         <Button
           title="Save Sleep Log"
@@ -585,6 +748,13 @@ const styles = StyleSheet.create({
   },
   historyRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: 'center',
   },
   // Purple glow — applied to structural cards (stats, chart, detail)
