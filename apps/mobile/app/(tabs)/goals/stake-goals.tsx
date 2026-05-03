@@ -38,6 +38,7 @@ import { createStakePayment } from '../../../services/stripe';
 import type { StakeGoal, StakeEvaluation } from '@app-types/database';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { Coachmark } from '@components/ui/Coachmark';
 import type { CoachmarkStep } from '@components/ui/Coachmark';
 import { COACHMARK_KEYS, COACHMARK_CONTENT } from '../../../constants/coachmarkSteps';
@@ -241,6 +242,11 @@ export default function StakeGoalsScreen() {
   if (!gate.isAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <HelpBubble
+          id="gate_stake_goals"
+          message="Put real money on your goals. Hit them and your money comes back. Miss them and it goes to charity. Real accountability drives real results."
+          position="above"
+        />
         <FeatureLockOverlay
           featureKey="stake_goals"
           title="Stake Goals"

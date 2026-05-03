@@ -801,6 +801,13 @@ export default function DashboardScreen() {
       {/* Quick Stats Row */}
       <FadeInView delay={100} duration={400}>
         <QuickStatsRow stats={quickStats} style={{ marginBottom: spacing.lg }} />
+        {!readinessGate.isAvailable && (
+          <HelpBubble
+            id="gate_readiness"
+            message="Your readiness score tells you how hard to push today, calculated from sleep, mood, training load, and soreness. Keep logging to unlock it."
+            position="below"
+          />
+        )}
       </FadeInView>
 
       {/* Stats Grid — calories, protein, water, workout */}

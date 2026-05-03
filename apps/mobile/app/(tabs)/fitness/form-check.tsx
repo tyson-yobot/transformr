@@ -31,6 +31,7 @@ import { AIInsightCard } from '@components/cards/AIInsightCard';
 import { analyzeExerciseForm } from '@services/ai/formCheck';
 import { supabase } from '@services/supabase';
 import { useFeatureGate } from '@hooks/useFeatureGate';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { ScreenBackground } from '@components/ui/ScreenBackground';
 import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
@@ -212,6 +213,13 @@ export default function FormCheckScreen() {
         <ScreenBackground />
         <AmbientBackground />
         <StatusBar style="light" backgroundColor="#0C0A15" />
+        {!formCheckGate.isAvailable && (
+          <HelpBubble
+            id="gate_form_check"
+            message="Record a set and your AI coach analyzes your technique, identifying form breakdowns and injury risks before they become problems."
+            position="above"
+          />
+        )}
         <ScrollView
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 90 }}
           showsVerticalScrollIndicator={false}

@@ -206,6 +206,11 @@ export default function MealCameraScreen() {
   if (!gate.isAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <HelpBubble
+          id="gate_meal_camera"
+          message="Point your camera at any meal and AI estimates calories and macros in seconds. Upgrade to unlock."
+          position="above"
+        />
         <FeatureLockOverlay
           featureKey="ai_meal_camera"
           title="AI Meal Camera"

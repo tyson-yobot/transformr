@@ -29,6 +29,7 @@ import { AmbientBackground } from '@components/ui/AmbientBackground';
 import { EmptyStateBackground } from '@components/ui/EmptyStateBackground';
 import type { LabUpload, LabUploadStatus } from '@app-types/ai';
 import { hapticLight, hapticMedium } from '@utils/haptics';
+import { HelpBubble } from '@components/ui/HelpBubble';
 
 const STATUS_LABEL: Record<LabUploadStatus, string> = {
   pending: 'Pending',
@@ -309,6 +310,11 @@ export default function LabsHistoryScreen() {
       <AmbientBackground />
       <StatusBar style="light" backgroundColor="#0C0A15" />
       <PurpleRadialBackground />
+      <HelpBubble
+        id="gate_labs"
+        message="Upload your blood work and get AI-powered biomarker interpretation. Track trends over time and get personalized supplement and lifestyle recommendations."
+        position="above"
+      />
       {/* Header */}
       <View
         style={[

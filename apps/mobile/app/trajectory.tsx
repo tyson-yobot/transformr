@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFeatureGate } from '@hooks/useFeatureGate';
 import { FeatureLockOverlay } from '@components/ui/FeatureLockOverlay';
+import { HelpBubble } from '@components/ui/HelpBubble';
 import { useTheme } from '@theme/index';
 import { StatusBar } from 'expo-status-bar';
 import { Card } from '@components/ui/Card';
@@ -182,6 +183,11 @@ export default function TrajectoryScreen() {
   if (!gate.isAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+        <HelpBubble
+          id="gate_trajectory"
+          message="See your projected weight, revenue, and fitness trajectory based on your current habits. AI-powered simulations show where you'll be in 30, 60, and 90 days."
+          position="above"
+        />
         <FeatureLockOverlay
           featureKey="ai_trajectory_simulator"
           title="AI Trajectory Simulator"
