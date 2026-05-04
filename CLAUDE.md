@@ -5,6 +5,34 @@ All agents working in this repository MUST follow these rules without exception.
 
 ---
 
+## Governance File Locations
+
+Some governance files live at repo root, others at `apps/mobile/`. Use these
+exact paths in scripts, prompts, and tooling:
+
+**Repo-root governance files:**
+- `CLAUDE.md` (this file)
+- `SOUL.md`
+- `TRANSFORMR-BRAND-KIT.md`
+- `docs/TRANSFORMR-DASHBOARD-V2-SPEC.md`
+- `docs/specs/TRANSFORMR-MASTER-PRINCIPLES.md`
+- `docs/EXECUTION-PLAN.md`
+
+**Mobile-app-rooted governance files:**
+- `apps/mobile/ASSET-MANIFEST.md`
+- `apps/mobile/LESSONS-LEARNED.md`
+- `apps/mobile/ARCHITECTURE-DECISIONS.md`
+
+The split exists because asset, lessons, and architecture files are
+mobile-app-specific. Future Claude Code sessions, autonomous prompts, and
+any tooling that reads governance files must use the correct paths above.
+
+Reference: autonomous Phase 1 v1 launch failed pre-flight on this exact path
+issue (commit 4770a16 BLOCKED.md, fixed in v2 commit 85c9717). Adding this
+section prevents recurrence.
+
+---
+
 ## LOCKED FILES — DO NOT MODIFY
 
 These files are production-locked. NO Claude Code session may

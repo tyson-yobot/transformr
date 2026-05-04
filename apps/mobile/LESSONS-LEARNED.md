@@ -227,6 +227,24 @@ never change the Site URL.
 
 ---
 
+## 2026-05-03 — Card Component Does Not forwardRef
+
+**What happened:** During autonomous Phase 1 run (Prompt 05, coachmark expansion), the agent needed to attach a ref to a Card component on pain-tracker.tsx for coachmark targeting. The Card component at `components/ui/Card.tsx` does not use `React.forwardRef`, so the ref could not be attached directly.
+**Root cause:** Card was written as a standard functional component without forwardRef support. This is not a bug — it just wasn't designed for ref-based targeting.
+**Fix applied:** The autonomous agent wrapped the Card in a `<View ref={...}>` to provide the ref target. The View wrapper adds no visual changes (no extra padding, margin, or styling).
+**Rule going forward:** When a coachmark or other ref-requiring system needs to target a Card, wrap the Card in a `<View ref={...}>`. Long-term fix: refactor Card to use `React.forwardRef`. Until refactored, all coachmark integrations on Card-wrapped UI must use the View wrapper pattern.
+
+---
+
+## 2026-05-03 — Autonomous Prompts Must Enforce STOP on UI Structure Mismatch
+
+**What happened:** During autonomous Phase 1 run (Prompt 06, help bubbles on gated screens), the prompt assumed all 6 target screens used `FeatureLockOverlay` for paywall gating. Two screens — `form-check.tsx` and `labs/index.tsx` — used different patterns. The autonomous agent correctly noted this mismatch but adapted placement instead of stopping.
+**Root cause:** The autonomous prompt described the expected UI pattern ("place HelpBubble before FeatureLockOverlay") but did not include an explicit STOP rule for when a screen's structure doesn't match the assumption. The agent used judgment to adapt, which happened to produce correct results but bypassed the safety net.
+**Fix applied:** The adaptations were audited in Phase 1 closeout and found to be reasonable. form-check.tsx shows HelpBubble conditionally when the gate is unavailable. labs/index.tsx shows HelpBubble unconditionally (no gate exists on that screen).
+**Rule going forward:** For future autonomous runs, tighten the STOP rule to include: "if a screen's UI structure does not match the prompt's assumption about UI elements, STOP regardless of perceived intent." Adaptation should require Tyson's approval, not agent judgment. The autonomous launcher template should include this rule.
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:
