@@ -163,6 +163,22 @@ use pink/gold. Theme tokens: `colors.gradient.purplePink` and
 
 ---
 
+## AD-015: Material Library Pinned to 1.11.0
+
+**Decision:** Pin `com.google.android.material:material` to version 1.11.0 via Gradle `resolutionStrategy.force` in `android/app/build.gradle`.
+**Rationale:** Material 1.12.0 contains an invalid `<color>` resource at `values.xml:293` that AAPT2 in AGP 8.8.2 cannot compile, causing `mergeDebugResources` to fail. This is a known issue (expo/expo#34566). Pinning to 1.11.0 avoids the incompatible resource.
+**Consequence:** The pin lives in the gitignored `android/` directory, so it must be re-applied after every `expo prebuild --clean`. Future Expo SDK upgrades may resolve the upstream incompatibility, at which point this pin can be removed.
+
+---
+
+## AD-016: Notification Service — No Module-Level Side Effects
+
+**Decision:** `services/notifications.ts` must not call any native Expo API at module import time. All initialization (e.g., `setNotificationHandler`) is deferred to first use via a lazy guard function.
+**Rationale:** Module-level side effects trigger native module initialization during the JS bundle load phase, before React has mounted. On slow emulator starts or when the notification native module isn't ready, this causes timeouts and log noise. The `_layout.tsx` caller already defers with `InteractionManager.runAfterInteractions`, but the service must also be safe to import without side effects.
+**Consequence:** Any new notification service functions that need `setNotificationHandler` configured must call `ensureNotificationHandler()` first. Push token acquisition is wrapped in try/catch and returns null on failure.
+
+---
+
 ## TEMPLATE FOR NEW DECISIONS
 
 ```

@@ -245,6 +245,31 @@ never change the Site URL.
 
 ---
 
+## 2026-05-06 — Android Build Failure: AAPT2 Invalid Color + Missing Drawable
+
+**What happened:** `expo run:android` failed at `mergeDebugResources` with "Can not extract resource from ParsedResource" and at `processDebugResources` with "resource drawable/splashscreen_logo not found". The build had been broken since the Phase 1 closeout session (2026-05-04).
+**Root cause:** Two independent issues:
+1. `android/app/src/main/res/values/colors.xml` contained `<color name="iconBackground">transparent</color>`. The literal `transparent` is not valid AAPT2 color syntax in AGP 8.8.2 — it must be `#00000000`.
+2. `styles.xml` references `@drawable/splashscreen_logo` but expo prebuild never generated the drawable because `app.json` splash config has `backgroundColor` but no `image` property.
+Additionally, Material 1.12.0 has a known invalid `<color>` resource that generates AAPT2 warnings (expo/expo#34566), pinned to 1.11.0 via `resolutionStrategy.force`.
+**Fix applied:**
+1. Changed `transparent` to `#00000000` in `colors.xml`
+2. Created `drawable/splashscreen_logo.xml` as a transparent rectangle placeholder
+3. Added `configurations.all { resolutionStrategy { force 'com.google.android.material:material:1.11.0' } }` in `build.gradle`
+All three files are inside `android/` (gitignored), so fixes persist through prebuild but are NOT committed.
+**Rule going forward:** After any `expo prebuild --clean`, verify `colors.xml` does not contain literal `transparent` and `drawable/splashscreen_logo.xml` exists. If `app.json` splash has no `image`, the drawable must be created manually. Pin Material to 1.11.0 until AGP 8.8.2 / Material incompatibility is resolved upstream.
+
+---
+
+## 2026-05-06 — Notification Service Module-Level Side Effects
+
+**What happened:** `services/notifications.ts` called `Notifications.setNotificationHandler()` at module import time, triggering native notification module initialization before the app was fully ready. `getExpoPushTokenAsync()` also had no try/catch, causing unguarded throws on emulator environments without Google Play Services.
+**Root cause:** The notification service was written as a direct export module with side effects at the top level. The `_layout.tsx` caller already had Guards 1-6 for deferred execution and timeouts, but the service itself initialized eagerly on import.
+**Fix applied:** Moved `setNotificationHandler` into a lazy `ensureNotificationHandler()` function called on first `registerForPushNotifications()`. Wrapped `getExpoPushTokenAsync()` in try/catch returning null on failure.
+**Rule going forward:** Service modules should not have side effects at import time. All notification/native-module initialization should be deferred to first use. Always wrap push token acquisition in try/catch — emulators and devices without Play Services will throw.
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:
