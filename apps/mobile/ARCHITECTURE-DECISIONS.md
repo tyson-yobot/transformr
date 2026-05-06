@@ -179,6 +179,32 @@ use pink/gold. Theme tokens: `colors.gradient.purplePink` and
 
 ---
 
+## AD-017: Detox e2e adoption (Session 2A.1, 2026-05-06)
+
+**Decision:** Detox is the autonomous functional verification tool
+for TRANSFORMR React Native bugs going forward. Tests live at
+`apps/mobile/e2e/` and run via `npm run detox:test:android` from
+`apps/mobile/`.
+**Rationale:** Alternatives considered:
+- Maestro: simpler setup but treats RN as generic mobile; doesn't
+  know about native bridge or React internals.
+- Manual ADB-driven verification: not reliable, prone to false
+  PASS claims when taps miss intended targets.
+- Code-only (tsc + eslint): does not catch runtime worklet errors
+  or other RN-specific issues; insufficient for production-grade
+  verification.
+
+Detox chosen because it provides deepest RN integration, knows
+about native modules, and synchronizes with React render cycles.
+**Consequence:** First-time Detox build on Windows is slow (2h 17m
+in Session 2A.1 due to native CMake across 4 ABIs); subsequent
+builds reuse caches. Detox-instrumented APK is a separate build
+profile from the normal dev build, so the operator's
+`expo run:android` workflow is unchanged. `@config-plugins/detox`
+applies the necessary Android patches during `expo prebuild`.
+
+---
+
 ## TEMPLATE FOR NEW DECISIONS
 
 ```

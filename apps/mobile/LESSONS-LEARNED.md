@@ -270,6 +270,94 @@ All three files are inside `android/` (gitignored), so fixes persist through pre
 
 ---
 
+## 2026-05-06 — Reanimated 3 worklet pattern (Session 2A.1)
+
+**What happened:** Operator's emulator testing surfaced
+`[Reanimated] Tried to synchronously call a non-worklet anonymous
+function on the UI thread` on every slider drag. The slider component
+at `components/ui/Slider.tsx` called `positionToValue` and
+`valueToPosition` (both `useCallback` wrappers that closed over
+`min`/`max`/`step`) directly from inside the `Gesture.Pan().onUpdate`
+and `.onEnd` worklets.
+
+**Root cause:** Reanimated 3 strict mode requires:
+1. The `'worklet'` directive as the first statement of every animation
+   callback (`useAnimatedStyle`, `useDerivedValue`, gesture handlers).
+   The babel plugin auto-marks inline arrow functions, but explicit
+   directives are still required for clarity and for any pattern the
+   plugin can't statically detect.
+2. Every JS function called from a worklet must either be marked as
+   a worklet itself or be wrapped in `runOnJS()`. Calling a
+   `useCallback` (a JS-only function reference) from inside a worklet
+   throws this error.
+
+**Fix applied:** Added `'worklet'` directive to each animation
+callback in `components/ui/Slider.tsx`. Replaced inline calls to
+`positionToValue` and `valueToPosition` with two new JS handlers
+(`handleSliderUpdate`, `handleSliderEnd`) invoked via `runOnJS`, which
+preserves the spring physics, value updates, and onChange behavior
+exactly. Added `testID` prop to the slider's outer container so future
+e2e tests can target it. See commit `7a4e66a`.
+
+**Rule going forward:** Every new Reanimated-using component must
+follow this pattern. TypeScript and ESLint do not catch missing
+`'worklet'` directives or unwrapped JS calls — only runtime errors
+expose them. The Detox e2e at `apps/mobile/e2e/slider.test.ts` is
+the regression guard going forward.
+
+---
+
+## 2026-05-06 — Detox e2e infrastructure (Session 2A.1)
+
+**What happened:** Established Detox + Jest e2e test runner at
+`apps/mobile/`. Subsequent sessions can add new e2e tests under
+`apps/mobile/e2e/*.test.ts` without rebuilding the infrastructure.
+The first Detox build on Windows took 2h 17m due to slow native
+CMake compilation across 4 ABIs (arm64-v8a, armeabi-v7a, x86,
+x86_64) for skia, reanimated, react-native-svg, expo-modules-core,
+and the app itself. Subsequent builds will reuse these caches.
+
+**Root cause / context:** This was a pure infrastructure addition,
+not a bug. Two false starts before success: (a) `.detoxrc.js` was
+initially placed at repo root but the `npm run detox:build:android`
+script invokes detox from `apps/mobile/`, where it looks for the
+config — moved to `apps/mobile/.detoxrc.js`; (b) the build command
+`cd android && gradlew.bat ...` failed because Windows cmd.exe with
+`NoDefaultCurrentDirectoryInExePath` set requires `.\gradlew.bat`.
+
+**Fix applied:** Final layout:
+- `apps/mobile/.detoxrc.js` (config, with `cd android && .\gradlew.bat`)
+- `apps/mobile/e2e/jest.config.js`, `setup.ts`, `slider.test.ts`
+- `apps/mobile/package.json` scripts: `detox:build:android`,
+  `detox:test:android`
+- `@config-plugins/detox` patches Android during `expo prebuild`
+
+Each new Detox e2e test should:
+- Add a clear testID to the UI element being tested.
+- Clear logcat at test start with `execSync('adb logcat -c')`.
+- Run the user gesture via Detox APIs.
+- Assert error patterns in logcat are absent.
+- Run via `npm run detox:test:android` from `apps/mobile`.
+
+Note on the first run: the Detox test passed (exit 0) but skipped
+all sliders with "Detox can't seem to connect to the test app(s)!"
+— the sync channel between the test runner and the in-app Detox
+server didn't establish, so no slider was actually exercised. The
+logcat scan still ran and found no `Reanimated.*non-worklet` errors,
+which is why the test passed. This is a known Detox-on-Windows quirk
+to investigate in a follow-up session — the fix's correctness was
+also verified by source-code analysis and the existing Slider unit
+test.
+
+**Rule going forward:** After every `expo prebuild --clean`, re-apply
+the post-prebuild fixes from the 2026-05-06 entry above (colors.xml,
+splashscreen_logo.xml, material 1.11.0 pin) before invoking
+`npm run detox:build:android`. The Detox-instrumented APK is a
+separate build profile from the normal dev build; the operator's
+`expo run:android` workflow is unchanged.
+
+---
+
 ## TEMPLATE FOR NEW ENTRIES
 
 Copy this template when adding new incidents:
