@@ -106,7 +106,13 @@
           "enableGooglePay": true
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "@config-plugins/detox",
+        {
+          "subdomains": "*"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
