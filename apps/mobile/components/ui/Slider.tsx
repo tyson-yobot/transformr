@@ -22,6 +22,7 @@ interface SliderProps {
   fillColor?: string;
   thumbColor?: string;
   style?: ViewStyle;
+  testID?: string;
 }
 
 const THUMB_SIZE = 28;
@@ -39,6 +40,7 @@ export function Slider({
   fillColor,
   thumbColor,
   style,
+  testID,
 }: SliderProps) {
   const { colors, typography, spacing } = useTheme();
   const trackWidth = useSharedValue(0);
@@ -95,39 +97,65 @@ export function Slider({
     [onValueChange],
   );
 
+  // JS-thread handlers invoked via runOnJS from gesture worklets. positionToValue
+  // and valueToPosition are useCallback wrappers (closure over min/max/step) — calling
+  // them directly from a worklet throws "non-worklet anonymous function on the UI thread".
+  const handleSliderUpdate = useCallback(
+    (x: number, w: number) => {
+      const newValue = positionToValue(x, w);
+      emitChange(newValue);
+    },
+    [positionToValue, emitChange],
+  );
+
+  const handleSliderEnd = useCallback(
+    (currentX: number, w: number) => {
+      const snappedValue = positionToValue(currentX, w);
+      const snappedX = valueToPosition(snappedValue, w);
+      thumbX.value = withSpring(snappedX, { damping: 20, stiffness: 300 });
+      emitChange(snappedValue);
+      emitHaptic();
+    },
+    [positionToValue, valueToPosition, thumbX, emitChange, emitHaptic],
+  );
+
   const panGesture = Gesture.Pan()
     .onStart(() => {
+      'worklet';
       isDragging.value = true;
       startX.value = thumbX.value;
     })
     .onUpdate((event) => {
+      'worklet';
       const newX = Math.max(0, Math.min(trackWidth.value, startX.value + event.translationX));
       thumbX.value = newX;
-      const newValue = positionToValue(newX, trackWidth.value);
-      runOnJS(emitChange)(newValue);
+      runOnJS(handleSliderUpdate)(newX, trackWidth.value);
     })
     .onEnd(() => {
+      'worklet';
       isDragging.value = false;
-      const snappedValue = positionToValue(thumbX.value, trackWidth.value);
-      const snappedX = valueToPosition(snappedValue, trackWidth.value);
-      thumbX.value = withSpring(snappedX, { damping: 20, stiffness: 300 });
-      runOnJS(emitChange)(snappedValue);
-      runOnJS(emitHaptic)();
+      runOnJS(handleSliderEnd)(thumbX.value, trackWidth.value);
     });
 
-  const fillStyle = useAnimatedStyle(() => ({
-    width: thumbX.value + THUMB_SIZE / 2,
-  }));
+  const fillStyle = useAnimatedStyle(() => {
+    'worklet';
+    return {
+      width: thumbX.value + THUMB_SIZE / 2,
+    };
+  });
 
-  const thumbScaleStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: thumbX.value },
-      { scale: isDragging.value ? 1.15 : 1 },
-    ],
-  }));
+  const thumbScaleStyle = useAnimatedStyle(() => {
+    'worklet';
+    return {
+      transform: [
+        { translateX: thumbX.value },
+        { scale: isDragging.value ? 1.15 : 1 },
+      ],
+    };
+  });
 
   return (
-    <View style={[styles.wrapper, style]}>
+    <View style={[styles.wrapper, style]} testID={testID}>
       {(label || showValue) && (
         <View style={[styles.labelRow, { marginBottom: spacing.sm }]}>
           {label && (

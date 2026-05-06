@@ -348,6 +348,7 @@ export default function ChallengeBuilderScreen() {
               min={15}
               max={120}
               step={5}
+              testID="intensity-slider"
             />
             <View style={{ marginTop: spacing.md }}>
               <Text style={[typography.captionBold, { color: colors.text.secondary, marginBottom: spacing.xs }]}>

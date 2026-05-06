@@ -253,6 +253,7 @@ export default function MoodLogger() {
                     : colors.accent.danger
               }
               style={{ marginTop: spacing.md }}
+              testID="mood-slider"
             />
           </Card>
         </Animated.View>
