@@ -4,21 +4,35 @@ import { Platform } from 'react-native';
 import { supabase } from './supabase';
 import Constants from 'expo-constants';
 
-// Configure notification behavior
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// ---------------------------------------------------------------------------
+// Fix A — Deferred notification handler setup
+// Previously ran at module import time, which triggered native notification
+// module initialization before the app was ready. Now lazily initialised on
+// first call to registerForPushNotifications().
+// ---------------------------------------------------------------------------
+let handlerConfigured = false;
+
+function ensureNotificationHandler(): void {
+  if (handlerConfigured) return;
+  handlerConfigured = true;
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 export async function registerForPushNotifications(): Promise<string | null> {
   if (!Device.isDevice) {
     return null;
   }
+
+  // Fix A — configure handler lazily on first registration attempt
+  ensureNotificationHandler();
 
   const { granted: alreadyGranted } = await Notifications.getPermissionsAsync();
   let isGranted = alreadyGranted;
@@ -32,8 +46,16 @@ export async function registerForPushNotifications(): Promise<string | null> {
     return null;
   }
 
+  // Fix B — wrap getExpoPushTokenAsync in try/catch so emulator environments
+  // without Google Play Services (or missing project ID) don't throw unguarded.
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-  const token = await Notifications.getExpoPushTokenAsync({ projectId });
+  let token: Notifications.ExpoPushToken;
+  try {
+    token = await Notifications.getExpoPushTokenAsync({ projectId });
+  } catch (err) {
+    console.warn('[notifications] getExpoPushTokenAsync failed:', err);
+    return null;
+  }
 
   if (Platform.OS === 'android') {
     Notifications.setNotificationChannelAsync('default', {
