@@ -20,9 +20,12 @@
     "doctor": "npx expo-doctor",
     "prebuild": "npx expo prebuild",
     "prebuild:clean": "npx expo prebuild --clean",
-    "postinstall": "npx patch-package || echo 'patch-package: some patches could not be applied (non-fatal in monorepo/CI)'"
+    "postinstall": "npx patch-package || echo 'patch-package: some patches could not be applied (non-fatal in monorepo/CI)'",
+    "detox:build:android": "detox build --configuration android.emu.debug",
+    "detox:test:android": "detox test --configuration android.emu.debug"
   },
   "dependencies": {
+    "@config-plugins/detox": "^11.0.0",
     "@expo/vector-icons": "14.1.0",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/datetimepicker": "8.4.1",
@@ -95,10 +98,12 @@
     "@typescript-eslint/parser": "7.18.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "~13.0.0",
+    "detox": "^20.51.1",
     "eslint": "8.57.1",
     "eslint-config-expo": "~9.2.0",
     "eslint-config-prettier": "10.1.8",
     "jest": "^29.7.0",
+    "jest-circus": "^30.3.0",
     "jest-expo": "~53.0.10",
     "patch-package": "^8.0.1",
     "prettier": "3.6.2",
