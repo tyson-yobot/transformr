@@ -7,6 +7,7 @@ import { InteractionManager, Linking, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Slot, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Device from 'expo-device';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -43,6 +44,17 @@ GoogleSignin.configure({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+// ----------------------------------------------------------
+// Device.isDevice guard — emulators and simulators have no
+// FCM/APNS. Skip the push registration path entirely on
+// non-physical devices so we don't pollute Metro with 15s
+// timeout warnings every cold launch. Real-device behavior
+// is unchanged.
+// ----------------------------------------------------------
+const canReceivePushTokens = (): boolean => {
+  return Device.isDevice === true;
+};
 
 // ---------------------------------------------------------------------------
 // Notification helpers (Guards 1-6)
@@ -159,34 +171,40 @@ export default function RootLayout() {
       if (pushTokenRegistered) return;
       pushTokenRegistered = true;
 
-      // Guard 1 — Defer to after first frame
-      InteractionManager.runAfterInteractions(() => {
-        void (async () => {
-          try { // Guard 3 — try/catch
-            notificationsLog.debug('deferred setup starting'); // Guard 6
+      if (!canReceivePushTokens()) {
+        notificationsLog.debug(
+          'skipping push registration on non-physical device'
+        );
+      } else {
+        // Guard 1 — Defer to after first frame
+        InteractionManager.runAfterInteractions(() => {
+          void (async () => {
+            try { // Guard 3 — try/catch
+              notificationsLog.debug('deferred setup starting'); // Guard 6
 
-            // Guard 2 — 15s timeout on cold-start registration
-            const token = await withTimeout(
-              registerForPushNotifications(),
-              15000,
-              'registerForPushNotifications',
-            );
+              // Guard 2 — 15s timeout on cold-start registration
+              const token = await withTimeout(
+                registerForPushNotifications(),
+                15000,
+                'registerForPushNotifications',
+              );
 
-            if (!token) {
-              notificationsLog.debug('no push token returned, skipping save (expected on emulator/simulator)');
+              if (!token) {
+                notificationsLog.debug('no push token returned, skipping save (expected on emulator/simulator)');
+                notificationsLog.debug('deferred setup complete'); // Guard 6
+                return;
+              }
+
+              await withTimeout(savePushToken(userId, token), 5000, 'savePushToken');
+
               notificationsLog.debug('deferred setup complete'); // Guard 6
-              return;
+            } catch (err) {
+              // Guard 3 — never throw up the React tree
+              notificationsLog.warn('push token setup failed:', err);
             }
-
-            await withTimeout(savePushToken(userId, token), 5000, 'savePushToken');
-
-            notificationsLog.debug('deferred setup complete'); // Guard 6
-          } catch (err) {
-            // Guard 3 — never throw up the React tree
-            notificationsLog.warn('push token setup failed:', err);
-          }
-        })();
-      });
+          })();
+        });
+      }
     });
 
     return () => {
@@ -222,24 +240,30 @@ export default function RootLayout() {
         });
 
         // Guard 2 — Handle cold-start tap with timeout (15s for cold start)
-        void (async () => {
-          try {
-            const lastResponse = await withTimeout(
-              Notifications.getLastNotificationResponseAsync(),
-              15000,
-              'getLastNotificationResponseAsync',
-            );
-            if (lastResponse) {
-              const deepLink =
-                (lastResponse.notification.request.content.data as Record<string, unknown> | undefined)
-                  ?.deep_link as string | undefined;
-              const route = deepLink ? DEEP_LINK_ROUTES[deepLink] : undefined;
-              routerRef.current.push((route ?? '/(tabs)/dashboard') as never);
+        if (!canReceivePushTokens()) {
+          notificationsLog.debug(
+            'skipping getLastNotificationResponseAsync on non-physical device'
+          );
+        } else {
+          void (async () => {
+            try {
+              const lastResponse = await withTimeout(
+                Notifications.getLastNotificationResponseAsync(),
+                15000,
+                'getLastNotificationResponseAsync',
+              );
+              if (lastResponse) {
+                const deepLink =
+                  (lastResponse.notification.request.content.data as Record<string, unknown> | undefined)
+                    ?.deep_link as string | undefined;
+                const route = deepLink ? DEEP_LINK_ROUTES[deepLink] : undefined;
+                routerRef.current.push((route ?? '/(tabs)/dashboard') as never);
+              }
+            } catch (err) {
+              notificationsLog.warn('cold-start tap check failed:', err);
             }
-          } catch (err) {
-            notificationsLog.warn('cold-start tap check failed:', err);
-          }
-        })();
+          })();
+        }
       } catch (err) {
         notificationsLog.warn('tap handler setup failed:', err);
       }
