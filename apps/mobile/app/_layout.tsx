@@ -25,6 +25,7 @@ import {
   addNotificationResponseListener,
 } from '@services/notifications';
 import * as Notifications from 'expo-notifications';
+import { notificationsLog } from '@/utils/notificationsLog';
 
 // Suppress dev-overlay for expected network failures — Supabase unreachable in emulator dev mode.
 // All fetch errors are caught and shown as friendly UI states; the overlay adds no value.
@@ -47,13 +48,19 @@ SplashScreen.preventAutoHideAsync();
 // Notification helpers (Guards 1-6)
 // ---------------------------------------------------------------------------
 
-/** Guard 2 — Hard 5s timeout on every async notification call */
+/** Guard 2 — Hard timeout on every async notification call */
 async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T | null> {
+  const TIMEOUT_COPY: Record<string, string> = {
+    getLastNotificationResponseAsync:
+      `getLastNotificationResponseAsync timed out after ${ms}ms; treating as no pending tap`,
+    registerForPushNotifications:
+      `registerForPushNotifications timed out after ${ms}ms; will retry on next foreground`,
+  };
   return Promise.race([
     p,
     new Promise<null>((resolve) =>
       setTimeout(() => {
-        console.warn(`[notifications] ${label} timed out after ${ms}ms`);
+        notificationsLog.warn(TIMEOUT_COPY[label] ?? `${label} timed out after ${ms}ms`);
         resolve(null);
       }, ms),
     ),
@@ -144,7 +151,7 @@ export default function RootLayout() {
       // Guard 4 — Session presence check
       const userId = session?.user?.id;
       if (!userId) {
-        console.warn('[notifications] skipping push token: no user id');
+        notificationsLog.debug('skipping push token: no user id');
         return;
       }
 
@@ -156,27 +163,27 @@ export default function RootLayout() {
       InteractionManager.runAfterInteractions(() => {
         void (async () => {
           try { // Guard 3 — try/catch
-            console.warn('[notifications] deferred setup starting'); // Guard 6
+            notificationsLog.debug('deferred setup starting'); // Guard 6
 
-            // Guard 2 — 5s timeout on every async call
+            // Guard 2 — 15s timeout on cold-start registration
             const token = await withTimeout(
               registerForPushNotifications(),
-              5000,
+              15000,
               'registerForPushNotifications',
             );
 
             if (!token) {
-              console.warn('[notifications] no push token returned, skipping save');
-              console.warn('[notifications] deferred setup complete'); // Guard 6
+              notificationsLog.debug('no push token returned, skipping save (expected on emulator/simulator)');
+              notificationsLog.debug('deferred setup complete'); // Guard 6
               return;
             }
 
             await withTimeout(savePushToken(userId, token), 5000, 'savePushToken');
 
-            console.warn('[notifications] deferred setup complete'); // Guard 6
+            notificationsLog.debug('deferred setup complete'); // Guard 6
           } catch (err) {
             // Guard 3 — never throw up the React tree
-            console.warn('[notifications] push token setup failed:', err);
+            notificationsLog.warn('push token setup failed:', err);
           }
         })();
       });
@@ -205,21 +212,21 @@ export default function RootLayout() {
               routerRef.current.push(route as never);
             } else {
               if (deepLink) {
-                console.warn('[notifications] unmapped deep_link:', deepLink);
+                notificationsLog.warn('unmapped deep_link:', deepLink);
               }
               routerRef.current.push('/(tabs)/dashboard' as never);
             }
           } catch (err) {
-            console.warn('[notifications] tap handler error:', err);
+            notificationsLog.warn('tap handler error:', err);
           }
         });
 
-        // Guard 2 — Handle cold-start tap with timeout
+        // Guard 2 — Handle cold-start tap with timeout (15s for cold start)
         void (async () => {
           try {
             const lastResponse = await withTimeout(
               Notifications.getLastNotificationResponseAsync(),
-              5000,
+              15000,
               'getLastNotificationResponseAsync',
             );
             if (lastResponse) {
@@ -230,11 +237,11 @@ export default function RootLayout() {
               routerRef.current.push((route ?? '/(tabs)/dashboard') as never);
             }
           } catch (err) {
-            console.warn('[notifications] cold-start tap check failed:', err);
+            notificationsLog.warn('cold-start tap check failed:', err);
           }
         })();
       } catch (err) {
-        console.warn('[notifications] tap handler setup failed:', err);
+        notificationsLog.warn('tap handler setup failed:', err);
       }
     });
 
